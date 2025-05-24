@@ -1,0 +1,110 @@
+{
+    "name": "PlayerInput",
+    "maps": [
+        {
+            "name": "PlayerInputMap_EXPLORATION",
+            "id": "46bde89f-f890-44a7-b7fb-a00cf8f9f768",
+            "actions": [
+                {
+                    "name": "MovementInput",
+                    "type": "Value",
+                    "id": "73a0006e-85f9-480b-812f-9dc905472ea9",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "MenuInput",
+                    "type": "Button",
+                    "id": "5f6cc1f6-dc8b-49d1-968e-6be54777994c",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "WASD",
+                    "id": "2486f187-dd01-4eea-85ca-3f452a61df6a",
+                    "path": "2DVector",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MovementInput",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "up",
+                    "id": "7cf05436-7506-4502-a9d7-b6f261486f56",
+                    "path": "<Keyboard>/w",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MovementInput",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "down",
+                    "id": "381ee9b1-da64-4c89-a1ce-b23b0990565e",
+                    "path": "<Keyboard>/s",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MovementInput",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "left",
+                    "id": "05dc7187-db63-4c06-b26d-421243eea881",
+                    "path": "<Keyboard>/a",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MovementInput",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "right",
+                    "id": "a3f454ee-9dae-4149-abbf-7d3df3ea1666",
+                    "path": "<Keyboard>/d",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MovementInput",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "",
+                    "id": "daff7f97-aacd-433f-b50e-b1c7602caa40",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MenuInput",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "PlayerInputMap_COMBAT",
+            "id": "f4f74810-eeab-42c2-b6b0-9c819f9627e8",
+            "actions": [],
+            "bindings": []
+        },
+        {
+            "name": "PlayerInputMap_ALCHEMY",
+            "id": "1337884c-2186-4c54-a580-7ade57337242",
+            "actions": [],
+            "bindings": []
+        }
+    ],
+    "controlSchemes": []
+}
