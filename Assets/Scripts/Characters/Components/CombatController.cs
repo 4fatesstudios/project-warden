@@ -2,6 +2,11 @@ using UnityEngine;
 
 public class CombatController : MonoBehaviour
 {
-    // STATS COMPONENT
+    private StatsComponent statsComponent;
+
+    private void Awake() {
+        statsComponent = GetComponent<StatsComponent>();
+    }
+    
     
 }
