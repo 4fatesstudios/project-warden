@@ -627,3 +627,8 @@ Assets/LocalAssets.meta
 PythonBackend/common/GGUF_Models/
 PythonBackend/windows/
 PythonBackend/macos/
+
+# --- Fix for Unity Packages folder being ignored by Visual Studio rules ---
+!Packages/
+!Packages/manifest.json
+!Packages/packages-lock.json
