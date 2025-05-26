@@ -3,15 +3,9 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     private PlayerInput _playerInput;
-    private PlayerMovement _playerMovement;
 
     private void Awake() {
         _playerInput = new PlayerInput();
-        _playerMovement = GetComponent<PlayerMovement>();
-    }
-
-    private void Update() {
-        
     }
 
     public Vector2 GetMovementVectorNormalized() {
