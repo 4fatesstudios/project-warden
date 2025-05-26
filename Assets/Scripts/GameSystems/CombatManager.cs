@@ -1,17 +1,21 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class CombatManager : MonoBehaviour {
     
-    public static Action onStartCombat;
+    public delegate void StartCombatDelegate(List<CombatController> playerParty, List<CombatController> enemyParty);
+    public static StartCombatDelegate OnStartCombat;
     
     private void Start() {
-        onStartCombat += StartCombat;
+        OnStartCombat += StartCombat;
+    }
+
+    private void StartCombat(List<CombatController> playerParty, List<CombatController> enemyParty) {
+        // set up variables
+        // enter State Machine here
     }
     
-    private void StartCombat() {
-        
-    }
 }
 
 /*
@@ -30,10 +34,13 @@ Start State (Enemy[], Party[])
 - Determine combat order (enemy or party)
 - For each Enemy.CombatController.OnDeath<this> += OnEnemyDeath;
 - For each PlayableCharacters.CombatController.OnDeath<this> += OnPartyDeath;
+- MaxEnemyActionPoints = Enemy.Length
+- MaxPartyActionPoints = Party.Length
 - If enemy first >>> "Enemy State"
 - If player first >>> "Party State"
 
 Enemy State (Enemy[])
+- CurrentEnemyActionPoints = MaxEnemyActionPoints
 - For each Enemy
 - - Apply DoT
 - - If cannot move decrease MaxEnemyActionPoints by 1, continue
@@ -44,6 +51,7 @@ Enemy State (Enemy[])
 - If Party[] empty >>> "Defeat State"
 
 Party State (Party[])
+- CurrentPartyActionPoints = MaxPartyActionPoints
 - For each PartyMember
 - - Apply DoT
 - - If cannot move decrease CurrentPartyActionPoints by 1, continue
@@ -54,11 +62,15 @@ Party State (Party[])
 - If Party[] empty >>> "Defeat State"
 
 Victory State
+- For each Enemy.CombatController.OnDeath<this> -= OnEnemyDeath;
+- For each PlayableCharacters.CombatController.OnDeath<this> -= OnPartyDeath;
 - Play victory
 - Allot experience
 - Exit combat
 
 Defeat State
+- For each Enemy.CombatController.OnDeath<this> -= OnEnemyDeath;
+- For each PlayableCharacters.CombatController.OnDeath<this> -= OnPartyDeath;
 - Play defeat ("game over")
 - Death animation
 - Go to Game Over menu
