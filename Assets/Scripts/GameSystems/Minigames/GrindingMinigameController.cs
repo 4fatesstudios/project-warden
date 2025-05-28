@@ -1,13 +1,16 @@
-using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
+﻿using UnityEngine;
+using UnityEngine.UIElements; // This one enables Label, Slider, etc.
+
 
 public class GrindingMinigameController : MonoBehaviour
 {
-    [Header("UI Elements")]
-    public Slider grindSpeedSlider;
-    public Slider poundRateSlider;
-    public TMP_Text resultText;
+    [Header("UI Toolkit Elements")]
+    public UIDocument uiDocument;
+
+    private ProgressBar grindSpeedBar;
+    private ProgressBar poundRateBar;
+    private Label resultLabel;
+
 
     [Header("Config")]
     public float requiredDuration = 5f;
@@ -32,6 +35,17 @@ public class GrindingMinigameController : MonoBehaviour
 
     private float totalTime;
     private bool gameEnded;
+
+    void Start()
+    {
+        var root = uiDocument.rootVisualElement;
+
+        grindSpeedBar = root.Q<ProgressBar>("grindSpeedBar");
+        poundRateBar = root.Q<ProgressBar>("poundRateBar");
+        resultLabel = root.Q<Label>("resultLabel");
+
+        ResetGame(); // Ensure UI is initialized at start
+    }
 
     void Update()
     {
@@ -89,10 +103,42 @@ public class GrindingMinigameController : MonoBehaviour
 
     private void UpdateUI()
     {
-        if (grindSpeedSlider != null)
-            grindSpeedSlider.value = Mathf.Clamp01(grindSpeed / maxGrindSpeed);
-        if (poundRateSlider != null)
-            poundRateSlider.value = Mathf.Clamp01(poundFrequency / maxPoundRate);
+        if (grindSpeedBar != null)
+        {
+            float grindPercent = Mathf.Clamp01(grindSpeed / maxGrindSpeed) * 100f;
+            grindSpeedBar.value = grindPercent;
+
+            UpdateProgressBarClass(grindSpeedBar, grindSpeed, minGrindSpeed, maxGrindSpeed);
+        }
+
+        if (poundRateBar != null)
+        {
+            float poundPercent = Mathf.Clamp01(poundFrequency / maxPoundRate) * 100f;
+            poundRateBar.value = poundPercent;
+
+            UpdateProgressBarClass(poundRateBar, poundFrequency, minPoundRate, maxPoundRate);
+        }
+
+    }
+
+    private void UpdateProgressBarClass(ProgressBar bar, float value, float min, float max)
+    {
+        bar.RemoveFromClassList("progress-bar-good");
+        bar.RemoveFromClassList("progress-bar-warning");
+        bar.RemoveFromClassList("progress-bar-danger");
+
+        if (value > max || value < min)
+        {
+            bar.AddToClassList("progress-bar-danger");
+        }
+        else if (value < min + 1f || value > max - 1f)
+        {
+            bar.AddToClassList("progress-bar-warning");
+        }
+        else
+        {
+            bar.AddToClassList("progress-bar-good");
+        }
     }
 
     private void EvaluateGameState()
@@ -126,19 +172,21 @@ public class GrindingMinigameController : MonoBehaviour
         totalTime = 0f;
         gameEnded = false;
 
-        if (resultText != null)
-            resultText.text = "Grind (mouse) and Pound (space)!";
-        if (grindSpeedSlider != null)
-            grindSpeedSlider.value = 0f;
-        if (poundRateSlider != null)
-            poundRateSlider.value = 0f;
+        if (resultLabel != null)
+            resultLabel.text = "Grind (mouse) and Pound (space)!";
+        if (grindSpeedBar != null)
+            grindSpeedBar.value = 0f;
+        if (poundRateBar != null)
+            poundRateBar.value = 0f;
+
     }
+
 
     private void EndGame(string message)
     {
         gameEnded = true;
-        if (resultText != null)
-            resultText.text = message;
+        if (resultLabel != null)
+            resultLabel.text = message; // or "Grind (mouse) and Pound (space)!" in Reset
 
         Debug.Log("Grinding End: " + message);
     }

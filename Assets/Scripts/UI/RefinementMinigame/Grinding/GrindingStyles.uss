@@ -1,0 +1,18 @@
+.progress-bar-good {
+    background-color: #2ecc71; /* Green */
+}
+
+.progress-bar-warning {
+    background-color: #f1c40f; /* Yellow */
+}
+
+.progress-bar-danger {
+    background-color: #e74c3c; /* Red */
+}
+
+.result-label {
+    font-size: 16px;
+    -unity-text-align: middle-center;
+    color: white;
+    margin-top: 10px;
+}
