@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class StatsComponent : MonoBehaviour {
     
-    [SerializeField] StatsSO defaultStats;
+    [SerializeField] BaseStatSO defaultStats;
     [SerializeField] private int level;
 
     private HealthComponent healthComponent;
