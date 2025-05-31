@@ -2,15 +2,15 @@ using UnityEngine;
 using UnityEditor;
 using UnityEditor.Callbacks;
 using System.IO;
-using System.Text.RegularExpressions;
 using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
 
-public static class NamespaceFormatter
+public class NamespaceAssetProcessor : AssetModificationProcessor
 {
     private const string BaseNamespace = "FourFatesStudios.ProjectWarden";
     private const string CodeRoot = "Assets/Scripts";
 
-    // Auto-inject namespace when script is created
     public static void OnWillCreateAsset(string metaPath)
     {
         if (!metaPath.EndsWith(".cs.meta")) return;
@@ -18,29 +18,43 @@ public static class NamespaceFormatter
         string assetPath = metaPath.Replace(".meta", "");
         string fullPath = Path.GetFullPath(assetPath);
 
-        InjectNamespace(fullPath, assetPath);
+        EditorApplication.delayCall += () =>
+        {
+            if (File.Exists(fullPath))
+            {
+                InjectNamespace(fullPath, assetPath);
+                AssetDatabase.Refresh();
+            }
+        };
     }
 
-    // Inject namespace into a file if not already present
     private static void InjectNamespace(string fullPath, string assetPath)
     {
         if (!assetPath.StartsWith(CodeRoot)) return;
-        if (!File.Exists(fullPath)) return;
 
         string contents = File.ReadAllText(fullPath);
-        if (contents.Contains("namespace")) return; // Skip if already namespaced
+        if (contents.Contains("namespace")) return;
 
+        // Extract "using" directives
+        var usingMatches = Regex.Matches(contents, @"^\s*using\s.+?;\s*$", RegexOptions.Multiline);
+        string usings = string.Join("\n", usingMatches.Select(m => m.Value));
+
+        // Strip out usings from original content
+        string codeWithoutUsings = Regex.Replace(contents, @"^\s*using\s.+?;\s*$", "", RegexOptions.Multiline).Trim();
+
+        // Determine namespace from folder structure
         string relativePath = assetPath.Substring(CodeRoot.Length).TrimStart('/', '\\');
         string[] pathParts = Path.GetDirectoryName(relativePath).Split(Path.DirectorySeparatorChar);
         string namespacePath = string.Join(".", pathParts.Where(p => !string.IsNullOrEmpty(p)));
-
         string finalNamespace = string.IsNullOrEmpty(namespacePath)
             ? BaseNamespace
             : $"{BaseNamespace}.{namespacePath}";
 
-        string indentedCode = IndentCode(contents);
+        string indentedCode = IndentCode(codeWithoutUsings);
+
         string wrapped =
-$@"namespace {finalNamespace}
+$@"{usings}
+namespace {finalNamespace}
 {{
 {indentedCode}
 }}";
@@ -50,15 +64,15 @@ $@"namespace {finalNamespace}
 
     private static string IndentCode(string code)
     {
-        string[] lines = code.Split('\n');
+        var lines = code.Split('\n');
         for (int i = 0; i < lines.Length; i++)
         {
-            lines[i] = "    " + lines[i];
+            if (!string.IsNullOrWhiteSpace(lines[i]))
+                lines[i] = "    " + lines[i];
         }
         return string.Join("\n", lines);
     }
 
-    // Context menu to batch-fix selected scripts
     [MenuItem("Assets/Fix Namespaces on Selected Scripts", priority = 1000)]
     public static void FixSelectedNamespaces()
     {
@@ -71,6 +85,7 @@ $@"namespace {finalNamespace}
         {
             string fullPath = Path.GetFullPath(assetPath);
             string contents = File.ReadAllText(fullPath);
+
             if (contents.Contains("namespace")) continue;
 
             InjectNamespace(fullPath, assetPath);
