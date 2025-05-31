@@ -1,16 +1,22 @@
-using System;
-using UnityEngine;
+using FourFatesStudios.ProjectWarden.ScriptableObjects;
 
-public class StatsComponent : MonoBehaviour {
+namespace FourFatesStudios.ProjectWarden.Characters.Components
+{
+    using System;
+    using UnityEngine;
     
-    [SerializeField] BaseStatSO defaultStats;
-    [SerializeField] private int level;
-
-    private HealthComponent healthComponent;
-
-    private void Awake() {
+    public class StatsComponent : MonoBehaviour {
+        
+        [SerializeField] BaseStatSO defaultStats;
+        [SerializeField] private int level;
+    
+        private HealthComponent healthComponent;
+    
+        private void Awake() {
+            
+        }
+        
         
     }
-    
     
 }
