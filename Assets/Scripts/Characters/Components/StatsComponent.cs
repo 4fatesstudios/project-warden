@@ -1,9 +1,9 @@
+using System;
+using UnityEngine;
 using FourFatesStudios.ProjectWarden.ScriptableObjects;
 
 namespace FourFatesStudios.ProjectWarden.Characters.Components
 {
-    using System;
-    using UnityEngine;
     
     public class StatsComponent : MonoBehaviour {
         

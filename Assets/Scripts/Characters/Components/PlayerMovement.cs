@@ -1,8 +1,8 @@
+using UnityEngine;
 using FourFatesStudios.ProjectWarden.Characters.Controllers;
 
 namespace FourFatesStudios.ProjectWarden.Characters.Components
 {
-    using UnityEngine;
     
     public class PlayerMovement : MonoBehaviour
     {

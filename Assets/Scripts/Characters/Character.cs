@@ -1,6 +1,7 @@
+using UnityEngine;
+
 namespace FatesStudios.ProjectWarden.Characters
 {
-    using UnityEngine;
     
     /// <summary>
     /// Basic character class

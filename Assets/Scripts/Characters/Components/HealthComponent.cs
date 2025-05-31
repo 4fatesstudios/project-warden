@@ -1,7 +1,8 @@
+using System;
+using UnityEngine;
+
 namespace FourFatesStudios.ProjectWarden.Characters.Components
 {
-    using System;
-    using UnityEngine;
     
     public class HealthComponent {
         private int maxHealth;

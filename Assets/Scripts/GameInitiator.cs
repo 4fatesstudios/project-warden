@@ -1,7 +1,8 @@
+using Cysharp.Threading.Tasks;
+using UnityEngine;
+
 namespace FourFatesStudios.ProjectWarden
 {
-    using Cysharp.Threading.Tasks;
-    using UnityEngine;
     
     public class GameInitiator : MonoBehaviour
     {

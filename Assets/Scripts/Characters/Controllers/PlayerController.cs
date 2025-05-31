@@ -1,6 +1,7 @@
+using UnityEngine;
+
 namespace FourFatesStudios.ProjectWarden.Characters.Controllers
 {
-    using UnityEngine;
     
     public class PlayerController : MonoBehaviour
     {

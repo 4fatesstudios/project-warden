@@ -1,10 +1,10 @@
+using System;
+using System.Collections.Generic;
+using UnityEngine;
 using FourFatesStudios.ProjectWarden.Characters.Components;
 
 namespace FourFatesStudios.ProjectWarden.GameSystems
 {
-    using System;
-    using System.Collections.Generic;
-    using UnityEngine;
     
     public class CombatManager : MonoBehaviour {
         
