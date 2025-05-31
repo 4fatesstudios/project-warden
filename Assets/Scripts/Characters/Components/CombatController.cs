@@ -1,12 +1,16 @@
-using UnityEngine;
-
-public class CombatController : MonoBehaviour
+namespace FourFatesStudios.ProjectWarden.Characters.Components
 {
-    private StatsComponent statsComponent;
-
-    private void Awake() {
-        statsComponent = GetComponent<StatsComponent>();
-    }
+    using UnityEngine;
     
+    public class CombatController : MonoBehaviour
+    {
+        private StatsComponent statsComponent;
+    
+        private void Awake() {
+            statsComponent = GetComponent<StatsComponent>();
+        }
+        
+        
+    }
     
 }

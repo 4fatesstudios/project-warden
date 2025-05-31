@@ -7,7 +7,7 @@ using System.Linq;
 
 public static class NamespaceFormatter
 {
-    private const string BaseNamespace = "4FatesStudios.ProjectWarden";
+    private const string BaseNamespace = "FourFatesStudios.ProjectWarden";
     private const string CodeRoot = "Assets/Scripts";
 
     // Auto-inject namespace when script is created
