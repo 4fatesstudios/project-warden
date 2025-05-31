@@ -1,5 +1,8 @@
 using System;
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
 {
@@ -15,13 +18,13 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
     public abstract class Item : ScriptableObject {
         [SerializeField] private string itemName;
         [SerializeField] private string itemDescription;
-        private string _itemID;
         [SerializeField] private ItemRarity itemRarity;
+        [SerializeField, HideInInspector] private string _itemID;
 
         public string ItemName => itemName;
         public string ItemDescription => itemDescription;
-        public string ItemID => _itemID;
         public ItemRarity ItemRarity => itemRarity;
+        public string ItemID => _itemID;
         
 #if UNITY_EDITOR
         private void OnValidate() {
