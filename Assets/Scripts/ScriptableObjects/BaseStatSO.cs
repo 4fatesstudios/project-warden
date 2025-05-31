@@ -1,6 +1,7 @@
+using UnityEngine;
+
 namespace FourFatesStudios.ProjectWarden.ScriptableObjects
 {
-    using UnityEngine;
     
     [CreateAssetMenu(fileName = "BaseStat", menuName = "Base Stat SO")]
     public class BaseStatSO : ScriptableObject

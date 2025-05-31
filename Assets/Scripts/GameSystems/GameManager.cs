@@ -1,6 +1,7 @@
+using UnityEngine;
+
 namespace FourFatesStudios.ProjectWarden.GameSystems
 {
-    using UnityEngine;
     
     public class GameManager : MonoBehaviour
     {

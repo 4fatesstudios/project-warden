@@ -1,6 +1,7 @@
+using UnityEngine;
+
 namespace FourFatesStudios.ProjectWarden.Characters.Components
 {
-    using UnityEngine;
     
     public class CombatController : MonoBehaviour
     {
