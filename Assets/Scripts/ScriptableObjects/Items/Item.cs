@@ -1,4 +1,5 @@
 using System;
+using FourFatesStudios.ProjectWarden.Enums;
 using UnityEngine;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -6,14 +7,7 @@ using UnityEditor;
 
 namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
 {
-    public enum ItemRarity {
-        None,
-        Common,
-        Rare,
-        Epic,
-        Mythic,
-        Unique
-    }
+    
     
     public abstract class Item : ScriptableObject {
         [SerializeField] private string itemName;
