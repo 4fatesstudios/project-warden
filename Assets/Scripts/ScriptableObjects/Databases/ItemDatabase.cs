@@ -7,8 +7,17 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Databases
 {
     [CreateAssetMenu(fileName = "NewDatabase", menuName = "Databases/Item Database")]
     public class ItemDatabase : ScriptableObject {
-        [SerializeField] private List<Item> items = new();
+        private static ItemDatabase _instance;
 
+        public static ItemDatabase Instance {
+            get {
+                if (_instance == null)
+                    _instance = Resources.Load<ItemDatabase>("Databases/ItemDatabase");
+                return _instance;
+            }
+        }
+        
+        [SerializeField] private List<Item> items = new();
         private Dictionary<string, Item> itemLookup;
         
         public IReadOnlyList<Item> Items => items;
