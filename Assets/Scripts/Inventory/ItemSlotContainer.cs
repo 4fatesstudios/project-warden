@@ -7,50 +7,130 @@ namespace FourFatesStudios.ProjectWarden.Inventory
 {
     [System.Serializable]
     public class ItemSlotContainer<T> where T : Item {
-        private List<ItemSlot> _items = new List<ItemSlot>();
+        private List<ItemSlot> _items;
         private int _maxQuantityPerSlot;
         private const int DefaultMaxQuantity = 499;
+        private int _maxSlots;
         
         public IReadOnlyList<ItemSlot> Slots => _items.AsReadOnly();
+        /// <summary>
+        /// Current amount of slots occupied in ItemSlotContainer
+        /// </summary>
         public int Count => _items.Count;
         public ItemSlot this[int index] => _items[index];
+        /// <summary>
+        /// Max items that can go in each slot in ItemSlotContainer
+        /// </summary>
         public int MaxQuantityPerSlot => _maxQuantityPerSlot;
+        /// <summary>
+        /// Maximum size of the ItemSlotContainer, 0 if no limit
+        /// </summary>
+        public int MaxSlots => _maxSlots;
 
-        public ItemSlotContainer(int maxQuantityPerSlot = DefaultMaxQuantity) {
+        public ItemSlotContainer(int maxQuantityPerSlot = DefaultMaxQuantity, int maxSlots = 0) {
+            _items = new List<ItemSlot>();
             _maxQuantityPerSlot = maxQuantityPerSlot;
+            _maxSlots = maxSlots;
         }
 
         public ItemSlotContainer(ItemSlotContainer<T> itemSlotContainer) {
             _items = new List<ItemSlot>(itemSlotContainer._items);
             _maxQuantityPerSlot = itemSlotContainer.MaxQuantityPerSlot;
+            _maxSlots = itemSlotContainer.MaxSlots;
         }
-
-        public void Add(T item, int amount = 1) {
+        
+        /// <summary>
+        /// Adds a specified amount of the given item to the container.
+        /// Attempts to fill existing partial slots first, then adds new slots as needed.
+        /// If the container has a maximum slot limit, adding stops when the limit is reached.
+        /// </summary>
+        /// <param name="item">The item to add. Cannot be null.</param>
+        /// <param name="amount">The quantity of the item to add. Must be greater than zero.</param>
+        /// <returns>The amount of the item that could not be added due to slot limits or capacity.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if the provided <paramref name="item"/> is null.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown if the <paramref name="amount"/> is zero or negative.</exception>
+        public int Add(T item, int amount = 1) {
             if (item == null)
                 throw new ArgumentNullException(nameof(item), "ItemSlotContainer: item cannot be null");
             if (amount <= 0)
                 throw new ArgumentOutOfRangeException(nameof(amount), "ItemSlotContainer: quantity cannot be 0 or negative");
 
-            int lastIndex = -1;
-
-            for (int i = 0; i < _items.Count; i++) {
+            // Fill existing partial slots first
+            for (int i = 0; i < _items.Count && amount > 0; i++) {
                 var slot = _items[i];
-                if (slot.Item.Equals(item)) {
-                    lastIndex = i;
+                if (slot.Item.Equals(item) && slot.Quantity < _maxQuantityPerSlot) {
                     amount = slot.AddQuantity(amount);
-                    if (amount == 0) return;
                 }
             }
 
+            // Add new slots if needed and possible
             while (amount > 0) {
-                int insertIndex = (lastIndex >= 0) ? lastIndex + 1 : _items.Count;
+                if (MaxSlots > 0 && Count >= MaxSlots)
+                    break;  // Can't add more slots, stop here and return remainder
+
                 int toAdd = Mathf.Min(amount, _maxQuantityPerSlot);
                 var newSlot = new ItemSlot(item, toAdd, _maxQuantityPerSlot);
-                _items.Insert(insertIndex, newSlot);
+                _items.Add(newSlot);
                 amount -= toAdd;
-                lastIndex = insertIndex;
             }
+
+            return amount; // Return leftover amount that couldn't be added
         }
+        
+        /// <summary>
+        /// Attempts to remove a specified amount of the given item from the container.
+        /// If the container does not have enough total quantity of the item, no removal occurs.
+        /// Removal prioritizes slots with the smallest quantities first. Slots reduced to zero are removed from the container.
+        /// The order of remaining slots is preserved.
+        /// </summary>
+        /// <param name="item">The item to remove. Cannot be null.</param>
+        /// <param name="amount">The quantity of the item to remove. Must be greater than zero.</param>
+        /// <returns><c>true</c> if the removal was successful; <c>false</c> if the total quantity was insufficient or the item was not found.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if the provided <paramref name="item"/> is null.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown if the <paramref name="amount"/> is zero or negative.</exception>
+        public int Remove(T item, int amount = 1) {
+            if (item == null)
+                throw new ArgumentNullException(nameof(item), "ItemSlotContainer: item cannot be null");
+            if (amount <= 0)
+                throw new ArgumentOutOfRangeException(nameof(amount), "ItemSlotContainer: quantity cannot be 0 or negative");
+
+            // Calculate total quantity of the item in the container
+            int totalQuantity = 0;
+            foreach (var slot in _items) {
+                if (slot.Item.Equals(item)) {
+                    totalQuantity += slot.Quantity;
+                }
+            }
+
+            // If not enough quantity to remove, return full amount (no removal)
+            if (totalQuantity < amount) {
+                return amount;
+            }
+
+            // Get all slots with this item, sorted ascending by quantity
+            var slots = new List<ItemSlot>();
+            foreach (var slot in _items) {
+                if (slot.Item.Equals(item)) {
+                    slots.Add(slot);
+                }
+            }
+            slots.Sort((a, b) => a.Quantity.CompareTo(b.Quantity));
+
+            // Remove from smallest slot amounts first
+            foreach (var slot in slots) {
+                if (amount <= 0) break;
+
+                amount = slot.SubtractQuantity(amount);
+                if (slot.Quantity == 0) {
+                    _items.Remove(slot);
+                }
+            }
+
+            return amount; // Should be 0 here, since we already checked totalQuantity
+        }
+
+
+
         
         [System.Serializable]
         public class ItemSlot {
