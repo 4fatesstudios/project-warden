@@ -13,17 +13,17 @@ namespace FourFatesStudios.ProjectWarden.Inventory
     }
 
     [System.Serializable]
-    public class ItemSlot {
-        [SerializeField] private Item item;
+    public class ItemSlot<T> where T : Item {
+        [SerializeField] private T item;
         [SerializeField] private int quantity;
         [SerializeField] private int maxQuantity = MAX_STACKABLE_QUANTITY;
         private const int MAX_STACKABLE_QUANTITY = 499;
 
-        public Item Item => item;
+        public T Item => item;
         public int Quantity => quantity;
         public int MaxQuantity => maxQuantity;
 
-        public ItemSlot(Item item, int quantity=1, int maxQuantity=MAX_STACKABLE_QUANTITY) {
+        public ItemSlot(T item, int quantity=1, int maxQuantity=MAX_STACKABLE_QUANTITY) {
             if (item == null)
                 throw new ArgumentNullException(nameof(item), "ItemSlot: item cannot be null");
             
@@ -36,7 +36,7 @@ namespace FourFatesStudios.ProjectWarden.Inventory
         /// <param name="item">The item to set the slot to</param>
         /// <param name="quantity">The initial quantity to set the slot to</param>
         /// <exception cref="ArgumentNullException">Thrown when <paramref name="item"/> is null</exception>
-        public void SetItem(Item item, int quantity=1) {
+        public void SetItem(T item, int quantity=1) {
             if (item == null)
                 throw new ArgumentNullException(nameof(item), "ItemSlot: item cannot be null");
             
