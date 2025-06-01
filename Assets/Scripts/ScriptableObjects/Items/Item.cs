@@ -11,10 +11,10 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
     public class Item : ScriptableObject
     {
         [SerializeField, Tooltip("Display name shown to the player.")]
-        private string itemName;
+        private string itemName = "Unnamed Item";
 
         [SerializeField, Tooltip("Description shown to the player.")]
-        private string itemDescription;
+        private string itemDescription = "Empty Description";
 
         [SerializeField] private ItemRarity itemRarity;
 
@@ -31,11 +31,11 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
 
         private void OnValidate()
         {
-            if (string.IsNullOrEmpty(_itemID))
-            {
-                _itemID = Guid.NewGuid().ToString();
-                EditorUtility.SetDirty(this);
-            }
+            if (string.IsNullOrEmpty(itemName)) itemName = "Unnamed Item";
+            if (string.IsNullOrEmpty(itemDescription)) itemDescription = "Empty Description";
+            if (!string.IsNullOrEmpty(_itemID)) return;
+            _itemID = Guid.NewGuid().ToString();
+            EditorUtility.SetDirty(this);
         }
 #endif
     }
