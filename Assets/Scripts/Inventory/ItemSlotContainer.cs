@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
 using Unity.Mathematics.Geometry;
 using UnityEngine;
@@ -7,21 +8,33 @@ using UnityEngine.InputSystem.Controls;
 
 namespace FourFatesStudios.ProjectWarden.Inventory
 {
-    public class ItemSlotContainer : MonoBehaviour
-    {
+    [System.Serializable]
+    public class ItemSlotContainer<T> where T : Item {
+        private List<T> _items = new List<T>();
+        
+        public IReadOnlyList<T> Items => _items.AsReadOnly();
+        public int Count => _items.Count;
+        public T this[int index] => _items[index];
+
+        public ItemSlotContainer() { }
+
+        public ItemSlotContainer(List<T> items) {
+            _items = items;
+        }
+        
         
     }
 
     [System.Serializable]
     public class ItemSlot<T> where T : Item {
-        [SerializeField] private T item;
-        [SerializeField] private int quantity;
-        [SerializeField] private int maxQuantity = MAX_STACKABLE_QUANTITY;
+        private T _item;
+        private int _quantity;
+        private int _maxQuantity;
         private const int MAX_STACKABLE_QUANTITY = 499;
 
-        public T Item => item;
-        public int Quantity => quantity;
-        public int MaxQuantity => maxQuantity;
+        public T Item => _item;
+        public int Quantity => _quantity;
+        public int MaxQuantity => _maxQuantity;
 
         public ItemSlot(T item, int quantity=1, int maxQuantity=MAX_STACKABLE_QUANTITY) {
             if (item == null)
@@ -40,8 +53,8 @@ namespace FourFatesStudios.ProjectWarden.Inventory
             if (item == null)
                 throw new ArgumentNullException(nameof(item), "ItemSlot: item cannot be null");
             
-            this.item = item;
-            this.quantity = quantity;
+            this._item = item;
+            this._quantity = quantity;
             ClampQuantity();
         }
     
@@ -55,14 +68,14 @@ namespace FourFatesStudios.ProjectWarden.Inventory
             if (amount < 0)
                 throw new ArgumentOutOfRangeException(nameof(amount), "ItemSlot: AddQuantity: Cannot add a negative amount, use SubtractQuantity instead.");
 
-            int spaceLeft = maxQuantity - quantity;
+            int spaceLeft = _maxQuantity - _quantity;
 
             if (amount <= spaceLeft) {
-                quantity += amount;
+                _quantity += amount;
                 return 0;
             }
 
-            quantity = maxQuantity;
+            _quantity = _maxQuantity;
             return amount - spaceLeft; // remainder
         }
         
@@ -84,16 +97,16 @@ namespace FourFatesStudios.ProjectWarden.Inventory
             if (amount < 0)
                 throw new ArgumentOutOfRangeException(nameof(amount), "ItemSlot: SubtractQuantity: Cannot subtract a negative amount, use AddQuantity instead.");
 
-            if (amount > quantity)
-                return amount - quantity; // not enough to subtract, return what's missing
+            if (amount > _quantity)
+                return amount - _quantity; // not enough to subtract, return what's missing
 
-            quantity -= amount;
+            _quantity -= amount;
             return 0;
         }
         
         private void ClampQuantity() {
-            if (quantity is <= MAX_STACKABLE_QUANTITY and >= 1) return;
-            quantity = Mathf.Clamp(quantity, 1, MAX_STACKABLE_QUANTITY);
+            if (_quantity is <= MAX_STACKABLE_QUANTITY and >= 1) return;
+            _quantity = Mathf.Clamp(_quantity, 1, MAX_STACKABLE_QUANTITY);
             Debug.LogWarning("ItemSlot: ERROR, attempted to set quantity to invalid range");
         }
     }
