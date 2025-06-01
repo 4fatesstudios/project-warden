@@ -13,6 +13,8 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Databases
             get {
                 if (_instance == null)
                     _instance = Resources.Load<ItemDatabase>("Databases/ItemDatabase");
+                if (_instance == null)
+                    Debug.LogError("ItemDatabase asset not found in Resources/Databases/ItemDatabase");
                 return _instance;
             }
         }
@@ -29,6 +31,10 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Databases
         private void BuildLookup() {
             itemLookup = new Dictionary<string, Item>();
             foreach (var item in items) {
+                if (itemLookup.ContainsKey(item.ItemID)) {
+                    Debug.LogWarning($"Duplicate ItemID detected: {item.ItemID} in {item.name}");
+                    continue;
+                }
                 if (item != null && !string.IsNullOrEmpty(item.ItemID)) 
                     itemLookup[item.ItemID] = item;
             }
