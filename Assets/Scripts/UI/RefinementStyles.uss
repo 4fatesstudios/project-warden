@@ -1,0 +1,13 @@
+.menu-container {
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 10%;
+    row-gap: 10px;
+}
+
+Button {
+    font-size: 18px;
+    padding: 10px 20px;
+    unity-font-style: bold;
+}
