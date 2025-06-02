@@ -179,12 +179,16 @@ namespace FourFatesStudios.ProjectWarden.Inventory
                 if (amount < 0)
                     throw new ArgumentOutOfRangeException(nameof(amount), "ItemSlot: SubtractQuantity: Cannot subtract a negative amount, use AddQuantity instead.");
 
-                if (amount > _quantity)
-                    return amount - _quantity;
+                if (amount >= _quantity) {
+                    int leftover = amount - _quantity;
+                    _quantity = 0;
+                    return leftover;
+                }
 
                 _quantity -= amount;
                 return 0;
             }
+
 
             private void ClampQuantity() {
                 if (_quantity is <= DefaultMaxQuantity and >= 1) return;
