@@ -8,8 +8,8 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
     public class Trinket : Item
     {
         [SerializeField, Tooltip("Trinket type.")]
-        private ItemTrinketType itemTrinkeyType;
+        private ItemTrinketType itemTrinketType;
 
-        public ItemTrinketType ItemTrinketType => itemTrinkeyType;
+        public ItemTrinketType ItemTrinketType => itemTrinketType;
     }
 }
