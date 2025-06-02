@@ -143,7 +143,7 @@ namespace FourFatesStudios.ProjectWarden.Inventory
             public int Quantity => _quantity;
             public int MaxQuantity => _maxQuantity;
 
-            internal ItemSlot(T item, int quantity = 1, int maxQuantity = DefaultMaxQuantity) {
+            public ItemSlot(T item, int quantity = 1, int maxQuantity = DefaultMaxQuantity) {
                 if (item == null)
                     throw new ArgumentNullException(nameof(item), "ItemSlot: item cannot be null");
 
