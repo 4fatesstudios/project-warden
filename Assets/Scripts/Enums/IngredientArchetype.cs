@@ -10,7 +10,6 @@ namespace FourFatesStudios.ProjectWarden.Enums
         Herb,
         Ore,
         Synthetic,
-        Corrupted,
         Accent
     }
 }
