@@ -2,7 +2,8 @@ using UnityEditor;
 using UnityEngine;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
 
-[CustomEditor(typeof(Item))]
+[CanEditMultipleObjects]
+[CustomEditor(typeof(Item), true)] // 'true' allows inheritance
 public class ItemEditor : Editor
 {
     public override void OnInspectorGUI()
