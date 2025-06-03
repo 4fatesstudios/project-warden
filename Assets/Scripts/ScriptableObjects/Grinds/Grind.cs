@@ -1,5 +1,6 @@
 using System;
 using FourFatesStudios.ProjectWarden.Enums;
+using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
 using UnityEngine;
 #if UNITY_EDITOR
 using UnityEditor;

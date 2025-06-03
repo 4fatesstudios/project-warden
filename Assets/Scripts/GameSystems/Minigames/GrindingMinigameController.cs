@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Grinds;
+using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
 
 namespace FourFatesStudios.ProjectWarden.GameSystems.Minigames
 {
