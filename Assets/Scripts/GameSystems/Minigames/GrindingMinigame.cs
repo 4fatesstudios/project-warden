@@ -1,31 +1,35 @@
 using UnityEngine;
 using FourFatesStudios.ProjectWarden.Enums;
 
-public class GrindingMinigame : IMiniGame
-{
-    private GrindingMinigameController controller;
 
-    public void StartGame()
+namespace FourFatesStudios.ProjectWarden.GameSystems.Minigames
+{
+    public class GrindingMinigame : IMiniGame
     {
-        GameObject obj = GameObject.FindWithTag("GrindingController");
-        if (obj == null)
+        private GrindingMinigameController controller;
+
+        public void StartGame()
         {
-            Debug.LogError("GrindingMinigameController not found in scene.");
-            return;
+            GameObject obj = GameObject.FindWithTag("GrindingController");
+            if (obj == null)
+            {
+                Debug.LogError("GrindingMinigameController not found in scene.");
+                return;
+            }
+
+            controller = obj.GetComponent<GrindingMinigameController>();
+            controller.ResetGame();
+            Debug.Log("GrindingMinigame started via interface.");
         }
 
-        controller = obj.GetComponent<GrindingMinigameController>();
-        controller.ResetGame();
-        Debug.Log("GrindingMinigame started via interface.");
-    }
+        public void UpdateGame()
+        {
+            // No need to handle per-frame logic here since the controller MonoBehaviour runs it
+        }
 
-    public void UpdateGame()
-    {
-        // No need to handle per-frame logic here since the controller MonoBehaviour runs it
-    }
-
-    public void EndGame()
-    {
-        Debug.Log("GrindingMinigame ended via interface.");
+        public void EndGame()
+        {
+            Debug.Log("GrindingMinigame ended via interface.");
+        }
     }
 }

@@ -1,6 +1,12 @@
-public enum MiniGameType
+using UnityEngine;
+
+
+namespace FourFatesStudios.ProjectWarden.Enums
 {
-    Grinding,
-    Distilling,
-    Roasting
+    public enum MiniGameType
+    {
+        Grinding,
+        Distilling,
+        Roasting
+    }
 }
