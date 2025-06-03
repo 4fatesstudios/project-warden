@@ -1,13 +1,15 @@
 .menu-container {
     flex-direction: column;
-    justify-content: center;
     align-items: center;
-    margin-top: 10%;
-    row-gap: 10px;
+    justify-content: center;
+    padding: 40px;
+    row-gap: 15px;
 }
 
 Button {
     font-size: 18px;
-    padding: 10px 20px;
+    width: 200px;
+    height: 40px;
     unity-font-style: bold;
+    margin: 5px 0;
 }
