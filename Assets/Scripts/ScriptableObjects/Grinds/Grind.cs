@@ -12,7 +12,7 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Grinds
     public class Grind : ScriptableObject
     {
         [SerializeField, Tooltip("Make sure you choose the right rarity")]
-        private Ingredient inputIngredient = new();
+        private Ingredient inputIngredient;
 
         [SerializeField, Tooltip("Minimum Grind Speed"), Range(1, 9998)] private float minGrindSpeed = 1;
         [SerializeField, Tooltip("Maximum Grind Speed"), Range(1, 9999)] private float maxGrindSpeed = 2;
@@ -20,7 +20,7 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Grinds
         [SerializeField, Tooltip("Maximum Pound Speed"), Range(1, 9999)] private float maxPoundSpeed = 2;
 
         [SerializeField, Tooltip("Don't forget to make the result ingredient before setting the recipe.")]
-        private Ingredient outputIngredient = new();
+        private Ingredient outputIngredient;
 
         public Ingredient InputIngredient => inputIngredient;
         public float MinGrindSpeed => minGrindSpeed;
