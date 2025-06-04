@@ -9,7 +9,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
+<<<<<<<< Updated upstream:Assets/Resources/Databases/DistillDatabase.asset
   m_Script: {fileID: 11500000, guid: afcfe265e7e27634eb129b6120d5593b, type: 3}
   m_Name: DistillDatabase
+========
+  m_Script: {fileID: 11500000, guid: ccec348f60f7b5c429d2fb1e20182269, type: 3}
+  m_Name: TestGrindInput
+>>>>>>>> Stashed changes:Assets/Resources/Items/TestGrindInput.asset
   m_EditorClassIdentifier: 
   distills: []

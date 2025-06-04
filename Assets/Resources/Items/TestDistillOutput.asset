@@ -10,11 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ccec348f60f7b5c429d2fb1e20182269, type: 3}
+<<<<<<< Updated upstream
 <<<<<<<< Updated upstream:Assets/Resources/Items/TestDistillOutput.asset
   m_Name: TestDistillOutput
 ========
   m_Name: TestGrindOutput
 >>>>>>>> Stashed changes:Assets/Resources/Items/TestGrindOutput.asset
+=======
+  m_Name: TestDistillOutput
+>>>>>>> Stashed changes
   m_EditorClassIdentifier: 
   itemName: Heartleaf Extract
   itemDescription: This extract was distilled from Heartleafs
