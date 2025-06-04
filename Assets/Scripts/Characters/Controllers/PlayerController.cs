@@ -103,41 +103,10 @@ namespace FourFatesStudios.ProjectWarden.Characters.Controllers
             
             // Exploration Mapping
             _playerInput.PlayerInputMap_EXPLORATION.Interact.performed += Exploration_Interact_performed;
-            
-            //Combat Mapping
-
-            _playerInput.PlayerInputMap_COMBAT_ACTIONSELECTION.OpenSkills.performed += Combat_OpenSkills_performed;
-            _playerInput.PlayerInputMap_COMBAT_ACTIONSELECTION.OpenItems.performed += Combat_OpenItems_performed;
-            _playerInput.PlayerInputMap_COMBAT_ACTIONSELECTION.Guard.performed += Combat_Guard_performed;
-            _playerInput.PlayerInputMap_COMBAT_ACTIONSELECTION.Attack.performed += Combat_Attack_performed;
-            _playerInput.PlayerInputMap_COMBAT_ACTIONSELECTION.Back.performed += Combat_Back_performed;
-            
-            _playerInput.PlayerInputMap_COMBAT_UINAVIGATION.CycleUp.performed += Combat_CycleUp_performed;
-            _playerInput.PlayerInputMap_COMBAT_UINAVIGATION.CycleDown.performed += Combat_CycleDown_performed;
-            _playerInput.PlayerInputMap_COMBAT_UINAVIGATION.CycleLeft.performed += Combat_CycleLeft_performed;
-            _playerInput.PlayerInputMap_COMBAT_UINAVIGATION.CycleRight.performed += Combat_CycleRight_performed;
-            _playerInput.PlayerInputMap_COMBAT_UINAVIGATION.Select.performed += Combat_Select_performed;
-            _playerInput.PlayerInputMap_COMBAT_UINAVIGATION.Back.performed += Combat_Back_performed;
         }
     
         private void OnDisable() {
             _playerInput.PlayerInputMap_EXPLORATION.Disable();
-            _playerInput.PlayerInputMap_COMBAT_ACTIONSELECTION.Disable();
-            _playerInput.PlayerInputMap_COMBAT_UINAVIGATION.Disable();
-            
-            //Combat Mapping
-            _playerInput.PlayerInputMap_COMBAT_ACTIONSELECTION.OpenSkills.performed -= Combat_OpenSkills_performed;
-            _playerInput.PlayerInputMap_COMBAT_ACTIONSELECTION.OpenItems.performed -= Combat_OpenItems_performed;
-            _playerInput.PlayerInputMap_COMBAT_ACTIONSELECTION.Guard.performed -= Combat_Guard_performed;
-            _playerInput.PlayerInputMap_COMBAT_ACTIONSELECTION.Attack.performed -= Combat_Attack_performed;
-            _playerInput.PlayerInputMap_COMBAT_UINAVIGATION.Back.performed -= Combat_Back_performed;
-            
-            _playerInput.PlayerInputMap_COMBAT_UINAVIGATION.CycleUp.performed -= Combat_CycleUp_performed;
-            _playerInput.PlayerInputMap_COMBAT_UINAVIGATION.CycleDown.performed -= Combat_CycleDown_performed;
-            _playerInput.PlayerInputMap_COMBAT_UINAVIGATION.CycleLeft.performed -= Combat_CycleLeft_performed;
-            _playerInput.PlayerInputMap_COMBAT_UINAVIGATION.CycleRight.performed -= Combat_CycleRight_performed;
-            _playerInput.PlayerInputMap_COMBAT_UINAVIGATION.Select.performed -= Combat_Select_performed;
-            _playerInput.PlayerInputMap_COMBAT_UINAVIGATION.Back.performed -= Combat_Back_performed;
             
             // Exploration Mapping
             _playerInput.PlayerInputMap_EXPLORATION.Interact.performed -= Exploration_Interact_performed;
