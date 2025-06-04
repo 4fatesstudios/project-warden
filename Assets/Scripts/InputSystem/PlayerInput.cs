@@ -108,6 +108,15 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Interact"",
+                    ""type"": ""Button"",
+                    ""id"": ""5480dabb-40e3-456e-90d0-79dd0170b0cc"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -176,6 +185,17 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                     ""action"": ""MenuInput"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""82699276-d836-4455-8353-6aaae265bb70"",
+                    ""path"": ""<Keyboard>/e"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Interact"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         },
@@ -198,6 +218,7 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         m_PlayerInputMap_EXPLORATION = asset.FindActionMap("PlayerInputMap_EXPLORATION", throwIfNotFound: true);
         m_PlayerInputMap_EXPLORATION_MovementInput = m_PlayerInputMap_EXPLORATION.FindAction("MovementInput", throwIfNotFound: true);
         m_PlayerInputMap_EXPLORATION_MenuInput = m_PlayerInputMap_EXPLORATION.FindAction("MenuInput", throwIfNotFound: true);
+        m_PlayerInputMap_EXPLORATION_Interact = m_PlayerInputMap_EXPLORATION.FindAction("Interact", throwIfNotFound: true);
         // PlayerInputMap_COMBAT
         m_PlayerInputMap_COMBAT = asset.FindActionMap("PlayerInputMap_COMBAT", throwIfNotFound: true);
         // PlayerInputMap_ALCHEMY
@@ -286,6 +307,7 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
     private List<IPlayerInputMap_EXPLORATIONActions> m_PlayerInputMap_EXPLORATIONActionsCallbackInterfaces = new List<IPlayerInputMap_EXPLORATIONActions>();
     private readonly InputAction m_PlayerInputMap_EXPLORATION_MovementInput;
     private readonly InputAction m_PlayerInputMap_EXPLORATION_MenuInput;
+    private readonly InputAction m_PlayerInputMap_EXPLORATION_Interact;
     /// <summary>
     /// Provides access to input actions defined in input action map "PlayerInputMap_EXPLORATION".
     /// </summary>
@@ -305,6 +327,10 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "PlayerInputMap_EXPLORATION/MenuInput".
         /// </summary>
         public InputAction @MenuInput => m_Wrapper.m_PlayerInputMap_EXPLORATION_MenuInput;
+        /// <summary>
+        /// Provides access to the underlying input action "PlayerInputMap_EXPLORATION/Interact".
+        /// </summary>
+        public InputAction @Interact => m_Wrapper.m_PlayerInputMap_EXPLORATION_Interact;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -337,6 +363,9 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
             @MenuInput.started += instance.OnMenuInput;
             @MenuInput.performed += instance.OnMenuInput;
             @MenuInput.canceled += instance.OnMenuInput;
+            @Interact.started += instance.OnInteract;
+            @Interact.performed += instance.OnInteract;
+            @Interact.canceled += instance.OnInteract;
         }
 
         /// <summary>
@@ -354,6 +383,9 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
             @MenuInput.started -= instance.OnMenuInput;
             @MenuInput.performed -= instance.OnMenuInput;
             @MenuInput.canceled -= instance.OnMenuInput;
+            @Interact.started -= instance.OnInteract;
+            @Interact.performed -= instance.OnInteract;
+            @Interact.canceled -= instance.OnInteract;
         }
 
         /// <summary>
@@ -578,6 +610,13 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnMenuInput(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Interact" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnInteract(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "PlayerInputMap_COMBAT" which allows adding and removing callbacks.
