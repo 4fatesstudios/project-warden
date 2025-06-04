@@ -104,7 +104,8 @@ namespace FourFatesStudios.ProjectWarden.Characters.Controllers
             // Exploration Mapping
             _playerInput.PlayerInputMap_EXPLORATION.Interact.performed += Exploration_Interact_performed;
         }
-    
+
+
         private void OnDisable() {
             _playerInput.PlayerInputMap_EXPLORATION.Disable();
             
