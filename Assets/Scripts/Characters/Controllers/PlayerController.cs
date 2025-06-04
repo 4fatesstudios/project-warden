@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using FourFatesStudios.ProjectWarden.Enums;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.XR;
