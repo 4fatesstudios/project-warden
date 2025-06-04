@@ -1,4 +1,5 @@
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 // DistillingMinigameController.cs
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -74,6 +75,8 @@ public class DistillingMinigameController : MonoBehaviour
         isCorrupted = value;
     }
 =======
+=======
+>>>>>>> Stashed changes
 using UnityEngine;
 using UnityEngine.UIElements;
 using FourFatesStudios.ProjectWarden.Enums;
@@ -231,5 +234,8 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.Minigames
             isCorrupted = value;
         }
     }
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 }

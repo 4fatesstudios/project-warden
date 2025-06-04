@@ -1,5 +1,6 @@
 using UnityEngine;
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 
 public class DistillingMinigame : IMiniGame
 {
@@ -30,6 +31,8 @@ public class DistillingMinigame : IMiniGame
     }
 }
 =======
+=======
+>>>>>>> Stashed changes
 using FourFatesStudios.ProjectWarden.Enums;
 
 
@@ -63,5 +66,9 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.Minigames
             Debug.Log("DistillingMinigame ended via interface.");
         }
     }
+<<<<<<< Updated upstream
+}
+>>>>>>> Stashed changes
+=======
 }
 >>>>>>> Stashed changes
