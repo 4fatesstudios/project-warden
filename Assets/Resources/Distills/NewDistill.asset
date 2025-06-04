@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 705d0b5539cd24b4196b3a6b1123d98a, type: 3}
   m_Name: NewDistill
   m_EditorClassIdentifier: 
-  inputIngredient: {fileID: 0}
-  outputIngredient: {fileID: 0}
+  inputIngredient: {fileID: 11400000, guid: 6b252c7e9ad9a18449f7859adb9a844b, type: 2}
+  outputIngredient: {fileID: 11400000, guid: 333c9956f37e17245919788be20db395, type: 2}
   requiredDuration: 5
   totalDuration: 10
-  progressionStages: 
+  progressionStages: 01000000
