@@ -1,30 +1,35 @@
 using FourFatesStudios.ProjectWarden.Interfaces;
 using UnityEngine;
+using UnityEngine.Events;
 
 
-namespace FourFatesStudios.ProjectWarden.Characters.Components
+namespace FourFatesStudios.ProjectWarden.Interactions
 {
-    public class InteractableComponent : MonoBehaviour, IInteract
+    [RequireComponent(typeof(Collider))]
+    public abstract class Interactable : MonoBehaviour, IInteract
     {
         [SerializeField] protected string interactText = "Interact";
+        
         private bool _canInteract = true;
         
         public string InteractText => interactText;
-        
-        public void Interact(GameObject interactor) {
-            throw new System.NotImplementedException();
-        }
+
+        public abstract void Interact(GameObject interactor);
         
         public bool CanInteract(GameObject interactor) {
             return _canInteract;
         }
+
+        public void SetCanInteract(bool canInteract) {
+            _canInteract = canInteract;
+        }
         
         public void OnFocus() {
-            throw new System.NotImplementedException();
+            Debug.Log($"{name} is focused.");
         }
         
         public void OnUnfocus() {
-            throw new System.NotImplementedException();
+            Debug.Log($"{name} is unfocused.");
         }
         
     }
