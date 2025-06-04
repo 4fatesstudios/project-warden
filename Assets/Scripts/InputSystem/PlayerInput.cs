@@ -222,8 +222,250 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         {
             ""name"": ""PlayerInputMap_COMBAT"",
             ""id"": ""f4f74810-eeab-42c2-b6b0-9c819f9627e8"",
-            ""actions"": [],
-            ""bindings"": []
+            ""actions"": [
+                {
+                    ""name"": ""OpenSkills"",
+                    ""type"": ""Button"",
+                    ""id"": ""921c787f-ed1c-4b94-89e3-8b6529fc8d55"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""OpenItems"",
+                    ""type"": ""Button"",
+                    ""id"": ""17ab73ac-9924-40ee-b2ee-8c0f0270cfe6"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Attack"",
+                    ""type"": ""Button"",
+                    ""id"": ""ed110a56-58a8-4507-8ba7-864b34190c01"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Guard"",
+                    ""type"": ""Button"",
+                    ""id"": ""1db8cd64-3022-4e19-b564-441ceff94a5d"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Select"",
+                    ""type"": ""Button"",
+                    ""id"": ""0660b505-eaec-4bfc-88dd-e6399b7c9a9c"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Back"",
+                    ""type"": ""Button"",
+                    ""id"": ""563cc69d-834c-4206-9669-3f3d009f5a91"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""CycleUp"",
+                    ""type"": ""Button"",
+                    ""id"": ""b9042381-997e-4ee1-9215-88678572cece"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""CycleDown"",
+                    ""type"": ""Button"",
+                    ""id"": ""d5b3246f-398b-44dc-8c82-6d1e2348f894"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""CycleLeft"",
+                    ""type"": ""Button"",
+                    ""id"": ""3f5ae6fc-e807-458f-837d-8c11d805858f"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""CycleRight"",
+                    ""type"": ""Button"",
+                    ""id"": ""6b9542a5-1147-439c-a568-aa39847e8bf1"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""ToggleAnalysis"",
+                    ""type"": ""Button"",
+                    ""id"": ""bad03bbf-89e6-4b77-ab68-99b04c4f736b"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Settings"",
+                    ""type"": ""Button"",
+                    ""id"": ""1dad1076-5edb-4d2c-9df1-4a3b2c71dc17"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""af8522ab-899f-45b6-8f72-ae6155f9c8da"",
+                    ""path"": ""<Keyboard>/w"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""OpenSkills"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""4ed169d3-0c49-48bc-abb1-f2128ea10419"",
+                    ""path"": ""<Keyboard>/a"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""OpenItems"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""8de60ef2-9586-4c90-9030-fbb7b3cb3bd7"",
+                    ""path"": ""<Keyboard>/d"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Attack"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""9554c69a-2c94-4854-91f1-ff8ee0e8fb77"",
+                    ""path"": ""<Keyboard>/s"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Guard"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""2b34cf8b-addd-4d8c-bffb-44d440befa51"",
+                    ""path"": ""<Keyboard>/space"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Select"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""40ee0927-fd44-40a5-b593-5dbefcae26c8"",
+                    ""path"": ""<Keyboard>/tab"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Back"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""69940825-d00e-412f-a8e0-541e5059d4fb"",
+                    ""path"": ""<Keyboard>/upArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""CycleUp"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""a4229de2-2681-4e97-ae80-7e0947819975"",
+                    ""path"": ""<Keyboard>/downArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""CycleDown"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""9ec30f14-b692-4ac9-9fe3-00fc6426797a"",
+                    ""path"": ""<Keyboard>/leftArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""CycleLeft"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""81340b14-04ad-42a7-ae71-29746096abcf"",
+                    ""path"": ""<Keyboard>/rightArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""CycleRight"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""2eed47bf-a4d1-4953-8698-95938b9abd4c"",
+                    ""path"": ""<Keyboard>/q"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""ToggleAnalysis"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""3403fcce-1022-4e81-b667-430067e4f415"",
+                    ""path"": ""<Keyboard>/escape"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Settings"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
         },
         {
             ""name"": ""PlayerInputMap_ALCHEMY"",
@@ -242,6 +484,18 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         m_PlayerInputMap_EXPLORATION_InteractSwitch = m_PlayerInputMap_EXPLORATION.FindAction("InteractSwitch", throwIfNotFound: true);
         // PlayerInputMap_COMBAT
         m_PlayerInputMap_COMBAT = asset.FindActionMap("PlayerInputMap_COMBAT", throwIfNotFound: true);
+        m_PlayerInputMap_COMBAT_OpenSkills = m_PlayerInputMap_COMBAT.FindAction("OpenSkills", throwIfNotFound: true);
+        m_PlayerInputMap_COMBAT_OpenItems = m_PlayerInputMap_COMBAT.FindAction("OpenItems", throwIfNotFound: true);
+        m_PlayerInputMap_COMBAT_Attack = m_PlayerInputMap_COMBAT.FindAction("Attack", throwIfNotFound: true);
+        m_PlayerInputMap_COMBAT_Guard = m_PlayerInputMap_COMBAT.FindAction("Guard", throwIfNotFound: true);
+        m_PlayerInputMap_COMBAT_Select = m_PlayerInputMap_COMBAT.FindAction("Select", throwIfNotFound: true);
+        m_PlayerInputMap_COMBAT_Back = m_PlayerInputMap_COMBAT.FindAction("Back", throwIfNotFound: true);
+        m_PlayerInputMap_COMBAT_CycleUp = m_PlayerInputMap_COMBAT.FindAction("CycleUp", throwIfNotFound: true);
+        m_PlayerInputMap_COMBAT_CycleDown = m_PlayerInputMap_COMBAT.FindAction("CycleDown", throwIfNotFound: true);
+        m_PlayerInputMap_COMBAT_CycleLeft = m_PlayerInputMap_COMBAT.FindAction("CycleLeft", throwIfNotFound: true);
+        m_PlayerInputMap_COMBAT_CycleRight = m_PlayerInputMap_COMBAT.FindAction("CycleRight", throwIfNotFound: true);
+        m_PlayerInputMap_COMBAT_ToggleAnalysis = m_PlayerInputMap_COMBAT.FindAction("ToggleAnalysis", throwIfNotFound: true);
+        m_PlayerInputMap_COMBAT_Settings = m_PlayerInputMap_COMBAT.FindAction("Settings", throwIfNotFound: true);
         // PlayerInputMap_ALCHEMY
         m_PlayerInputMap_ALCHEMY = asset.FindActionMap("PlayerInputMap_ALCHEMY", throwIfNotFound: true);
     }
@@ -455,6 +709,18 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
     // PlayerInputMap_COMBAT
     private readonly InputActionMap m_PlayerInputMap_COMBAT;
     private List<IPlayerInputMap_COMBATActions> m_PlayerInputMap_COMBATActionsCallbackInterfaces = new List<IPlayerInputMap_COMBATActions>();
+    private readonly InputAction m_PlayerInputMap_COMBAT_OpenSkills;
+    private readonly InputAction m_PlayerInputMap_COMBAT_OpenItems;
+    private readonly InputAction m_PlayerInputMap_COMBAT_Attack;
+    private readonly InputAction m_PlayerInputMap_COMBAT_Guard;
+    private readonly InputAction m_PlayerInputMap_COMBAT_Select;
+    private readonly InputAction m_PlayerInputMap_COMBAT_Back;
+    private readonly InputAction m_PlayerInputMap_COMBAT_CycleUp;
+    private readonly InputAction m_PlayerInputMap_COMBAT_CycleDown;
+    private readonly InputAction m_PlayerInputMap_COMBAT_CycleLeft;
+    private readonly InputAction m_PlayerInputMap_COMBAT_CycleRight;
+    private readonly InputAction m_PlayerInputMap_COMBAT_ToggleAnalysis;
+    private readonly InputAction m_PlayerInputMap_COMBAT_Settings;
     /// <summary>
     /// Provides access to input actions defined in input action map "PlayerInputMap_COMBAT".
     /// </summary>
@@ -466,6 +732,54 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         /// Construct a new instance of the input action map wrapper class.
         /// </summary>
         public PlayerInputMap_COMBATActions(@PlayerInput wrapper) { m_Wrapper = wrapper; }
+        /// <summary>
+        /// Provides access to the underlying input action "PlayerInputMap_COMBAT/OpenSkills".
+        /// </summary>
+        public InputAction @OpenSkills => m_Wrapper.m_PlayerInputMap_COMBAT_OpenSkills;
+        /// <summary>
+        /// Provides access to the underlying input action "PlayerInputMap_COMBAT/OpenItems".
+        /// </summary>
+        public InputAction @OpenItems => m_Wrapper.m_PlayerInputMap_COMBAT_OpenItems;
+        /// <summary>
+        /// Provides access to the underlying input action "PlayerInputMap_COMBAT/Attack".
+        /// </summary>
+        public InputAction @Attack => m_Wrapper.m_PlayerInputMap_COMBAT_Attack;
+        /// <summary>
+        /// Provides access to the underlying input action "PlayerInputMap_COMBAT/Guard".
+        /// </summary>
+        public InputAction @Guard => m_Wrapper.m_PlayerInputMap_COMBAT_Guard;
+        /// <summary>
+        /// Provides access to the underlying input action "PlayerInputMap_COMBAT/Select".
+        /// </summary>
+        public InputAction @Select => m_Wrapper.m_PlayerInputMap_COMBAT_Select;
+        /// <summary>
+        /// Provides access to the underlying input action "PlayerInputMap_COMBAT/Back".
+        /// </summary>
+        public InputAction @Back => m_Wrapper.m_PlayerInputMap_COMBAT_Back;
+        /// <summary>
+        /// Provides access to the underlying input action "PlayerInputMap_COMBAT/CycleUp".
+        /// </summary>
+        public InputAction @CycleUp => m_Wrapper.m_PlayerInputMap_COMBAT_CycleUp;
+        /// <summary>
+        /// Provides access to the underlying input action "PlayerInputMap_COMBAT/CycleDown".
+        /// </summary>
+        public InputAction @CycleDown => m_Wrapper.m_PlayerInputMap_COMBAT_CycleDown;
+        /// <summary>
+        /// Provides access to the underlying input action "PlayerInputMap_COMBAT/CycleLeft".
+        /// </summary>
+        public InputAction @CycleLeft => m_Wrapper.m_PlayerInputMap_COMBAT_CycleLeft;
+        /// <summary>
+        /// Provides access to the underlying input action "PlayerInputMap_COMBAT/CycleRight".
+        /// </summary>
+        public InputAction @CycleRight => m_Wrapper.m_PlayerInputMap_COMBAT_CycleRight;
+        /// <summary>
+        /// Provides access to the underlying input action "PlayerInputMap_COMBAT/ToggleAnalysis".
+        /// </summary>
+        public InputAction @ToggleAnalysis => m_Wrapper.m_PlayerInputMap_COMBAT_ToggleAnalysis;
+        /// <summary>
+        /// Provides access to the underlying input action "PlayerInputMap_COMBAT/Settings".
+        /// </summary>
+        public InputAction @Settings => m_Wrapper.m_PlayerInputMap_COMBAT_Settings;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -492,6 +806,42 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         {
             if (instance == null || m_Wrapper.m_PlayerInputMap_COMBATActionsCallbackInterfaces.Contains(instance)) return;
             m_Wrapper.m_PlayerInputMap_COMBATActionsCallbackInterfaces.Add(instance);
+            @OpenSkills.started += instance.OnOpenSkills;
+            @OpenSkills.performed += instance.OnOpenSkills;
+            @OpenSkills.canceled += instance.OnOpenSkills;
+            @OpenItems.started += instance.OnOpenItems;
+            @OpenItems.performed += instance.OnOpenItems;
+            @OpenItems.canceled += instance.OnOpenItems;
+            @Attack.started += instance.OnAttack;
+            @Attack.performed += instance.OnAttack;
+            @Attack.canceled += instance.OnAttack;
+            @Guard.started += instance.OnGuard;
+            @Guard.performed += instance.OnGuard;
+            @Guard.canceled += instance.OnGuard;
+            @Select.started += instance.OnSelect;
+            @Select.performed += instance.OnSelect;
+            @Select.canceled += instance.OnSelect;
+            @Back.started += instance.OnBack;
+            @Back.performed += instance.OnBack;
+            @Back.canceled += instance.OnBack;
+            @CycleUp.started += instance.OnCycleUp;
+            @CycleUp.performed += instance.OnCycleUp;
+            @CycleUp.canceled += instance.OnCycleUp;
+            @CycleDown.started += instance.OnCycleDown;
+            @CycleDown.performed += instance.OnCycleDown;
+            @CycleDown.canceled += instance.OnCycleDown;
+            @CycleLeft.started += instance.OnCycleLeft;
+            @CycleLeft.performed += instance.OnCycleLeft;
+            @CycleLeft.canceled += instance.OnCycleLeft;
+            @CycleRight.started += instance.OnCycleRight;
+            @CycleRight.performed += instance.OnCycleRight;
+            @CycleRight.canceled += instance.OnCycleRight;
+            @ToggleAnalysis.started += instance.OnToggleAnalysis;
+            @ToggleAnalysis.performed += instance.OnToggleAnalysis;
+            @ToggleAnalysis.canceled += instance.OnToggleAnalysis;
+            @Settings.started += instance.OnSettings;
+            @Settings.performed += instance.OnSettings;
+            @Settings.canceled += instance.OnSettings;
         }
 
         /// <summary>
@@ -503,6 +853,42 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         /// <seealso cref="PlayerInputMap_COMBATActions" />
         private void UnregisterCallbacks(IPlayerInputMap_COMBATActions instance)
         {
+            @OpenSkills.started -= instance.OnOpenSkills;
+            @OpenSkills.performed -= instance.OnOpenSkills;
+            @OpenSkills.canceled -= instance.OnOpenSkills;
+            @OpenItems.started -= instance.OnOpenItems;
+            @OpenItems.performed -= instance.OnOpenItems;
+            @OpenItems.canceled -= instance.OnOpenItems;
+            @Attack.started -= instance.OnAttack;
+            @Attack.performed -= instance.OnAttack;
+            @Attack.canceled -= instance.OnAttack;
+            @Guard.started -= instance.OnGuard;
+            @Guard.performed -= instance.OnGuard;
+            @Guard.canceled -= instance.OnGuard;
+            @Select.started -= instance.OnSelect;
+            @Select.performed -= instance.OnSelect;
+            @Select.canceled -= instance.OnSelect;
+            @Back.started -= instance.OnBack;
+            @Back.performed -= instance.OnBack;
+            @Back.canceled -= instance.OnBack;
+            @CycleUp.started -= instance.OnCycleUp;
+            @CycleUp.performed -= instance.OnCycleUp;
+            @CycleUp.canceled -= instance.OnCycleUp;
+            @CycleDown.started -= instance.OnCycleDown;
+            @CycleDown.performed -= instance.OnCycleDown;
+            @CycleDown.canceled -= instance.OnCycleDown;
+            @CycleLeft.started -= instance.OnCycleLeft;
+            @CycleLeft.performed -= instance.OnCycleLeft;
+            @CycleLeft.canceled -= instance.OnCycleLeft;
+            @CycleRight.started -= instance.OnCycleRight;
+            @CycleRight.performed -= instance.OnCycleRight;
+            @CycleRight.canceled -= instance.OnCycleRight;
+            @ToggleAnalysis.started -= instance.OnToggleAnalysis;
+            @ToggleAnalysis.performed -= instance.OnToggleAnalysis;
+            @ToggleAnalysis.canceled -= instance.OnToggleAnalysis;
+            @Settings.started -= instance.OnSettings;
+            @Settings.performed -= instance.OnSettings;
+            @Settings.canceled -= instance.OnSettings;
         }
 
         /// <summary>
@@ -664,6 +1050,90 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
     /// <seealso cref="PlayerInputMap_COMBATActions.RemoveCallbacks(IPlayerInputMap_COMBATActions)" />
     public interface IPlayerInputMap_COMBATActions
     {
+        /// <summary>
+        /// Method invoked when associated input action "OpenSkills" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnOpenSkills(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "OpenItems" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnOpenItems(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Attack" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnAttack(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Guard" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnGuard(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Select" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnSelect(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Back" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnBack(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "CycleUp" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnCycleUp(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "CycleDown" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnCycleDown(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "CycleLeft" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnCycleLeft(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "CycleRight" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnCycleRight(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "ToggleAnalysis" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnToggleAnalysis(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Settings" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnSettings(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "PlayerInputMap_ALCHEMY" which allows adding and removing callbacks.
