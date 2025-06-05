@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.Events;
 
 
-namespace FourFatesStudios.ProjectWarden.Interactions
+namespace FourFatesStudios.ProjectWarden.Interactions.Interactable
 {
     [RequireComponent(typeof(Collider))]
     [RequireComponent(typeof(Transform))]
