@@ -2,7 +2,6 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEngine.SceneManagement;
 
-
 namespace FourFatesStudios.ProjectWarden.GameSystems
 {
     public class RefinementMenuManager : MonoBehaviour
