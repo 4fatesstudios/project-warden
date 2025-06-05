@@ -6,13 +6,21 @@ using UnityEngine.Events;
 namespace FourFatesStudios.ProjectWarden.Interactions
 {
     [RequireComponent(typeof(Collider))]
+    [RequireComponent(typeof(Transform))]
     public abstract class Interactable : MonoBehaviour, IInteract
     {
         [SerializeField] protected string interactText = "Interact";
+        protected Collider InteractCollider;
+        protected Transform InteractFocusTransform;
         
         private bool _canInteract = true;
         
         public string InteractText => interactText;
+
+        private void Awake() {
+            InteractCollider = GetComponent<Collider>();
+            InteractFocusTransform = GetComponent<Transform>();
+        }
 
         public abstract void Interact(GameObject interactor);
         
