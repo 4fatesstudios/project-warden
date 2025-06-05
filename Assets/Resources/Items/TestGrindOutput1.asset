@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ccec348f60f7b5c429d2fb1e20182269, type: 3}
-  m_Name: Blood
+  m_Name: TestGrindOutput1
   m_EditorClassIdentifier: 
   itemName: Unnamed Item
   itemDescription: Empty Description
   itemRarity: 0
-  _itemID: 1006a829-c558-4b1b-a507-aa272b2db2a6
+  _itemID: 
   ingredientArchetype: 0
   ingredientAspect: 0
   isCorrupted: 0

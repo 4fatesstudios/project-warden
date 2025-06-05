@@ -9,13 +9,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ccec348f60f7b5c429d2fb1e20182269, type: 3}
-  m_Name: Blood
+  m_Script: {fileID: 11500000, guid: 833efb82720cb484b99f20d9c63a0fd7, type: 3}
+  m_Name: GrindDatabase
   m_EditorClassIdentifier: 
-  itemName: Unnamed Item
-  itemDescription: Empty Description
-  itemRarity: 0
-  _itemID: 1006a829-c558-4b1b-a507-aa272b2db2a6
-  ingredientArchetype: 0
-  ingredientAspect: 0
-  isCorrupted: 0
+  grinds:
+  - {fileID: 11400000, guid: 04bf0d71a9bbe3648a6023670f87e8b7, type: 2}

@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3e34a95c103300e4cb5f21609970de43, type: 3}
+  m_Name: NewGrind
+  m_EditorClassIdentifier: 
+  inputIngredient: {fileID: 11400000, guid: 6b252c7e9ad9a18449f7859adb9a844b, type: 2}
+  minGrindSpeed: 1
+  maxGrindSpeed: 2
+  minPoundSpeed: 1
+  maxPoundSpeed: 2
+  outputIngredient: {fileID: 11400000, guid: 333c9956f37e17245919788be20db395, type: 2}
