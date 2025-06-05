@@ -1,0 +1,10 @@
+<UXML xmlns="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/Scripts/UI/RefinementMinigame/Distilling/DistillStyles.uss?fileID=7433441132597879392&amp;guid=e827e06622731e848929f5ee7022a419&amp;type=3#DistillStyles" />
+    <VisualElement style="flex-direction: column; align-items: center; padding: 20px; gap: 12px; width: 349px; height: 353px;">
+        <Label name="stateLabel" text="State: None" class="state-label" />
+        <Label name="instructionLabel" text="Instructions appear here" class="instruction-label" />
+    </VisualElement>
+    <VisualElement style="flex-direction: column; align-items: center; padding: 20px; gap: 12px; width: 349px; height: 98px;">
+        <Button name="collectButton" text="Collect" class="collect-button" style="bottom: 0%;" />
+    </VisualElement>
+</UXML>
