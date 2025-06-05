@@ -5,7 +5,7 @@ using UnityEngine.Events;
 
 namespace FourFatesStudios.ProjectWarden.Interactions.Interactable
 {
-    [RequireComponent(typeof(Collider))]
+    [RequireComponent(typeof(SphereCollider))]
     [RequireComponent(typeof(Transform))]
     public abstract class Interactable : MonoBehaviour, IInteract
     {
