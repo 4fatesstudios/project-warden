@@ -9,8 +9,12 @@ namespace FourFatesStudios.ProjectWarden.Interactions.Interactables
     [RequireComponent(typeof(SphereCollider))]
     public abstract class Interactable : MonoBehaviour, IInteract
     {
-        [SerializeField] protected string interactText = "Interact";
-        [SerializeField] protected GameObject focusVisual;
+        [SerializeField, Tooltip("Text that will be displayed when interactable is focused on.")] 
+        protected string interactText = "Interact";
+        
+        [SerializeField, Tooltip("Focus visual GameObject.")] 
+        protected GameObject focusVisual;
+        
         protected Collider InteractCollider;
         protected RectTransform InteractFocusTransform;
         private TextMeshPro _focusText;

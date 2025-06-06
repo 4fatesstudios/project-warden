@@ -39,6 +39,7 @@ namespace FourFatesStudios.ProjectWarden.Interactions
         {
             float radius = _interactionCollider.radius * Mathf.Max(transform.lossyScale.x, transform.lossyScale.y, transform.lossyScale.z);
             int count = Physics.OverlapSphereNonAlloc(transform.position, radius, _overlapResults, interactLayer);
+            // default set closest Interactable to null
             Interactable closest = null;
             float closestDist = float.MaxValue;
 
