@@ -1,14 +1,14 @@
 .state-label {
     font-size: 24px;
-    unity-font-style: Bold;
+    -unity-font-style: Bold;
     color: #D2691E; /* Chocolate brown */
-    unity-text-align: middle-center;
+    -unity-text-align: middle-center;
 }
 
 .instruction-label {
     font-size: 16px;
     color: #8B4513; /* SaddleBrown */
-    unity-text-align: middle-center;
+    -unity-text-align: middle-center;
     white-space: normal;
     max-width: 280px;
 }
@@ -19,7 +19,7 @@
     font-size: 18px;
     color: white;
     background-color: #A0522D; /* Sienna */
-    unity-text-align: middle-center;
+    -unity-text-align: middle-center;
     border-radius: 5px;
 }
 

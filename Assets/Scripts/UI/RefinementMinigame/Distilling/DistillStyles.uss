@@ -1,15 +1,15 @@
 .state-label {
     font-size: 28px;
-    font-weight: bold;
+    -unity-font-style: Bold;
     color: #ddeeff;
-    unity-text-align: center;
+    -unity-text-align: middle-center;
     margin-top: 10px;
 }
 
 .instruction-label {
     font-size: 18px;
     color: #ffff88;
-    unity-text-align: center;
+    -unity-text-align: middle-center;
     margin-bottom: 10px;
 }
 
@@ -19,8 +19,8 @@
     background-color: #3a75c4;
     color: white;
     border-radius: 8px;
-    unity-text-align: center;
-    cursor: pointer;
+    -unity-text-align: middle-center;
+    cursor: link;
 }
 
 .collect-button:active {
