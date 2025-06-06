@@ -1,7 +1,7 @@
 using UnityEngine;
 
 
-namespace FourFatesStudios.ProjectWarden.Interactions.Interactable
+namespace FourFatesStudios.ProjectWarden.Interactions.Interactables
 {
     public class InteractablePlaceholder : Interactable
     {

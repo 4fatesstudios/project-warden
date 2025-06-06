@@ -4,16 +4,20 @@ using UnityEngine;
 using UnityEngine.Events;
 
 
-namespace FourFatesStudios.ProjectWarden.Interactions.Interactable
+namespace FourFatesStudios.ProjectWarden.Interactions.Interactables
 {
     [RequireComponent(typeof(SphereCollider))]
     public abstract class Interactable : MonoBehaviour, IInteract
     {
-        [SerializeField] protected string interactText = "Interact";
-        [SerializeField] protected GameObject focusVisual;
+        [SerializeField, Tooltip("Text that will be displayed when interactable is focused on.")] 
+        protected string interactText = "Interact";
+        
+        [SerializeField, Tooltip("Focus visual GameObject.")] 
+        protected GameObject focusVisual;
+        
         protected Collider InteractCollider;
         protected RectTransform InteractFocusTransform;
-        private TextMeshProUGUI _focusText;
+        private TextMeshPro _focusText;
         
         private bool _canInteract = true;
         
@@ -22,8 +26,9 @@ namespace FourFatesStudios.ProjectWarden.Interactions.Interactable
         private void Awake() {
             InteractCollider = GetComponent<Collider>();
             InteractFocusTransform = focusVisual.GetComponent<RectTransform>();
-            _focusText = focusVisual.GetComponent<TextMeshProUGUI>();
+            _focusText = focusVisual.GetComponent<TextMeshPro>();
             _focusText.text = interactText;
+            focusVisual.SetActive(false);
         }
 
         public abstract void Interact(GameObject interactor);
@@ -38,10 +43,12 @@ namespace FourFatesStudios.ProjectWarden.Interactions.Interactable
         
         public void OnFocus() {
             Debug.Log($"{name} is focused.");
+            focusVisual.SetActive(true);
         }
         
         public void OnUnfocus() {
             Debug.Log($"{name} is unfocused.");
+            focusVisual.SetActive(false);
         }
         
     }
