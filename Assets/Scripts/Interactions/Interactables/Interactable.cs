@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Events;
 
 
-namespace FourFatesStudios.ProjectWarden.Interactions.Interactable
+namespace FourFatesStudios.ProjectWarden.Interactions.Interactables
 {
     [RequireComponent(typeof(SphereCollider))]
     public abstract class Interactable : MonoBehaviour, IInteract
@@ -13,7 +13,7 @@ namespace FourFatesStudios.ProjectWarden.Interactions.Interactable
         [SerializeField] protected GameObject focusVisual;
         protected Collider InteractCollider;
         protected RectTransform InteractFocusTransform;
-        private TextMeshProUGUI _focusText;
+        private TextMeshPro _focusText;
         
         private bool _canInteract = true;
         
@@ -22,7 +22,7 @@ namespace FourFatesStudios.ProjectWarden.Interactions.Interactable
         private void Awake() {
             InteractCollider = GetComponent<Collider>();
             InteractFocusTransform = focusVisual.GetComponent<RectTransform>();
-            _focusText = focusVisual.GetComponent<TextMeshProUGUI>();
+            _focusText = focusVisual.GetComponent<TextMeshPro>();
             _focusText.text = interactText;
             focusVisual.SetActive(false);
         }
