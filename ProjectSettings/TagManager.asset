@@ -11,12 +11,12 @@ TagManager:
   - Interact
   - Water
   - UI
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
+  - Player
+  - Enemy
+  - Environment
+  - TriggerZone
+  - Ground
+  - NoCollision
   - 
   - 
   - 
