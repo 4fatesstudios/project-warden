@@ -24,6 +24,7 @@ namespace FourFatesStudios.ProjectWarden.Interactions.Interactable
             InteractFocusTransform = focusVisual.GetComponent<RectTransform>();
             _focusText = focusVisual.GetComponent<TextMeshProUGUI>();
             _focusText.text = interactText;
+            focusVisual.SetActive(false);
         }
 
         public abstract void Interact(GameObject interactor);
@@ -38,10 +39,12 @@ namespace FourFatesStudios.ProjectWarden.Interactions.Interactable
         
         public void OnFocus() {
             Debug.Log($"{name} is focused.");
+            focusVisual.SetActive(true);
         }
         
         public void OnUnfocus() {
             Debug.Log($"{name} is unfocused.");
+            focusVisual.SetActive(false);
         }
         
     }
