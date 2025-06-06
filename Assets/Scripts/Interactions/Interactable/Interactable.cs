@@ -1,4 +1,5 @@
 using FourFatesStudios.ProjectWarden.Interfaces;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -6,12 +7,13 @@ using UnityEngine.Events;
 namespace FourFatesStudios.ProjectWarden.Interactions.Interactable
 {
     [RequireComponent(typeof(SphereCollider))]
-    [RequireComponent(typeof(Transform))]
     public abstract class Interactable : MonoBehaviour, IInteract
     {
         [SerializeField] protected string interactText = "Interact";
+        [SerializeField] protected GameObject focusVisual;
         protected Collider InteractCollider;
-        protected Transform InteractFocusTransform;
+        protected RectTransform InteractFocusTransform;
+        private TextMeshProUGUI _focusText;
         
         private bool _canInteract = true;
         
@@ -19,7 +21,9 @@ namespace FourFatesStudios.ProjectWarden.Interactions.Interactable
 
         private void Awake() {
             InteractCollider = GetComponent<Collider>();
-            InteractFocusTransform = GetComponent<Transform>();
+            InteractFocusTransform = focusVisual.GetComponent<RectTransform>();
+            _focusText = focusVisual.GetComponent<TextMeshProUGUI>();
+            _focusText.text = interactText;
         }
 
         public abstract void Interact(GameObject interactor);
