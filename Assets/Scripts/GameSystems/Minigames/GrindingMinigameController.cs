@@ -79,7 +79,7 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.Minigames
             if (Input.GetMouseButton(0) && grindCenter != null)
             {
                 Vector2 mousePos = Input.mousePosition;
-                Vector2 centerScreen = Camera.main.WorldToScreenPoint(grindCenter.position);
+                Vector2 centerScreen = UnityEngine.Camera.main.WorldToScreenPoint(grindCenter.position);
                 Vector2 dir = (mousePos - centerScreen).normalized;
 
                 if (lastMouseDirection != Vector2.zero)
