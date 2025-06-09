@@ -1,5 +1,6 @@
 //using FourFatesStudios.ProjectWarden.GameSystems.Inventory;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
+using FourFatesStudios.ProjectWarden.Enums;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -15,6 +16,7 @@ namespace FourFatesStudios.ProjectWarden.GameSystems
         private Ingredient[] selectedIngredients = new Ingredient[3];
         private Button craftButton;
         private Label resultLabel;
+
 
         void OnEnable()
         {
@@ -44,6 +46,7 @@ namespace FourFatesStudios.ProjectWarden.GameSystems
             selectedIngredients[slotIndex] = selected;
             ingredientSlots[slotIndex].text = selected.name;
         }
+
 
         private void TryCraftPotion()
         {
