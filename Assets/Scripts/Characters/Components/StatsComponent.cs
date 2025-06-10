@@ -11,7 +11,7 @@ namespace FourFatesStudios.ProjectWarden.Characters.Components
         private HealthComponent healthComponent;
         [SerializeField] private BaseStatSO baseStats;
         private StatsAllocation statsAllocation;
-        private StatsModifier statsModifier;
+        private StatModifierManager statModifierManager;
         
         
         #region Stats Declarations
