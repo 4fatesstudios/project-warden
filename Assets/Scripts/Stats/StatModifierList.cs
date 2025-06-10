@@ -11,19 +11,19 @@ namespace FourFatesStudios.ProjectWarden.Stats
         private List<StatModifier> statModifiers = new();
 
         [SerializeField, HideInInspector]
-        private string _statModifierListSourceID; // should be set to the source objects GUID
+        private string _sourceModifierID; // should be set to the source objects GUID
 
         public List<StatModifier> StatModifiers => statModifiers;
-        public string StatModifierListID => _statModifierListSourceID;
+        public string SourceModifierID => _sourceModifierID;
 
 #if UNITY_EDITOR
         public void ValidateID() {
-            if (string.IsNullOrEmpty(_statModifierListSourceID))
+            if (string.IsNullOrEmpty(_sourceModifierID))
                 Debug.LogWarning("Stat Modifiers List Source ID cannot be null or empty, assign in source object");
         }
         
         public void SetSourceID(string guid) {
-            _statModifierListSourceID = guid;
+            _sourceModifierID = guid;
         }
 #endif
     }

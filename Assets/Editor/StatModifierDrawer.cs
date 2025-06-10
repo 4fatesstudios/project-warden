@@ -34,9 +34,9 @@ public class StatModifierDrawer : PropertyDrawer
         }
         else
         {
-            min = 0;
-            max = 200;
-            tooltip = "Percent modifier (e.g., 100 = 100%)";
+            min = -999;
+            max = 999;
+            tooltip = "Percent modifier (e.g., 100% of value multiplier, 0% is no modifier, -100% is a 0 multiplier)";
         }
 
         valProp.intValue = Mathf.Clamp(valProp.intValue, min, max);
