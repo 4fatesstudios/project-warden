@@ -9,6 +9,5 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects
         public Stat stat = Stat.Vitality;
         public StatModifierType type = StatModifierType.Additive;
         public int modifier = 0;
-        public string source = "Unknown Source";
     }
 }
