@@ -1,6 +1,6 @@
 using UnityEngine;
 using UnityEditor;
-using FourFatesStudios.ProjectWarden.ScriptableObjects;
+using FourFatesStudios.ProjectWarden.ScriptableObjects.Stats;
 
 [CustomEditor(typeof(StatModifierListSO))]
 public class StatModifierListEditor : Editor {

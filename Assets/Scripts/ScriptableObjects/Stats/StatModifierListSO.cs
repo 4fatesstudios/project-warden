@@ -4,7 +4,7 @@ using UnityEditor;
 using UnityEngine;
 
 
-namespace FourFatesStudios.ProjectWarden.ScriptableObjects
+namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Stats
 {
     [CreateAssetMenu(fileName = "StatModifierList", menuName = "Stats/Stat Modifier List")]
     public class StatModifierListSO : ScriptableObject{

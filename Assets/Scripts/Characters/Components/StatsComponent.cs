@@ -1,6 +1,6 @@
 using System;
 using UnityEngine;
-using FourFatesStudios.ProjectWarden.ScriptableObjects;
+using FourFatesStudios.ProjectWarden.ScriptableObjects.Stats;
 using UnityEngine.PlayerLoop;
 
 namespace FourFatesStudios.ProjectWarden.Characters.Components
