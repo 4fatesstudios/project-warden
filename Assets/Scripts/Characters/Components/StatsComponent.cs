@@ -1,6 +1,6 @@
 using System;
 using UnityEngine;
-using FourFatesStudios.ProjectWarden.ScriptableObjects;
+using FourFatesStudios.ProjectWarden.ScriptableObjects.Stats;
 using UnityEngine.PlayerLoop;
 
 namespace FourFatesStudios.ProjectWarden.Characters.Components
@@ -11,7 +11,7 @@ namespace FourFatesStudios.ProjectWarden.Characters.Components
         private HealthComponent healthComponent;
         [SerializeField] private BaseStatSO baseStats;
         private StatsAllocation statsAllocation;
-        private StatsModifier statsModifier;
+        private StatModifierManager statModifierManager;
         
         
         #region Stats Declarations
@@ -47,6 +47,7 @@ namespace FourFatesStudios.ProjectWarden.Characters.Components
 
         private void Awake(){
             UpdateStats();
+            statModifierManager = new StatModifierManager();
         }
 
         private void UpdateStats(){

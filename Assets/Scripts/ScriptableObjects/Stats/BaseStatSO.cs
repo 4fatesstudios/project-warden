@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace FourFatesStudios.ProjectWarden.ScriptableObjects
+namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Stats
 {
     
     [CreateAssetMenu(fileName = "BaseStat", menuName = "Base Stat SO")]

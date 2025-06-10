@@ -29,7 +29,7 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
         [ContextMenu("Regenerate Item ID")]
         public void RegenerateID() => _itemID = Guid.NewGuid().ToString();
 
-        private void OnValidate()
+        protected virtual void OnValidate()
         {
             if (string.IsNullOrEmpty(itemName)) itemName = "Unnamed Item";
             if (string.IsNullOrEmpty(itemDescription)) itemDescription = "Empty Description";
