@@ -15,8 +15,17 @@ MonoBehaviour:
   itemName: TestTrinket1
   itemDescription: Test Trinket 1
   itemRarity: 0
-  _itemID: 2be40229-db6f-49ae-bb42-6763525c1953
+  _itemID: 66419094-10ac-486e-9300-6036527219cc
   itemTrinketType: 0
   statModifierList:
-    statModifiers: []
-    _statModifierListSourceID: 2be40229-db6f-49ae-bb42-6763525c1953
+    statModifiers:
+    - stat: 13
+      type: 1
+      modifier: -5
+    - stat: 2
+      type: 0
+      modifier: 3
+    - stat: 11
+      type: 1
+      modifier: 5
+    _statModifierListSourceID: 66419094-10ac-486e-9300-6036527219cc

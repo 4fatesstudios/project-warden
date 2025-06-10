@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Xml.Schema;
 using FourFatesStudios.ProjectWarden.Enums;
 using FourFatesStudios.ProjectWarden.ScriptableObjects;
 using FourFatesStudios.ProjectWarden.Stats;
