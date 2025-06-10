@@ -1,7 +1,7 @@
 using FourFatesStudios.ProjectWarden.Enums;
 using UnityEngine;
 using UnityEditor;
-using FourFatesStudios.ProjectWarden.ScriptableObjects;
+using FourFatesStudios.ProjectWarden.Stats;
 
 [CustomPropertyDrawer(typeof(StatModifier))]
 public class StatModifierDrawer : PropertyDrawer
