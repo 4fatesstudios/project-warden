@@ -47,6 +47,7 @@ namespace FourFatesStudios.ProjectWarden.Characters.Components
 
         private void Awake(){
             UpdateStats();
+            statModifierManager = new StatModifierManager();
         }
 
         private void UpdateStats(){
