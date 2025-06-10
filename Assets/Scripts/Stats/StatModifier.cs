@@ -1,12 +1,12 @@
+using FourFatesStudios.ProjectWarden.Enums;
 using UnityEngine;
 
 
 namespace FourFatesStudios.ProjectWarden.ScriptableObjects
 {
-    public class StatModifier {
-        // ModifierType
-        private int val;
-        
-        
+    [System.Serializable]
+    public class StatModifier{
+        public StatModifierType type = StatModifierType.Additive;
+        public int modifier = 0;
     }
 }
