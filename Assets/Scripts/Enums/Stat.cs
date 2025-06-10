@@ -13,7 +13,7 @@ namespace FourFatesStudios.ProjectWarden.Enums
         Health,
         Numo,
         Defense,
-        Crit,
+        [EnumDisplayName("Critical Chance")] Crit,
         Zeal,
         Potency,
         [EnumDisplayName("Melee Damage")] MeleeDMG,
