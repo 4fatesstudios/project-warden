@@ -13,7 +13,11 @@ namespace FourFatesStudios.ProjectWarden.Stats
         [SerializeField, HideInInspector]
         private string _sourceModifierID; // should be set to the source objects GUID
 
-        public List<StatModifier> StatModifiers => statModifiers;
+        public List<StatModifier> StatModifiers {
+            get => statModifiers;
+            set => statModifiers = value;
+        }
+
         public string SourceModifierID => _sourceModifierID;
 
 #if UNITY_EDITOR

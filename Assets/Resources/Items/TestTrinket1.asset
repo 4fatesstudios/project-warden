@@ -28,4 +28,4 @@ MonoBehaviour:
     - stat: 11
       type: 1
       modifier: 5
-    _statModifierListSourceID: 66419094-10ac-486e-9300-6036527219cc
+    _sourceModifierID: 66419094-10ac-486e-9300-6036527219cc

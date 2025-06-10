@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using FourFatesStudios.ProjectWarden.Enums;
 using FourFatesStudios.ProjectWarden.ScriptableObjects;
 using FourFatesStudios.ProjectWarden.Stats;
@@ -14,6 +15,16 @@ namespace FourFatesStudios.ProjectWarden.Characters.Components
         private readonly List<StatModifierList> allModifierLists = new();
         private readonly Dictionary<Stat, List<StatModifierEntry>> additiveModifiers = new();
         private readonly Dictionary<Stat, List<StatModifierEntry>> multiplicativeModifiers = new();
+        
+        public IReadOnlyList<StatModifierList> AllModifierLists => allModifierLists.AsReadOnly();
+        public IReadOnlyDictionary<Stat, IReadOnlyList<StatModifierEntry>> AdditiveModifiers => 
+            additiveModifiers.ToDictionary(
+                pair => pair.Key, 
+                pair => (IReadOnlyList<StatModifierEntry>)pair.Value.AsReadOnly());
+        public IReadOnlyDictionary<Stat, IReadOnlyList<StatModifierEntry>> MultiplicativeModifiers => 
+            multiplicativeModifiers.ToDictionary(
+                pair => pair.Key, 
+                pair => (IReadOnlyList<StatModifierEntry>)pair.Value.AsReadOnly());
 
         public StatModifierManager() {
             OnStatModifierListAdded += HandleOnStatModifierListAdded;

@@ -16,8 +16,11 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
         private StatModifierList statModifierList;
 
         public ItemTrinketType ItemTrinketType => itemTrinketType;
-        public StatModifierList StatModifierList => statModifierList;
-        
+        public StatModifierList StatModifierList {
+            get => statModifierList;
+            set => statModifierList = value;
+        }
+
 #if UNITY_EDITOR
         protected override void OnValidate() {
             base.OnValidate();
