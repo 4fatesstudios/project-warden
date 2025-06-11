@@ -1,12 +1,13 @@
+using FourFatesStudios.ProjectWarden.Attributes;
 using UnityEngine;
 
 
 namespace FourFatesStudios.ProjectWarden.Enums
 {
     public enum EffectTiming {
-        OnActivation,
+        [EnumDisplayName("On Activation")] OnActivation,
         Delay,
-        OverTime,
-        OnTurn,
+        [EnumDisplayName("Over Time")] OverTime,
+        [EnumDisplayName("On Turn")] OnTurn,
     }
 }
