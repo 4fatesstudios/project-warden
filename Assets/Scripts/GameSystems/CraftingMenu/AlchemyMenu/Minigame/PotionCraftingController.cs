@@ -1,7 +1,11 @@
 //using FourFatesStudios.ProjectWarden.GameSystems.Inventory;
 using FourFatesStudios.ProjectWarden.Enums;
+using FourFatesStudios.ProjectWarden.GameSystems.Crafting;
 using FourFatesStudios.ProjectWarden.Inventory;
+using FourFatesStudios.ProjectWarden.RuntimeData;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
+using FourFatesStudios.ProjectWarden.ScriptableObjects.PotionEffects;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -54,6 +58,23 @@ namespace FourFatesStudios.ProjectWarden.GameSystems
             ingredientSlots[slotIndex].text = selected.name;
         }
 
+        private List<PotionEffect> ResolvePotionEffects(List<Ingredient> usedIngredients)
+        {
+            if (usedIngredients == null || usedIngredients.Count == 0)
+                return new List<PotionEffect>();
+
+            // Start with the effects of the first ingredient
+            IEnumerable<PotionEffect> sharedEffects = usedIngredients[0].PotionEffects;
+
+            // Intersect with the effects of the remaining ingredients
+            foreach (var ingredient in usedIngredients.Skip(1))
+            {
+                sharedEffects = sharedEffects.Intersect(ingredient.PotionEffects);
+            }
+
+            return sharedEffects.ToList();
+        }
+
 
         private void TryCraftPotion()
         {
@@ -78,16 +99,34 @@ namespace FourFatesStudios.ProjectWarden.GameSystems
 
             if (hasSolvent)
             {
-                // Create a Potion
-                resultLabel.text = "You crafted a Potion!";
-                // TODO: Create and store Potion ScriptableObject
+                // Create Potion
+                var effects = ResolvePotionEffects(used);
+                var newPotion = new CraftedPotion
+                {
+                    Name = "Potion of " + string.Join(", ", effects.Select(e => e.name)),
+                    Effects = effects,
+                    Upgraded = false
+                };
+                PlayerCraftingInventory.CraftedPotions.Add(newPotion);
+
+                resultLabel.text = $"You crafted: {newPotion.Name}\nEffects:\n" +
+                    string.Join("\n", newPotion.Effects.Select(e => $"- {e.name}"));
             }
             else
             {
-                // Create a AlchemyComponent
-                resultLabel.text = "You created a AlchemyComponent.";
-                // TODO: Create and store AlchemyComponent ScriptableObject
+                // Create Component
+                var sorted = used.OrderBy(i => i.name).ToList();
+                var newComponent = new CraftedAlchemyComponent
+                {
+                    Name = $"Component from {sorted[0].name} + {sorted[1].name}",
+                    Base1 = sorted[0],
+                    Base2 = sorted[1]
+                };
+                PlayerCraftingInventory.CraftedComponents.Add(newComponent);
+
+                resultLabel.text = $"You created an Alchemy Component:\n{newComponent.Name}";
             }
+
 
             // Clear state
             for (int i = 0; i < ingredientSlots.Length; i++)
