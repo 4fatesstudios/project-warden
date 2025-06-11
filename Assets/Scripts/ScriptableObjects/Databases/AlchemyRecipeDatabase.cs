@@ -31,20 +31,20 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.AlchemyRecipes
                 if (recipe.InputIngredient2 != null) inputs.Add(recipe.InputIngredient2);
                 if (recipe.InputIngredient3 != null) inputs.Add(recipe.InputIngredient3);
 
-                if (inputs.Count() < 2)
+                if (inputs.Count < 2)
                 {
                     Debug.LogWarning($"[{recipe.name}] has fewer than 2 ingredients.");
                     continue;
                 }
 
-                if ((inputs[0] == null || inputs[1] == null || inputs[2] == null) && inputs.Count() == 3)
+                if (inputs.Count == 3 && (recipe.InputIngredient1 == null || recipe.InputIngredient2 == null || recipe.InputIngredient3 == null))
                 {
                     Debug.LogWarning($"[{recipe.name}] has missing ingredients.");
                     continue;
                 }
 
                 // Sort by name to make the key order-insensitive
-                System.Array.Sort(inputs, (a, b) => a.name.CompareTo(b.name));
+                inputs.Sort((a, b) => a.name.CompareTo(b.name));
                 string key = $"{inputs[0].name}-{inputs[1].name}-{inputs[2].name}";
 
                 if (!seenKeys.Add(key))
@@ -56,6 +56,7 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.AlchemyRecipes
                 {
                     Debug.LogWarning($"[{recipe.name}] is missing an output potion.");
                 }
+
             }
         }
 #endif

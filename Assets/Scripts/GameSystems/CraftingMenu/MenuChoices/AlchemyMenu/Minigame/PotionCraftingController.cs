@@ -1,6 +1,7 @@
 //using FourFatesStudios.ProjectWarden.GameSystems.Inventory;
-using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
 using FourFatesStudios.ProjectWarden.Enums;
+using FourFatesStudios.ProjectWarden.Inventory;
+using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -10,7 +11,7 @@ namespace FourFatesStudios.ProjectWarden.GameSystems
     public class PotionCraftingController : MonoBehaviour
     {
         public UIDocument uiDocument;
-        //public Inventory playerInventory; // Link to your inventory system
+        public ItemSlotContainer<Ingredient> ingredientInventory; // Link to the inventory system
 
         private Button[] ingredientSlots = new Button[3];
         private Ingredient[] selectedIngredients = new Ingredient[3];
@@ -38,11 +39,17 @@ namespace FourFatesStudios.ProjectWarden.GameSystems
 
         private void OpenIngredientSelector(int slotIndex)
         {
-            // Replace this with your actual inventory UI logic
-            var ingredients = playerInventory.GetAllIngredients(); // Assume it returns List<Ingredient>
+            var slots = ingredientInventory.Slots;
+            var uniqueIngredients = slots.Select(slot => slot.Item).Distinct().ToList();
 
-            // TODO: Create popup/select UI. For now, simulate selection
-            Ingredient selected = ingredients[Random.Range(0, ingredients.Count)];
+            if (uniqueIngredients.Count == 0)
+            {
+                Debug.LogWarning("No ingredients in inventory.");
+                return;
+            }
+
+            // Simulate selection (replace with UI popup)
+            Ingredient selected = uniqueIngredients[Random.Range(0, uniqueIngredients.Count)];
             selectedIngredients[slotIndex] = selected;
             ingredientSlots[slotIndex].text = selected.name;
         }
@@ -62,7 +69,12 @@ namespace FourFatesStudios.ProjectWarden.GameSystems
 
             // Remove from inventory
             foreach (var ing in used)
-                //playerInventory.RemoveItem(ing);
+            {
+                int leftover = ingredientInventory.Remove(ing, 1);
+                if (leftover > 0)
+                    Debug.LogWarning($"Couldn't fully remove {ing.name} from inventory.");
+            }
+
 
             if (hasSolvent)
             {
@@ -72,9 +84,9 @@ namespace FourFatesStudios.ProjectWarden.GameSystems
             }
             else
             {
-                // Create a Component
-                resultLabel.text = "You created a Component.";
-                // TODO: Create and store Component ScriptableObject
+                // Create a AlchemyComponent
+                resultLabel.text = "You created a AlchemyComponent.";
+                // TODO: Create and store AlchemyComponent ScriptableObject
             }
 
             // Clear state
