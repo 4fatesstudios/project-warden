@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using FourFatesStudios.ProjectWarden.Enums;
+using FourFatesStudios.ProjectWarden.Attributes;
 using UnityEditor;
 using UnityEngine;
 
