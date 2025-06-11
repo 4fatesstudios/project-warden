@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-namespace FourFatesStudios.ProjectWarden.Enums.Tooltips
+namespace FourFatesStudios.ProjectWarden.Enums.Tooltips.Providers
 {
     public static class TargetingTooltips {
         public static readonly Dictionary<Targeting, string> Tooltips = new() {
