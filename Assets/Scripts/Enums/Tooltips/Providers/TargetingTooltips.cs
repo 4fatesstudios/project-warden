@@ -4,6 +4,8 @@ using UnityEngine;
 
 namespace FourFatesStudios.ProjectWarden.Enums.Tooltips.Providers
 {
+    // implement by tagging the following above any Targeting enum declarations
+    // [EnumTooltip(typeof(Targeting), typeof(TargetingTooltips))]
     public static class TargetingTooltips {
         public static readonly Dictionary<Targeting, string> Tooltips = new() {
             { Targeting.Single, "Affects a single target." },
