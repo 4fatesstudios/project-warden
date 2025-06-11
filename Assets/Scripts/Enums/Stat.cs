@@ -1,5 +1,6 @@
 using UnityEngine;
 using System;
+using FourFatesStudios.ProjectWarden.Attributes;
 
 namespace FourFatesStudios.ProjectWarden.Enums
 {
@@ -32,15 +33,4 @@ namespace FourFatesStudios.ProjectWarden.Enums
         [EnumDisplayName("Divine Resistance")] DivineRES,
         [EnumDisplayName("Special Attribute")] Special,
     }
-    
-    [AttributeUsage(AttributeTargets.Field)]
-    public class EnumDisplayNameAttribute : Attribute
-    {
-        public string DisplayName { get; }
-        public EnumDisplayNameAttribute(string displayName)
-        {
-            DisplayName = displayName;
-        }
-    }
-
 }
