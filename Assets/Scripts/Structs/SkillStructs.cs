@@ -21,6 +21,7 @@ namespace FourFatesStudios.ProjectWarden.Structs
         public Aspect Aspect { get => aspect; set => aspect = value; }
     }
 
+    [System.Serializable]
     public struct HealInstance {
         [SerializeField, Tooltip("Base Heal"), Range(1, 9999)] private int baseHeal;
         
