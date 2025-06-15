@@ -12,6 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dd7775e3c5734a34baff90785b63271b, type: 3}
   m_Name: TestSkill1
   m_EditorClassIdentifier: 
+  skillName: Unnamed Skill
+  skillDescription: Empty Description
+  _skillID: fe0fc1cf-2788-410a-8778-56aaf8cbb003
   doesDamage: 0
   baseDamage: 1
   stagger: 1
@@ -19,6 +22,7 @@ MonoBehaviour:
   damageType: 0
   aspect: 0
   doesBuffing: 0
+  doesStatBuff: 0
   doesDebuffing: 0
   targetTeam: 0
   targeting: 0
