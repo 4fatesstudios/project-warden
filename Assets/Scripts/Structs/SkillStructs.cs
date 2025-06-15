@@ -1,4 +1,5 @@
 using FourFatesStudios.ProjectWarden.Enums;
+using FourFatesStudios.ProjectWarden.ScriptableObjects.Stats;
 using FourFatesStudios.ProjectWarden.Stats;
 using UnityEngine;
 
@@ -12,34 +13,54 @@ namespace FourFatesStudios.ProjectWarden.Structs
         [SerializeField, Tooltip("Exposure Damage"), Range(1, 999)] private int exposure;
         [SerializeField, Tooltip("Damage Type")] private DamageType damageType;
         [SerializeField, Tooltip("Aspect")] private Aspect aspect;
+        
+        public int BaseDamage { get => baseDamage; set => baseDamage = value; }
+        public int Stagger { get => stagger; set => stagger = value; }
+        public int Exposure { get => exposure; set => exposure = value; }
+        public DamageType DamageType { get => damageType; set => damageType = value; }
+        public Aspect Aspect { get => aspect; set => aspect = value; }
     }
 
     public struct HealInstance {
         [SerializeField, Tooltip("Base Heal"), Range(1, 9999)] private int baseHeal;
+        
+        public int BaseHeal { get => baseHeal; set => baseHeal = value; }
     }
     
     [System.Serializable]
     public struct BuffStatInstance {
-        [SerializeField, Tooltip("Stat Buff")] private StatModifier statModifier; // turn into Passive
+        [SerializeField, Tooltip("Stat Buff Modifiers")] private StatModifierList statModifierList;
         [SerializeField, Tooltip("Effect Timing")] private EffectTimingInfo effectTiming;
+        
+        public StatModifierList StatModifierList { get => statModifierList; set => statModifierList = value; }
+        public EffectTimingInfo EffectTiming { get => effectTiming; set => effectTiming = value; }
     }
     
     [System.Serializable]
     public struct BuffHealInstance {
         [SerializeField, Tooltip("Heal Instance")] private HealInstance[] healInstances;
         [SerializeField, Tooltip("Effect Timing")] private EffectTimingInfo effectTiming;
+        
+        public HealInstance[] HealInstances { get => healInstances; set => healInstances = value; }
+        public EffectTimingInfo EffectTiming { get => effectTiming; set => effectTiming = value; }
     }
     
     [System.Serializable]
     public struct DebuffStatInstance {
-        [SerializeField, Tooltip("Stat Buff")] private StatModifier statModifier; // turn into Passive
+        [SerializeField, Tooltip("Stat Debuff Modifiers")] private StatModifierList statModifierList;
         [SerializeField, Tooltip("Effect Timing")] private EffectTimingInfo effectTimingInfo;
+        
+        public StatModifierList StatModifierList { get => statModifierList; set => statModifierList = value; }
+        public EffectTimingInfo EffectTimingInfo { get => effectTimingInfo; set => effectTimingInfo = value; }
     }
     
     [System.Serializable]
     public struct DebuffDOTInstance {
         [SerializeField, Tooltip("Damage Instances")] private DamageInstance[] damageInstances;
         [SerializeField, Tooltip("Effect Timing")] private EffectTimingInfo effectTimingInfo;
+        
+        public DamageInstance[] DamageInstances { get => damageInstances; set => damageInstances = value; }
+        public EffectTimingInfo EffectTimingInfo { get => effectTimingInfo; set => effectTimingInfo = value; }
     }
 
     [System.Serializable]
@@ -51,5 +72,8 @@ namespace FourFatesStudios.ProjectWarden.Structs
             effectTiming == EffectTiming.Delay || 
             effectTiming == EffectTiming.OverTime || 
             effectTiming == EffectTiming.OnTurn;
+        
+        public EffectTiming EffectTiming { get => effectTiming; set => effectTiming = value; }
+        public int TurnDuration { get => turnDuration; set => turnDuration = value; }
     }
 }
