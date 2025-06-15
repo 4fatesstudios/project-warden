@@ -15,15 +15,11 @@ MonoBehaviour:
   skillName: Unnamed Skill
   skillDescription: Empty Description
   _skillID: fe0fc1cf-2788-410a-8778-56aaf8cbb003
-  doesDamage: 0
-  baseDamage: 1
-  stagger: 1
-  exposure: 1
-  damageType: 0
-  aspect: 0
-  doesBuffing: 0
-  doesStatBuff: 0
-  doesDebuffing: 0
+  damageInstances: []
+  healingInstances: []
+  buffStatInstances: []
+  buffHealInstances: []
+  debuffStatInstances: []
+  debuffDOTInstances: []
   targetTeam: 0
   targeting: 0
-  effectTiming: 0
