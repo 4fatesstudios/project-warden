@@ -28,12 +28,12 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects
         [SerializeField] private BuffHealInstance[] buffHealInstances;
         
         [Header("Debuffing")]
-        [SerializeField] private bool doesDebuffing;
+        [SerializeField] private DebuffStatInstance[] debuffStatInstances;
+        [SerializeField] private DebuffDOTInstance[] debuffDOTInstances;
         
         [Header("Common Attributes")]
         [SerializeField, Tooltip("Target Team")] private Team targetTeam;
         [SerializeField, Tooltip("Targeting")] private Targeting targeting;
-        [SerializeField, Tooltip("Effect Timing")] private EffectTiming effectTiming;
         
 #if UNITY_EDITOR
         [ContextMenu("Regenerate Skill ID")]
@@ -43,8 +43,16 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects
         {
             if (string.IsNullOrEmpty(skillName)) skillName = "Unnamed Skill";
             if (string.IsNullOrEmpty(skillDescription)) skillDescription = "Empty Description";
-            if (!string.IsNullOrEmpty(_skillID)) return;
-            _skillID = Guid.NewGuid().ToString();
+            if (string.IsNullOrEmpty(_skillID))
+                _skillID = Guid.NewGuid().ToString();
+            
+            if (buffStatInstances is { Length: > 0 })
+                foreach (var instance in buffStatInstances)
+                    instance.StatModifierList.SetSourceID(_skillID);
+            if (debuffStatInstances is { Length: > 0 })
+                foreach (var instance in debuffStatInstances)
+                    instance.StatModifierList.SetSourceID(_skillID);
+            
             EditorUtility.SetDirty(this);
         }
 #endif
