@@ -35,6 +35,18 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects
         [SerializeField, Tooltip("Target Team")] private Team targetTeam;
         [SerializeField, Tooltip("Targeting")] private Targeting targeting;
         
+        public string SkillName { get => skillName; set => skillName = value; }
+        public string SkillDescription { get => skillDescription; set => skillDescription = value; }
+        public string SkillID => _skillID;
+        public DamageInstance[] DamageInstances => damageInstances;
+        public HealInstance[] HealingInstances => healingInstances;
+        public BuffStatInstance[] BuffStatInstances => buffStatInstances;
+        public BuffHealInstance[] BuffHealInstances => buffHealInstances;
+        public DebuffStatInstance[] DebuffStatInstances => debuffStatInstances;
+        public DebuffDOTInstance[] DebuffDOTInstances => debuffDOTInstances;
+        public Team TargetTeam { get => targetTeam; set => targetTeam = value; }
+        public Targeting Targeting { get => targeting; set => targeting = value; }
+
 #if UNITY_EDITOR
         [ContextMenu("Regenerate Skill ID")]
         public void RegenerateSkillID() => _skillID = Guid.NewGuid().ToString();
