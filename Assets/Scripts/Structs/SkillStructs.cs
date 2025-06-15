@@ -21,14 +21,12 @@ namespace FourFatesStudios.ProjectWarden.Structs
     [System.Serializable]
     public struct BuffStatInstance {
         [SerializeField, Tooltip("Stat Buff")] private StatModifier statModifier; // turn into Passive
-        [SerializeField, Tooltip("Turn Duration")] private int turnDuration;
         [SerializeField, Tooltip("Effect Timing")] private EffectTimingInfo effectTiming;
     }
     
     [System.Serializable]
     public struct BuffHealInstance {
         [SerializeField, Tooltip("Heal Instance")] private HealInstance[] healInstances;
-        [SerializeField, Tooltip("Turn Duration")] private int turnDuration;
         [SerializeField, Tooltip("Effect Timing")] private EffectTimingInfo effectTiming;
     }
     
