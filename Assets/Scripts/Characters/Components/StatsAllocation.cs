@@ -10,6 +10,7 @@ namespace FourFatesStudios.ProjectWarden.Characters.Components
         private int wisdom;
         private int agility;   
         private int luck;
+        
 
         public int GetVitality(){
             return vitality;
