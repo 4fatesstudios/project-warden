@@ -21,7 +21,7 @@ namespace Tests.Editor {
                 StatModifiers = new List<StatModifier> {
                     new (Stat.Agility, StatModifierType.Multiplicative, 5),
                     new (Stat.DivineDMG, StatModifierType.Multiplicative, -4),
-                    new (Stat.Crit, StatModifierType.Additive, 15)
+                    new (Stat.CritChance, StatModifierType.Additive, 15)
                 }
             };
             _trinketA.StatModifierList.SetSourceID(_trinketA.ItemID);
@@ -33,7 +33,7 @@ namespace Tests.Editor {
                 StatModifiers = new List<StatModifier> {
                     new (Stat.Agility, StatModifierType.Additive, -6),
                     new (Stat.DivineDMG, StatModifierType.Multiplicative, -2),
-                    new (Stat.Crit, StatModifierType.Additive, -20)
+                    new (Stat.CritChance, StatModifierType.Additive, -20)
                 }
             };
             _trinketB.StatModifierList.SetSourceID(_trinketB.ItemID);
@@ -77,7 +77,7 @@ namespace Tests.Editor {
             StatModifierManager.OnStatModifierListAdded?.Invoke(_trinketA.StatModifierList);
             StatModifierManager.OnStatModifierListAdded?.Invoke(_trinketB.StatModifierList);
             
-            Assert.AreEqual(-5, _statModifierManager.GetAdditiveModifierValue(Stat.Crit));
+            Assert.AreEqual(-5, _statModifierManager.GetAdditiveModifierValue(Stat.CritChance));
         }
         
         [Test]
