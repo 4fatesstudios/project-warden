@@ -1,5 +1,6 @@
-using System.Collections.Generic;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 
@@ -47,5 +48,11 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Databases
             itemLookup.TryGetValue(itemID, out var item);
             return item;
         }
+
+        public Ingredient GetIngredientByName(string name)
+        {
+            return items.OfType<Ingredient>().FirstOrDefault(i => i.name == name);
+        }
+
     }
 }
