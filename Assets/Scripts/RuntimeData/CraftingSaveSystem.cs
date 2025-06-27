@@ -1,9 +1,10 @@
+using FourFatesStudios.ProjectWarden.GameSystems.Crafting;
+using FourFatesStudios.ProjectWarden.ScriptableObjects.Databases;
+using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
+using FourFatesStudios.ProjectWarden.ScriptableObjects.PotionEffects;
 using System.IO;
 using System.Linq;
 using UnityEngine;
-using FourFatesStudios.ProjectWarden.GameSystems.Crafting;
-using FourFatesStudios.ProjectWarden.ScriptableObjects.PotionEffects;
-using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
 
 namespace FourFatesStudios.ProjectWarden.RuntimeData
 {
@@ -48,7 +49,7 @@ namespace FourFatesStudios.ProjectWarden.RuntimeData
         /* ---------- LOAD ---------- */
         public static void Load(
             PotionEffectDatabase effectDb,
-            IngredientDatabase ingredientDb)     // <-- provide your own ingredient DB
+            ItemDatabase itemDb)
         {
             if (!File.Exists(FullPath))
             {
@@ -81,12 +82,12 @@ namespace FourFatesStudios.ProjectWarden.RuntimeData
             // rebuild components
             foreach (var dto in save.components)
             {
-                var b1 = ingredientDb.GetByName(dto.base1Name);   // supply GetByName
-                var b2 = ingredientDb.GetByName(dto.base2Name);
+                var b1 = itemDb.Items.OfType<Ingredient>().FirstOrDefault(i => i.name == dto.base1Name);
+                var b2 = itemDb.Items.OfType<Ingredient>().FirstOrDefault(i => i.name == dto.base2Name);
 
                 if (b1 == null || b2 == null) continue;
 
-                PlayerCraftingInventory.CraftedComponents.Add(new AlchemyComponentRuntime
+                PlayerCraftingInventory.CraftedComponents.Add(new CraftedAlchemyComponent
                 {
                     Name = dto.name,
                     Base1 = b1,
