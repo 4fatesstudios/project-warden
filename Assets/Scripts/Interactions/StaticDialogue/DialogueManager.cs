@@ -91,7 +91,7 @@ namespace FourFatesStudios.ProjectWarden.Interactions.StaticDialogue
                 }
                 else
                 {
-                    DialogueEventSystem.instance.dialogueEvents.DisplayDialogue(dialogueLine, story.currentChoices);
+                    DialogueEventSystem.instance.dialogueEvents.DisplayDialogue(dialogueLine, story.currentChoices, (string)story.variablesState["speakerName"]);
                 }
 
             }

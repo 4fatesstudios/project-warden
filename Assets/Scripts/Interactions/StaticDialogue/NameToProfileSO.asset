@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 42ee00f0da100dd4a84e3c7d45fa6a0b, type: 3}
+  m_Name: NameToProfileSO
+  m_EditorClassIdentifier: 
+  names:
+  - Aramis
+  - The NPC Guy
+  sprites:
+  - {fileID: 21300000, guid: 5b75cf9267a256e4cbc71eb75d052250, type: 3}
+  - {fileID: 21300000, guid: 38b5c941c7a891c49b46f9f6efd46217, type: 3}

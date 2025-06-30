@@ -21,10 +21,8 @@ namespace FourFatesStudios.ProjectWarden.Interactions.Interactables
             {
                 dm.ContinueOrExitStory();
             }
-            Debug.Log($"{name} interacted with by {interactor.name}");
             if (!dialogueKnotName.Equals(""))
             {
-                Debug.Log("Made it this far");
                 DialogueEventSystem.instance.dialogueEvents.EnterDialogue(dialogueKnotName);
 
             }
