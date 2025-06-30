@@ -1,35 +1,68 @@
-.crafting-root {
+#PotionCraftingRoot {
     flex-direction: column;
     align-items: center;
-    gap: 10px;
+    justify-content: flex-start;
     padding: 20px;
+    margin-right: 12px;
+    background-color: #1e1e1e;
+    color: #ffffff;
+    border-radius: 10px;
 }
 
-.slot-container {
+#IngredientSlots {
     flex-direction: row;
     justify-content: center;
-    gap: 10px;
+    margin-right: 12px;
 }
 
-.ingredient-slot {
-    width: 60px;
-    height: 60px;
-    font-size: 24px;
+Button {
+    font-size: 16px;
+    background-color: #333333;
+    color: #ffffff;
+    border-radius: 6px;
+    border-width: 2px;
+    border-color: #555555;
+    transition: background-color 0.2s;
 }
 
-.craft-button {
+Button:hover {
+    background-color: #555555;
+}
+
+#craftButton {
     margin-top: 10px;
     width: 200px;
-    height: 40px;
+    height: 44px;
+    font-size: 18px;
+    background-color: #4caf50;
+    color: #ffffff;
+    border-color: #388e3c;
 }
 
-.back-button {
-    margin-top: 10px;
-    width: 120px;
-    height: 35px;
+#craftButton:hover {
+    background-color: #66bb6a;
 }
 
-.result-label {
-    margin-top: 10px;
-    font-size: 16px;
+#resultLabel {
+    margin-top: 16px;
+    white-space: normal;
+    width: 320px;
+    min-height: 60px;
+    -unity-text-align: middle-center;
+    font-size: 14px;
+    padding: 10px;
+    background-color: #2a2a2a;
+    border-radius: 6px;
+    border-width: 1px;
+    border-color: #444444;
+}
+
+#RhythmMinigameSlot {
+    margin-top: 20px;
+    width: 100%;
+    height: 120px;
+    background-color: #111111;
+    border-radius: 8px;
+    border-width: 1px;
+    border-color: #333333;
 }

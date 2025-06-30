@@ -1,16 +1,18 @@
-//using FourFatesStudios.ProjectWarden.GameSystems.Inventory;
 using FourFatesStudios.ProjectWarden.Enums;
 using FourFatesStudios.ProjectWarden.GameSystems.Crafting;
+using FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu.Minigame;
 using FourFatesStudios.ProjectWarden.Inventory;
 using FourFatesStudios.ProjectWarden.RuntimeData;
+using FourFatesStudios.ProjectWarden.ScriptableObjects.AlchemyRecipes;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.PotionEffects;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
+using static UnityEngine.UIElements.UxmlAttributeDescription;
 
-namespace FourFatesStudios.ProjectWarden.GameSystems
+namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu.Minigame
 {
     public class PotionCraftingController : MonoBehaviour
     {
@@ -21,7 +23,7 @@ namespace FourFatesStudios.ProjectWarden.GameSystems
         private Ingredient[] selectedIngredients = new Ingredient[3];
         private Button craftButton;
         private Label resultLabel;
-
+        [SerializeField] private RhythmMinigameController rhythmMinigameController;  // drag in Inspector
 
         void OnEnable()
         {
@@ -75,20 +77,75 @@ namespace FourFatesStudios.ProjectWarden.GameSystems
             return sharedEffects.ToList();
         }
 
+        private void CreateComponent(List<Ingredient> ingredients)
+        {
+            var sorted = ingredients.OrderBy(i => i.name).ToList();
+            var component = new CraftedAlchemyComponent
+            {
+                Name = $"Component from {sorted[0].name} + {sorted[1].name}",
+                Base1 = sorted[0],
+                Base2 = sorted[1]
+            };
+
+            PlayerCraftingInventory.CraftedComponents.Add(component);
+            resultLabel.text = $"You created an Alchemy Component:\n{component.Name}";
+        }
+
+        private void CreateUniquePotion(AlchemyRecipe recipe)
+        {
+            var potion = new CraftedPotion
+            {
+                Name = recipe.OutputPotion.ItemName,
+                Effects = recipe.OutputPotion.PotionEffects.ToList(),
+                Upgraded = recipe.OutputPotion.Upgraded
+            };
+
+            PlayerCraftingInventory.CraftedPotions.Add(potion);
+            resultLabel.text = $"Unique Recipe Matched!\nCrafted: {potion.Name}";
+        }
+
+        private void CreateEffectBasedPotion(List<Ingredient> ingredients)
+        {
+            var effects = ResolvePotionEffects(ingredients);
+            if (effects.Count == 0)
+            {
+                resultLabel.text = "No matching effects found. Crafting failed.";
+                return;
+            }
+
+            var potion = new CraftedPotion
+            {
+                Name = "Potion of " + string.Join(", ", effects.Select(e => e.name)),
+                Effects = effects,
+                Upgraded = false
+            };
+
+            PlayerCraftingInventory.CraftedPotions.Add(potion);
+            resultLabel.text = $"Crafted Generic Potion:\n{potion.Name}\nEffects:\n" +
+                               string.Join("\n", potion.Effects.Select(e => $"- {e.name}"));
+        }
+
+        private void ResetUI()
+        {
+            for (int i = 0; i < ingredientSlots.Length; i++)
+            {
+                ingredientSlots[i].text = "+";
+                selectedIngredients[i] = null;
+            }
+        }
 
         private void TryCraftPotion()
         {
             var used = selectedIngredients.Where(x => x != null).ToList();
-
-            if (used.Count == 0)
+            if (used.Count < 2)
             {
-                resultLabel.text = "No ingredients selected.";
+                resultLabel.text = "Select at least two ingredients.";
                 return;
             }
 
-            bool hasSolvent = used.Any(x => x.IngredientArchetype == IngredientArchetype.Solvent);
+            bool hasSolvent = used.Any(i => i.IngredientArchetype == IngredientArchetype.Solvent);
 
-            // Remove from inventory
+            // Remove ingredients from inventory
             foreach (var ing in used)
             {
                 int leftover = ingredientInventory.Remove(ing, 1);
@@ -96,44 +153,44 @@ namespace FourFatesStudios.ProjectWarden.GameSystems
                     Debug.LogWarning($"Couldn't fully remove {ing.name} from inventory.");
             }
 
+            // compute defaults from ingredient rarity
+            int defaultHits = Mathf.CeilToInt((float)used.Average(i => (int)i.ItemRarity) * 1.5f);
+            int defaultAttempts = defaultHits + 2;
 
-            if (hasSolvent)
+            // resolve recipe (may be null)
+            var recipe = AlchemyRecipeDatabase.Instance.GetRecipeByIngredients(used);
+
+            int hitsNeeded = recipe?.RequiredHits ?? defaultHits;
+            int maxTries = recipe?.MaxAttempts ?? defaultAttempts;
+
+
+            if (!hasSolvent)
             {
-                // Create Potion
-                var effects = ResolvePotionEffects(used);
-                var newPotion = new CraftedPotion
+                CreateComponent(used);
+                return;
+            }
+
+            // start the rhythm challenge
+            rhythmMinigameController.Init(hitsNeeded, maxTries);
+            rhythmMinigameController.uiDocument.rootVisualElement.style.display = DisplayStyle.Flex;
+            rhythmMinigameController.uiDocument.rootVisualElement.style.display = DisplayStyle.None;
+            rhythmMinigameController.OnMinigameEnd += success =>
+            {
+                if (success)
                 {
-                    Name = "Potion of " + string.Join(", ", effects.Select(e => e.name)),
-                    Effects = effects,
-                    Upgraded = false
-                };
-                PlayerCraftingInventory.CraftedPotions.Add(newPotion);
+                    // unique or generic potion creation
+                    if (recipe != null) CreateUniquePotion(recipe);
+                    else CreateEffectBasedPotion(used);
 
-                resultLabel.text = $"You crafted: {newPotion.Name}\nEffects:\n" +
-                    string.Join("\n", newPotion.Effects.Select(e => $"- {e.name}"));
-            }
-            else
-            {
-                // Create Component
-                var sorted = used.OrderBy(i => i.name).ToList();
-                var newComponent = new CraftedAlchemyComponent
+                    CraftingSaveSystem.Save();    // optional: save immediately
+                }
+                else
                 {
-                    Name = $"Component from {sorted[0].name} + {sorted[1].name}",
-                    Base1 = sorted[0],
-                    Base2 = sorted[1]
-                };
-                PlayerCraftingInventory.CraftedComponents.Add(newComponent);
+                    resultLabel.text = "The brew fizzledÅc try different timing!";
+                }
 
-                resultLabel.text = $"You created an Alchemy Component:\n{newComponent.Name}";
-            }
-
-
-            // Clear state
-            for (int i = 0; i < ingredientSlots.Length; i++)
-            {
-                ingredientSlots[i].text = "+";
-                selectedIngredients[i] = null;
-            }
+                ResetUI();
+            };
         }
     }
 }

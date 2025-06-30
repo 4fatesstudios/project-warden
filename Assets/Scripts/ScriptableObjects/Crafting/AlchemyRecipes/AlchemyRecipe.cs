@@ -20,6 +20,12 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.AlchemyRecipes
         [SerializeField, Tooltip("Input ingredient 3 is added.")]
         private Ingredient inputIngredient3;
 
+        [SerializeField, Tooltip("Number of successful hits required.")]
+        private int requiredHits;
+
+        [SerializeField, Tooltip("Maximum allowed attempts.")]
+        private int maxAttempts;
+
         [SerializeField, Tooltip("Output potion to be created.")]
         private Potion outputPotion;
 
@@ -28,6 +34,8 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.AlchemyRecipes
 
         [SerializeField, Tooltip("Maximum time allowed to complete the distillation (seconds).")]
         private float totalDuration = 10f;
+        public int RequiredHits => requiredHits;
+        public int MaxAttempts => maxAttempts;
 
         public Ingredient InputIngredient1 => inputIngredient1;
         public Ingredient InputIngredient2 => inputIngredient2;
@@ -41,6 +49,15 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.AlchemyRecipes
 #if UNITY_EDITOR
         private void OnValidate()
         {
+            if (requiredHits == 0 || requiredHits > maxAttempts)
+            {
+                Debug.LogWarning($"Recipe [{name}] is an Invalid amount compared to Max Attempt.");
+            }
+            if (maxAttempts == 0 || requiredHits > maxAttempts)
+            {
+                Debug.LogWarning($"Recipe [{name}] is an Invalid amount compared to Required Hits.");
+            }
+
             var ingredients = new[] { inputIngredient1, inputIngredient2, inputIngredient3 };
 
             // Check for missing input ingredients

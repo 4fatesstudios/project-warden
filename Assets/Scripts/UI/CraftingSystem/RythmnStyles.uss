@@ -1,0 +1,65 @@
+.rhythm-container {
+    width: 100%;
+    height: 200px;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 16px;
+    background-color: #1e1e1e;
+    border-radius: 8px;
+}
+
+.minigame-status {
+    color: white;
+    font-size: 18px;
+    margin-bottom: 12px;
+    -unity-text-align: middle-center;
+}
+
+.hit-bar {
+    width: 90%;
+    height: 40px;
+    background-color: #444;
+    position: relative;
+    flex-direction: row;
+    margin-bottom: 16px;
+    justify-content: space-between;
+    border-radius: 4px;
+}
+
+.zone {
+    height: 100%;
+    flex-grow: 1;
+    opacity: 0.3;
+}
+
+.bad-zone {
+    background-color: red;
+}
+
+.good-zone {
+    background-color: yellow;
+}
+
+.perfect-zone {
+    background-color: green;
+    flex-grow: 0.5;
+}
+
+.cursor {
+    position: absolute;
+    width: 4px;
+    height: 100%;
+    background-color: white;
+    top: 0;
+    left: 0;
+    transition: left 0.1s linear;
+}
+
+.end-button {
+    width: 140px;
+    height: 32px;
+    background-color: #222;
+    color: white;
+    border-radius: 4px;
+}
