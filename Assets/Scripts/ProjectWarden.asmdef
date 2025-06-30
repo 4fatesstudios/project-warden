@@ -4,7 +4,9 @@
     "references": [
         "Unity.InputSystem",
         "UniTask",
-        "Unity.TextMeshPro"
+        "Unity.TextMeshPro",
+        "Ink-Libraries",
+        "InkEditor"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
