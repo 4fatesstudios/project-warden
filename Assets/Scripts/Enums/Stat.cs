@@ -1,6 +1,5 @@
 using UnityEngine;
 using System;
-using FourFatesStudios.ProjectWarden.Attributes;
 
 namespace FourFatesStudios.ProjectWarden.Enums
 {
