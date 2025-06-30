@@ -31,14 +31,14 @@ namespace FourFatesStudios.ProjectWarden.Interactions.StaticDialogue
             {
                 onDialogueFinished();
             }
-        }
+        } 
 
-        public event Action<string, List<Choice>> onDisplayDialogue;
-        public void DisplayDialogue(string dialogueLine, List<Choice> dialogueChoices)
+        public event Action<string, List<Choice>, string> onDisplayDialogue;
+        public void DisplayDialogue(string dialogueLine, List<Choice> dialogueChoices, string speakerName)
         {
             if (onDisplayDialogue != null)
             {
-                onDisplayDialogue(dialogueLine, dialogueChoices);
+                onDisplayDialogue(dialogueLine, dialogueChoices, speakerName);
             }
         }
 
