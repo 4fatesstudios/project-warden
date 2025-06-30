@@ -8,7 +8,7 @@ using UnityEngine.PlayerLoop;
 namespace FourFatesStudios.ProjectWarden.Characters.Components
 {
     
-    public class StatsComponent : MonoBehaviour
+    public class StatsComponent : MonoBehaviour 
     {
         private HealthComponent healthComponent;
         private NumoComponent numoComponent;
@@ -20,11 +20,11 @@ namespace FourFatesStudios.ProjectWarden.Characters.Components
         private int level;
         private int defense;
         
-        private int vitality; // 5
-        private int strength; // 5
-        private int wisdom; // 5
-        private int agility; // 5
-        private int luck; // 5
+        private int vitality;
+        private int strength;
+        private int wisdom;
+        private int agility;
+        private int luck;
         
         private int critChance;
         private int zeal;
@@ -54,6 +54,7 @@ namespace FourFatesStudios.ProjectWarden.Characters.Components
         // }
 
         private void UpdateStats(){
+            healthComponent.UpdateMaxHealth(CalcMaxHealth());
             vitality = CalcVitality();
             strength = CalcStrength();
             wisdom = CalcWisdom();
