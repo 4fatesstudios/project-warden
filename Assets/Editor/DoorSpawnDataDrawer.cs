@@ -1,3 +1,4 @@
+using FourFatesStudios.ProjectWarden.Enums;
 using UnityEngine;
 using UnityEditor;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Exploration;
@@ -43,12 +44,13 @@ public class DoorSpawnDataDrawer : PropertyDrawer
 
         y += lineHeight + LineSpacing;
 
-        // Bottom row: Direction + SpawnPoint (readonly, no label for spawnPoint)
-        EditorGUI.BeginDisabledGroup(true);
-        Rect directionRect = new(position.x, y, 120f, lineHeight);
-        Rect pointRect = new(position.x + 125f, y, fullWidth - 125f, lineHeight);
+        // Bottom row: direction value and readonly GameObject field
+        Rect directionRect = new(position.x, y, 60f, lineHeight); // Reduced width for just the value
+        Rect pointRect = new(position.x + 65f, y, fullWidth - 65f, lineHeight); // Adjusted position
 
-        EditorGUI.PropertyField(directionRect, spawnDirection, new GUIContent("Direction"));
+        string directionValue = ((CardinalDirection)spawnDirection.enumValueIndex).ToString();
+        EditorGUI.LabelField(directionRect, directionValue); // Show just the value without label
+        EditorGUI.BeginDisabledGroup(true);
         EditorGUI.ObjectField(pointRect, GUIContent.none, doorSpawnPoint.objectReferenceValue, typeof(GameObject), true);
         EditorGUI.EndDisabledGroup();
 
