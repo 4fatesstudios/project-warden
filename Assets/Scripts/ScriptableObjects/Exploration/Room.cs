@@ -6,9 +6,11 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Exploration {
     [CreateAssetMenu(fileName = "New Room Data", menuName = "Exploration/Room Data")]
     public class RoomData : ScriptableObject {
         [SerializeField] private GameObject roomPrefab; // Reference to the main prefab
+        [SerializeField] private RoomSize roomSize = RoomSize.Small;
         [SerializeField] private List<DoorSpawnData> doorSpawnPoints = new();
         
         public GameObject RoomPrefab { get => roomPrefab; set => roomPrefab = value; }
+        public RoomSize RoomSize { get => roomSize; set => roomSize = value; }
         public List<DoorSpawnData> DoorSpawnPoints { get => doorSpawnPoints; set => doorSpawnPoints = value; }
     }
 

@@ -55,6 +55,10 @@ public class RoomDataEditor : Editor
         // Compact RoomPrefab field
         SerializedProperty roomPrefabProp = serializedObject.FindProperty("roomPrefab");
         EditorGUILayout.PropertyField(roomPrefabProp);
+        
+        // Compact RoomSize field
+        SerializedProperty roomSizeProp = serializedObject.FindProperty("roomSize");
+        EditorGUILayout.PropertyField(roomSizeProp);
 
         // Compact DoorSpawnPoints list with custom drawer
         SerializedProperty spawnListProp = serializedObject.FindProperty("doorSpawnPoints");
