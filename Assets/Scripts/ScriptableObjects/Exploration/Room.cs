@@ -14,10 +14,8 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Exploration {
 
     [System.Serializable]
     public class DoorSpawnData {
-        [Header("References")] 
         [SerializeField] private GameObject doorSpawnPoint; // Direct reference to the GameObject
 
-        [Header("Settings")]
         [SerializeField] private DoorType doorType;
         [SerializeField] private float spawnWeight = 1f;
         [SerializeField] private CardinalDirection spawnDirection = CardinalDirection.None;

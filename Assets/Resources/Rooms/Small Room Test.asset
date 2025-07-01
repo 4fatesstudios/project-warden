@@ -12,53 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 710a054946e11eb44bf55df88ee683e3, type: 3}
   m_Name: Small Room Test
   m_EditorClassIdentifier: 
-  roomPrefab: {fileID: 2954860515763045841, guid: 2563512273154794d99a3c57496bd477, type: 3}
-  doorSpawnPoints:
-  - doorSpawnPoint: {fileID: 7686858634920915877, guid: 2563512273154794d99a3c57496bd477, type: 3}
-    doorType: 0
-    spawnWeight: 1
-    spawnDirection: 0
-  - doorSpawnPoint: {fileID: 1709377774118875278, guid: 2563512273154794d99a3c57496bd477, type: 3}
-    doorType: 0
-    spawnWeight: 1
-    spawnDirection: 0
-  - doorSpawnPoint: {fileID: 6778485342699980301, guid: 2563512273154794d99a3c57496bd477, type: 3}
-    doorType: 0
-    spawnWeight: 1
-    spawnDirection: 0
-  - doorSpawnPoint: {fileID: 4539812218676260267, guid: 2563512273154794d99a3c57496bd477, type: 3}
-    doorType: 0
-    spawnWeight: 1
-    spawnDirection: 0
-  - doorSpawnPoint: {fileID: 6033086511939971998, guid: 2563512273154794d99a3c57496bd477, type: 3}
-    doorType: 0
-    spawnWeight: 1
-    spawnDirection: 0
-  - doorSpawnPoint: {fileID: 7957647606389540126, guid: 2563512273154794d99a3c57496bd477, type: 3}
-    doorType: 0
-    spawnWeight: 1
-    spawnDirection: 0
-  - doorSpawnPoint: {fileID: 7773371224000092518, guid: 2563512273154794d99a3c57496bd477, type: 3}
-    doorType: 0
-    spawnWeight: 1
-    spawnDirection: 0
-  - doorSpawnPoint: {fileID: 9155030867957370239, guid: 2563512273154794d99a3c57496bd477, type: 3}
-    doorType: 0
-    spawnWeight: 1
-    spawnDirection: 0
-  - doorSpawnPoint: {fileID: 7854223594535508075, guid: 2563512273154794d99a3c57496bd477, type: 3}
-    doorType: 0
-    spawnWeight: 1
-    spawnDirection: 0
-  - doorSpawnPoint: {fileID: 4201258275462532486, guid: 2563512273154794d99a3c57496bd477, type: 3}
-    doorType: 0
-    spawnWeight: 1
-    spawnDirection: 0
-  - doorSpawnPoint: {fileID: 3523955317175095383, guid: 2563512273154794d99a3c57496bd477, type: 3}
-    doorType: 0
-    spawnWeight: 1
-    spawnDirection: 0
-  - doorSpawnPoint: {fileID: 7351945520982785856, guid: 2563512273154794d99a3c57496bd477, type: 3}
-    doorType: 0
-    spawnWeight: 1
-    spawnDirection: 0
+  roomPrefab: {fileID: 0}
+  doorSpawnPoints: []
