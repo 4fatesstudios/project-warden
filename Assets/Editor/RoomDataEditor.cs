@@ -1,6 +1,8 @@
 #if UNITY_EDITOR
 using UnityEditor;
 using System.Linq;
+using FourFatesStudios.ProjectWarden.Enums;
+using FourFatesStudios.ProjectWarden.ScriptableObjects.Exploration;
 using UnityEngine;
 
 [CustomEditor(typeof(RoomData))]
