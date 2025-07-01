@@ -16,40 +16,38 @@ public class RoomDataEditor : Editor
         
         if (GUILayout.Button("Auto-Populate Door Spawns"))
         {
-            if (data.roomPrefab == null)
+            if (data.RoomPrefab == null)
             {
                 Debug.LogError("Assign roomPrefab first!");
                 return;
             }
 
             // Get all GameObjects with DoorSpawn tag in the prefab
-            var spawnObjects = data.roomPrefab.GetComponentsInChildren<Transform>()
+            var spawnObjects = data.RoomPrefab.GetComponentsInChildren<Transform>()
                 .Where(t => t.CompareTag("DoorSpawn"))
                 .Select(t => t.gameObject)
                 .ToList();
 
             // Clear null entries
-            data.doorSpawnPoints.RemoveAll(x => x.doorSpawnPoint == null);
+            data.DoorSpawnPoints.RemoveAll(x => x.DoorSpawnPoint == null);
 
             // Add new spawn points
             foreach (var spawnObj in spawnObjects)
             {
-                if (!data.doorSpawnPoints.Any(x => x.doorSpawnPoint == spawnObj))
-                {
-                    data.doorSpawnPoints.Add(new DoorSpawnData()
+                if (data.DoorSpawnPoints.All(x => x.DoorSpawnPoint != spawnObj)) {
+                    data.DoorSpawnPoints.Add(new DoorSpawnData()
                     {
-                        doorSpawnPoint = spawnObj,
-                        isActive = true,
-                        doorType = DoorType.Default,
-                        spawnWeight = 1f,
-                        spawnDirection = spawnObj.transform.forward
+                        DoorSpawnPoint = spawnObj,
+                        DoorType = DoorType.Default,
+                        SpawnWeight = 1f,
+                        SpawnDirection = CardinalDirection.None,
                     });
                 }
             }
 
             // Remove entries that no longer exist in prefab
-            data.doorSpawnPoints.RemoveAll(x => 
-                !spawnObjects.Contains(x.doorSpawnPoint));
+            data.DoorSpawnPoints.RemoveAll(x => 
+                !spawnObjects.Contains(x.DoorSpawnPoint));
 
             EditorUtility.SetDirty(data);
         }
