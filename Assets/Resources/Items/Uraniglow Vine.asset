@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ccec348f60f7b5c429d2fb1e20182269, type: 3}
   m_Name: Uraniglow Vine
   m_EditorClassIdentifier: 
-  itemName: Unnamed Item
-  itemDescription: Empty Description
-  itemRarity: 0
-  _itemID: 
-  ingredientArchetype: 0
-  ingredientAspect: 0
+  itemName: Uraniglow Vine
+  itemDescription: This luminencent plant glows and burns with no visable flame
+  itemRarity: 1
+  _itemID: d4105b9b-fce7-4028-bec3-eb1f640b5f8c
+  ingredientArchetype: 2
+  ingredientAspect: 3
   isCorrupted: 0
   potionEffects: []

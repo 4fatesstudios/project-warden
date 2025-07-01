@@ -15,7 +15,7 @@ MonoBehaviour:
   itemName: Water
   itemDescription: Plain Ol' Water
   itemRarity: 1
-  _itemID: 
+  _itemID: eeba4ec8-98ca-459c-a62a-61a8fb2f4c7c
   ingredientArchetype: 0
   ingredientAspect: 0
   isCorrupted: 0

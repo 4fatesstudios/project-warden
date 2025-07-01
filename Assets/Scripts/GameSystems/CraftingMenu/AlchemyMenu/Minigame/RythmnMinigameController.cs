@@ -2,54 +2,77 @@ using System;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-
-
 namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu.Minigame
 {
     public class RhythmMinigameController : MonoBehaviour
     {
-        private VisualElement root;
-        public UIDocument uiDocument;
+        [Header("References")]
+        public UIDocument uiDocument;                // assign in Inspector
+
+        [Header("Movement")]
+        [SerializeField] private float speed = 300f; // px / sec
+
+        [Header("Requirements (will be set by Init)")]
         public int requiredHits = 3;
         public int maxAttempts = 5;
 
+        /* UI Elements */
+        private VisualElement root;
+        private VisualElement track;
         private VisualElement cursor;
         private VisualElement perfectZone;
         private VisualElement goodZone;
         private VisualElement badZone;
 
-        private int successfulHits = 0;
-        private int attempts = 0;
-        private bool goingRight = true;
-
-        public event Action<bool> OnMinigameEnd;
-
-        private float speed = 300f;
+        /* State */
         private float trackWidth;
+        private bool movingRight = true;
+        private int successfulHits;
+        private int attempts;
+        private bool active;
 
-        void OnEnable()
+        public event Action<bool> OnMinigameEnd;     // true = success
+
+        /* ---------------------------------------------------------------- */
+
+        private void OnEnable()
         {
+            if (uiDocument == null)
+            {
+                Debug.LogError("RhythmMinigameController: UIDocument not assigned.");
+                return;
+            }
+
             root = uiDocument.rootVisualElement;
+            track = root.Q<VisualElement>("track");
             cursor = root.Q<VisualElement>("cursor");
             perfectZone = root.Q<VisualElement>("perfectZone");
             goodZone = root.Q<VisualElement>("goodZone");
             badZone = root.Q<VisualElement>("badZone");
 
-            // Fix: Delay reading width until layout is ready
-            var track = root.Q<VisualElement>("track");
+            if (track == null || cursor == null ||
+                perfectZone == null || goodZone == null || badZone == null)
+            {
+                Debug.LogError("RhythmMinigameController: One or more UI elements missing.");
+                return;
+            }
+
+            /* cache width once layout is ready */
             track.RegisterCallback<GeometryChangedEvent>(_ =>
             {
                 trackWidth = track.resolvedStyle.width;
             });
 
-            successfulHits = 0;
-            attempts = 0;
+            /* start hidden */
+            root.style.display = DisplayStyle.None;
+            enabled = false;                // Update() off by default
         }
 
+        /* ---------------------------------------------------------------- */
 
-        void Update()
+        private void Update()
         {
-            if (cursor == null || trackWidth <= 0) return;
+            if (!active || cursor == null || trackWidth <= 0f) return;
 
             MoveCursor();
 
@@ -57,62 +80,72 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu.Mi
                 EvaluateHit();
         }
 
+        /* ---------------------------------------------------------------- */
 
         private void MoveCursor()
         {
             float delta = speed * Time.deltaTime;
-            float currentX = cursor.resolvedStyle.left;
-            float newX = currentX + (goingRight ? delta : -delta);
+            float current = cursor.resolvedStyle.left;
+            float next = current + (movingRight ? delta : -delta);
 
-            var track = root.Q<VisualElement>("track");
-            track.RegisterCallback<GeometryChangedEvent>(_ =>
+            if (next <= 0f)
             {
-                trackWidth = track.resolvedStyle.width;
-            });
-
-
-            if (newX <= 0)
-            {
-                newX = 0;
-                goingRight = true;
+                next = 0f;
+                movingRight = true;
             }
-            else if (newX >= trackWidth - cursor.resolvedStyle.width)
+            else if (next >= trackWidth - cursor.resolvedStyle.width)
             {
-                newX = trackWidth - cursor.resolvedStyle.width;
-                goingRight = false;
+                next = trackWidth - cursor.resolvedStyle.width;
+                movingRight = false;
             }
 
-            cursor.style.left = newX;
-
+            cursor.style.left = next;
         }
+
+        /* ---------------------------------------------------------------- */
 
         private void EvaluateHit()
         {
-            float cursorCenter = cursor.worldBound.center.x;
+            float cx = cursor.worldBound.center.x;
+            Vector2 test = new(cx, cursor.worldBound.center.y);
 
-            if (perfectZone.worldBound.Contains(new Vector2(cursorCenter, perfectZone.worldBound.center.y)))
+            if (perfectZone.worldBound.Contains(test))
                 successfulHits++;
-            else if (goodZone.worldBound.Contains(new Vector2(cursorCenter, goodZone.worldBound.center.y)))
+            else if (goodZone.worldBound.Contains(test))
                 successfulHits++;
-            else if (badZone.worldBound.Contains(new Vector2(cursorCenter, badZone.worldBound.center.y)))
+            else if (badZone.worldBound.Contains(test))
                 successfulHits--;
 
             attempts++;
 
             if (attempts >= maxAttempts)
             {
-                bool success = successfulHits >= requiredHits;
-                OnMinigameEnd?.Invoke(success);
-                enabled = false;
+                FinishMiniGame(successfulHits >= requiredHits);
             }
         }
 
-        public void Init(int hits, int tries)
+        private void FinishMiniGame(bool success)
         {
-            requiredHits = hits;
-            maxAttempts = tries;
+            active = false;
+            root.style.display = DisplayStyle.None;
+            OnMinigameEnd?.Invoke(success);
+        }
+
+        /* ---------------------------------------------------------------- */
+
+        public void Init(int hitsNeeded, int triesAllowed)
+        {
+            requiredHits = hitsNeeded;
+            maxAttempts = triesAllowed;
             successfulHits = 0;
             attempts = 0;
+            movingRight = true;
+
+            /* reset UI */
+            cursor.style.left = 0f;
+            root.style.display = DisplayStyle.Flex;
+
+            active = true;
             enabled = true;
         }
     }

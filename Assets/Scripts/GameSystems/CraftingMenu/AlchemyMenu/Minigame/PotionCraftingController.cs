@@ -4,6 +4,7 @@ using FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu.Miniga
 using FourFatesStudios.ProjectWarden.Inventory;
 using FourFatesStudios.ProjectWarden.RuntimeData;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.AlchemyRecipes;
+using FourFatesStudios.ProjectWarden.ScriptableObjects.Databases;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.PotionEffects;
 using System.Collections.Generic;
@@ -24,6 +25,33 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu.Mi
         private Button craftButton;
         private Label resultLabel;
         [SerializeField] private RhythmMinigameController rhythmMinigameController;  // drag in Inspector
+
+
+        private List<Ingredient> _cachedUsedIngredients;
+        private AlchemyRecipe _cachedRecipe;
+
+        private void OnMinigameFinished(bool success)
+        {
+            // Hide rhythm UI and show crafting UI
+            rhythmMinigameController.uiDocument.rootVisualElement.style.display = DisplayStyle.None;
+            uiDocument.rootVisualElement.style.display = DisplayStyle.Flex;
+
+            if (success)
+            {
+                if (_cachedRecipe != null)
+                    CreateUniquePotion(_cachedRecipe);
+                else
+                    CreateEffectBasedPotion(_cachedUsedIngredients);
+
+                CraftingSaveSystem.Save();
+            }
+            else
+            {
+                resultLabel.text = "The brew fizzledc try a steadier rhythm!";
+            }
+
+            ResetUI();
+        }
 
         void OnEnable()
         {
@@ -136,7 +164,7 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu.Mi
 
         private void TryCraftPotion()
         {
-            var used = selectedIngredients.Where(x => x != null).ToList();
+            var used = selectedIngredients.Where(i => i != null).ToList();
             if (used.Count < 2)
             {
                 resultLabel.text = "Select at least two ingredients.";
@@ -147,50 +175,38 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu.Mi
 
             // Remove ingredients from inventory
             foreach (var ing in used)
-            {
-                int leftover = ingredientInventory.Remove(ing, 1);
-                if (leftover > 0)
-                    Debug.LogWarning($"Couldn't fully remove {ing.name} from inventory.");
-            }
-
-            // compute defaults from ingredient rarity
-            int defaultHits = Mathf.CeilToInt((float)used.Average(i => (int)i.ItemRarity) * 1.5f);
-            int defaultAttempts = defaultHits + 2;
-
-            // resolve recipe (may be null)
-            var recipe = AlchemyRecipeDatabase.Instance.GetRecipeByIngredients(used);
-
-            int hitsNeeded = recipe?.RequiredHits ?? defaultHits;
-            int maxTries = recipe?.MaxAttempts ?? defaultAttempts;
-
+                ingredientInventory.Remove(ing, 1);
 
             if (!hasSolvent)
             {
-                CreateComponent(used);
+                CreateComponent(used);      // solvent missing ¨ component
+                ResetUI();
                 return;
             }
 
-            // start the rhythm challenge
-            rhythmMinigameController.Init(hitsNeeded, maxTries);
-            rhythmMinigameController.uiDocument.rootVisualElement.style.display = DisplayStyle.Flex;
-            rhythmMinigameController.uiDocument.rootVisualElement.style.display = DisplayStyle.None;
-            rhythmMinigameController.OnMinigameEnd += success =>
-            {
-                if (success)
-                {
-                    // unique or generic potion creation
-                    if (recipe != null) CreateUniquePotion(recipe);
-                    else CreateEffectBasedPotion(used);
+            // --- at this point we know a potion CAN be brewed, so prep rhythm game ---
 
-                    CraftingSaveSystem.Save();    // optional: save immediately
-                }
-                else
-                {
-                    resultLabel.text = "The brew fizzledc try different timing!";
-                }
+            // Determine hit/try numbers
+            int defaultHits = Mathf.CeilToInt((float)used.Average(i => (int)i.ItemRarity) * 1.5f);
+            int defaultAttempts = defaultHits + 2;
+            var recipe = AlchemyRecipeDatabase.Instance.GetRecipeByIngredients(used);
 
-                ResetUI();
-            };
+            int hitsNeeded = recipe?.RequiredHits ?? defaultHits;
+            int tries = recipe?.MaxAttempts ?? defaultAttempts;
+
+            // Swap UI panels
+            uiDocument.rootVisualElement.style.display = DisplayStyle.None;  // hide crafting UI
+            rhythmMinigameController.uiDocument.rootVisualElement.style.display = DisplayStyle.Flex; // show rhythm UI
+
+            // Initialise minigame
+            rhythmMinigameController.Init(hitsNeeded, tries);
+            // Unsubscribe the old handler (if needed)
+            rhythmMinigameController.OnMinigameEnd -= OnMinigameFinished;
+            rhythmMinigameController.OnMinigameEnd += OnMinigameFinished;
+
+            // Cache data needed in callback
+            _cachedUsedIngredients = used;
+            _cachedRecipe = recipe;
         }
     }
 }

@@ -12,12 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 560b788464d45864384a0c2342426f48, type: 3}
   m_Name: Caustic Burn
   m_EditorClassIdentifier: 
-  suffix: Unnamed Item
-  effectDescription: Empty Description
-  id: -1
-  effectTypes: 00000000
-  effectAspects: 00000000
+  suffix: Grime
+  effectDescription: Poisons the enemy
+  id: 1
+  effectTypes: 02000000
+  effectAspects: 03000000
   potencies:
-  - 1
+  - 5
   durations:
-  - 1
+  - 2

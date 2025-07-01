@@ -2,12 +2,14 @@
     <Style src="project://database/Assets/Scripts/UI/RythmnStyles.uss?fileID=7433441132597879392&amp;guid=6a6c5c4ce451efa43864c13c42395ed6&amp;type=3#RythmnStyles" />
     <VisualElement name="RhythmRoot" class="rhythm-container">
         <Label name="MinigameStatusLabel" text="Get Ready!" class="minigame-status" />
-        <VisualElement name="HitBar" class="hit-bar">
-            <VisualElement name="BadZone" class="zone bad-zone" />
-            <VisualElement name="GoodZone" class="zone good-zone" />
-            <VisualElement name="PerfectZone" class="zone perfect-zone" />
-            <VisualElement name="Cursor" class="cursor" />
-        </VisualElement>
+        <VisualElement name="track" class="track">
+			<VisualElement name="badZone" class="zone bad-zone"/>
+			<VisualElement name="goodZone" class="zone good-zone"/>
+			<VisualElement name="perfectZone" class="zone perfect-zone"/>
+			<VisualElement name="goodZone2" class="zone good-zone"/>        <!-- mirror -->
+			<VisualElement name="badZone2"  class="zone bad-zone"/>         <!-- mirror -->
+			<VisualElement name="cursor" class="cursor"/>
+		  </VisualElement>
         <Button name="EndMinigameButton" text="End Minigame" class="end-button" />
     </VisualElement>
 </UXML>

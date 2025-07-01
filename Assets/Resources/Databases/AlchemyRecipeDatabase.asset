@@ -12,4 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a0b6fb3113c6a234580ba7532c570333, type: 3}
   m_Name: AlchemyRecipeDatabase
   m_EditorClassIdentifier: 
-  _recipes: []
+  _recipes:
+  - {fileID: 11400000, guid: dd0534be969afd34085cdb22dac4b9ed, type: 2}

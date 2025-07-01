@@ -12,9 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 53efbf4862b0b5b4797dee728a66223a, type: 3}
   m_Name: Serpent's Dew
   m_EditorClassIdentifier: 
-  itemName: Unnamed Item
-  itemDescription: Empty Description
-  itemRarity: 0
-  _itemID: 
-  itemPotionType: 0
-  potionEffects: []
+  itemName: Serpent's Dew
+  itemDescription: This potion burns those that are unfortunate enough to encounter
+    it
+  itemRarity: 1
+  _itemID: f47d204d-f626-43f6-90f7-edc5ac03aa9c
+  itemPotionType: 2
+  potionEffects:
+  - {fileID: 11400000, guid: 16c874db723e62a43b0e662637ec39e7, type: 2}

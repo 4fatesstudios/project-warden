@@ -7,6 +7,7 @@
     padding: 16px;
     background-color: #1e1e1e;
     border-radius: 8px;
+    display: none;
 }
 
 .minigame-status {
@@ -16,45 +17,33 @@
     -unity-text-align: middle-center;
 }
 
-.hit-bar {
-    width: 90%;
-    height: 40px;
-    background-color: #444;
-    position: relative;
+.track {
+    width: 500px;
+    height: 50px;
     flex-direction: row;
-    margin-bottom: 16px;
-    justify-content: space-between;
-    border-radius: 4px;
+    position: relative;
+    background-color: #222;
+    border-radius: 6px;
+    overflow: hidden;
 }
 
 .zone {
     height: 100%;
     flex-grow: 1;
-    opacity: 0.3;
+    opacity: 0.4;
 }
 
-.bad-zone {
-    background-color: red;
-}
-
-.good-zone {
-    background-color: yellow;
-}
-
-.perfect-zone {
-    background-color: green;
-    flex-grow: 0.5;
-}
+.bad-zone     { background-color: #c44; }
+.good-zone    { background-color: #cc4; }
+.perfect-zone { background-color: #4c4; flex-grow: 0.6; }
 
 .cursor {
     position: absolute;
-    width: 4px;
+    width: 12px;
     height: 100%;
-    background-color: white;
-    top: 0;
-    left: 0;
-    transition: left 0.1s linear;
+    background-color: #fff;
 }
+
 
 .end-button {
     width: 140px;
