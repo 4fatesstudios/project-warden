@@ -6,7 +6,7 @@ using FourFatesStudios.ProjectWarden.Enums;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Exploration;
 using System.Collections.Generic;
 
-[CustomEditor(typeof(RoomData))]
+[CustomEditor(typeof(SpaceData))]
 public class RoomDataEditor : Editor
 {
     private static CardinalDirection GetDirectionFromZ(float zRot)
@@ -52,13 +52,19 @@ public class RoomDataEditor : Editor
 
     public override void OnInspectorGUI()
     {
-        // Compact RoomPrefab field
+        // Compact SpacePrefab field
         SerializedProperty roomPrefabProp = serializedObject.FindProperty("roomPrefab");
         EditorGUILayout.PropertyField(roomPrefabProp);
         
-        // Compact RoomSize field
-        SerializedProperty roomSizeProp = serializedObject.FindProperty("roomSize");
-        EditorGUILayout.PropertyField(roomSizeProp);
+        // Compact SpaceType field
+        SerializedProperty spaceTypeProp = serializedObject.FindProperty("spaceType");
+        EditorGUILayout.PropertyField(spaceTypeProp);
+        
+        // Only show RoomSize if spaceType == SpaceType.Room
+        if ((SpaceType)spaceTypeProp.enumValueIndex == SpaceType.Room) {
+            SerializedProperty roomSizeProp = serializedObject.FindProperty("roomSize");
+            EditorGUILayout.PropertyField(roomSizeProp);
+        }
 
         // Compact DoorSpawnPoints list with custom drawer
         SerializedProperty spawnListProp = serializedObject.FindProperty("doorSpawnPoints");
@@ -66,17 +72,17 @@ public class RoomDataEditor : Editor
 
         serializedObject.ApplyModifiedProperties();
 
-        RoomData data = (RoomData)target;
+        SpaceData data = (SpaceData)target;
 
         if (GUILayout.Button("Auto-Populate Door Spawns"))
         {
-            if (data.RoomPrefab == null)
+            if (data.SpacePrefab == null)
             {
                 Debug.LogError("Assign roomPrefab first!");
                 return;
             }
 
-            string prefabPath = AssetDatabase.GetAssetPath(data.RoomPrefab);
+            string prefabPath = AssetDatabase.GetAssetPath(data.SpacePrefab);
             GameObject prefabRoot = PrefabUtility.LoadPrefabContents(prefabPath);
 
             var spawnObjects = prefabRoot.GetComponentsInChildren<Transform>()
@@ -135,20 +141,20 @@ public class RoomDataEditor : Editor
 
         if (GUILayout.Button("Update Sprite Colors From Groups"))
         {
-            if (data.RoomPrefab == null)
+            if (data.SpacePrefab == null)
             {
                 Debug.LogError("Assign RoomPrefab first!");
                 return;
             }
 
-            string prefabPath = AssetDatabase.GetAssetPath(data.RoomPrefab);
+            string prefabPath = AssetDatabase.GetAssetPath(data.SpacePrefab);
             GameObject prefabRoot = PrefabUtility.LoadPrefabContents(prefabPath);
 
             foreach (var doorData in data.DoorSpawnPoints)
             {
                 if (doorData.DoorSpawnPoint == null) continue;
 
-                string relPath = GetRelativePath(data.RoomPrefab.transform, doorData.DoorSpawnPoint.transform);
+                string relPath = GetRelativePath(data.SpacePrefab.transform, doorData.DoorSpawnPoint.transform);
                 var prefabTransform = prefabRoot.transform.Find(relPath);
                 if (prefabTransform != null)
                 {

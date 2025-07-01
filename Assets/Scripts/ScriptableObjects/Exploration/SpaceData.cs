@@ -1,15 +1,17 @@
 using System.Collections.Generic;
 using FourFatesStudios.ProjectWarden.Enums;
 using UnityEngine;
+using UnityEngine.XR;
 
 namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Exploration {
-    [CreateAssetMenu(fileName = "New Room Data", menuName = "Exploration/Room Data")]
-    public class RoomData : ScriptableObject {
+    [CreateAssetMenu(fileName = "New Space Data", menuName = "Exploration/Space Data")]
+    public class SpaceData : ScriptableObject {
         [SerializeField] private GameObject roomPrefab; // Reference to the main prefab
-        [SerializeField] private RoomSize roomSize = RoomSize.Small;
+        [SerializeField] private SpaceType spaceType = SpaceType.Room;
+        [SerializeField] private RoomSize roomSize = RoomSize.Small; // relevant if SpaceType == Room
         [SerializeField] private List<DoorSpawnData> doorSpawnPoints = new();
         
-        public GameObject RoomPrefab { get => roomPrefab; set => roomPrefab = value; }
+        public GameObject SpacePrefab { get => roomPrefab; set => roomPrefab = value; }
         public RoomSize RoomSize { get => roomSize; set => roomSize = value; }
         public List<DoorSpawnData> DoorSpawnPoints { get => doorSpawnPoints; set => doorSpawnPoints = value; }
     }
