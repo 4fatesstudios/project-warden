@@ -7,7 +7,7 @@ using FourFatesStudios.ProjectWarden.ScriptableObjects.Exploration;
 using System.Collections.Generic;
 
 [CustomEditor(typeof(SpaceData))]
-public class RoomDataEditor : Editor
+public class SpaceDataEditor : Editor
 {
     private static CardinalDirection GetDirectionFromZ(float zRot)
     {
@@ -53,8 +53,8 @@ public class RoomDataEditor : Editor
     public override void OnInspectorGUI()
     {
         // Compact SpacePrefab field
-        SerializedProperty roomPrefabProp = serializedObject.FindProperty("roomPrefab");
-        EditorGUILayout.PropertyField(roomPrefabProp);
+        SerializedProperty spacePrefabProp = serializedObject.FindProperty("spacePrefab");
+        EditorGUILayout.PropertyField(spacePrefabProp);
         
         // Compact SpaceType field
         SerializedProperty spaceTypeProp = serializedObject.FindProperty("spaceType");
@@ -78,7 +78,7 @@ public class RoomDataEditor : Editor
         {
             if (data.SpacePrefab == null)
             {
-                Debug.LogError("Assign roomPrefab first!");
+                Debug.LogError("Assign SpacePrefab first!");
                 return;
             }
 
@@ -143,7 +143,7 @@ public class RoomDataEditor : Editor
         {
             if (data.SpacePrefab == null)
             {
-                Debug.LogError("Assign RoomPrefab first!");
+                Debug.LogError("Assign SpacePrefab first!");
                 return;
             }
 

@@ -6,12 +6,12 @@ using UnityEngine.XR;
 namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Exploration {
     [CreateAssetMenu(fileName = "New Space Data", menuName = "Exploration/Space Data")]
     public class SpaceData : ScriptableObject {
-        [SerializeField] private GameObject roomPrefab; // Reference to the main prefab
+        [SerializeField] private GameObject spacePrefab; // Reference to the main prefab
         [SerializeField] private SpaceType spaceType = SpaceType.Room;
         [SerializeField] private RoomSize roomSize = RoomSize.Small; // relevant if SpaceType == Room
         [SerializeField] private List<DoorSpawnData> doorSpawnPoints = new();
         
-        public GameObject SpacePrefab { get => roomPrefab; set => roomPrefab = value; }
+        public GameObject SpacePrefab { get => spacePrefab; set => spacePrefab = value; }
         public RoomSize RoomSize { get => roomSize; set => roomSize = value; }
         public List<DoorSpawnData> DoorSpawnPoints { get => doorSpawnPoints; set => doorSpawnPoints = value; }
     }
