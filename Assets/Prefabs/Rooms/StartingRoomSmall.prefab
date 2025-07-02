@@ -253,6 +253,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a105fa97e598bd44986ec7cf07fe4746, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  minimumFreeRooms: 8
+  maximumFreeRooms: 12
+  storyPrefabs: []
+  startingRoom: {fileID: 8883216095692962453}
 --- !u!1 &6445488630143781573
 GameObject:
   m_ObjectHideFlags: 0
