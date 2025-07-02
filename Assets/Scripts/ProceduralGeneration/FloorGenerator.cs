@@ -1,19 +1,17 @@
+using System.Collections.Generic;
 using UnityEngine;
+
 
 namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
 {
-    public class FloorGenerator : MonoBehaviour
-    {
-        // Start is called once before the first execution of Update after the MonoBehaviour is created
-        void Start()
-        {
-        
-        }
+    public class FloorGenerator : MonoBehaviour {
+        [SerializeField] private int minimumFreeRooms = 8;
+        [SerializeField] private int maximumFreeRooms = 12;
+        [SerializeField] private List<GameObject> storyPrefabs;
+        [SerializeField] private GameObject startingRoom;
 
-        // Update is called once per frame
-        void Update()
-        {
-        
+        public void GenerateFloor() {
+            Debug.Log("Generating floor");
         }
     }
 }
