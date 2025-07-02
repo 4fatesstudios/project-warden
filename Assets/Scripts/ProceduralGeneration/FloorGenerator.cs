@@ -14,7 +14,9 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
         public void GenerateFloor() {
             Debug.Log("Generating floor");
         }
-        
-        // private List<DoorSpawnData> 
+
+        private DoorSpawnData GetRandomDoorSpawn(List<DoorSpawnData> doorSpawnGroup) {
+            return doorSpawnGroup[Random.Range(0, doorSpawnGroup.Count)];
+        }
     }
 }
