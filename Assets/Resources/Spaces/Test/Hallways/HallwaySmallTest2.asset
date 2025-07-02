@@ -12,7 +12,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 710a054946e11eb44bf55df88ee683e3, type: 3}
   m_Name: HallwaySmallTest2
   m_EditorClassIdentifier: 
-  spacePrefab: {fileID: 0}
+  spacePrefab: {fileID: 8113794995430571539, guid: 870f394788059a64ca7163e86d655782, type: 3}
   spaceType: 1
   roomSize: 0
-  doorSpawnPoints: []
+  doorSpawnPoints:
+  - doorSpawnPoint: {fileID: 583395190366123530, guid: 870f394788059a64ca7163e86d655782, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 2
+    doorSpawnGroup: 1
+  - doorSpawnPoint: {fileID: 412065465474492305, guid: 870f394788059a64ca7163e86d655782, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 1
+    doorSpawnGroup: 2
+  - doorSpawnPoint: {fileID: 9127108767559374322, guid: 870f394788059a64ca7163e86d655782, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 4
+    doorSpawnGroup: 0
+  - doorSpawnPoint: {fileID: 5308973636017787684, guid: 870f394788059a64ca7163e86d655782, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 3
+    doorSpawnGroup: 0
