@@ -139,7 +139,7 @@ public class SpaceDataEditor : Editor
             EditorUtility.SetDirty(data);
         }
 
-        if (GUILayout.Button("Update Sprite Colors From Groups"))
+        if (GUILayout.Button("Update Groups"))
         {
             if (data.SpacePrefab == null)
             {
@@ -147,6 +147,60 @@ public class SpaceDataEditor : Editor
                 return;
             }
 
+            // Step 1: Collect all non-zero groups
+            var originalGroups = new Dictionary<int, List<DoorSpawnData>>();
+
+            foreach (var door in data.DoorSpawnPoints)
+            {
+                if (door.DoorSpawnGroup == 0) continue;
+
+                if (!originalGroups.ContainsKey(door.DoorSpawnGroup))
+                    originalGroups[door.DoorSpawnGroup] = new List<DoorSpawnData>();
+
+                originalGroups[door.DoorSpawnGroup].Add(door);
+            }
+
+            // Step 2: Create dense remap starting from group 1
+            var sortedKeys = originalGroups.Keys.OrderBy(k => k).ToList();
+            var groupRemap = new Dictionary<int, int>(); // old -> new
+            for (int i = 0; i < sortedKeys.Count; i++)
+                groupRemap[sortedKeys[i]] = i + 1; // start at group 1
+
+            // Step 3: Update doorSpawnGroup values using remap
+            foreach (var door in data.DoorSpawnPoints)
+            {
+                if (door.DoorSpawnGroup == 0) continue;
+
+                if (groupRemap.TryGetValue(door.DoorSpawnGroup, out int newGroup))
+                    door.DoorSpawnGroup = newGroup;
+            }
+
+            // Step 4: Rebuild doorSpawnGroups (index 0 = group 1, index 1 = group 2, etc.)
+            var newGroups = new List<List<DoorSpawnData>>();
+            int groupCount = groupRemap.Count;
+            for (int i = 0; i < groupCount; i++)
+                newGroups.Add(new List<DoorSpawnData>());
+
+            foreach (var door in data.DoorSpawnPoints)
+            {
+                if (door.DoorSpawnGroup == 0) continue;
+                int index = door.DoorSpawnGroup - 1;
+                newGroups[index].Add(door);
+            }
+
+            data.DoorSpawnGroup = newGroups;
+
+            // Step 5: Debug log full group structure
+            Debug.Log("Updated and densified door spawn groups (excluding group 0):");
+            for (int i = 0; i < data.DoorSpawnGroup.Count; i++)
+            {
+                int groupId = i + 1;
+                string groupStr = $"Group {groupId} ({data.DoorSpawnGroup[i].Count} spawns): ";
+                groupStr += string.Join(", ", data.DoorSpawnGroup[i].Select(d => d.DoorSpawnPoint?.name ?? "null"));
+                Debug.Log(groupStr);
+            }
+
+            // Step 6: Update prefab sprite colors
             string prefabPath = AssetDatabase.GetAssetPath(data.SpacePrefab);
             GameObject prefabRoot = PrefabUtility.LoadPrefabContents(prefabPath);
 
@@ -170,8 +224,10 @@ public class SpaceDataEditor : Editor
             PrefabUtility.SaveAsPrefabAsset(prefabRoot, prefabPath);
             PrefabUtility.UnloadPrefabContents(prefabRoot);
 
-            Debug.Log("Sprite colors updated and saved to prefab.");
+            EditorUtility.SetDirty(data);
+            Debug.Log("Door groups densified (starting from 1), and prefab visuals updated.");
         }
+
 
     }
 }
