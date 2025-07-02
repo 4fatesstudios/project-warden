@@ -3,57 +3,61 @@ using UnityEngine;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.AlchemyRecipes;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
 
-public class AlchemyManager : MonoBehaviour
+
+namespace FourFatesStudios.ProjectWarden.GameSystems
 {
-    [SerializeField] private AlchemyRecipeDatabase recipeDatabase;
-
-   private Dictionary<UnorderedIngredientKey, AlchemyRecipe> recipeLookup;
-
-    private void Awake()
+    public class AlchemyManager : MonoBehaviour
     {
-        BuildRecipeLookup();
-    }
+        [SerializeField] private AlchemyRecipeDatabase recipeDatabase;
 
-    private void BuildRecipeLookup()
-    {
-        recipeLookup = new Dictionary<UnorderedIngredientKey, AlchemyRecipe>();
+        private Dictionary<UnorderedIngredientKey, AlchemyRecipe> recipeLookup;
 
-        foreach (var recipe in recipeDatabase.Recipes)
+        private void Awake()
         {
-            if (recipe == null) continue;
+            BuildRecipeLookup();
+        }
 
-            var inputs = new List<Ingredient>();
+        private void BuildRecipeLookup()
+        {
+            recipeLookup = new Dictionary<UnorderedIngredientKey, AlchemyRecipe>();
 
-            if (recipe.InputIngredient1 != null) inputs.Add(recipe.InputIngredient1);
-            if (recipe.InputIngredient2 != null) inputs.Add(recipe.InputIngredient2);
-            if (recipe.InputIngredient3 != null) inputs.Add(recipe.InputIngredient3);
-
-            if (inputs.Count < 2)
+            foreach (var recipe in recipeDatabase.Recipes)
             {
-                Debug.LogWarning($"[{recipe.name}] has fewer than 2 ingredients and was skipped.");
-                continue;
+                if (recipe == null) continue;
+
+                var inputs = new List<Ingredient>();
+
+                if (recipe.InputIngredient1 != null) inputs.Add(recipe.InputIngredient1);
+                if (recipe.InputIngredient2 != null) inputs.Add(recipe.InputIngredient2);
+                if (recipe.InputIngredient3 != null) inputs.Add(recipe.InputIngredient3);
+
+                if (inputs.Count < 2)
+                {
+                    Debug.LogWarning($"[{recipe.name}] has fewer than 2 ingredients and was skipped.");
+                    continue;
+                }
+
+                var key = new UnorderedIngredientKey(inputs.ToArray());
+
+                if (!recipeLookup.ContainsKey(key))
+                    recipeLookup[key] = recipe;
+                else
+                    Debug.LogWarning($"Duplicate recipe key in lookup for {recipe.name}: {key}");
+            }
+        }
+
+
+        public AlchemyRecipe TryFindRecipe(params Ingredient[] inputs)
+        {
+            if (inputs.Length < 2 || inputs.Length > 3)
+            {
+                Debug.LogWarning("You must pass 2 or 3 ingredients to find a recipe.");
+                return null;
             }
 
-            var key = new UnorderedIngredientKey(inputs.ToArray());
-
-            if (!recipeLookup.ContainsKey(key))
-                recipeLookup[key] = recipe;
-            else
-                Debug.LogWarning($"Duplicate recipe key in lookup for {recipe.name}: {key}");
+            var key = new UnorderedIngredientKey(inputs);
+            recipeLookup.TryGetValue(key, out var result);
+            return result;
         }
-    }
-
-
-    public AlchemyRecipe TryFindRecipe(params Ingredient[] inputs)
-    {
-        if (inputs.Length < 2 || inputs.Length > 3)
-        {
-            Debug.LogWarning("You must pass 2 or 3 ingredients to find a recipe.");
-            return null;
-        }
-
-        var key = new UnorderedIngredientKey(inputs);
-        recipeLookup.TryGetValue(key, out var result);
-        return result;
     }
 }

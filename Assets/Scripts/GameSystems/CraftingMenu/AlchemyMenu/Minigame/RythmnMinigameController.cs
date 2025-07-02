@@ -2,46 +2,41 @@ using System;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu.Minigame
+namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
 {
     public class RhythmMinigameController : MonoBehaviour
     {
-        [Header("References")]
-        public UIDocument uiDocument;                // assign in Inspector
+        [SerializeField] private UIDocument uiDocument;  // assign in Inspector
+        public UIDocument UIDocument => uiDocument;
 
-        [Header("Movement")]
-        [SerializeField] private float speed = 300f; // px / sec
+        [SerializeField] private float speed = 300f; // pixels per second
+        [SerializeField] private float maxTime = 10f; // seconds for the minigame
 
-        [Header("Requirements (will be set by Init)")]
         public int requiredHits = 3;
         public int maxAttempts = 5;
 
-        /* UI Elements */
         private VisualElement root;
         private VisualElement track;
         private VisualElement cursor;
         private VisualElement perfectZone;
         private VisualElement goodZone;
         private VisualElement badZone;
+        private Label attemptsLabel;
+        private Label timerLabel;
 
-        /* State */
         private float trackWidth;
-        private bool movingRight = true;
+        private bool movingRight;
         private int successfulHits;
         private int attempts;
         private bool active;
+        private float timer;
 
-        public event Action<bool> OnMinigameEnd;     // true = success
+        public event Action<bool> OnMinigameEnd;
 
-        /* ---------------------------------------------------------------- */
-
-        private void OnEnable()
+        private void Awake()
         {
             if (uiDocument == null)
-            {
-                Debug.LogError("RhythmMinigameController: UIDocument not assigned.");
-                return;
-            }
+                uiDocument = GetComponent<UIDocument>();
 
             root = uiDocument.rootVisualElement;
             track = root.Q<VisualElement>("track");
@@ -49,38 +44,43 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu.Mi
             perfectZone = root.Q<VisualElement>("perfectZone");
             goodZone = root.Q<VisualElement>("goodZone");
             badZone = root.Q<VisualElement>("badZone");
+            attemptsLabel = root.Q<Label>("AttemptsLabel");
+            timerLabel = root.Q<Label>("TimerLabel");
 
-            if (track == null || cursor == null ||
-                perfectZone == null || goodZone == null || badZone == null)
+            if (track == null || cursor == null || perfectZone == null || goodZone == null || badZone == null)
             {
-                Debug.LogError("RhythmMinigameController: One or more UI elements missing.");
+                Debug.LogError("RhythmMinigameController: Missing UI elements.");
+                enabled = false;
                 return;
             }
 
-            /* cache width once layout is ready */
-            track.RegisterCallback<GeometryChangedEvent>(_ =>
-            {
-                trackWidth = track.resolvedStyle.width;
-            });
+            track.RegisterCallback<GeometryChangedEvent>(_ => trackWidth = track.resolvedStyle.width);
 
-            /* start hidden */
-            root.style.display = DisplayStyle.None;
-            enabled = false;                // Update() off by default
+            Hide();
         }
-
-        /* ---------------------------------------------------------------- */
 
         private void Update()
         {
-            if (!active || cursor == null || trackWidth <= 0f) return;
+            if (!active || cursor == null || trackWidth <= 0f)
+                return;
 
             MoveCursor();
 
             if (Input.GetKeyDown(KeyCode.Space))
                 EvaluateHit();
-        }
 
-        /* ---------------------------------------------------------------- */
+            // Timer logic
+            timer -= Time.deltaTime;
+            if (timerLabel != null)
+                timerLabel.text = $"Time: {Mathf.Max(0, Mathf.CeilToInt(timer))}s";
+
+            if (timer <= 0f)
+                FinishMiniGame(successfulHits >= requiredHits);
+
+            // Update attempts label
+            if (attemptsLabel != null)
+                attemptsLabel.text = $"Attempts: {attempts}/{maxAttempts}";
+        }
 
         private void MoveCursor()
         {
@@ -102,36 +102,27 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu.Mi
             cursor.style.left = next;
         }
 
-        /* ---------------------------------------------------------------- */
-
         private void EvaluateHit()
         {
-            float cx = cursor.worldBound.center.x;
-            Vector2 test = new(cx, cursor.worldBound.center.y);
+            Vector2 center = cursor.worldBound.center;
 
-            if (perfectZone.worldBound.Contains(test))
+            if (perfectZone.worldBound.Contains(center) || goodZone.worldBound.Contains(center))
                 successfulHits++;
-            else if (goodZone.worldBound.Contains(test))
-                successfulHits++;
-            else if (badZone.worldBound.Contains(test))
+            else if (badZone.worldBound.Contains(center))
                 successfulHits--;
 
             attempts++;
 
             if (attempts >= maxAttempts)
-            {
                 FinishMiniGame(successfulHits >= requiredHits);
-            }
         }
 
         private void FinishMiniGame(bool success)
         {
             active = false;
-            root.style.display = DisplayStyle.None;
+            Hide();
             OnMinigameEnd?.Invoke(success);
         }
-
-        /* ---------------------------------------------------------------- */
 
         public void Init(int hitsNeeded, int triesAllowed)
         {
@@ -140,13 +131,37 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu.Mi
             successfulHits = 0;
             attempts = 0;
             movingRight = true;
-
-            /* reset UI */
             cursor.style.left = 0f;
-            root.style.display = DisplayStyle.Flex;
+            timer = maxTime;
 
+            // Initialize UI
+            if (attemptsLabel != null)
+                attemptsLabel.text = $"Attempts: {attempts}/{maxAttempts}";
+            if (timerLabel != null)
+                timerLabel.text = $"Time: {Mathf.CeilToInt(timer)}s";
+
+            Show();
             active = true;
+        }
+
+        public void Show()
+        {
+            if (uiDocument?.rootVisualElement == null)
+            {
+                Debug.LogError("RhythmMinigameController: uiDocument or rootVisualElement is null");
+                return;
+            }
+
+            uiDocument.rootVisualElement.style.display = DisplayStyle.Flex;
             enabled = true;
+        }
+
+        public void Hide()
+        {
+            if (uiDocument?.rootVisualElement != null)
+                uiDocument.rootVisualElement.style.display = DisplayStyle.None;
+
+            enabled = false;
         }
     }
 }

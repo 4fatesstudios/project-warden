@@ -1,4 +1,3 @@
-using FourFatesStudios.ProjectWarden.RuntimeData;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.PotionEffects;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Databases;
 using UnityEngine;
@@ -25,12 +24,10 @@ namespace FourFatesStudios.ProjectWarden.GameSystems
 
         private void Awake()
         {
-            CraftingSaveSystem.Load(potionEffectDb, itemDb);
         }
 
         private void OnApplicationQuit()
         {
-            CraftingSaveSystem.Save();
         }
     }
     

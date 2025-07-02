@@ -5,9 +5,7 @@
     justify-content: center;
     flex-direction: column;
     padding: 16px;
-    background-color: #1e1e1e;
     border-radius: 8px;
-    display: none;
 }
 
 .minigame-status {
@@ -34,8 +32,8 @@
 }
 
 .bad-zone     { background-color: #c44; }
-.good-zone    { background-color: #cc4; }
-.perfect-zone { background-color: #4c4; flex-grow: 0.6; }
+.good-zone    { background-color: #cc4; flex-grow: 0.4;}
+.perfect-zone { background-color: #4c4; flex-grow: 0.15; }
 
 .cursor {
     position: absolute;
@@ -48,7 +46,5 @@
 .end-button {
     width: 140px;
     height: 32px;
-    background-color: #222;
-    color: white;
     border-radius: 4px;
 }
