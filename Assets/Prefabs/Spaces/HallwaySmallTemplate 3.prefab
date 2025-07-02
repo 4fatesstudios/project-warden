@@ -276,7 +276,7 @@ GameObject:
   - component: {fileID: 6533040820910917489}
   - component: {fileID: 7939097124340225316}
   m_Layer: 10
-  m_Name: HallwaySmallTemplate
+  m_Name: HallwaySmallTemplate 3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
