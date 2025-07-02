@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using FourFatesStudios.ProjectWarden.ScriptableObjects.Exploration;
 using UnityEngine;
 
 
@@ -13,5 +14,7 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
         public void GenerateFloor() {
             Debug.Log("Generating floor");
         }
+        
+        // private List<DoorSpawnData> 
     }
 }
