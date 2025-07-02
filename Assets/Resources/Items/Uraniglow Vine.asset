@@ -19,4 +19,5 @@ MonoBehaviour:
   ingredientArchetype: 2
   ingredientAspect: 3
   isCorrupted: 0
-  potionEffects: []
+  potionEffects:
+  - {fileID: 11400000, guid: 16c874db723e62a43b0e662637ec39e7, type: 2}

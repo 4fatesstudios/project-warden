@@ -10,16 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ccec348f60f7b5c429d2fb1e20182269, type: 3}
-  m_Name: Toxigland
+  m_Name: Fire Plant
   m_EditorClassIdentifier: 
-  itemName: Toxigland
-  itemDescription: A gland used offensive or defensively by the creatures in this
-    place.
+  itemName: Fire Plant
+  itemDescription: Plant burns test item
   itemRarity: 1
-  _itemID: d8d4b408-d15d-4d31-8b61-370c6dbc2841
-  ingredientArchetype: 1
-  ingredientAspect: 3
+  _itemID: 44bb50b6-8d3c-47da-808e-e83968ec76a2
+  ingredientArchetype: 2
+  ingredientAspect: 2
   isCorrupted: 0
   potionEffects:
-  - {fileID: 11400000, guid: 16c874db723e62a43b0e662637ec39e7, type: 2}
   - {fileID: 11400000, guid: 18e9208ff52f97b43804780eaa56a33c, type: 2}

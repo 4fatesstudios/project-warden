@@ -296,6 +296,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   uiDocument: {fileID: 364277221}
   speed: 300
+  maxTime: 10
   requiredHits: 3
   maxAttempts: 5
 --- !u!1 &803368411
@@ -430,7 +431,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: d964cc334a7d4d5428817e758f4d481c, type: 2}
   - {fileID: 11400000, guid: 4b2803ab31add384e85f5fc1451fe038, type: 2}
   - {fileID: 11400000, guid: 73ab2621b0c8d034697a3eaf46c44521, type: 2}
-  initialQuantities: 0a0000000a0000000a000000
+  - {fileID: 11400000, guid: 32f93b5167963d5428d18955071a1f47, type: 2}
+  initialQuantities: 0a0000000a0000000a0000000a000000
   maxQuantityPerSlot: 499
   maxSlots: 30
 --- !u!4 &1814970311

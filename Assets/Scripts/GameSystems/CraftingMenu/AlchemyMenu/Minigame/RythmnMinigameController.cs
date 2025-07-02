@@ -30,6 +30,7 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
         private int attempts;
         private bool active;
         private float timer;
+        private float cursorPosition = 0f;
 
         public event Action<bool> OnMinigameEnd;
 
@@ -85,21 +86,21 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
         private void MoveCursor()
         {
             float delta = speed * Time.deltaTime;
-            float current = cursor.resolvedStyle.left;
-            float next = current + (movingRight ? delta : -delta);
+            float next = cursorPosition + (movingRight ? delta : -delta);
 
             if (next <= 0f)
             {
                 next = 0f;
                 movingRight = true;
             }
-            else if (next >= trackWidth - cursor.resolvedStyle.width)
+            else if (trackWidth > 0f && next >= trackWidth - cursor.resolvedStyle.width)
             {
                 next = trackWidth - cursor.resolvedStyle.width;
                 movingRight = false;
             }
 
-            cursor.style.left = next;
+            cursorPosition = next;
+            cursor.style.left = cursorPosition;
         }
 
         private void EvaluateHit()
@@ -131,7 +132,8 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
             successfulHits = 0;
             attempts = 0;
             movingRight = true;
-            cursor.style.left = 0f;
+            cursorPosition = 0f;
+            cursor.style.left = cursorPosition;
             timer = maxTime;
 
             // Initialize UI

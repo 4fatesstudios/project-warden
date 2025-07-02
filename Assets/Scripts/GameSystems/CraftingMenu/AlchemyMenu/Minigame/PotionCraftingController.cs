@@ -55,14 +55,14 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
             // Get both Ingredients and AlchemyComponents from inventory
             var availableItems = slots
                 .Select(slot => slot.Item)
-                .Where(item => item is Ingredient or item is AlchemyComponent)
+                .Where(item => item is Ingredient || item is AlchemyComponent)
                 .Distinct()
                 .ToList();
 
             // Exclude already selected items in other slots
             var alreadySelected = selectedIngredients
                 .Where((ing, idx) => ing != null && idx != slotIndex)
-                .Cast<object>()
+                .Cast<Item>()
                 .ToHashSet();
 
             var availableForSelection = availableItems
@@ -89,13 +89,20 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
             popup.style.borderTopRightRadius = 5;
             popup.style.borderBottomLeftRadius = 5;
             popup.style.borderBottomRightRadius = 5;
+            popup.style.width = 250;
+            popup.style.maxHeight = 300;
+            popup.style.overflow = Overflow.Hidden;
+
+            // Add a ScrollView for the ingredient buttons
+            var scrollView = new ScrollView();
+            scrollView.style.height = 220;
+            scrollView.style.width = 230;
 
             foreach (var item in availableForSelection)
             {
-                string displayName = item is Ingredient ing ? ing.name : ((AlchemyComponent)item).Name;
+                string displayName = item is Ingredient ing ? ing.name : ((AlchemyComponent)item).ItemName;
                 var button = new Button(() =>
                 {
-                    // Store as Ingredient or handle as component as needed
                     if (item is Ingredient ingredient)
                         selectedIngredients[slotIndex] = ingredient;
                     else
@@ -105,8 +112,10 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
                     root.Remove(popup);
                 })
                 { text = displayName };
-                popup.Add(button);
+                scrollView.Add(button);
             }
+
+            popup.Add(scrollView);
 
             if (selectedIngredients[slotIndex] != null)
             {
@@ -131,10 +140,20 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
             if (usedIngredients == null || usedIngredients.Count == 0)
                 return new List<PotionEffect>();
 
-            IEnumerable<PotionEffect> sharedEffects = usedIngredients[0].PotionEffects;
+            // Defensive: skip ingredients with null or empty PotionEffects
+            var validIngredients = usedIngredients
+                .Where(i => i != null && i.PotionEffects != null && i.PotionEffects.Count > 0)
+                .ToList();
 
-            foreach (var ingredient in usedIngredients.Skip(1))
+            if (validIngredients.Count == 0)
+                return new List<PotionEffect>();
+
+            IEnumerable<PotionEffect> sharedEffects = validIngredients[0].PotionEffects;
+
+            foreach (var ingredient in validIngredients.Skip(1))
             {
+                if (ingredient.PotionEffects == null)
+                    continue;
                 sharedEffects = sharedEffects.Intersect(ingredient.PotionEffects);
             }
 
@@ -163,19 +182,17 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
             resultLabel.text = "You created an Alchemy Component:\n" + component.name;
         }
 
-        private void CreateUniquePotion(AlchemyRecipe recipe)
+        private void CreateUniquePotion(AlchemyRecipe recipe, List<Ingredient> unpacked)
         {
             var potion = ScriptableObject.CreateInstance<Potion>();
             potion.name = recipe.OutputPotion.ItemName;
 
-            // Set effects and upgraded via reflection (if needed)
             var effectsField = typeof(Potion).GetField("potionEffects", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             effectsField?.SetValue(potion, recipe.OutputPotion.PotionEffects.ToList());
 
             var upgradedProp = typeof(Potion).GetProperty("Upgraded");
             upgradedProp?.SetValue(potion, recipe.OutputPotion.Upgraded);
 
-            // Add to inventory
             if (ingredientInventoryHolder != null && ingredientInventoryHolder.Container != null)
             {
                 ingredientInventoryHolder.AddItem(potion, 1);
@@ -185,7 +202,8 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
 
         private void CreateEffectBasedPotion(List<Ingredient> ingredients)
         {
-            var effects = ResolvePotionEffects(ingredients);
+            var unpacked = UnpackIngredients(ingredients);
+            var effects = ResolvePotionEffects(unpacked);
             if (effects.Count == 0)
             {
                 resultLabel.text = "No matching effects found. Crafting failed.";
@@ -219,7 +237,7 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
             if (success)
             {
                 if (_cachedRecipe != null)
-                    CreateUniquePotion(_cachedRecipe);
+                    CreateUniquePotion(_cachedRecipe, UnpackIngredients(_cachedUsedIngredients));
                 else
                     CreateEffectBasedPotion(_cachedUsedIngredients);
             }
@@ -258,7 +276,10 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
                 return;
             }
 
-            int defaultHits = Mathf.CeilToInt((float)used.Average(i => (int)i.ItemRarity) * 1.5f);
+            // Unpack all ingredients for unique recipe check
+            var unpacked = UnpackIngredients(used);
+
+            int defaultHits = Mathf.CeilToInt((float)unpacked.Average(i => (int)i.ItemRarity) * 1.5f);
             int defaultAttempts = defaultHits + 2;
 
             var db = Resources.Load<AlchemyRecipeDatabase>("Databases/AlchemyRecipeDatabase");
@@ -270,7 +291,8 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
                 return;
             }
 
-            var recipe = db.GetRecipeByIngredients(used);
+            // Use unpacked ingredients for recipe matching
+            var recipe = db.GetRecipeByIngredients(unpacked);
 
             int hitsNeeded = recipe != null ? recipe.RequiredHits : defaultHits;
             int tries = recipe != null ? recipe.MaxAttempts : defaultAttempts;
@@ -282,10 +304,30 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
             rhythmMinigameController.OnMinigameEnd += OnMinigameFinished;
             rhythmMinigameController.Init(hitsNeeded, tries);
 
-            _cachedUsedIngredients = used;
+            _cachedUsedIngredients = used; // keep original for display, but pass unpacked to CreateUniquePotion
             _cachedRecipe = recipe;
         }
 
+        private List<Ingredient> UnpackIngredients(List<Ingredient> ingredients)
+        {
+            var result = new List<Ingredient>();
+            foreach (var ing in ingredients)
+            {
+                if (ing is AlchemyComponent comp)
+                {
+                    // Recursively unpack base ingredients
+                    if (comp.BaseIngredient1 != null)
+                        result.AddRange(UnpackIngredients(new List<Ingredient> { comp.BaseIngredient1 }));
+                    if (comp.BaseIngredient2 != null)
+                        result.AddRange(UnpackIngredients(new List<Ingredient> { comp.BaseIngredient2 }));
+                }
+                else if (ing != null)
+                {
+                    result.Add(ing);
+                }
+            }
+            return result;
+        }
 
         private void ResetUI()
         {

@@ -2,6 +2,10 @@
     <Style src="project://database/Assets/Scripts/UI/CraftingSystem/RythmnStyles.uss?fileID=7433441132597879392&amp;guid=98fef426f27ece6439fdb2d60d79be60&amp;type=3#RythmnStyles" />
     <engine:VisualElement name="RhythmRoot" class="rhythm-container">
         <engine:Label name="MinigameStatusLabel" text="Get Ready!" class="minigame-status" />
+        <engine:VisualElement class="minigame-counters" style="flex-direction: row; justify-content: space-between; margin-bottom: 8px;">
+            <engine:Label name="TimerLabel" text="Time: 0s" class="timer-label" />
+            <engine:Label name="AttemptsLabel" text="Attempts: 0/0" class="attempts-label" />
+        </engine:VisualElement>
         <engine:VisualElement name="track" class="track" style="height: 18px;">
             <engine:VisualElement name="badZone" class="zone bad-zone" />
             <engine:VisualElement name="goodZone" class="zone good-zone" />
