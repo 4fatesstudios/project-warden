@@ -11,6 +11,10 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
     /// </summary>
     public static class PlacedSpaceFactory
     {
+        public static PlacedSpace Create(SpaceData data, Vector3 position) {
+            return Create(data, position, Quaternion.identity);
+        }
+        
         public static PlacedSpace Create(SpaceData data, Vector3 position, Quaternion rotation)
         {
             GameObject instance = GameObject.Instantiate(data.SpacePrefab, position, rotation);
