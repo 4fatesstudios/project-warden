@@ -29,126 +29,110 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
                 return;
             }
             
-            // Set up rng and reset necessary structures
-            SetRandomSeed();
-            _placedSpaces = new List<PlacedSpace>();
-            _spawnQueue = new Queue<SpawnGroupQueueItem>();
-            numberOfFreeRooms = _rng.Next(minimumFreeRooms, maximumFreeRooms + 1);
+            InitializeGeneration();
             
             // Obtain all hallways and all rooms from the given Area Database
             var hallways = globalAreasDatabase.GetDatabaseByArea(area).Hallways;
             var rooms = globalAreasDatabase.GetDatabaseByArea(area).Rooms;
             
             // Place the starting room
-            var placed = InstantiateSpaceAtOrigin(startingRoom, transform.position);
-            if (placed == null) return;
-            Debug.Log($"Placed starting room: {placed.Instance.name} at {placed.Instance.transform.position}");
-
-            LogPlacedSpaceDoors(placed);
-            
             // Enqueue starting room door spawn groups and add starting room to placed spaces
-            EnqueueSpaceDoorSpawnGroups(placed);
-            _placedSpaces.Add(placed);
-
-            int attempts = 0;
-            // Start propagation loop
-            while (_placedSpaces.Count(space => space.SourceData.SpaceType == SpaceType.Room) < numberOfFreeRooms && _spawnQueue.Count > 0 && attempts < 50) {
-                var queueItem = _spawnQueue.Dequeue();
-                var source = queueItem.Source;
-
-                Debug.Log($"Processing spawn group {queueItem.GroupID} from {source.Instance.name} with hallwayDepth {queueItem.HallwayDepth}");
-
-                if (!source.DoorGroups.TryGetValue(queueItem.GroupID, out var doorGroup)) {
-                    Debug.LogWarning($"Group {queueItem.GroupID} not found in {source.Instance.name}");
-                    continue;
-                }
-
-                Debug.Log($"Trying {doorGroup.Count} doors in group {queueItem.GroupID}");
-
-                ShuffleList(doorGroup); // Randomize door usage order
-
-                bool placedAny = false;
-
-                foreach (var sourceDoorGO in doorGroup) {
-                    switch (queueItem.HallwayDepth) {
-                        case 0: {
-                            // At depth 0, always place a hallway
-                            var newHallwayData = hallways[_rng.Next(hallways.Count)];
-                            Debug.Log($"Attempting to place hallway {newHallwayData.name} at door {sourceDoorGO.name} from {source.Instance.name}");
-
-                            if (TryPlaceSpaceAtDoor(sourceDoorGO, source, newHallwayData, queueItem.HallwayDepth + 1, out var newHallway)) {
-                                Debug.Log($"Placed hallway: {newHallway.Instance.name} at {newHallway.Instance.transform.position}");
-                                _placedSpaces.Add(newHallway);
-                                EnqueueSpaceDoorSpawnGroups(newHallway, queueItem.HallwayDepth + 1);
-                                placedAny = true;
-                            } else {
-                                Debug.LogWarning($"Failed to place hallway {newHallwayData.name} at door {sourceDoorGO.name}");
-                            }
-
-                            break;
-                        }
-                        case 1: {
-                            // At depth 1, try either hallway or room
-
-                            // Try hallway first or room first — you decide your preference
-                            // Example: try hallway first
-
-                            var newHallwayData = hallways[_rng.Next(hallways.Count)];
-                            Debug.Log($"Attempting to place hallway {newHallwayData.name} at door {sourceDoorGO.name} from {source.Instance.name}");
-
-                            if (TryPlaceSpaceAtDoor(sourceDoorGO, source, newHallwayData, queueItem.HallwayDepth + 1, out var newHallway)) {
-                                Debug.Log($"Placed hallway: {newHallway.Instance.name} at {newHallway.Instance.transform.position}");
-                                _placedSpaces.Add(newHallway);
-                                EnqueueSpaceDoorSpawnGroups(newHallway, queueItem.HallwayDepth + 1);
-                                placedAny = true;
-                            } else {
-                                var newRoomData = rooms[_rng.Next(rooms.Count)];
-                                Debug.Log($"Attempting to place room {newRoomData.name} at door {sourceDoorGO.name} from {source.Instance.name}");
-
-                                if (TryPlaceSpaceAtDoor(sourceDoorGO, source, newRoomData, queueItem.HallwayDepth, out var newRoom)) {
-                                    Debug.Log($"Placed room: {newRoom.Instance.name} at {newRoom.Instance.transform.position}");
-                                    _placedSpaces.Add(newRoom);
-                                    EnqueueSpaceDoorSpawnGroups(newRoom);
-                                    placedAny = true;
-                                } else {
-                                    Debug.LogWarning($"Failed to place room {newRoomData.name} at door {sourceDoorGO.name}");
-                                }
-                            }
-
-                            break;
-                        }
-                        case 2: {
-                            // Always place room at depth 2
-                            var newRoomData = rooms[_rng.Next(rooms.Count)];
-                            Debug.Log($"Attempting to place room {newRoomData.name} at door {sourceDoorGO.name} from {source.Instance.name}");
-
-                            if (TryPlaceSpaceAtDoor(sourceDoorGO, source, newRoomData, queueItem.HallwayDepth, out var newRoom)) {
-                                Debug.Log($"Placed room: {newRoom.Instance.name} at {newRoom.Instance.transform.position}");
-                                _placedSpaces.Add(newRoom);
-                                EnqueueSpaceDoorSpawnGroups(newRoom);
-                                placedAny = true;
-                            } else {
-                                Debug.LogWarning($"Failed to place room {newRoomData.name} at door {sourceDoorGO.name}");
-                            }
-
-                            break;
-                        }
-                    }
-
-                    if (placedAny)
-                        break; // One placement per door group
-                }
-
-                if (!placedAny) {
-                    Debug.LogWarning($"No valid space placed from group {queueItem.GroupID} of {source.Instance.name}");
-                    _spawnQueue.Enqueue(queueItem);
-                }
-                ++attempts;
-            }
+            var placedStart = PlaceStartingRoom();
+            if (placedStart == null) return;
+            
+            // First pass, generate all rooms and hallways where valid
+            ProcessSpawnQueue(rooms, hallways);
             
             // Cleanup pass to remove hallways that go nowhere
-
             // Connection pass to connect rooms that can be connected together
+        }
+        
+        private void ProcessSpawnQueue(IReadOnlyList<SpaceData> rooms, IReadOnlyList<SpaceData> hallways, int maxAttempts=50) {
+            int attempts = 0;
+            while (_placedSpaces.Count(s => s.SourceData.SpaceType == SpaceType.Room) < numberOfFreeRooms 
+                   && _spawnQueue.Count > 0 && attempts < maxAttempts) {
+                var queueItem = _spawnQueue.Dequeue();
+                TryPlaceFromSpawnGroup(queueItem, rooms, hallways);
+                attempts++;
+            }
+        }
+        
+        private void TryPlaceFromSpawnGroup(SpawnGroupQueueItem queueItem, IReadOnlyList<SpaceData> rooms, IReadOnlyList<SpaceData> hallways) {
+            var source = queueItem.Source;
+            if (!source.DoorGroups.TryGetValue(queueItem.GroupID, out var doorGroup)) {
+                Debug.LogWarning($"Group {queueItem.GroupID} not found in {source.Instance.name}");
+                return;
+            }
+            ShuffleList(doorGroup);
+            bool placedAny = false;
+
+            foreach (var sourceDoorGO in doorGroup) {
+                placedAny = TryPlaceSpaceByDepth(sourceDoorGO, source, queueItem.HallwayDepth, rooms, hallways);
+                if (placedAny) break;
+            }
+            if (!placedAny) {
+                Debug.LogWarning($"No valid space placed from group {queueItem.GroupID} of {source.Instance.name}");
+                _spawnQueue.Enqueue(queueItem);
+            }
+        }
+        
+        private bool TryPlaceSpaceByDepth(GameObject doorGO, PlacedSpace source, int hallwayDepth,
+            IReadOnlyList<SpaceData> rooms, IReadOnlyList<SpaceData> hallways) {
+            switch (hallwayDepth) {
+                case 0:
+                    return TryPlaceHallway(doorGO, source, hallways, hallwayDepth + 1);
+                case 1:
+                    if (_rng.Next(2) == 1)
+                        return TryPlaceHallway(doorGO, source, hallways, hallwayDepth + 1);
+                    else
+                        return TryPlaceRoom(doorGO, source, rooms, hallwayDepth);
+                case 2:
+                    return TryPlaceRoom(doorGO, source, rooms, hallwayDepth);
+                default:
+                    return false;
+            }
+        }
+        
+        private bool TryPlaceHallway(GameObject doorGO, PlacedSpace source, IReadOnlyList<SpaceData> hallways, int depth) {
+            var hallwayData = hallways[_rng.Next(hallways.Count)];
+            if (TryPlaceSpaceAtDoor(doorGO, source, hallwayData, depth, out var placed)) {
+                _placedSpaces.Add(placed);
+                EnqueueSpaceDoorSpawnGroups(placed, depth);
+                return true;
+            }
+            return false;
+        }
+
+        private bool TryPlaceRoom(GameObject doorGO, PlacedSpace source, IReadOnlyList<SpaceData> rooms, int depth) {
+            var roomData = rooms[_rng.Next(rooms.Count)];
+            if (TryPlaceSpaceAtDoor(doorGO, source, roomData, depth, out var placed)) {
+                _placedSpaces.Add(placed);
+                EnqueueSpaceDoorSpawnGroups(placed);
+                return true;
+            }
+            return false;
+        }
+        
+        private PlacedSpace PlaceStartingRoom() {
+            var placed = InstantiateSpaceAtOrigin(startingRoom, transform.position);
+            if (placed == null) return null;
+            EnqueueSpaceDoorSpawnGroups(placed);
+            _placedSpaces.Add(placed);
+            return placed;
+        }
+
+        private void InitializeGeneration() {
+            // Set up rng and reset necessary structures
+            SetRandomSeed();
+            _placedSpaces = new List<PlacedSpace>();
+            _spawnQueue = new Queue<SpawnGroupQueueItem>();
+            numberOfFreeRooms = _rng.Next(minimumFreeRooms, maximumFreeRooms + 1);
+        }
+
+        public void ClearFloor() {
+            foreach (var space in _placedSpaces) {
+                DestroyImmediate(space.Instance);
+            }
         }
 
         private void SetRandomSeed() {
@@ -169,7 +153,6 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
             placed.Instance.transform.position = targetPosition;
             return placed;
         }
-
         
         private bool TryPlaceSpaceAtDoor(GameObject sourceDoorGO, PlacedSpace sourceSpace, SpaceData newData, int hallwayDepth, out PlacedSpace placed) {
             placed = PlacedSpaceFactory.Create(newData, Vector3.zero);
