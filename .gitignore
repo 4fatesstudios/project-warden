@@ -633,4 +633,3 @@ PythonBackend/macos/
 !Packages/manifest.json
 !Packages/packages-lock.json
 .bezisidekick/.settings.json
-Packages/packages-lock.json
