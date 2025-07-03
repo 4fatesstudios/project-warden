@@ -159,34 +159,20 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
         }
         
         /// <summary>
-        /// Instantiates SpaceData's prefab and places their Origin at given target position
+        /// Instantiates SpaceData's prefab and places its root transform at the given target position
         /// </summary>
         /// <param name="data">the Space Data containing the prefab to instantiate</param>
-        /// <param name="targetPosition">the target position to place the Origin point of the Space Data prefab</param>
+        /// <param name="targetPosition">the target position to place the prefab's root transform</param>
         /// <returns></returns>
         private PlacedSpace InstantiateSpaceAtOrigin(SpaceData data, Vector3 targetPosition) {
             var placed = PlacedSpaceFactory.Create(data, Vector3.zero);
-            var origin = placed.Instance.transform.Find("Origin");
-
-            if (!origin) {
-                Debug.LogError($"Prefab {data.name} missing an Origin child.");
-                return null;
-            }
-
-            var offset = targetPosition - origin.position;
-            placed.Instance.transform.position += offset;
+            placed.Instance.transform.position = targetPosition;
             return placed;
         }
+
         
         private bool TryPlaceSpaceAtDoor(GameObject sourceDoorGO, PlacedSpace sourceSpace, SpaceData newData, int hallwayDepth, out PlacedSpace placed) {
             placed = PlacedSpaceFactory.Create(newData, Vector3.zero);
-            var origin = placed.Instance.transform.Find("Origin");
-            if (!origin) {
-                Debug.LogWarning($"Failed to find Origin in {newData.name}");
-                Destroy(placed.Instance);
-                placed = null;
-                return false;
-            }
 
             // Get the source door's direction from the source space
             if (!sourceSpace.DoorLookup.TryGetValue(sourceDoorGO, out var sourceDoorData)) {
@@ -213,16 +199,18 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
                 return false;
             }
 
-            // Align using actual Transforms
+            // Align using actual Transforms - position root so target door aligns with source door
             var offset = sourceDoorGO.transform.position - targetDoorGO.transform.position;
             placed.Instance.transform.position += offset;
+
+            Debug.Log(placed.Instance.transform.position);
 
             if (IsOverlapping(placed.GetBounds())) {
                 Debug.LogWarning($"Failed: Overlap detected for {newData.name}");
 #if UNITY_EDITOR
                 DestroyImmediate(placed.Instance);
 #else
-                Destroy(placed.Instance);
+        Destroy(placed.Instance);
 #endif
                 placed = null;
                 return false;
