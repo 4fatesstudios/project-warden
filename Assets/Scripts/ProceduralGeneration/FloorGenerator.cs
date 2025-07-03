@@ -41,7 +41,10 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
             if (placedStart == null) return;
             
             // First pass, generate all rooms and hallways where valid
-            ProcessSpawnQueue(rooms, hallways);
+            ProcessSpawnQueue(rooms, hallways, numberOfFreeRooms*4);
+            
+            // Delete remaining spawn door groups (TEMP)
+            
             
             // Cleanup pass to remove hallways that go nowhere
             // Connection pass to connect rooms that can be connected together
@@ -55,6 +58,12 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
                 TryPlaceFromSpawnGroup(queueItem, rooms, hallways);
                 attempts++;
             }
+            
+            Debug.Log($"\n### Processed Queue ###\n" +
+                      $"Placed Rooms: {_placedSpaces.Count(p => p.SourceData.SpaceType == SpaceType.Room)} / {numberOfFreeRooms}\n" +
+                      $"Remaining Queue Items: {_spawnQueue.Count}\n" +
+                      $"Attempts: {attempts} / {maxAttempts}\n" +
+                      $"########################\n");
         }
         
         private void TryPlaceFromSpawnGroup(SpawnGroupQueueItem queueItem, IReadOnlyList<SpaceData> rooms, IReadOnlyList<SpaceData> hallways) {
@@ -71,9 +80,13 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
                 if (placedAny) break;
             }
             if (!placedAny) {
-                Debug.LogWarning($"No valid space placed from group {queueItem.GroupID} of {source.Instance.name}");
+                LogSpawnQueue("After Failed Placement");
                 _spawnQueue.Enqueue(queueItem);
             }
+            else {
+                LogSpawnQueue("After Successful Placement");
+            }
+
         }
         
         private bool TryPlaceSpaceByDepth(GameObject doorGO, PlacedSpace source, int hallwayDepth,
@@ -82,7 +95,7 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
                 case 0:
                     return TryPlaceHallway(doorGO, source, hallways, hallwayDepth + 1);
                 case 1:
-                    if (_rng.Next(2) == 1)
+                    if (_rng.Next(4) == 1)
                         return TryPlaceHallway(doorGO, source, hallways, hallwayDepth + 1);
                     else
                         return TryPlaceRoom(doorGO, source, rooms, hallwayDepth);
@@ -118,6 +131,12 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
             if (placed == null) return null;
             EnqueueSpaceDoorSpawnGroups(placed);
             _placedSpaces.Add(placed);
+            
+            Debug.Log($"\n--- STARTING ROOM ---\n" +
+                      $"Prefab: {startingRoom.name}\n" +
+                      $"Position: {placed.Instance.transform.position}\n" +
+                      $"----------------------\n");
+            
             return placed;
         }
 
@@ -185,19 +204,29 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
             // Align using actual Transforms - position root so target door aligns with source door
             var offset = sourceDoorGO.transform.position - targetDoorGO.transform.position;
             placed.Instance.transform.position += offset;
-
-            Debug.Log(placed.Instance.transform.position);
-
+            
             if (IsOverlapping(placed.GetBounds())) {
                 Debug.LogWarning($"Failed: Overlap detected for {newData.name}");
 #if UNITY_EDITOR
                 DestroyImmediate(placed.Instance);
 #else
-        Destroy(placed.Instance);
+                Destroy(placed.Instance);
 #endif
                 placed = null;
                 return false;
             }
+            
+            Debug.Log(
+                $"\n+++ SPACE PLACED +++\n" +
+                $"Prefab: {newData.name}\n" +
+                $"Placed at: {placed.Instance.transform.position}\n" +
+                $"From Source: {sourceSpace.SourceData.name} ({sourceDoorGO.name})\n" +
+                $"Connected via direction: {sourceSpace.DoorLookup[sourceDoorGO].SpawnDirection} -> {targetDoorData.SpawnDirection}\n" +
+                $"Hallway Depth: {hallwayDepth}\n" +
+                $"Total Placed Spaces: {_placedSpaces.Count}\n" +
+                $"++++++++++++++++++++\n"
+            );
+            
             return true;
         }
         
@@ -209,6 +238,19 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
                 }
             }
             return false;
+        }
+        
+        private void LogSpawnQueue(string context) {
+            Debug.Log($"\n--- Spawn Queue ({context}) ---\n" +
+                      $"Queue Count: {_spawnQueue.Count}");
+
+            int i = 0;
+            foreach (var item in _spawnQueue) {
+                Debug.Log(
+                    $"[{i++}] Source: {item.Source.SourceData.name}, Group ID: {item.GroupID}, Depth: {item.HallwayDepth}"
+                );
+            }
+            Debug.Log("--- End of Queue ---\n");
         }
         
         private void LogPlacedSpaceDoors(PlacedSpace placed) {
@@ -224,7 +266,7 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
         }
 
         private void EnqueueSpaceDoorSpawnGroups(PlacedSpace placed, int hallwayDepth=0) {
-            foreach (var group in placed.DoorGroups) {
+            foreach (var group in placed.DoorGroups.Where(group => group.Key != 0)) {
                 _spawnQueue.Enqueue(new SpawnGroupQueueItem(placed, group.Key, hallwayDepth));
             }
         }

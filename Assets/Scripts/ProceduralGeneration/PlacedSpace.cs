@@ -34,11 +34,6 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
             Vector3 worldCenter = Instance.transform.TransformPoint(collider.center);
             Bounds bounds = new Bounds(worldCenter, collider.size);
 
-            Debug.Log($"[GetBounds] Instance world pos: {Instance.transform.position}");
-            Debug.Log($"[GetBounds] Collider local center: {collider.center}");
-            Debug.Log($"[GetBounds] Computed world bounds center: {bounds.center}");
-            Debug.Log($"[GetBounds] Computed world bounds size: {bounds.size}");
-
             return bounds;
         }
 
