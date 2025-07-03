@@ -110,7 +110,10 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
             var hallwayData = hallways[_rng.Next(hallways.Count)];
             if (TryPlaceSpaceAtDoor(doorGO, source, hallwayData, depth, out var placed)) {
                 _placedSpaces.Add(placed);
-                EnqueueSpaceDoorSpawnGroups(placed, depth);
+                
+                int usedGroupId = placed.DoorLookup.First(d => d.Value.SpawnDirection == 
+                                                               CardinalDirectionMask.GetOpposite(source.DoorLookup[doorGO].SpawnDirection)).Value.DoorSpawnGroup;
+                EnqueueSpaceDoorSpawnGroups(placed, depth, usedGroupId);
                 return true;
             }
             return false;
@@ -120,7 +123,10 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
             var roomData = rooms[_rng.Next(rooms.Count)];
             if (TryPlaceSpaceAtDoor(doorGO, source, roomData, depth, out var placed)) {
                 _placedSpaces.Add(placed);
-                EnqueueSpaceDoorSpawnGroups(placed);
+                
+                int usedGroupId = placed.DoorLookup.First(d => d.Value.SpawnDirection ==
+                                                               CardinalDirectionMask.GetOpposite(source.DoorLookup[doorGO].SpawnDirection)).Value.DoorSpawnGroup;
+                EnqueueSpaceDoorSpawnGroups(placed, 0, usedGroupId);
                 return true;
             }
             return false;
@@ -265,8 +271,10 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
             }
         }
 
-        private void EnqueueSpaceDoorSpawnGroups(PlacedSpace placed, int hallwayDepth=0) {
-            foreach (var group in placed.DoorGroups.Where(group => group.Key != 0)) {
+        private void EnqueueSpaceDoorSpawnGroups(PlacedSpace placed, int hallwayDepth=0, int excludeGroupId=-1) {
+            foreach (var group in placed.DoorGroups) {
+                if (group.Key == 0 || group.Key == excludeGroupId) continue;
+                
                 _spawnQueue.Enqueue(new SpawnGroupQueueItem(placed, group.Key, hallwayDepth));
             }
         }
