@@ -1,0 +1,21 @@
+<UXML xmlns="UnityEngine.UIElements" xmlns:ui="UnityEngine.UIElements">
+  <ui:VisualElement name="PotionCraftingRoot" style="flex-direction: column; padding: 16px; align-items: center; gap: 12px;">
+
+    <!-- Ingredient Slots -->
+    <ui:VisualElement name="IngredientSlots" style="flex-direction: row; justify-content: center; gap: 8px;">
+      <ui:Button name="ingredientSlot1" text="+" style="width: 80px; height: 80px;" />
+      <ui:Button name="ingredientSlot2" text="+" style="width: 80px; height: 80px;" />
+      <ui:Button name="ingredientSlot3" text="+" style="width: 80px; height: 80px;" />
+    </ui:VisualElement>
+
+    <!-- Craft Button -->
+    <ui:Button name="craftButton" text="Craft Potion" style="margin-top: 16px; width: 200px; height: 40px;" />
+
+    <!-- Result Label -->
+    <ui:Label name="resultLabel" style="margin-top: 16px; white-space: normal; width: 300px; min-height: 60px; text-align: center;" />
+
+    <!-- Optional Rhythm Minigame Slot -->
+    <ui:VisualElement name="RhythmMinigameSlot" style="margin-top: 20px;" />
+
+  </ui:VisualElement>
+</UXML>

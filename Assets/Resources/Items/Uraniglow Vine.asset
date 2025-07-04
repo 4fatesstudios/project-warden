@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ccec348f60f7b5c429d2fb1e20182269, type: 3}
+  m_Name: Uraniglow Vine
+  m_EditorClassIdentifier: 
+  itemName: Uraniglow Vine
+  itemDescription: This luminencent plant glows and burns with no visable flame
+  itemRarity: 1
+  _itemID: d4105b9b-fce7-4028-bec3-eb1f640b5f8c
+  ingredientArchetype: 2
+  ingredientAspect: 3
+  isCorrupted: 0
+  potionEffects:
+  - {fileID: 11400000, guid: 16c874db723e62a43b0e662637ec39e7, type: 2}
