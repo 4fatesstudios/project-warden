@@ -222,6 +222,10 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
                 return false;
             }
             
+            // On successful SpacePlace, add DoorConnection to sourceSpace and new placedSpace
+            placed.AddNewDoorConnection(targetDoorGO, sourceDoorData.DoorSpawnPoint, sourceSpace);
+            sourceSpace.AddNewDoorConnection(sourceDoorData.DoorSpawnPoint, targetDoorGO, placed);
+            
             Debug.Log(
                 $"\n+++ SPACE PLACED +++\n" +
                 $"Prefab: {newData.name}\n" +
