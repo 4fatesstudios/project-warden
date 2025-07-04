@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 53efbf4862b0b5b4797dee728a66223a, type: 3}
+  m_Name: Serpent's Dew
+  m_EditorClassIdentifier: 
+  itemName: Serpent's Dew
+  itemDescription: This potion burns those that are unfortunate enough to encounter
+    it
+  itemRarity: 1
+  _itemID: f47d204d-f626-43f6-90f7-edc5ac03aa9c
+  itemPotionType: 2
+  potionEffects:
+  - {fileID: 11400000, guid: 16c874db723e62a43b0e662637ec39e7, type: 2}

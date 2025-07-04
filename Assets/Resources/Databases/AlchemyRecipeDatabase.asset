@@ -9,10 +9,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 871781efd7ba7d344bb37a91e64b5322, type: 3}
-  m_Name: TestItem2
+  m_Script: {fileID: 11500000, guid: a0b6fb3113c6a234580ba7532c570333, type: 3}
+  m_Name: AlchemyRecipeDatabase
   m_EditorClassIdentifier: 
-  itemName: TestItem2
-  itemDescription: Test Item 2
-  itemRarity: 0
-  _itemID: 820475f3-88f5-4505-b5c4-bd3e093271cb
+  _recipes:
+  - {fileID: 11400000, guid: dd0534be969afd34085cdb22dac4b9ed, type: 2}

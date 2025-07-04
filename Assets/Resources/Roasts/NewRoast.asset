@@ -18,8 +18,8 @@ MonoBehaviour:
   totalDisplayedIngredients: 3
   requiredCookedTime: 6
   uncookedThreshold: 0
-  cookedThreshold: 2
-  burntThreshold: 1
+  cookedThreshold: 1
+  burntThreshold: 2
   requiresCorruptedCooking: 0
   requiredCookCount: 0
   cookedTime: 0

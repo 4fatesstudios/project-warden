@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ccec348f60f7b5c429d2fb1e20182269, type: 3}
-  m_Name: TestIngredient1
+  m_Name: Water
   m_EditorClassIdentifier: 
-  itemName: Test Ingredient 1
-  itemDescription: Test Ingredient 1
-  itemRarity: 3
-  _itemID: 0c93a869-491e-483b-9f0b-8e64fb603a5a
-  ingredientArchetype: 3
-  ingredientAspect: 3
-  isCorrupted: 1
+  itemName: Water
+  itemDescription: Plain Ol' Water
+  itemRarity: 1
+  _itemID: eeba4ec8-98ca-459c-a62a-61a8fb2f4c7c
+  ingredientArchetype: 0
+  ingredientAspect: 0
+  isCorrupted: 0
   potionEffects: []

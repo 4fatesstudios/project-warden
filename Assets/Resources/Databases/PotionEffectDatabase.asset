@@ -9,14 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ccec348f60f7b5c429d2fb1e20182269, type: 3}
-  m_Name: TestIngredient1
+  m_Script: {fileID: 11500000, guid: f8c5fc307e7d73f4497e6c1c49787a21, type: 3}
+  m_Name: PotionEffectDatabase
   m_EditorClassIdentifier: 
-  itemName: Test Ingredient 1
-  itemDescription: Test Ingredient 1
-  itemRarity: 3
-  _itemID: 0c93a869-491e-483b-9f0b-8e64fb603a5a
-  ingredientArchetype: 3
-  ingredientAspect: 3
-  isCorrupted: 1
   potionEffects: []

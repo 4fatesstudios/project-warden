@@ -1,14 +1,21 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
-    <Style src="project://database/Assets/Scripts/UI/CraftingSystem/PotionStyles.uss?fileID=7433441132597879392&amp;guid=87e5e9d71a8116c41ba4d1d172a7a989&amp;type=3#PotionStyles" />
-    <ui:VisualElement class="crafting-root">
-        <ui:Label text="Potion Crafting" class="crafting-title" />
-        <ui:VisualElement class="slot-container">
-            <ui:Button name="ingredientSlot1" class="ingredient-slot" />
-            <ui:Button name="ingredientSlot2" class="ingredient-slot" />
-            <ui:Button name="ingredientSlot3" class="ingredient-slot" />
-        </ui:VisualElement>
-        <ui:Button name="craftButton" text="Begin Brewing" class="craft-button" />
-        <ui:Label name="resultLabel" class="result-label" />
-        <ui:Button name="backButton" text="Back" class="back-button" />
+<UXML xmlns="UnityEngine.UIElements" xmlns:ui="UnityEngine.UIElements">
+  <ui:VisualElement name="PotionCraftingRoot" style="flex-direction: column; padding: 16px; align-items: center; gap: 12px;">
+
+    <!-- Ingredient Slots -->
+    <ui:VisualElement name="IngredientSlots" style="flex-direction: row; justify-content: center; gap: 8px;">
+      <ui:Button name="ingredientSlot1" text="+" style="width: 80px; height: 80px;" />
+      <ui:Button name="ingredientSlot2" text="+" style="width: 80px; height: 80px;" />
+      <ui:Button name="ingredientSlot3" text="+" style="width: 80px; height: 80px;" />
     </ui:VisualElement>
-</ui:UXML>
+
+    <!-- Craft Button -->
+    <ui:Button name="craftButton" text="Craft Potion" style="margin-top: 16px; width: 200px; height: 40px;" />
+
+    <!-- Result Label -->
+    <ui:Label name="resultLabel" style="margin-top: 16px; white-space: normal; width: 300px; min-height: 60px; text-align: center;" />
+
+    <!-- Optional Rhythm Minigame Slot -->
+    <ui:VisualElement name="RhythmMinigameSlot" style="margin-top: 20px;" />
+
+  </ui:VisualElement>
+</UXML>

@@ -9,10 +9,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 871781efd7ba7d344bb37a91e64b5322, type: 3}
-  m_Name: TestItem2
+  m_Script: {fileID: 11500000, guid: 560b788464d45864384a0c2342426f48, type: 3}
+  m_Name: Burning
   m_EditorClassIdentifier: 
-  itemName: TestItem2
-  itemDescription: Test Item 2
-  itemRarity: 0
-  _itemID: 820475f3-88f5-4505-b5c4-bd3e093271cb
+  suffix: Searing
+  effectDescription: Burns the enemy
+  id: 1
+  effectTypes: 02000000
+  effectAspects: 02000000
+  potencies:
+  - 5
+  durations:
+  - 2
