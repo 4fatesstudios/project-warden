@@ -33,7 +33,7 @@ namespace TMPro.Examples
 
 
 
-            if (BenchmarkType == 0) // TextMesh Pro Component
+            if (BenchmarkType == 0) // TextMesh Pro AlchemyComponent
             {
                 m_textMeshPro = gameObject.AddComponent<TextMeshPro>();
                 m_textMeshPro.autoSizeTextContainer = true;

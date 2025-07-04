@@ -15,7 +15,8 @@ MonoBehaviour:
   itemName: Test Ingredient 1
   itemDescription: Test Ingredient 1
   itemRarity: 3
-  _itemID: 340a584d-a0b5-4b91-947a-da9a2331de03
+  _itemID: 0c93a869-491e-483b-9f0b-8e64fb603a5a
   ingredientArchetype: 3
   ingredientAspect: 3
   isCorrupted: 1
+  potionEffects: []

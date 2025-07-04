@@ -1,3 +1,5 @@
+using FourFatesStudios.ProjectWarden.ScriptableObjects.PotionEffects;
+using FourFatesStudios.ProjectWarden.ScriptableObjects.Databases;
 using UnityEngine;
 
 namespace FourFatesStudios.ProjectWarden.GameSystems
@@ -15,6 +17,17 @@ namespace FourFatesStudios.ProjectWarden.GameSystems
         void Update()
         {
             
+        }
+
+        [SerializeField] private PotionEffectDatabase potionEffectDb;
+        [SerializeField] private ItemDatabase itemDb;
+
+        private void Awake()
+        {
+        }
+
+        private void OnApplicationQuit()
+        {
         }
     }
     

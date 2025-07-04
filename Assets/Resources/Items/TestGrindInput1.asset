@@ -15,7 +15,8 @@ MonoBehaviour:
   itemName: Unnamed Item
   itemDescription: Empty Description
   itemRarity: 0
-  _itemID: 
+  _itemID: 6e82f18d-804d-4acc-9c9d-d9515725bf01
   ingredientArchetype: 0
   ingredientAspect: 0
   isCorrupted: 0
+  potionEffects: []

@@ -21,7 +21,7 @@ namespace TMPro.Examples
 
         void Awake()
         {
-            // Get Reference to TextMeshPro Component
+            // Get Reference to TextMeshPro AlchemyComponent
             m_textMeshPro = GetComponent<TMP_Text>();
             m_textMeshPro.text = label01;
             m_textMeshPro.textWrappingMode = TextWrappingModes.Normal;
