@@ -19,12 +19,14 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
         // Door groups are mapped to the GameObjects at runtime
         public Dictionary<int, List<GameObject>> DoorGroups { get; set; } = new();
 
-        private List<DoorConnection> connectedDoors = new();
+        private List<DoorConnection> ConnectedDoors { get; set; } = new();
         
-        public IReadOnlyList<DoorConnection> ConnectedDoors => connectedDoors;
-
         public DoorSpawnData GetMatchingDoor(CardinalDirection oppositeDirection) {
             return SourceData.DoorSpawnPoints.FirstOrDefault(d => d.SpawnDirection == oppositeDirection);
+        }
+        
+        public List<DoorConnection> GetAllConnections() {
+            return ConnectedDoors.ToList(); // Return a copy to prevent external mutation
         }
     
         /// <summary>
@@ -32,15 +34,19 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
         /// </summary>
         /// <param name="localDoor">Door GameObject of this PlacedSpace to add</param>
         /// <param name="connectedDoor">Door GameObject that localDoor is now connected to</param>
-        /// <param name="placedSpace">The PlacedSpace of the newly connectedDoor</param>
-        public void AddNewDoorConnection(GameObject localDoor, GameObject connectedDoor, PlacedSpace placedSpace) {
-            bool alreadyConnected = connectedDoors.Any(c => c.LocalDoor == localDoor);
-            if (alreadyConnected) {
+        /// <param name="otherSpace">The PlacedSpace of the newly connectedDoor</param>
+        public void AddNewDoorConnection(GameObject localDoor, GameObject connectedDoor, PlacedSpace otherSpace) {
+            if (ConnectedDoors.Any(c => c.LocalDoor == localDoor)) {
                 Debug.LogWarning($"Error: {Instance.name} already has a connection for {localDoor.name}");
                 return;
             }
 
-            connectedDoors.Add(new DoorConnection(localDoor, connectedDoor, placedSpace));
+            ConnectedDoors.Add(new DoorConnection(localDoor, connectedDoor, otherSpace));
+
+            // Add reverse connection to the other space
+            if (!otherSpace.ConnectedDoors.Any(c => c.LocalDoor == connectedDoor)) {
+                otherSpace.ConnectedDoors.Add(new DoorConnection(connectedDoor, localDoor, this));
+            }
         }
         
         /// <summary>
@@ -48,13 +54,22 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
         /// </summary>
         /// <param name="localDoor">Door GameObject of this PlacedSpace to remove</param>
         public void RemoveDoorConnection(GameObject localDoor) {
-            var connection = connectedDoors.FirstOrDefault(c => c.LocalDoor == localDoor);
+            var connection = ConnectedDoors.FirstOrDefault(c => c.LocalDoor == localDoor);
             if (connection.LocalDoor == null) {
                 Debug.LogWarning($"No connection found for {localDoor.name} in {Instance.name}");
                 return;
             }
 
-            connectedDoors.Remove(connection);
+            ConnectedDoors.Remove(connection);
+
+            // Remove reverse connection from the other space
+            var otherSpace = connection.ConnectedSpace;
+            if (otherSpace != null) {
+                var reverse = otherSpace.ConnectedDoors.FirstOrDefault(c => c.LocalDoor == connection.ConnectedDoor);
+                if (reverse.LocalDoor != null) {
+                    otherSpace.ConnectedDoors.Remove(reverse);
+                }
+            }
         }
 
         public Bounds GetBounds() {
@@ -82,6 +97,45 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
             LocalDoor = localDoor;
             ConnectedDoor = connectedDoor;
             ConnectedSpace = connectedSpace;
+        }
+    }
+    
+    public static class PlacedSpaceConnectionUtility
+    {
+        /// <summary>
+        /// Connects two spaces via the specified doors. Ensures doors exist on their respective spaces.
+        /// </summary>
+        public static void ConnectSpaces(PlacedSpace spaceA, GameObject doorA, PlacedSpace spaceB, GameObject doorB) {
+            if (!spaceA.DoorLookup.ContainsKey(doorA)) {
+                Debug.LogError($"Door {doorA.name} not found in DoorLookup of {spaceA.Instance.name}");
+                return;
+            }
+
+            if (!spaceB.DoorLookup.ContainsKey(doorB)) {
+                Debug.LogError($"Door {doorB.name} not found in DoorLookup of {spaceB.Instance.name}");
+                return;
+            }
+
+            spaceA.AddNewDoorConnection(doorA, doorB, spaceB);
+        }
+
+        /// <summary>
+        /// Disconnects the door from its connected counterpart bidirectionally.
+        /// </summary>
+        public static void DisconnectDoor(PlacedSpace space, GameObject door) {
+            space.RemoveDoorConnection(door);
+        }
+
+        /// <summary>
+        /// Removes all connections from the given space and clears them bidirectionally.
+        /// </summary>
+        public static void RemoveAllConnections(PlacedSpace space) {
+            // Use ToList to avoid modifying collection while iterating
+            var connections = space.GetAllConnections().ToList();
+
+            foreach (var connection in connections) {
+                space.RemoveDoorConnection(connection.LocalDoor);
+            }
         }
     }
 }
