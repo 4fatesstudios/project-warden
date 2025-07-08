@@ -598,6 +598,7 @@ GameObject:
   - component: {fileID: 4324600162860606432}
   - component: {fileID: 7613071699431571570}
   - component: {fileID: 3656767692325278622}
+  - component: {fileID: 4327587673896965690}
   m_Layer: 10
   m_Name: RoomSmallTemplate
   m_TagString: Untagged
@@ -958,6 +959,19 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 29.9, y: 2, z: 29.9}
   m_Center: {x: 11, y: -1, z: 9}
+--- !u!114 &4327587673896965690
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2954860515763045841}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fb5e8f280babf614c99121eb334492fa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spaceType: 0
 --- !u!1 &3125019401964653276
 GameObject:
   m_ObjectHideFlags: 0

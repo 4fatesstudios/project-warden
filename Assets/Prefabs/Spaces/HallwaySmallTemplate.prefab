@@ -372,6 +372,7 @@ GameObject:
   - component: {fileID: 6533040820910917489}
   - component: {fileID: 7939097124340225316}
   - component: {fileID: 4838012458437398270}
+  - component: {fileID: 617369921486090690}
   m_Layer: 10
   m_Name: HallwaySmallTest1
   m_TagString: Untagged
@@ -732,6 +733,19 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 9.9, y: 2, z: 9.9}
   m_Center: {x: 1, y: -1, z: 19}
+--- !u!114 &617369921486090690
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8113794995430571539}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fb5e8f280babf614c99121eb334492fa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spaceType: 1
 --- !u!1 &8615208561167102213
 GameObject:
   m_ObjectHideFlags: 0

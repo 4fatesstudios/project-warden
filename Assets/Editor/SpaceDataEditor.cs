@@ -212,7 +212,7 @@ public class SpaceDataEditor : Editor
                 var prefabTransform = prefabRoot.transform.Find(relPath);
                 if (prefabTransform != null)
                 {
-                    var sr = prefabTransform.GetComponent<SpriteRenderer>();
+                    var sr = prefabTransform.GetComponentInChildren<SpriteRenderer>();
                     if (sr != null)
                     {
                         sr.color = GetColorFromGroup(doorData.DoorSpawnGroup);

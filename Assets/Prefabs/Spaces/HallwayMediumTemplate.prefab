@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 5318512382528408741}
   - component: {fileID: 5181615100912237330}
   - component: {fileID: 7282674385767599702}
+  - component: {fileID: 868918120179841825}
   m_Layer: 10
   m_Name: HallwayMediumTemplate
   m_TagString: Untagged
@@ -375,6 +376,19 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 19.9, y: 2, z: 19.9}
   m_Center: {x: 6, y: -1, z: 14}
+--- !u!114 &868918120179841825
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 119365581188525073}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fb5e8f280babf614c99121eb334492fa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spaceType: 1
 --- !u!1 &531353260051832118
 GameObject:
   m_ObjectHideFlags: 0
