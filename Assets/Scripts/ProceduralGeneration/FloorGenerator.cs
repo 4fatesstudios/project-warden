@@ -5,6 +5,7 @@ using FourFatesStudios.ProjectWarden.Enums;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Databases;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Exploration;
 using UnityEngine;
+using UnityEngine.PlayerLoop;
 using Random = UnityEngine.Random;
 
 namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
@@ -19,8 +20,9 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
         [SerializeField] private GlobalAreasDatabase globalAreasDatabase;
 
         private System.Random _rng;
-        private Queue<SpawnGroupQueueItem> _spawnQueue;
-        private List<PlacedSpace> _placedSpaces;
+        private Queue<SpawnGroupQueueItem> _spawnQueue = new();
+        private List<PlacedSpace> _placedSpaces = new();
+        private List<SpaceConnectionItem> _spaceConnections = new();
         private int numberOfFreeRooms;
 
         public void GenerateFloor() {
@@ -224,6 +226,7 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
             
             // On successful SpacePlace, add DoorConnection to sourceSpace and new placedSpace
             PlacedSpaceConnectionUtility.ConnectSpaces(sourceSpace, sourceDoorGO, placed, targetDoorGO);
+            _spaceConnections.Add(new SpaceConnectionItem(sourceSpace, sourceDoorGO, placed, targetDoorGO));
             
             Debug.Log(
                 $"\n+++ SPACE PLACED +++\n" +
@@ -289,6 +292,17 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
             }
         }
 
+        private void OnDrawGizmos() {
+            if (_spaceConnections.Count == 0) return;
+            foreach (var connection in _spaceConnections) {
+                if (connection != null) {
+                    Vector3 location = connection.DoorA.transform.position;
+                    Gizmos.color = Color.magenta;
+                    Gizmos.DrawWireCube(location, new Vector3(4, 4, 4));
+                }
+            }
+        }
+
         private class SpawnGroupQueueItem {
             public PlacedSpace Source;
             public int GroupID;
@@ -298,6 +312,20 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
                 Source = source;
                 GroupID = groupID;
                 HallwayDepth = hallwayDepth;
+            }
+        }
+
+        private class SpaceConnectionItem {
+            public PlacedSpace SpaceA;
+            public GameObject DoorA;
+            public PlacedSpace SpaceB;
+            public GameObject DoorB;
+
+            public SpaceConnectionItem(PlacedSpace spaceA, GameObject doorA, PlacedSpace spaceB, GameObject doorB) {
+                SpaceA = spaceA;
+                DoorA = doorA;
+                SpaceB = spaceB;
+                DoorB = doorB;
             }
         }
     }
