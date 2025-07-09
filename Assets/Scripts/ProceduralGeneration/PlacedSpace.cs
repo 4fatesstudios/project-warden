@@ -22,7 +22,8 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
         private List<DoorConnection> ConnectedDoors { get; set; } = new();
         
         public DoorSpawnData GetMatchingDoor(CardinalDirection oppositeDirection) {
-            return SourceData.DoorSpawnPoints.FirstOrDefault(d => d.SpawnDirection == oppositeDirection);
+            return SourceData.DoorSpawnPoints
+                .FirstOrDefault(d => d.SpawnDirection == oppositeDirection && d.DoorSpawnGroup != 0);
         }
         
         public List<DoorConnection> GetAllConnections() {

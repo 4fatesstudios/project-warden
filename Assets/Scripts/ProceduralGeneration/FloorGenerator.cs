@@ -154,12 +154,14 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
             _placedSpaces = new List<PlacedSpace>();
             _spawnQueue = new Queue<SpawnGroupQueueItem>();
             numberOfFreeRooms = _rng.Next(minimumFreeRooms, maximumFreeRooms + 1);
+            _spaceConnections = new List<SpaceConnectionItem>();
         }
 
         public void ClearFloor() {
             foreach (var space in _placedSpaces) {
                 DestroyImmediate(space.Instance);
             }
+            _spaceConnections.Clear();
         }
 
         private void SetRandomSeed() {
@@ -187,7 +189,11 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
             // Get the source door's direction from the source space
             if (!sourceSpace.DoorLookup.TryGetValue(sourceDoorGO, out var sourceDoorData)) {
                 Debug.LogError("Source door GameObject not found in DoorLookup.");
+#if UNITY_EDITOR
+                DestroyImmediate(placed.Instance);
+#else
                 Destroy(placed.Instance);
+#endif
                 placed = null;
                 return false;
             }
@@ -195,7 +201,11 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
             var targetDoorData = placed.GetMatchingDoor(CardinalDirectionMask.GetOpposite(sourceDoorData.SpawnDirection));
             if (targetDoorData == null) {
                 Debug.LogWarning($"Failed: Matching door not found in {newData.name}");
+#if UNITY_EDITOR
+                DestroyImmediate(placed.Instance);
+#else
                 Destroy(placed.Instance);
+#endif
                 placed = null;
                 return false;
             }
@@ -204,7 +214,11 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
             var targetDoorGO = placed.DoorLookup.FirstOrDefault(kvp => kvp.Value == targetDoorData).Key;
             if (targetDoorGO == null) {
                 Debug.LogError("Matching target door GameObject not found.");
+#if UNITY_EDITOR
+                DestroyImmediate(placed.Instance);
+#else
                 Destroy(placed.Instance);
+#endif
                 placed = null;
                 return false;
             }
