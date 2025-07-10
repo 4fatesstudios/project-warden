@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using FourFatesStudios.ProjectWarden.Enums;
@@ -48,8 +49,11 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
             // Delete remaining spawn door groups (TEMP)
             
             
-            // Cleanup pass to remove hallways that go nowhere
-            // Connection pass to connect rooms that can be connected together
+            // Second pass, cleanup pass to remove hallways that go nowhere
+
+            // PruneDeadEndHallways();
+
+            // Third pass, connection pass to connect rooms that can be connected together
         }
         
         private void ProcessSpawnQueue(IReadOnlyList<SpaceData> rooms, IReadOnlyList<SpaceData> hallways, int maxAttempts=50) {
@@ -67,6 +71,58 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
                       $"Attempts: {attempts} / {maxAttempts}\n" +
                       $"########################\n");
         }
+
+        public void PruneDeadEndHallways() {
+            var placedHallways = new Queue<PlacedSpace>(_placedSpaces
+                .Where(s => s.SourceData.SpaceType == SpaceType.Hallway).ToList());
+
+            Debug.Log($"[Prune] Starting pruning. Initial hallway count: {placedHallways.Count}");
+
+            while (placedHallways.Count > 0) {
+                var hallway = placedHallways.Dequeue();
+
+                Debug.Log($"[Prune] Evaluating hallway: {hallway.SourceData.name} | Connections: {hallway.NumberOfConnections}");
+
+                if (hallway.NumberOfConnections <= 1) {
+                    var connectedHallways = hallway.GetAllConnections()
+                        .Where(s => s.ConnectedSpace.SourceData.SpaceType == SpaceType.Hallway)
+                        .Select(s => s.ConnectedSpace)
+                        .Distinct();
+
+                    foreach (var connectedHallway in connectedHallways) {
+                        if (!placedHallways.Contains(connectedHallway)) {
+                            Debug.Log($"[Prune] Queueing connected hallway: {connectedHallway.SourceData.name}");
+                            placedHallways.Enqueue(connectedHallway);
+                        }
+                    }
+
+                    Debug.Log($"[Prune] Pruning dead-end hallway: {hallway.SourceData.name}");
+                    DeletePlacedSpaceAndConnections(hallway);
+                }
+            }
+
+            Debug.Log($"[Prune] Finished pruning. Remaining placed spaces: {_placedSpaces.Count}");
+        }
+
+        private void DeletePlacedSpaceAndConnections(PlacedSpace placedSpace) {
+            if (!_placedSpaces.Contains(placedSpace)) {
+                Debug.LogWarning($"[Delete] Placed space not found: {placedSpace.SourceData.name}");
+                return;
+            }
+
+            Debug.Log($"[Delete] Removing placed space: {placedSpace.SourceData.name}");
+
+            _placedSpaces.Remove(placedSpace);
+            _spaceConnections.RemoveAll(item => item.SpaceA == placedSpace || item.SpaceB == placedSpace);
+            PlacedSpaceConnectionUtility.RemoveAllConnections(placedSpace);
+            
+#if UNITY_EDITOR
+            DestroyImmediate(placedSpace.Instance);
+#else
+            Destroy(placed.Instance);
+#endif
+        }
+
         
         private void TryPlaceFromSpawnGroup(SpawnGroupQueueItem queueItem, IReadOnlyList<SpaceData> rooms, IReadOnlyList<SpaceData> hallways) {
             var source = queueItem.Source;
