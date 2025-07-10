@@ -83,22 +83,20 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
 
                 Debug.Log($"[Prune] Evaluating hallway: {hallway.SourceData.name} | Connections: {hallway.NumberOfConnections}");
 
-                if (hallway.NumberOfConnections <= 1) {
-                    var connectedHallways = hallway.GetAllConnections()
-                        .Where(s => s.ConnectedSpace.SourceData.SpaceType == SpaceType.Hallway)
-                        .Select(s => s.ConnectedSpace)
-                        .Distinct();
+                if (hallway.NumberOfConnections > 1) continue;
+                var connectedHallways = hallway.GetAllConnections()
+                    .Where(s => s.ConnectedSpace.SourceData.SpaceType == SpaceType.Hallway)
+                    .Select(s => s.ConnectedSpace)
+                    .Distinct();
 
-                    foreach (var connectedHallway in connectedHallways) {
-                        if (!placedHallways.Contains(connectedHallway)) {
-                            Debug.Log($"[Prune] Queueing connected hallway: {connectedHallway.SourceData.name}");
-                            placedHallways.Enqueue(connectedHallway);
-                        }
-                    }
-
-                    Debug.Log($"[Prune] Pruning dead-end hallway: {hallway.SourceData.name}");
-                    DeletePlacedSpaceAndConnections(hallway);
+                foreach (var connectedHallway in connectedHallways) {
+                    if (placedHallways.Contains(connectedHallway)) continue;
+                    Debug.Log($"[Prune] Queueing connected hallway: {connectedHallway.SourceData.name}");
+                    placedHallways.Enqueue(connectedHallway);
                 }
+
+                Debug.Log($"[Prune] Pruning dead-end hallway: {hallway.SourceData.name}");
+                DeletePlacedSpaceAndConnections(hallway);
             }
 
             Debug.Log($"[Prune] Finished pruning. Remaining placed spaces: {_placedSpaces.Count}");
