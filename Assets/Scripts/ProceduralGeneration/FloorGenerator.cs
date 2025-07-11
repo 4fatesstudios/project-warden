@@ -47,9 +47,6 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
             // First pass, generate all rooms and hallways where valid
             ProcessSpawnQueue();
             
-            // Delete remaining spawn door groups (TEMP)
-            
-            
             // Second pass, cleanup pass to remove hallways that go nowhere
             // PruneDeadEndHallways();
 
@@ -311,10 +308,6 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
             );
             
             return true;
-        }
-        
-        private List<SpaceData> GetFilteredRoomsBySize(IReadOnlyList<SpaceData> rooms, HashSet<RoomSize> targetSizes) {
-            return rooms.Where(room => !targetSizes.Contains(room.RoomSize)).ToList();
         }
 
         private List<RoomSize> GetLargerSizes(RoomSize targetSizes) {
