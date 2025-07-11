@@ -59,8 +59,10 @@ public class DoorSpawnDataDrawer : PropertyDrawer
 
     public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
     {
-        return 3 * EditorGUIUtility.singleLineHeight + LineSpacing;
+        float lineHeight = EditorGUIUtility.singleLineHeight;
+        return 3 * lineHeight + LineSpacing + 4f; // Add extra spacing after the element
     }
+
 
     private static Color GetColorFromGroup(int group)
     {
