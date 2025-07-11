@@ -19,6 +19,10 @@ public class FloorGeneratorEditor : Editor
         if (GUILayout.Button("Clear Floor")) {
             floorGenerator.ClearFloor();
         }
+
+        if (GUILayout.Button("Prune Dead End Hallways")) {
+            floorGenerator.PruneDeadEndHallways();
+        }
     }
 }
 #endif

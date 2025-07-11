@@ -12,6 +12,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: RoomMedium_Test5
       objectReference: {fileID: 0}
+    - target: {fileID: 457824140590779917, guid: 00e7813566ebb36418460f3ab58eaaf6, type: 3}
+      propertyPath: m_Color.b
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 655876997573725011, guid: 00e7813566ebb36418460f3ab58eaaf6, type: 3}
+      propertyPath: m_Color.r
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1799533427710472582, guid: 00e7813566ebb36418460f3ab58eaaf6, type: 3}
       propertyPath: m_Color.g
       value: 1
@@ -28,11 +36,27 @@ PrefabInstance:
       propertyPath: m_Color.b
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 4990436651370590424, guid: 00e7813566ebb36418460f3ab58eaaf6, type: 3}
+      propertyPath: m_Color.b
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5021791338818454140, guid: 00e7813566ebb36418460f3ab58eaaf6, type: 3}
+      propertyPath: m_Color.g
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6329886968688853952, guid: 00e7813566ebb36418460f3ab58eaaf6, type: 3}
       propertyPath: m_Color.r
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6475495668627222372, guid: 00e7813566ebb36418460f3ab58eaaf6, type: 3}
+      propertyPath: m_Color.g
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6915967342970926394, guid: 00e7813566ebb36418460f3ab58eaaf6, type: 3}
+      propertyPath: m_Color.r
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8848630878338741107, guid: 00e7813566ebb36418460f3ab58eaaf6, type: 3}
       propertyPath: m_Color.g
       value: 1
       objectReference: {fileID: 0}

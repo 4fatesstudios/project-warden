@@ -9,19 +9,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-<<<<<<<< HEAD:Assets/Resources/Databases/Area Spaces/ThornsteepedMouthSpaces.asset
   m_Script: {fileID: 11500000, guid: 914f7d9e83ba63b4684cec6815677fe4, type: 3}
   m_Name: ThornsteepedMouthSpaces
   m_EditorClassIdentifier: 
-  area: 0
+  area: 1
   rooms: []
   hallways: []
-========
-  m_Script: {fileID: 11500000, guid: 710a054946e11eb44bf55df88ee683e3, type: 3}
-  m_Name: HallwayLargeTest1
-  m_EditorClassIdentifier: 
-  spacePrefab: {fileID: 0}
-  spaceType: 1
-  roomSize: 0
-  doorSpawnPoints: []
->>>>>>>> cec3c00 (test spaces added):Assets/Resources/Spaces/Test/Hallways/HallwayLargeTest1.asset
