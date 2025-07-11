@@ -681,7 +681,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 25738
+  m_VersionIndex: 25749
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -701,7 +701,7 @@ MonoBehaviour:
   m_Shape:
     rid: 2422288033885454529
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_UnmodifiedMeshVersion: 25507
+  m_UnmodifiedMeshVersion: 25749
   m_Size: {x: 30, y: -2, z: 30}
   m_LocalCenter: {x: 11, y: -1.0476115, z: 9}
   references:
