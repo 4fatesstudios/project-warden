@@ -29,5 +29,17 @@ namespace FourFatesStudios.ProjectWarden.Enums
         public static bool EqualOpposites(CardinalDirection a, CardinalDirection b) {
             return a != b && GetMask(a) == GetMask(b);
         }
+        
+        public static CardinalDirection GetOpposite(CardinalDirection dir) => dir switch {
+            CardinalDirection.North => CardinalDirection.South,
+            CardinalDirection.South => CardinalDirection.North,
+            CardinalDirection.East => CardinalDirection.West,
+            CardinalDirection.West => CardinalDirection.East,
+            _ => CardinalDirection.None
+        };
+
+        public static bool AreOpposites(CardinalDirection a, CardinalDirection b) =>
+            GetOpposite(a) == b;
+
     }
 }
