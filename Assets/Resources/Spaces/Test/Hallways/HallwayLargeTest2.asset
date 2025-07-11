@@ -12,7 +12,57 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 710a054946e11eb44bf55df88ee683e3, type: 3}
   m_Name: HallwayLargeTest2
   m_EditorClassIdentifier: 
-  spacePrefab: {fileID: 0}
+  spacePrefab: {fileID: 3727246283051882185, guid: 781fe16c473132f43bf94d4fd748dd4a, type: 3}
   spaceType: 1
   roomSize: 0
-  doorSpawnPoints: []
+  doorSpawnPoints:
+  - doorSpawnPoint: {fileID: 1145605762779910398, guid: 781fe16c473132f43bf94d4fd748dd4a, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 2
+    doorSpawnGroup: 0
+  - doorSpawnPoint: {fileID: 4532528287686753367, guid: 781fe16c473132f43bf94d4fd748dd4a, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 2
+    doorSpawnGroup: 0
+  - doorSpawnPoint: {fileID: 7547595510386090499, guid: 781fe16c473132f43bf94d4fd748dd4a, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 2
+    doorSpawnGroup: 0
+  - doorSpawnPoint: {fileID: 3748739251397899297, guid: 781fe16c473132f43bf94d4fd748dd4a, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 4
+    doorSpawnGroup: 1
+  - doorSpawnPoint: {fileID: 1494196664997151824, guid: 781fe16c473132f43bf94d4fd748dd4a, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 4
+    doorSpawnGroup: 1
+  - doorSpawnPoint: {fileID: 5780195529318182470, guid: 781fe16c473132f43bf94d4fd748dd4a, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 3
+    doorSpawnGroup: 2
+  - doorSpawnPoint: {fileID: 5481974769095315395, guid: 781fe16c473132f43bf94d4fd748dd4a, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 3
+    doorSpawnGroup: 2
+  - doorSpawnPoint: {fileID: 3121581871647142098, guid: 781fe16c473132f43bf94d4fd748dd4a, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 1
+    doorSpawnGroup: 0
+  - doorSpawnPoint: {fileID: 3744232710333459388, guid: 781fe16c473132f43bf94d4fd748dd4a, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 1
+    doorSpawnGroup: 0
+  - doorSpawnPoint: {fileID: 2028882974820384293, guid: 781fe16c473132f43bf94d4fd748dd4a, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 1
+    doorSpawnGroup: 0

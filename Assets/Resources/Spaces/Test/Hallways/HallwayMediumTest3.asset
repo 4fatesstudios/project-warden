@@ -12,7 +12,47 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 710a054946e11eb44bf55df88ee683e3, type: 3}
   m_Name: HallwayMediumTest3
   m_EditorClassIdentifier: 
-  spacePrefab: {fileID: 0}
+  spacePrefab: {fileID: 119365581188525073, guid: 868ed2846349a57489a15d40a35a4bc6, type: 3}
   spaceType: 1
   roomSize: 0
-  doorSpawnPoints: []
+  doorSpawnPoints:
+  - doorSpawnPoint: {fileID: 7101406712141339675, guid: 868ed2846349a57489a15d40a35a4bc6, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 2
+    doorSpawnGroup: 1
+  - doorSpawnPoint: {fileID: 5659262775702813503, guid: 868ed2846349a57489a15d40a35a4bc6, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 2
+    doorSpawnGroup: 1
+  - doorSpawnPoint: {fileID: 8008506945883141277, guid: 868ed2846349a57489a15d40a35a4bc6, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 4
+    doorSpawnGroup: 2
+  - doorSpawnPoint: {fileID: 6019836222631949116, guid: 868ed2846349a57489a15d40a35a4bc6, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 4
+    doorSpawnGroup: 2
+  - doorSpawnPoint: {fileID: 5278167926089701008, guid: 868ed2846349a57489a15d40a35a4bc6, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 3
+    doorSpawnGroup: 0
+  - doorSpawnPoint: {fileID: 1482632233791239866, guid: 868ed2846349a57489a15d40a35a4bc6, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 3
+    doorSpawnGroup: 0
+  - doorSpawnPoint: {fileID: 5435487713612021899, guid: 868ed2846349a57489a15d40a35a4bc6, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 1
+    doorSpawnGroup: 0
+  - doorSpawnPoint: {fileID: 2905395355427190653, guid: 868ed2846349a57489a15d40a35a4bc6, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 1
+    doorSpawnGroup: 0
