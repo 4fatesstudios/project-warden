@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/Resources/Items/Fire Plant.asset.meta
 guid: 32f93b5167963d5428d18955071a1f47
+========
+guid: 64e538a8353483b48872c46aad6c2c02
+>>>>>>>> 724013a (added group indicing for door spawn groups):Assets/Resources/Items/RoomSmallTest.asset.meta
 NativeFormatImporter:
   externalObjects: {}
   mainObjectFileID: 11400000
