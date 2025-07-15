@@ -12,13 +12,37 @@ PrefabInstance:
       propertyPath: m_Color.r
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 2422857177822308680, guid: 0443ee07efb771f45bfdeceb355b8eca, type: 3}
+      propertyPath: m_Color.b
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3148303596628309492, guid: 0443ee07efb771f45bfdeceb355b8eca, type: 3}
+      propertyPath: m_Color.b
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3224340988523601119, guid: 0443ee07efb771f45bfdeceb355b8eca, type: 3}
       propertyPath: m_Color.b
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3727246283051882185, guid: 0443ee07efb771f45bfdeceb355b8eca, type: 3}
       propertyPath: m_Name
       value: HallwayLargeTest1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4654523505134351567, guid: 0443ee07efb771f45bfdeceb355b8eca, type: 3}
+      propertyPath: m_Color.r
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5312831896237817101, guid: 0443ee07efb771f45bfdeceb355b8eca, type: 3}
+      propertyPath: m_Color.r
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6583845609794804141, guid: 0443ee07efb771f45bfdeceb355b8eca, type: 3}
+      propertyPath: m_Color.b
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6729750299232425165, guid: 0443ee07efb771f45bfdeceb355b8eca, type: 3}
+      propertyPath: m_Color.r
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6774483560656048953, guid: 0443ee07efb771f45bfdeceb355b8eca, type: 3}
       propertyPath: m_Color.r
