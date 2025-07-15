@@ -4,7 +4,9 @@
 TagManager:
   serializedVersion: 3
   tags:
+  - DoorSpawn
   - DialogueManager
+  - Origin
   layers:
   - Default
   - TransparentFX
