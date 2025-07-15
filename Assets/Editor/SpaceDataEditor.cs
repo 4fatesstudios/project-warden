@@ -60,11 +60,9 @@ public class SpaceDataEditor : Editor
         SerializedProperty spaceTypeProp = serializedObject.FindProperty("spaceType");
         EditorGUILayout.PropertyField(spaceTypeProp);
         
-        // Only show RoomSize if spaceType == SpaceType.Room
-        if ((SpaceType)spaceTypeProp.enumValueIndex == SpaceType.Room) {
-            SerializedProperty roomSizeProp = serializedObject.FindProperty("roomSize");
-            EditorGUILayout.PropertyField(roomSizeProp);
-        }
+        // Compact SpaceSize field
+        SerializedProperty roomSizeProp = serializedObject.FindProperty("roomSize");
+        EditorGUILayout.PropertyField(roomSizeProp);
 
         // Compact DoorSpawnPoints list with custom drawer
         SerializedProperty spawnListProp = serializedObject.FindProperty("doorSpawnPoints");
@@ -212,7 +210,7 @@ public class SpaceDataEditor : Editor
                 var prefabTransform = prefabRoot.transform.Find(relPath);
                 if (prefabTransform != null)
                 {
-                    var sr = prefabTransform.GetComponent<SpriteRenderer>();
+                    var sr = prefabTransform.GetComponentInChildren<SpriteRenderer>();
                     if (sr != null)
                     {
                         sr.color = GetColorFromGroup(doorData.DoorSpawnGroup);
