@@ -9,7 +9,7 @@ using System.Collections.Generic;
 [CustomEditor(typeof(SpaceData))]
 public class SpaceDataEditor : Editor
 {
-    private static CardinalDirection GetDirectionFromZ(float zRot)
+    public static CardinalDirection GetDirectionFromZ(float zRot)
     {
         int z = Mathf.RoundToInt(zRot) % 360;
         return z switch
@@ -22,7 +22,7 @@ public class SpaceDataEditor : Editor
         };
     }
 
-    private static Color GetColorFromGroup(int group)
+    public static Color GetColorFromGroup(int group)
     {
         return group switch
         {
@@ -37,7 +37,7 @@ public class SpaceDataEditor : Editor
         };
     }
 
-    private static string GetRelativePath(Transform root, Transform target)
+    public static string GetRelativePath(Transform root, Transform target)
     {
         if (target == root) return "";
         var path = target.name;
@@ -61,8 +61,8 @@ public class SpaceDataEditor : Editor
         EditorGUILayout.PropertyField(spaceTypeProp);
         
         // Compact SpaceSize field
-        SerializedProperty roomSizeProp = serializedObject.FindProperty("roomSize");
-        EditorGUILayout.PropertyField(roomSizeProp);
+        SerializedProperty spaceSizeProp = serializedObject.FindProperty("spaceSize");
+        EditorGUILayout.PropertyField(spaceSizeProp);
 
         // Compact DoorSpawnPoints list with custom drawer
         SerializedProperty spawnListProp = serializedObject.FindProperty("doorSpawnPoints");
@@ -72,69 +72,8 @@ public class SpaceDataEditor : Editor
 
         SpaceData data = (SpaceData)target;
 
-        if (GUILayout.Button("Auto-Populate Door Spawns"))
-        {
-            if (data.SpacePrefab == null)
-            {
-                Debug.LogError("Assign SpacePrefab first!");
-                return;
-            }
-
-            string prefabPath = AssetDatabase.GetAssetPath(data.SpacePrefab);
-            GameObject prefabRoot = PrefabUtility.LoadPrefabContents(prefabPath);
-
-            var spawnObjects = prefabRoot.GetComponentsInChildren<Transform>()
-                .Where(t => t.CompareTag("DoorSpawn"))
-                .ToList();
-
-            // Temporarily hold data with relative paths
-            var tempSpawnDataList = new List<(string path, DoorSpawnData data)>();
-
-            foreach (var spawn in spawnObjects)
-            {
-                float zRot = spawn.localEulerAngles.y;
-                Debug.Log(spawn.localEulerAngles.y);
-                CardinalDirection dir = GetDirectionFromZ(zRot);
-                int group = 0;
-
-                var spriteRenderer = spawn.GetComponent<SpriteRenderer>();
-                if (spriteRenderer != null)
-                {
-                    spriteRenderer.color = GetColorFromGroup(group);
-                    EditorUtility.SetDirty(spriteRenderer);
-                }
-
-                string relPath = GetRelativePath(prefabRoot.transform, spawn);
-
-                tempSpawnDataList.Add((relPath, new DoorSpawnData()
-                {
-                    DoorSpawnPoint = null, // will be resolved later
-                    DoorType = DoorType.Default,
-                    SpawnWeight = 1f,
-                    SpawnDirection = dir,
-                    DoorSpawnGroup = group
-                }));
-            }
-
-            PrefabUtility.SaveAsPrefabAsset(prefabRoot, prefabPath);
-            PrefabUtility.UnloadPrefabContents(prefabRoot);
-
-            // Now resolve prefab GameObjects using saved paths
-            GameObject resolvedPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-            var realTransforms = resolvedPrefab.GetComponentsInChildren<Transform>();
-
-            data.DoorSpawnPoints.Clear();
-
-            foreach (var (path, doorData) in tempSpawnDataList)
-            {
-                var found = realTransforms.FirstOrDefault(t => GetRelativePath(resolvedPrefab.transform, t) == path);
-                if (found != null)
-                    doorData.DoorSpawnPoint = found.gameObject;
-
-                data.DoorSpawnPoints.Add(doorData);
-            }
-
-            EditorUtility.SetDirty(data);
+        if (GUILayout.Button("Auto-Populate Door Spawns")) {
+            SpaceDataUtility.AutoPopulateDoorSpawns(data);
         }
 
         if (GUILayout.Button("Update Groups"))
@@ -229,4 +168,70 @@ public class SpaceDataEditor : Editor
 
     }
 }
+
+public static class SpaceDataUtility
+{
+    public static void AutoPopulateDoorSpawns(SpaceData data)
+    {
+        if (data.SpacePrefab == null)
+        {
+            Debug.LogError("Assign SpacePrefab first!");
+            return;
+        }
+
+        string prefabPath = AssetDatabase.GetAssetPath(data.SpacePrefab);
+        GameObject prefabRoot = PrefabUtility.LoadPrefabContents(prefabPath);
+
+        var spawnObjects = prefabRoot.GetComponentsInChildren<Transform>()
+            .Where(t => t.CompareTag("DoorSpawn"))
+            .ToList();
+
+        var tempSpawnDataList = new List<(string path, DoorSpawnData data)>();
+
+        foreach (var spawn in spawnObjects)
+        {
+            float zRot = spawn.localEulerAngles.y;
+            CardinalDirection dir = SpaceDataEditor.GetDirectionFromZ(zRot); // make this public
+            int group = 0;
+
+            var spriteRenderer = spawn.GetComponent<SpriteRenderer>();
+            if (spriteRenderer != null)
+            {
+                spriteRenderer.color = SpaceDataEditor.GetColorFromGroup(group); // make this public
+                EditorUtility.SetDirty(spriteRenderer);
+            }
+
+            string relPath = SpaceDataEditor.GetRelativePath(prefabRoot.transform, spawn); // make this public
+
+            tempSpawnDataList.Add((relPath, new DoorSpawnData()
+            {
+                DoorSpawnPoint = null,
+                DoorType = DoorType.Default,
+                SpawnWeight = 1f,
+                SpawnDirection = dir,
+                DoorSpawnGroup = group
+            }));
+        }
+
+        PrefabUtility.SaveAsPrefabAsset(prefabRoot, prefabPath);
+        PrefabUtility.UnloadPrefabContents(prefabRoot);
+
+        GameObject resolvedPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+        var realTransforms = resolvedPrefab.GetComponentsInChildren<Transform>();
+
+        data.DoorSpawnPoints.Clear();
+
+        foreach (var (path, doorData) in tempSpawnDataList)
+        {
+            var found = realTransforms.FirstOrDefault(t => SpaceDataEditor.GetRelativePath(resolvedPrefab.transform, t) == path);
+            if (found != null)
+                doorData.DoorSpawnPoint = found.gameObject;
+
+            data.DoorSpawnPoints.Add(doorData);
+        }
+
+        EditorUtility.SetDirty(data);
+    }
+}
+
 #endif
