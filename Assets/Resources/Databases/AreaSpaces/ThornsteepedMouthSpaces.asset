@@ -13,5 +13,6 @@ MonoBehaviour:
   m_Name: ThornsteepedMouthSpaces
   m_EditorClassIdentifier: 
   area: 1
-  rooms: []
+  rooms:
+  - {fileID: 11400000, guid: 657421abc66edd243a437f6974886404, type: 2}
   hallways: []

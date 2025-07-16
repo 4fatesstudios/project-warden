@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1001 &1665310618430926643
+--- !u!1001 &2780017249250863528
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -50,7 +50,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2954860515763045841, guid: 2563512273154794d99a3c57496bd477, type: 3}
       propertyPath: m_Name
-      value: Test_Room_Small_NewSpace
+      value: ThornsteepedMouth_Room_Small_Testing
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

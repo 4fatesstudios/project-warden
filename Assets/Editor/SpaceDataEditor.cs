@@ -165,6 +165,34 @@ public class SpaceDataEditor : Editor
             Debug.Log("Door groups densified (starting from 1), and prefab visuals updated.");
         }
 
+        EditorGUILayout.Space();
+        GUI.backgroundColor = Color.red;
+        if (GUILayout.Button("Delete SpaceData & Prefab"))
+        {
+            if (EditorUtility.DisplayDialog("Delete Asset", 
+                    "Are you sure you want to delete this SpaceData asset and its linked prefab? This cannot be undone.",
+                    "Yes, Delete", "Cancel"))
+            {
+                string prefabPath = AssetDatabase.GetAssetPath(data.SpacePrefab);
+                string dataPath = AssetDatabase.GetAssetPath(data);
+
+                if (!string.IsNullOrEmpty(prefabPath))
+                {
+                    AssetDatabase.DeleteAsset(prefabPath);
+                    Debug.Log($"Deleted prefab at: {prefabPath}");
+                }
+
+                if (!string.IsNullOrEmpty(dataPath))
+                {
+                    AssetDatabase.DeleteAsset(dataPath);
+                    Debug.Log($"Deleted SpaceData at: {dataPath}");
+                }
+
+                AssetDatabase.SaveAssets();
+                AssetDatabase.Refresh();
+            }
+        }
+        GUI.backgroundColor = Color.white;
 
     }
 }
