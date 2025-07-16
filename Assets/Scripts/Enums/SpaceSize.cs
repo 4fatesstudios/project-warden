@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace FourFatesStudios.ProjectWarden.Enums
 {
-    public enum RoomSize
+    public enum SpaceSize
     {
         Small,
         Medium,
