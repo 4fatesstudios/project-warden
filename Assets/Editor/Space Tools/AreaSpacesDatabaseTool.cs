@@ -11,7 +11,7 @@ using FourFatesStudios.ProjectWarden.ScriptableObjects.Exploration;
 public static class AreaSpacesDatabaseTool {
     private const string DatabaseFolder = "Assets/Resources/Databases/AreaSpaces";
 
-    [MenuItem("Tools/Update All Area Databases")]
+    [MenuItem("Tools/Spaces/Update All Space Databases")]
     public static void UpdateAllDatabases() {
         if (!Directory.Exists(DatabaseFolder))
             Directory.CreateDirectory(DatabaseFolder);

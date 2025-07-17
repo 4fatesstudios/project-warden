@@ -16,7 +16,7 @@ public class SpaceCreatorWindow : EditorWindow
     private string newAreaName = "";
     private string areaEnumPath = "Assets/Scripts/Enums/Area.cs"; // Adjust if needed
 
-    [MenuItem("Tools/Create New Space Asset")]
+    [MenuItem("Tools/Spaces/Create New Space Asset")]
     public static void ShowWindow()
     {
         GetWindow<SpaceCreatorWindow>("Create Space Asset");

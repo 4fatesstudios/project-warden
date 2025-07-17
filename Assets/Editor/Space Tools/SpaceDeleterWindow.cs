@@ -5,7 +5,7 @@ using FourFatesStudios.ProjectWarden.ScriptableObjects.Exploration;
 public class SpaceDeleterWindow : EditorWindow {
     private SpaceData selectedSpaceData;
 
-    [MenuItem("Tools/Delete Space Asset")]
+    [MenuItem("Tools/Spaces/Delete Space Asset")]
     public static void ShowWindow() {
         GetWindow<SpaceDeleterWindow>("Delete Space Asset");
     }
