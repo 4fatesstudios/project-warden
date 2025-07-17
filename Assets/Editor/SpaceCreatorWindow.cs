@@ -101,6 +101,9 @@ public class SpaceCreatorWindow : EditorWindow
         AssetDatabase.Refresh();
 
         EditorUtility.DisplayDialog("Success", $"Created:\n- Prefab: {prefabPath}\n- SpaceData: {soPath}", "OK");
+        
+        // automatically update all databases
+        AreaSpacesDatabaseTool.UpdateAllDatabases();
     }
 
 
