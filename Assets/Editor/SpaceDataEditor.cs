@@ -191,6 +191,9 @@ public class SpaceDataEditor : Editor
                 AssetDatabase.SaveAssets();
                 AssetDatabase.Refresh();
             }
+            
+            // automatically update all databases
+            AreaSpacesDatabaseTool.UpdateAllDatabases();
         }
         GUI.backgroundColor = Color.white;
 
