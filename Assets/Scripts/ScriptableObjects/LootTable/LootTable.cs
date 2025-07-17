@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
 
 
 namespace FourFatesStudios.ProjectWarden.ScriptableObjects.LootTable
@@ -21,6 +22,26 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.LootTable
             
         IEnumerator IEnumerable.GetEnumerator() {
             return GetEnumerator();
+        }
+    }
+    
+    [System.Serializable]
+    public class LootTableEntry {
+        [SerializeField] private int minimumDropAmount;
+        [SerializeField] private int maximumDropAmount;
+        [SerializeField] private Item item;
+        private const int MAX = 100;
+
+        public int MinimumDropAmount => minimumDropAmount;
+        public int MaximumDropAmount => maximumDropAmount;
+        public Item Item => item;
+        
+        public void Validate(LootTable parentLootTable) {
+            minimumDropAmount = Mathf.Clamp(minimumDropAmount, 0, maximumDropAmount);
+            maximumDropAmount = Mathf.Clamp(maximumDropAmount, minimumDropAmount, MAX);
+            if (item == null) {
+                Debug.LogWarning($"Missing loot in '{parentLootTable.name}'!", parentLootTable);
+            }
         }
     }
 }
