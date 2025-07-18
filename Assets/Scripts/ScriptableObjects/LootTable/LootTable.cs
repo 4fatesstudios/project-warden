@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using FourFatesStudios.ProjectWarden.Enums;
 using UnityEngine;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
 
@@ -9,6 +10,19 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.LootTable
     [CreateAssetMenu(menuName = "Loot Table", fileName = "New Loot Table")]
     public class LootTable : ScriptableObject, IEnumerable<LootTableEntry> {
         [SerializeField] private LootTableEntry[] lootEntries;
+
+        public ItemRarity GetHighestRarity() {
+            var highest = ItemRarity.Common;
+
+            foreach (var entry in lootEntries) {
+                if (entry == null || entry.Item == null) continue;
+                if (entry.Item.ItemRarity > highest) {
+                    highest = entry.Item.ItemRarity;
+                }
+            }
+
+            return highest;
+        }
 
         private void OnValidate() {
             foreach (var lootEntry in lootEntries) {
