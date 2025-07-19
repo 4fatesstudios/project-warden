@@ -1,6 +1,7 @@
 using System;
 using FourFatesStudios.ProjectWarden.Enums;
 using UnityEngine;
+using UnityEngine.Serialization;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -16,13 +17,13 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
         [SerializeField, Tooltip("Description shown to the player.")]
         private string itemDescription = "Empty Description";
 
-        [SerializeField] private ItemRarity itemRarity;
+        [FormerlySerializedAs("itemRarity")] [SerializeField] private Rarity itemRarity;
 
         [SerializeField, HideInInspector] private string _itemID;
 
         public string ItemName => itemName;
         public string ItemDescription => itemDescription;
-        public ItemRarity ItemRarity => itemRarity;
+        public Rarity ItemRarity => itemRarity;
         public string ItemID => _itemID;
 
 #if UNITY_EDITOR

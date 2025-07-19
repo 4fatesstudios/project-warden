@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace FourFatesStudios.ProjectWarden.Enums
 {
-    public enum ItemRarity {
+    public enum Rarity {
         None,
         Common,
         Rare,
