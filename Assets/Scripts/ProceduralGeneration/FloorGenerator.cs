@@ -166,7 +166,7 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
             int hallwayDepth) {
             var list = _spaces[spaceTypeToTry];
             var filtered = list
-                .Where(space => !queueItem.FailedRoomSizes.Contains(space.RoomSize))
+                .Where(space => !queueItem.FailedRoomSizes.Contains(space.SpaceSize))
                 .ToList();
             // If nothing valid left to try, set attempts to max (probably cleaner way to do this later)
             if (filtered.Count == 0) {
@@ -175,7 +175,7 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
             }
             var spaceData = filtered[seedRNG.Rng.Next(filtered.Count)];
 
-            Debug.Log($"→ Attempting to place {spaceTypeToTry}: {spaceData.name} | Size: {spaceData.RoomSize} | Remaining options: {filtered.Count}");
+            Debug.Log($"→ Attempting to place {spaceTypeToTry}: {spaceData.name} | Size: {spaceData.SpaceSize} | Remaining options: {filtered.Count}");
             
             if (!TryPlaceSpaceAtDoor(queueItem, doorGO, source, spaceData, hallwayDepth, out var placed)) return false;
             _placedSpaces.Add(placed);
@@ -287,7 +287,7 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
                 Destroy(placed.Instance);
 #endif
                 // Adds failed size and larger sizes to queueItem hashset
-                queueItem.FailedRoomSizes.UnionWith(GetLargerSizes(placed.SourceData.RoomSize));
+                queueItem.FailedRoomSizes.UnionWith(GetLargerSizes(placed.SourceData.SpaceSize));
                 placed = null;
                 return false;
             }
@@ -310,17 +310,17 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
             return true;
         }
 
-        private List<RoomSize> GetLargerSizes(RoomSize targetSizes) {
-            var largerSizes = new List<RoomSize>();
+        private List<SpaceSize> GetLargerSizes(SpaceSize targetSizes) {
+            var largerSizes = new List<SpaceSize>();
             
             switch (targetSizes) {
-                case RoomSize.Small:
-                    largerSizes.AddRange(new[] { RoomSize.Medium, RoomSize.Large });
+                case SpaceSize.Small:
+                    largerSizes.AddRange(new[] { SpaceSize.Medium, SpaceSize.Large });
                     break;
-                case RoomSize.Medium:
-                    largerSizes.Add(RoomSize.Large);
+                case SpaceSize.Medium:
+                    largerSizes.Add(SpaceSize.Large);
                     break;
-                case RoomSize.Large:
+                case SpaceSize.Large:
                     break;
             }
             
@@ -393,15 +393,15 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
             public int GroupID;
             public int HallwayDepth;
             public int AttemptCount;
-            public HashSet<RoomSize> FailedRoomSizes;
+            public HashSet<SpaceSize> FailedRoomSizes;
 
             public SpawnGroupQueueItem(PlacedSpace source, int groupID, int hallwayDepth, int attemptCount = 0, 
-                HashSet<RoomSize> failedRoomSizes = null) {
+                HashSet<SpaceSize> failedRoomSizes = null) {
                 Source = source;
                 GroupID = groupID;
                 HallwayDepth = hallwayDepth;
                 AttemptCount = attemptCount;
-                FailedRoomSizes = failedRoomSizes ?? new HashSet<RoomSize>();
+                FailedRoomSizes = failedRoomSizes ?? new HashSet<SpaceSize>();
             }
         }
 
