@@ -9,10 +9,11 @@ using FourFatesStudios.ProjectWarden.ScriptableObjects.Databases;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Exploration;
 
 public static class AreaSpacesDatabaseTool {
-    private const string DatabaseFolder = "Assets/Resources/Databases/AreaSpaces";
 
     [MenuItem("Tools/Spaces/Update All Space Databases")]
     public static void UpdateAllDatabases() {
+        const string DatabaseFolder = "Assets/Resources/Databases/AreaSpaces";
+        
         if (!Directory.Exists(DatabaseFolder))
             Directory.CreateDirectory(DatabaseFolder);
 
