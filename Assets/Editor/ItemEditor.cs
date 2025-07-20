@@ -13,14 +13,7 @@ public class ItemEditor : Editor
         Item item = (Item)target;
 
         EditorGUI.BeginDisabledGroup(true);  // Disable editing
-        EditorGUILayout.TextField("Item ID", item.ItemID);
+        EditorGUILayout.TextField("Item ID", item.ID);
         EditorGUI.EndDisabledGroup();
-
-        if (GUILayout.Button("Regenerate Item ID"))
-        {
-            Undo.RecordObject(item, "Regenerate Item ID");
-            item.RegenerateID();
-            EditorUtility.SetDirty(item);
-        }
     }
 }

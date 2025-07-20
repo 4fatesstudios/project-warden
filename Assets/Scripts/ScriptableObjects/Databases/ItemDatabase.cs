@@ -7,23 +7,14 @@ using UnityEngine;
 namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Databases
 {
     [CreateAssetMenu(fileName = "NewDatabase", menuName = "Databases/Item Database")]
-    public class ItemDatabase : ScriptableObject {
-        private static ItemDatabase _instance;
-
-        public static ItemDatabase Instance {
-            get {
-                if (_instance == null)
-                    _instance = Resources.Load<ItemDatabase>("Databases/ItemDatabase");
-                if (_instance == null)
-                    Debug.LogError("ItemDatabase asset not found in Resources/Databases/ItemDatabase");
-                return _instance;
-            }
-        }
+    public class ItemDatabase<T> : ScriptableObject where T : Item {
+        [SerializeField] private List<T> items;
         
-        [SerializeField] private List<Item> items = new();
         private Dictionary<string, Item> itemLookup;
         
         public IReadOnlyList<Item> Items => items;
+        
+        public System.Type ItemType => typeof(T);
 
         private void OnEnable() {
             BuildLookup();
@@ -32,12 +23,12 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Databases
         private void BuildLookup() {
             itemLookup = new Dictionary<string, Item>();
             foreach (var item in items) {
-                if (itemLookup.ContainsKey(item.ItemID)) {
-                    Debug.LogWarning($"Duplicate ItemID detected: {item.ItemID} in {item.name}");
+                if (itemLookup.ContainsKey(item.ID)) {
+                    Debug.LogWarning($"Duplicate ItemID detected: {item.ID} in {item.name}");
                     continue;
                 }
-                if (item != null && !string.IsNullOrEmpty(item.ItemID)) 
-                    itemLookup[item.ItemID] = item;
+                if (item != null && !string.IsNullOrEmpty(item.ID)) 
+                    itemLookup[item.ID] = item;
             }
         }
 

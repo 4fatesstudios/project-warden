@@ -4,7 +4,7 @@ using UnityEditor;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Databases;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
 
-[CustomEditor(typeof(ItemDatabase))]
+[CustomEditor(typeof(ItemDatabase<Item>))]
 public class ItemDatabaseEditor : Editor
 {
     private const int GridColumns = 4;
@@ -13,7 +13,7 @@ public class ItemDatabaseEditor : Editor
 
     public override void OnInspectorGUI()
     {
-        ItemDatabase db = (ItemDatabase)target;
+        ItemDatabase<Item> db = (ItemDatabase<Item>)target;
 
         if (GUILayout.Button("Auto-Populate From Resources/Items"))
         {
@@ -54,7 +54,7 @@ public class ItemDatabaseEditor : Editor
         DrawDefaultInspector(); // Optional: keeps showing the serialized list
     }
 
-    private void AutoPopulate(ItemDatabase db)
+    private void AutoPopulate(ItemDatabase<Item> db)
     {
         string[] guids = AssetDatabase.FindAssets("t:Item", new[] { "Assets/Resources/Items" });
         int addedCount = 0;
@@ -66,19 +66,19 @@ public class ItemDatabaseEditor : Editor
         for (int i = 0; i < itemsProp.arraySize; i++)
         {
             var item = itemsProp.GetArrayElementAtIndex(i).objectReferenceValue as Item;
-            if (item != null && !string.IsNullOrEmpty(item.ItemID))
-                existingIDs.Add(item.ItemID);
+            if (item != null && !string.IsNullOrEmpty(item.ID))
+                existingIDs.Add(item.ID);
         }
 
         foreach (string guid in guids)
         {
             string path = AssetDatabase.GUIDToAssetPath(guid);
             Item item = AssetDatabase.LoadAssetAtPath<Item>(path);
-            if (item != null && !existingIDs.Contains(item.ItemID))
+            if (item != null && !existingIDs.Contains(item.ID))
             {
                 itemsProp.InsertArrayElementAtIndex(itemsProp.arraySize);
                 itemsProp.GetArrayElementAtIndex(itemsProp.arraySize - 1).objectReferenceValue = item;
-                existingIDs.Add(item.ItemID);
+                existingIDs.Add(item.ID);
                 addedCount++;
             }
         }

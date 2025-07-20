@@ -17,8 +17,8 @@ public class RoastEditor : Editor
         bool isValid = ValidateRoast(roast);
 
         EditorGUI.BeginDisabledGroup(true);
-        EditorGUILayout.TextField("Input Ingredient", roast.InputIngredient?.ItemID ?? "None");
-        EditorGUILayout.TextField("Output Ingredient", roast.OutputIngredient?.ItemID ?? "None");
+        EditorGUILayout.TextField("Input Ingredient", roast.InputIngredient?.ID ?? "None");
+        EditorGUILayout.TextField("Output Ingredient", roast.OutputIngredient?.ID ?? "None");
         EditorGUILayout.FloatField("Cook Time", roast.TotalCookTime);
         EditorGUILayout.FloatField("Cooked Time", roast.CookedTime);
         EditorGUI.EndDisabledGroup();
