@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace FourFatesStudios.ProjectWarden.ScriptableObjects
+namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Stats
 {
     
     [CreateAssetMenu(fileName = "BaseStat", menuName = "Base Stat SO")]
@@ -49,10 +49,18 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects
         public int BaseNumo => baseNumo;
         public int BaseDef => baseDef;
     
-        public int BaseVitality => baseVitality;
+        public int BaseVitality{
+            get => baseVitality;
+            set => baseVitality = value;
+        }
+
         public int BaseStrength => baseStrength;
         public int BaseWisdom => baseWisdom;
-        public int BaseAgility => baseAgility;
+        public int BaseAgility{
+            get => baseAgility;
+            set => baseAgility = value;
+        }
+
         public int BaseLuck => baseLuck;
     
         public int BaseCritChance => baseCritChance;

@@ -1,4 +1,3 @@
-using UnityEditor.SceneManagement;
 using UnityEngine;
 
 
@@ -11,66 +10,66 @@ namespace FourFatesStudios.ProjectWarden.Characters.Components
         private int wisdom;
         private int agility;   
         private int luck;
+        
 
-        public int getVitality(){
+        public int GetVitality(){
             return vitality;
         }
         
-        public void setVitality(int value){
+        public void SetVitality(int value){
             vitality = value;
         }
 
-        public void addVitatlity(int value){
+        public void AddVitality(int value){
             vitality += value;
         }
 
-        public int getStrength(){
+        public int GetStrength(){
             return strength;
         }
         
-        public void setStrength(int value){
+        public void SetStrength(int value){
             strength = value;
         }
 
-        public void addStrength(int value){
+        public void AddStrength(int value){
             strength += value;
         }
 
-        public int getWisdom(){
+        public int GetWisdom(){
             return wisdom;
         }
         
-        public void setWisdom(int value){
+        public void SetWisdom(int value){
             wisdom = value;
         }
 
-        public void addWisdom(int value){
+        public void AddWisdom(int value){
             wisdom += value;
         }
 
-        public int getAgility(){
+        public int GetAgility(){
             return agility;
         }
         
-        public void setAgility(int value){
+        public void SetAgility(int value){
             agility = value;
         }
 
-        public void addAgility(int value){
+        public void AddAgility(int value){
             agility += value;
         }
 
-        public int getLuck(){
+        public int GetLuck(){
             return luck;
         }
         
-        public void setLuck(int value){
+        public void SetLuck(int value){
             luck = value;
         }
 
-        public void addLuck(int value){
+        public void AddLuck(int value){
             luck += value;
         }
-        
     }
 }
