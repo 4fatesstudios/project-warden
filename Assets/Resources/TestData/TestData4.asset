@@ -17,3 +17,7 @@ MonoBehaviour:
   info: test4
   tested: 0
   aspect: 3
+  statModifier:
+    stat: 3
+    type: 1
+    modifier: 3

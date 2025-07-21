@@ -5,8 +5,7 @@ using System.Reflection;
 using System.Linq;
 using System.Collections.Generic;
 using FourFatesStudios.ProjectWarden.Utilities;
-using System.IO;
-using FourFatesStudios.ProjectWarden.Enums;
+using FourFatesStudios.ProjectWarden.Utilities.CSVImport;
 
 public class CSVToSOImporter : EditorWindow
 {
@@ -15,33 +14,8 @@ public class CSVToSOImporter : EditorWindow
     private string outputFolder = "Assets/Resources/";
     
     // For tracking duplicates and row info
-    private Dictionary<string, int> idToLastRow = new Dictionary<string, int>();
+    private Dictionary<string, int> idToLastRow = new();
     
-    // Registry Dictionary for variable parsing
-    private delegate bool ParserDelegate(SerializedProperty prop, string value, int csvRow, string header);
-
-    private static readonly Dictionary<string, ParserDelegate> TypeParsers = new() {
-        ["int"] = (prop, value, row, header) => TryParse<int>(prop, value, row, header, int.TryParse, (p, v) => p.intValue = v),
-        ["float"] = (prop, value, row, header) => TryParse<float>(prop, value, row, header, float.TryParse, (p, v) => p.floatValue = v),
-        ["bool"] = (prop, value, row, header) => TryParse<bool>(prop, value, row, header, bool.TryParse, (p, v) => p.boolValue = v),
-        ["string"] = (prop, value, row, header) => { prop.stringValue = value; return true; },
-        ["aspect"] = (prop, value, row, header) => TryParse<Aspect>(prop, value, row, header, Enum.TryParse, (p, v) => p.enumValueIndex = (int)(object)v),
-        // Add more custom types here, e.g. enums, Vector2, etc.
-    };
-    
-    private static bool TryParse<T>(SerializedProperty prop, string value, int row, string header, 
-        TryParseDelegate<T> tryParse, System.Action<SerializedProperty, T> assign) {
-        if (tryParse(value, out var parsed)) {
-            assign(prop, parsed);
-            return true;
-        }
-
-        CustomLogger.LogError(LogSystem.CSVImporter, $"Row {row}: Failed to parse {typeof(T).Name} for '{header}' with value '{value}'.");
-        return false;
-    }
-
-    private delegate bool TryParseDelegate<T>(string input, out T result);
-
     [MenuItem("Tools/CSV Importer")]
     public static void ShowWindow() {
         GetWindow<CSVToSOImporter>("CSV to ScriptableObject");
@@ -218,12 +192,12 @@ public class CSVToSOImporter : EditorWindow
 
     private bool IsTypeCompatible(string declaredType, System.Type actualType) {
         declaredType = declaredType.ToLower();
-        return TypeParsers.ContainsKey(declaredType);
+        return CSVTypeParsers.Parsers.ContainsKey(declaredType);
     }
     
     private bool TryParseAndSetProperty(SerializedProperty prop, string declaredType, string value, int csvRow, string header) {
         declaredType = declaredType.ToLower();
-        if (TypeParsers.TryGetValue(declaredType, out var parser))
+        if (CSVTypeParsers.Parsers.TryGetValue(declaredType, out var parser))
             return parser(prop, value, csvRow, header);
 
         CustomLogger.LogError(LogSystem.CSVImporter, $"Row {csvRow}: Unsupported declared type '{declaredType}' for '{header}'.");

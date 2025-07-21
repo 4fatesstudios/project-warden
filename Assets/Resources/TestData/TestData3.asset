@@ -16,4 +16,8 @@ MonoBehaviour:
   quantityTwo: 6
   info: test3
   tested: 1
-  aspect: 2
+  aspect: 4
+  statModifier:
+    stat: 2
+    type: 0
+    modifier: 10
