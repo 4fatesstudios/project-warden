@@ -16,7 +16,7 @@ namespace Tests.Editor {
         public void Setup() {
             _trinketA = ScriptableObject.CreateInstance<Trinket>();
             _trinketA.name = "Trinket A";
-            _trinketA.RegenerateID();
+            _trinketA.ID = "1";
             _trinketA.StatModifierList = new StatModifierList {
                 StatModifiers = new List<StatModifier> {
                     new (Stat.Agility, StatModifierType.Multiplicative, 5),
@@ -24,11 +24,11 @@ namespace Tests.Editor {
                     new (Stat.CritChance, StatModifierType.Additive, 15)
                 }
             };
-            _trinketA.StatModifierList.SetSourceID(_trinketA.ItemID);
+            _trinketA.StatModifierList.SetSourceID(_trinketA.ID);
 
             _trinketB = ScriptableObject.CreateInstance<Trinket>();
             _trinketB.name = "Trinket B";
-            _trinketB.RegenerateID();
+            _trinketB.ID = "2";
             _trinketB.StatModifierList = new StatModifierList {
                 StatModifiers = new List<StatModifier> {
                     new (Stat.Agility, StatModifierType.Additive, -6),
@@ -36,14 +36,14 @@ namespace Tests.Editor {
                     new (Stat.CritChance, StatModifierType.Additive, -20)
                 }
             };
-            _trinketB.StatModifierList.SetSourceID(_trinketB.ItemID);
+            _trinketB.StatModifierList.SetSourceID(_trinketB.ID);
 
             _statModifierManager = new StatModifierManager();
 
             Assert.IsNotNull(_trinketA);
             Assert.IsNotNull(_trinketB);
             Assert.IsNotNull(_statModifierManager);
-            Assert.AreNotEqual(_trinketA.ItemID, _trinketB.ItemID);
+            Assert.AreNotEqual(_trinketA.ID, _trinketB.ID);
         }
 
         [Test]
@@ -107,7 +107,7 @@ namespace Tests.Editor {
             StatModifierManager.OnStatModifierListAdded?.Invoke(_trinketA.StatModifierList);
             StatModifierManager.OnStatModifierListAdded?.Invoke(_trinketB.StatModifierList);
             
-            var list = _statModifierManager.GetModifiersBySourceID(_trinketB.ItemID);
+            var list = _statModifierManager.GetModifiersBySourceID(_trinketB.ID);
             
             Assert.AreEqual(3, list.Count);
             Assert.AreEqual(-20, list[0].Modifier.modifier);
