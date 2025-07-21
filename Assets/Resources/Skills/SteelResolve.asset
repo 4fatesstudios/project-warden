@@ -10,18 +10,24 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: dd7775e3c5734a34baff90785b63271b, type: 3}
-  m_Name: TestSkill1
+  m_Name: SteelResolve
   m_EditorClassIdentifier: 
-  skillName: Unnamed Skill
+  skillName: Steel Resolve
   skillType: 0
   skillDescription: Empty Description
-  _skillID: fe0fc1cf-2788-410a-8778-56aaf8cbb003
+  _skillID: 66ad3df8-4358-4085-834d-ab8988b9396c
   damageInstances: []
   healingInstances: []
   buffStatInstances: []
   buffHealInstances: []
   buffShieldInstances: []
-  debuffStatInstances: []
+  debuffStatInstances:
+  - statModifierList:
+      statModifiers: []
+      _sourceModifierID: 66ad3df8-4358-4085-834d-ab8988b9396c
+    effectTimingInfo:
+      effectTiming: 2
+      turnDuration: 1
   debuffDOTInstances: []
   targetTeam: 0
   targeting: 0

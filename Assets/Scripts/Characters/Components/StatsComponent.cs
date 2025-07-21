@@ -17,7 +17,6 @@ namespace FourFatesStudios.ProjectWarden.Characters.Components
         private StatModifierManager statModifierManager;
         
         #region Stats Declarations
-        private int level;
         private int defense;
         
         private int vitality;
