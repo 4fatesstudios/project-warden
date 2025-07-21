@@ -10,20 +10,25 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: dd7775e3c5734a34baff90785b63271b, type: 3}
-  m_Name: TestSkill1
+  m_Name: ShieldBash
   m_EditorClassIdentifier: 
-  skillName: Unnamed Skill
+  skillName: Shield Bash
   skillType: 0
-  skillDescription: Empty Description
-  _skillID: fe0fc1cf-2788-410a-8778-56aaf8cbb003
-  damageInstances: []
+  skillDescription: Strikes an enemy with a greatshield, dealing Corporeal damage.
+  _skillID: cb301529-09e6-4480-9a64-80917ef34162
+  damageInstances:
+  - baseDamage: 50
+    stagger: 5
+    exposure: 0
+    damageType: 0
+    aspect: 0
   healingInstances: []
   buffStatInstances: []
   buffHealInstances: []
   buffShieldInstances: []
   debuffStatInstances: []
   debuffDOTInstances: []
-  targetTeam: 0
+  targetTeam: 1
   targeting: 0
   numoCost: 0
   uniqueCost: 0

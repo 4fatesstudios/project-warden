@@ -38,6 +38,7 @@ public class EnumDisplayNameDrawer : PropertyDrawer
             _displayNameCache[key] = displayNames;
         }
 
-        property.enumValueIndex = EditorGUI.Popup(position, label.text, property.enumValueIndex, displayNames);
+        int safeIndex = Mathf.Clamp(property.enumValueIndex, 0, displayNames.Length - 1);
+        property.enumValueIndex = EditorGUI.Popup(position, label.text, safeIndex, displayNames);
     }
 }
