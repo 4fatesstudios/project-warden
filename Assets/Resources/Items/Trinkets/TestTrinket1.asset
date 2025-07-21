@@ -17,3 +17,6 @@ MonoBehaviour:
   itemDescription: Empty Description
   itemRarity: 0
   itemTrinketType: 0
+  statModifierList:
+    statModifiers: []
+    _sourceModifierID: 

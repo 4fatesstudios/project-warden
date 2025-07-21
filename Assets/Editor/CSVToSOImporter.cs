@@ -1,3 +1,4 @@
+using System;
 using UnityEditor;
 using UnityEngine;
 using System.Reflection;
@@ -5,15 +6,44 @@ using System.Linq;
 using System.Collections.Generic;
 using FourFatesStudios.ProjectWarden.Utilities;
 using System.IO;
+using FourFatesStudios.ProjectWarden.Enums;
 
 public class CSVToSOImporter : EditorWindow
 {
     private TextAsset csvFile;
     private MonoScript scriptableObjectType;
-    private string outputFolder = "Assets/Data/ScriptableObjects/";
+    private string outputFolder = "Assets/Resources/";
     
     // For tracking duplicates and row info
     private Dictionary<string, int> idToLastRow = new Dictionary<string, int>();
+    
+    // Registry Dictionary for variable parsing
+    private delegate bool ParserDelegate(SerializedProperty prop, string value, int csvRow, string header);
+
+    private static readonly Dictionary<string, ParserDelegate> TypeParsers = new()
+    {
+        ["int"] = (prop, value, row, header) => TryParse<int>(prop, value, row, header, int.TryParse, (p, v) => p.intValue = v),
+        ["float"] = (prop, value, row, header) => TryParse<float>(prop, value, row, header, float.TryParse, (p, v) => p.floatValue = v),
+        ["bool"] = (prop, value, row, header) => TryParse<bool>(prop, value, row, header, bool.TryParse, (p, v) => p.boolValue = v),
+        ["string"] = (prop, value, row, header) => { prop.stringValue = value; return true; },
+        ["aspect"] = (prop, value, row, header) => TryParse<Aspect>(prop, value, row, header, Enum.TryParse, (p, v) => p.enumValueIndex = (int)(object)v),
+        // Add more custom types here, e.g. enums, Vector2, etc.
+    };
+    
+    private static bool TryParse<T>(SerializedProperty prop, string value, int row, string header, 
+        TryParseDelegate<T> tryParse, System.Action<SerializedProperty, T> assign)
+    {
+        if (tryParse(value, out var parsed))
+        {
+            assign(prop, parsed);
+            return true;
+        }
+
+        CustomLogger.LogError(LogSystem.CSVImporter, $"Row {row}: Failed to parse {typeof(T).Name} for '{header}' with value '{value}'.");
+        return false;
+    }
+
+    private delegate bool TryParseDelegate<T>(string input, out T result);
 
     [MenuItem("Tools/CSV Importer")]
     public static void ShowWindow()
@@ -62,12 +92,11 @@ public class CSVToSOImporter : EditorWindow
             return;
         }
 
-        // Parse header and validate
         string[] headersRaw = lines[0].Split(',');
         string[] headers = headersRaw.Select(h => h.Split(':')[0].Trim()).ToArray();
         string[] declaredTypes = headersRaw.Select(h => h.Contains(":") ? h.Split(':')[1].Trim() : "string").ToArray();
 
-        int idIndex = System.Array.IndexOf(headers, "ID");
+        int idIndex = System.Array.FindIndex(headers, h => h.Equals("ID", StringComparison.OrdinalIgnoreCase));
         if (idIndex < 0)
         {
             CustomLogger.LogError(LogSystem.CSVImporter, "CSV must include an 'ID' column.");
@@ -75,7 +104,6 @@ public class CSVToSOImporter : EditorWindow
             return;
         }
 
-        // Validate headers exist as serialized fields or public properties
         var allFields = type.GetFields(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
         var allProps = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
 
@@ -83,31 +111,32 @@ public class CSVToSOImporter : EditorWindow
         {
             string header = headers[i];
             string declaredType = declaredTypes[i];
-            // Try to find a private serialized field matching the lowercase header
-            var field = allFields.FirstOrDefault(f => f.Name.Equals(header, System.StringComparison.OrdinalIgnoreCase));
-            var prop = allProps.FirstOrDefault(p => p.Name.Equals(header, System.StringComparison.OrdinalIgnoreCase));
 
-            if (header == "ID")
+            // For ID, accept either a public property or a private serialized field named 'id' (lowercase)
+            if (header.Equals("ID", StringComparison.OrdinalIgnoreCase))
             {
-                // ID is allowed to be a public property or field
+                var field = allFields.FirstOrDefault(f => f.Name.Equals("id", StringComparison.OrdinalIgnoreCase));
+                var prop = allProps.FirstOrDefault(p => p.Name.Equals("ID", StringComparison.OrdinalIgnoreCase));
                 if (field == null && prop == null)
                 {
-                    CustomLogger.LogError(LogSystem.CSVImporter, $"Header '{header}' not found as a field or property in {type.Name}. Aborting import.");
-                    Debug.LogError($"Header '{header}' not found as a field or property in {type.Name}. Aborting import.");
+                    CustomLogger.LogError(LogSystem.CSVImporter, $"Header '{header}' not found as 'id' field or 'ID' property in {type.Name}. Aborting import.");
+                    Debug.LogError($"Header '{header}' not found as 'id' field or 'ID' property in {type.Name}. Aborting import.");
                     return;
                 }
                 continue;
             }
 
-            if (field == null && prop == null)
+            var fieldNormal = allFields.FirstOrDefault(f => f.Name.Equals(header, StringComparison.OrdinalIgnoreCase));
+            var propNormal = allProps.FirstOrDefault(p => p.Name.Equals(header, StringComparison.OrdinalIgnoreCase));
+
+            if (fieldNormal == null && propNormal == null)
             {
                 CustomLogger.LogError(LogSystem.CSVImporter, $"Header '{header}' not found as a field or property in {type.Name}. Aborting import.");
                 Debug.LogError($"Header '{header}' not found as a field or property in {type.Name}. Aborting import.");
                 return;
             }
 
-            // Validate type matches - parse declared type vs field/prop type
-            System.Type actualType = field != null ? field.FieldType : prop.PropertyType;
+            System.Type actualType = fieldNormal != null ? fieldNormal.FieldType : propNormal.PropertyType;
             if (!IsTypeCompatible(declaredType, actualType))
             {
                 CustomLogger.LogError(LogSystem.CSVImporter, $"Type mismatch for '{header}': CSV declared '{declaredType}', but actual is '{actualType.Name}'. Aborting import.");
@@ -116,15 +145,12 @@ public class CSVToSOImporter : EditorWindow
             }
         }
 
-        // Clear tracking
         idToLastRow.Clear();
 
-        // Start processing rows
         for (int i = 1; i < lines.Length; i++)
         {
-            int csvRow = i + 1; // human-readable row number
-            string line = lines[i];
-            string[] values = line.Split(',');
+            int csvRow = i + 1;
+            string[] values = lines[i].Split(',');
 
             if (values.Length != headers.Length)
             {
@@ -132,7 +158,6 @@ public class CSVToSOImporter : EditorWindow
                 continue;
             }
 
-            // Check ID presence
             string id = values[idIndex].Trim();
             if (string.IsNullOrEmpty(id))
             {
@@ -140,7 +165,6 @@ public class CSVToSOImporter : EditorWindow
                 continue;
             }
 
-            // Check for empty values in other columns - skip if any missing or empty (except ID)
             bool anyEmpty = false;
             for (int c = 0; c < values.Length; c++)
             {
@@ -153,18 +177,16 @@ public class CSVToSOImporter : EditorWindow
             }
             if (anyEmpty) continue;
 
-            // Check duplicates: if already processed, update last row (log duplicate)
             if (idToLastRow.ContainsKey(id))
             {
                 CustomLogger.Log(LogSystem.CSVImporter, $"Row {csvRow}: Duplicate ID '{id}' found. Updating previous entry.");
-                idToLastRow[id] = csvRow; // update to latest
+                idToLastRow[id] = csvRow;
             }
             else
             {
                 idToLastRow.Add(id, csvRow);
             }
 
-            // Load existing SO or create new
             string assetPath = $"{outputFolder}/{id}.asset";
             ScriptableObject instance = AssetDatabase.LoadAssetAtPath(assetPath, type) as ScriptableObject;
             bool isNew = instance == null;
@@ -177,7 +199,6 @@ public class CSVToSOImporter : EditorWindow
 
             SerializedObject serialized = new SerializedObject(instance);
 
-            // Set values, but validate parse success before applying!
             bool parseError = false;
             for (int c = 0; c < headers.Length; c++)
             {
@@ -185,30 +206,23 @@ public class CSVToSOImporter : EditorWindow
                 string declaredType = declaredTypes[c];
                 string value = values[c].Trim();
 
-                if (header == "ID")
+                if (header.Equals("ID", StringComparison.OrdinalIgnoreCase))
                 {
-                    // set via property if exists
-                    var idProp = type.GetProperty("ID", BindingFlags.Public | BindingFlags.Instance);
-                    if (idProp != null && idProp.CanWrite)
-                        idProp.SetValue(instance, value);
-                    else
+                    SerializedProperty idProp = serialized.FindProperty("id"); // lowercase to match field name
+                    if (idProp == null)
                     {
-                        var idField = type.GetField("ID", BindingFlags.Public | BindingFlags.Instance);
-                        if (idField != null)
-                            idField.SetValue(instance, value);
-                        else
-                        {
-                            CustomLogger.LogError(LogSystem.CSVImporter, $"Row {csvRow}: Could not set ID property or field.");
-                            parseError = true;
-                        }
+                        CustomLogger.LogError(LogSystem.CSVImporter, $"Row {csvRow}: SerializedProperty 'id' not found on {type.Name}.");
+                        parseError = true;
+                        break;
                     }
+                    idProp.stringValue = value;
                     continue;
                 }
 
-                SerializedProperty prop = serialized.FindProperty(header.ToLower());
+                SerializedProperty prop = serialized.FindProperty(header);
                 if (prop == null)
                 {
-                    CustomLogger.LogError(LogSystem.CSVImporter, $"Row {csvRow}: SerializedProperty '{header.ToLower()}' not found on {type.Name}. Skipping row.");
+                    CustomLogger.LogError(LogSystem.CSVImporter, $"Row {csvRow}: SerializedProperty '{header}' not found on {type.Name}. Skipping row.");
                     parseError = true;
                     break;
                 }
@@ -226,14 +240,11 @@ public class CSVToSOImporter : EditorWindow
                 continue;
             }
 
-            // Save changes
             serialized.ApplyModifiedProperties();
-
             EditorUtility.SetDirty(instance);
         }
 
         AssetDatabase.SaveAssets();
-
         CustomLogger.Log(LogSystem.CSVImporter, $"CSV import complete. Processed {lines.Length - 1} rows.");
         Debug.Log("CSV import complete.");
     }
@@ -241,70 +252,17 @@ public class CSVToSOImporter : EditorWindow
     private bool IsTypeCompatible(string declaredType, System.Type actualType)
     {
         declaredType = declaredType.ToLower();
-        if (declaredType == "int" && (actualType == typeof(int) || actualType == typeof(long) || actualType == typeof(short)))
-            return true;
-        if (declaredType == "string" && actualType == typeof(string))
-            return true;
-        if (declaredType == "bool" && actualType == typeof(bool))
-            return true;
-        if (declaredType == "float" && actualType == typeof(float))
-            return true;
-        // add more types as needed
-        return false;
+        return TypeParsers.ContainsKey(declaredType);
     }
     
     private bool TryParseAndSetProperty(SerializedProperty prop, string declaredType, string value, int csvRow, string header)
     {
         declaredType = declaredType.ToLower();
-        try
-        {
-            switch (declaredType)
-            {
-                case "int":
-                    if (int.TryParse(value, out int intVal))
-                    {
-                        prop.intValue = intVal;
-                        return true;
-                    }
-                    else
-                    {
-                        CustomLogger.LogError(LogSystem.CSVImporter, $"Row {csvRow}: Failed to parse int for '{header}' with value '{value}'.");
-                        return false;
-                    }
-                case "string":
-                    prop.stringValue = value;
-                    return true;
-                case "bool":
-                    if (bool.TryParse(value, out bool boolVal))
-                    {
-                        prop.boolValue = boolVal;
-                        return true;
-                    }
-                    else
-                    {
-                        CustomLogger.LogError(LogSystem.CSVImporter, $"Row {csvRow}: Failed to parse bool for '{header}' with value '{value}'.");
-                        return false;
-                    }
-                case "float":
-                    if (float.TryParse(value, out float floatVal))
-                    {
-                        prop.floatValue = floatVal;
-                        return true;
-                    }
-                    else
-                    {
-                        CustomLogger.LogError(LogSystem.CSVImporter, $"Row {csvRow}: Failed to parse float for '{header}' with value '{value}'.");
-                        return false;
-                    }
-                default:
-                    CustomLogger.LogError(LogSystem.CSVImporter, $"Row {csvRow}: Unsupported declared type '{declaredType}' for '{header}'.");
-                    return false;
-            }
-        }
-        catch (System.Exception ex)
-        {
-            CustomLogger.LogError(LogSystem.CSVImporter, $"Row {csvRow}: Exception setting property '{header}': {ex.Message}");
-            return false;
-        }
+        if (TypeParsers.TryGetValue(declaredType, out var parser))
+            return parser(prop, value, csvRow, header);
+
+        CustomLogger.LogError(LogSystem.CSVImporter, $"Row {csvRow}: Unsupported declared type '{declaredType}' for '{header}'.");
+        return false;
     }
+
 }
