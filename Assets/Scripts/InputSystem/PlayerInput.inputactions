@@ -134,7 +134,7 @@
             ]
         },
         {
-            "name": "PlayerInputMap_COMBAT",
+            "name": "PlayerInputMap_COMBAT_ACTIONSELECTION",
             "id": "f4f74810-eeab-42c2-b6b0-9c819f9627e8",
             "actions": [
                 {
@@ -174,54 +174,9 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Select",
-                    "type": "Button",
-                    "id": "0660b505-eaec-4bfc-88dd-e6399b7c9a9c",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
                     "name": "Back",
                     "type": "Button",
                     "id": "563cc69d-834c-4206-9669-3f3d009f5a91",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "CycleUp",
-                    "type": "Button",
-                    "id": "b9042381-997e-4ee1-9215-88678572cece",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "CycleDown",
-                    "type": "Button",
-                    "id": "d5b3246f-398b-44dc-8c82-6d1e2348f894",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "CycleLeft",
-                    "type": "Button",
-                    "id": "3f5ae6fc-e807-458f-837d-8c11d805858f",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "CycleRight",
-                    "type": "Button",
-                    "id": "6b9542a5-1147-439c-a568-aa39847e8bf1",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -293,67 +248,12 @@
                 },
                 {
                     "name": "",
-                    "id": "2b34cf8b-addd-4d8c-bffb-44d440befa51",
-                    "path": "<Keyboard>/space",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Select",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
                     "id": "40ee0927-fd44-40a5-b593-5dbefcae26c8",
                     "path": "<Keyboard>/tab",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
                     "action": "Back",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "69940825-d00e-412f-a8e0-541e5059d4fb",
-                    "path": "<Keyboard>/upArrow",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "CycleUp",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "a4229de2-2681-4e97-ae80-7e0947819975",
-                    "path": "<Keyboard>/downArrow",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "CycleDown",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "9ec30f14-b692-4ac9-9fe3-00fc6426797a",
-                    "path": "<Keyboard>/leftArrow",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "CycleLeft",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "81340b14-04ad-42a7-ae71-29746096abcf",
-                    "path": "<Keyboard>/rightArrow",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "CycleRight",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -386,6 +286,178 @@
             "id": "1337884c-2186-4c54-a580-7ade57337242",
             "actions": [],
             "bindings": []
+        },
+        {
+            "name": "PlayerInputMap_COMBAT_UINAVIGATION",
+            "id": "878fb006-adbe-43b5-a2a1-8a4bebef383f",
+            "actions": [
+                {
+                    "name": "CycleUp",
+                    "type": "Button",
+                    "id": "e9e20051-94f9-459b-ba66-ed518102b481",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "CycleDown",
+                    "type": "Button",
+                    "id": "d8c2d347-e468-467b-a867-1742e889ee9b",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "CycleLeft",
+                    "type": "Button",
+                    "id": "d253f76d-587d-4c5b-b87f-5f2092c6d9fd",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "CycleRight",
+                    "type": "Button",
+                    "id": "53be219b-4990-4c4d-8d76-61740f8dd1d5",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Select",
+                    "type": "Button",
+                    "id": "a2fd4f92-0be2-4ad1-b98c-8f6d6d0d7d55",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Back",
+                    "type": "Button",
+                    "id": "f4003b7c-3d7e-421a-a9cc-d6b9f60bb3ed",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "17f1cefc-a763-46e1-a50b-ab1c5f988e33",
+                    "path": "<Keyboard>/w",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "CycleUp",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a7523dc8-4166-4afb-b3fc-0eacd3dac072",
+                    "path": "<Keyboard>/upArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "CycleUp",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "d085f9b3-eccb-4c57-9f99-c4a44a135d61",
+                    "path": "<Keyboard>/s",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "CycleDown",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "81dcf41b-830f-4b9a-ae6b-fd2c2d841b89",
+                    "path": "<Keyboard>/downArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "CycleDown",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "3a34f0e9-6f27-4f92-ac07-144d64549fc3",
+                    "path": "<Keyboard>/a",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "CycleLeft",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "2e95ba1c-90c8-4341-ae2d-37fb4fecbcf2",
+                    "path": "<Keyboard>/leftArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "CycleLeft",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "0f392697-6b61-444b-aa73-4bb8a9cec402",
+                    "path": "<Keyboard>/d",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "CycleRight",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "e40970ea-c5ab-4ab2-9089-1d9ab48a30f3",
+                    "path": "<Keyboard>/rightArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "CycleRight",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "f338a252-e04b-4269-9015-32e054225a8e",
+                    "path": "<Keyboard>/space",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Select",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "ec85aaaa-05fe-4faf-a9bf-85cb424f3ea8",
+                    "path": "<Keyboard>/tab",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Back",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
         }
     ],
     "controlSchemes": []

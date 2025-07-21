@@ -20,7 +20,7 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Class
 
     [System.Serializable]
     public class IntPair<T>{
-        public T key;
-        public int value;
+        public T key; //skill
+        public int value; //required level
     }
 }
