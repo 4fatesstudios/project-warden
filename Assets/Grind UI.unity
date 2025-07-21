@@ -130,7 +130,7 @@ GameObject:
   - component: {fileID: 31424851}
   - component: {fileID: 31424850}
   m_Layer: 5
-  m_Name: GrindingUI
+  m_Name: GrindingUI-UIdoc
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -183,6 +183,7 @@ GameObject:
   - component: {fileID: 117450877}
   - component: {fileID: 117450876}
   - component: {fileID: 117450875}
+  - component: {fileID: 117450879}
   m_Layer: 0
   m_Name: Cube
   m_TagString: Untagged
@@ -280,6 +281,23 @@ Transform:
   - {fileID: 861313028}
   m_Father: {fileID: 31424851}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &117450879
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 117450874}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9309bcf07e525b64d94bfdf1dc2e1a27, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  uiDocument: {fileID: 31424850}
+  grindRecipe: {fileID: 0}
+  requiredDuration: 5
+  grindDecayRate: 3
+  grindCenter: {fileID: 861313028}
 --- !u!1 &291636136
 GameObject:
   m_ObjectHideFlags: 0
@@ -368,7 +386,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 861313028}
-  - component: {fileID: 861313029}
   m_Layer: 0
   m_Name: GrindCenter
   m_TagString: MainCamera
@@ -391,26 +408,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 117450878}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &861313029
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 861313027}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 555cef615601b2144a86c12891610c45, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  uiDocument: {fileID: 31424850}
-  requiredDuration: 10
-  grindDecayRate: 3
-  grindCenter: {fileID: 861313028}
-  minGrindSpeed: 2
-  maxGrindSpeed: 8
-  minPoundRate: 1
-  maxPoundRate: 5
 --- !u!1 &1949177807
 GameObject:
   m_ObjectHideFlags: 0

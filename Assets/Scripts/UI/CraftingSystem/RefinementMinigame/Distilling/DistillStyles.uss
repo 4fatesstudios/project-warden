@@ -1,0 +1,28 @@
+.state-label {
+    font-size: 28px;
+    -unity-font-style: Bold;
+    color: #ddeeff;
+    -unity-text-align: middle-center;
+    margin-top: 10px;
+}
+
+.instruction-label {
+    font-size: 18px;
+    color: #ffff88;
+    -unity-text-align: middle-center;
+    margin-bottom: 10px;
+}
+
+.collect-button {
+    font-size: 20px;
+    padding: 10px 20px;
+    background-color: #3a75c4;
+    color: white;
+    border-radius: 8px;
+    -unity-text-align: middle-center;
+    cursor: link;
+}
+
+.collect-button:active {
+    background-color: #2a4a7d;
+}

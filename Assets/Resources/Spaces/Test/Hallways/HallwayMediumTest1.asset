@@ -1,0 +1,58 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 710a054946e11eb44bf55df88ee683e3, type: 3}
+  m_Name: HallwayMediumTest1
+  m_EditorClassIdentifier: 
+  spacePrefab: {fileID: 4506452909063083736, guid: 7d48cdcff40e9cf4ba04e08327a227c5, type: 3}
+  spaceType: 1
+  roomSize: 1
+  doorSpawnPoints:
+  - doorSpawnPoint: {fileID: 6750740337076938450, guid: 7d48cdcff40e9cf4ba04e08327a227c5, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 2
+    doorSpawnGroup: 1
+  - doorSpawnPoint: {fileID: 8190795193168298486, guid: 7d48cdcff40e9cf4ba04e08327a227c5, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 2
+    doorSpawnGroup: 1
+  - doorSpawnPoint: {fileID: 5765135239659753044, guid: 7d48cdcff40e9cf4ba04e08327a227c5, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 4
+    doorSpawnGroup: 2
+  - doorSpawnPoint: {fileID: 7829772316423539189, guid: 7d48cdcff40e9cf4ba04e08327a227c5, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 4
+    doorSpawnGroup: 2
+  - doorSpawnPoint: {fileID: 8511205805581839449, guid: 7d48cdcff40e9cf4ba04e08327a227c5, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 3
+    doorSpawnGroup: 3
+  - doorSpawnPoint: {fileID: 3148420206753664115, guid: 7d48cdcff40e9cf4ba04e08327a227c5, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 3
+    doorSpawnGroup: 3
+  - doorSpawnPoint: {fileID: 8380224810609097282, guid: 7d48cdcff40e9cf4ba04e08327a227c5, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 1
+    doorSpawnGroup: 4
+  - doorSpawnPoint: {fileID: 1688912501771849140, guid: 7d48cdcff40e9cf4ba04e08327a227c5, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 1
+    doorSpawnGroup: 4
