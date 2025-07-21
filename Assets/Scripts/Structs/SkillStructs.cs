@@ -29,6 +29,13 @@ namespace FourFatesStudios.ProjectWarden.Structs
     }
     
     [System.Serializable]
+    public struct ShieldInstance {
+        [SerializeField, Tooltip("Base Shield"), Range(1, 9999)] private int baseShield;
+        
+        public int BaseHeal { get => baseShield; set => baseShield = value; }
+    }
+    
+    [System.Serializable]
     public struct BuffStatInstance {
         [SerializeField, Tooltip("Stat Buff Modifiers")] private StatModifierList statModifierList;
         [SerializeField, Tooltip("Effect Timing")] private EffectTimingInfo effectTiming;
@@ -43,6 +50,15 @@ namespace FourFatesStudios.ProjectWarden.Structs
         [SerializeField, Tooltip("Effect Timing")] private EffectTimingInfo effectTiming;
         
         public HealInstance[] HealInstances { get => healInstances; set => healInstances = value; }
+        public EffectTimingInfo EffectTiming { get => effectTiming; set => effectTiming = value; }
+    }
+    
+    [System.Serializable]
+    public struct BuffShieldInstance {
+        [SerializeField, Tooltip("Shield Instance")] private ShieldInstance[] shieldInstances;
+        [SerializeField, Tooltip("Effect Timing")] private EffectTimingInfo effectTiming;
+        
+        public ShieldInstance[] ShieldInstances { get => shieldInstances; set => shieldInstances = value; }
         public EffectTimingInfo EffectTiming { get => effectTiming; set => effectTiming = value; }
     }
     
