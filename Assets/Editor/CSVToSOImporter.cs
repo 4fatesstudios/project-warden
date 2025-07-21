@@ -54,9 +54,7 @@ public class CSVToSOImporter : EditorWindow
         scriptableObjectType = (MonoScript)EditorGUILayout.ObjectField("Entry ScriptableObject Type", scriptableObjectType, typeof(MonoScript), false);
         outputFolder = EditorGUILayout.TextField("Output Folder", outputFolder);
 
-        if (GUILayout.Button("Import")) {
-            ImportCSV();
-        }
+        if (GUILayout.Button("Import")) ImportCSV();
     }
 
     private void ImportCSV() {
@@ -164,7 +162,7 @@ public class CSVToSOImporter : EditorWindow
                 idToLastRow.Add(id, csvRow);
             }
 
-            string assetPath = $"{outputFolder}/{id}.asset";
+            string assetPath = $"{outputFolder}/{type.Name+id}.asset";
             ScriptableObject instance = AssetDatabase.LoadAssetAtPath(assetPath, type) as ScriptableObject;
             bool isNew = instance == null;
             if (isNew) {
