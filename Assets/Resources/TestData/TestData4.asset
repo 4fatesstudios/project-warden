@@ -21,3 +21,10 @@ MonoBehaviour:
     stat: 3
     type: 1
     modifier: 3
+  statModifierList:
+  - stat: 2
+    type: 0
+    modifier: 10
+  - stat: 3
+    type: 1
+    modifier: 3

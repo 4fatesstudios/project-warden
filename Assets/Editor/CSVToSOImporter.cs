@@ -4,6 +4,7 @@ using UnityEngine;
 using System.Reflection;
 using System.Linq;
 using System.Collections.Generic;
+using FourFatesStudios.ProjectWarden.ScriptableObjects;
 using FourFatesStudios.ProjectWarden.Utilities;
 using FourFatesStudios.ProjectWarden.Utilities.CSVImport;
 
@@ -33,17 +34,19 @@ public class CSVToSOImporter : EditorWindow
 
     private void ImportCSV() {
         CustomLogger.Init(LogSystem.CSVImporter, clear:true);
-
+        
+        // Ensure that both the CSVFile field and ScriptableObject field are assigned
         if (csvFile == null || scriptableObjectType == null) {
             CustomLogger.LogError(LogSystem.CSVImporter, "CSV file or ScriptableObject type not assigned.");
             Debug.LogError("CSV file or ScriptableObject type not assigned.");
             return;
         }
-
+        
+        // Ensure the ScriptableObject inherits from BaseDataSO
         System.Type type = scriptableObjectType.GetClass();
-        if (!typeof(ScriptableObject).IsAssignableFrom(type)) {
-            CustomLogger.LogError(LogSystem.CSVImporter, $"Type {type.Name} must inherit from ScriptableObject.");
-            Debug.LogError($"Type {type.Name} must inherit from ScriptableObject.");
+        if (!typeof(BaseDataSO).IsAssignableFrom(type)) {
+            CustomLogger.LogError(LogSystem.CSVImporter, $"Type {type.Name} must inherit from BaseDataSO.");
+            Debug.LogError($"Type {type.Name} must inherit from BaseDataSO.");
             return;
         }
 
