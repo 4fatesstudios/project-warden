@@ -137,6 +137,15 @@ public class CSVToSOImporter : EditorWindow
 
         foreach (var warn in result.EntryWarnings)
             CustomLogger.Log(LogSystem.CSVImporter, warn);
+
+        if (result.DeletedIDs.Count > 0)
+            CustomLogger.Log(LogSystem.CSVImporter, $"IDs to delete ({result.DeletedIDs.Count}): {string.Join(", ", result.DeletedIDs)}");
+
+        if (result.UpdatedIDs.Count > 0)
+            CustomLogger.Log(LogSystem.CSVImporter, $"IDs to update ({result.UpdatedIDs.Count}): {string.Join(", ", result.UpdatedIDs)}");
+
+        if (result.NewIDs.Count > 0)
+            CustomLogger.Log(LogSystem.CSVImporter, $"IDs to create ({result.NewIDs.Count}): {string.Join(", ", result.NewIDs)}");
     }
 
     private bool IsTypeCompatible(string declaredType, System.Type actualType) {

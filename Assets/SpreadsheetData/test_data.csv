@@ -1,6 +1,6 @@
 id:string,quantityTwo:int,info:string,tested:bool,aspect:Aspect,statModifier:StatModifier,statModifierList:StatModifier[]
 0,2,test1,true,Corporeal,Vitality|Additive|5,Wisdom|Additive|10;Agility|Multiplicative|3
-2,4,test2,false,Frigid,Strength|Multiplicative|1,Strength|Additive|10;Agility|Multiplicative|3
+2,4,test2,falsee,Frigid,Strength|Multiplicative|1,Strength|Additive|10;Agility|Multiplicative|3
 3,6,test3,true,Arc,Wisdom|Additive|10,Agility|Additive|10;Agility|Multiplicative|3
 4,2,test4,false,Caustic,Agility|Multiplicative|3,Wisdom|Additive|10;Agility|Multiplicative|3
 6,1,test5,true,,,

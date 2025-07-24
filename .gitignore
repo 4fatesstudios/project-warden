@@ -635,5 +635,4 @@ PythonBackend/macos/
 .bezisidekick/.settings.json
 
 # ignore imported CSV files and folder
-SpreadsheetData/
 
