@@ -3,89 +3,121 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using FourFatesStudios.ProjectWarden.ScriptableObjects;
 using FourFatesStudios.ProjectWarden.Utilities;
 using UnityEditor;
 using UnityEngine;
 
 namespace FourFatesStudios.ProjectWarden.Utilities.CSVImport
 {
-    public static class CSVValidator
-    {
-        public static CSVValidationResult Validate(string csvPath, Type targetType)
-        {
-            var lines = File.ReadAllLines(csvPath).Where(l => !string.IsNullOrWhiteSpace(l)).ToArray();
-            if (lines.Length < 2)
-            {
-                CustomLogger.LogError(LogSystem.CSVImporter, $"CSV file '{csvPath}' has insufficient data rows.");
-                return new CSVValidationResult();
+    public static class CSVValidator {
+        public static CSVValidationResult Validate(TextAsset csvFile, Type soType, string outputFolder) {
+            var result = new CSVValidationResult();
+            if (csvFile == null || soType == null) return result;
+
+            string[] lines = csvFile.text.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            if (lines.Length < 2) {
+                result.HeaderErrors.Add("CSV has no data rows.");
+                return result;
             }
 
-            var headerParts = lines[0].Split(',');
-            var fieldMap = new Dictionary<string, (string fieldName, string type)>();
+            string[] headersRaw = lines[0].Split(',');
+            string[] headers = headersRaw.Select(h => h.Split(':')[0].Trim()).ToArray();
+            string[] declaredTypes = headersRaw.Select(h => h.Contains(":") ? h.Split(':')[1].Trim() : "string").ToArray();
 
-            foreach (var part in headerParts)
-            {
-                var split = part.Split(':');
-                if (split.Length != 2)
-                {
-                    CustomLogger.LogError(LogSystem.CSVImporter, $"Invalid header format '{part}' in CSV.");
-                    return new CSVValidationResult();
-                }
-                fieldMap[split[0].Trim().ToLower()] = (split[0].Trim(), split[1].Trim().ToLower());
+            int idIndex = Array.FindIndex(headers, h => h.Equals("ID", StringComparison.OrdinalIgnoreCase));
+            if (idIndex < 0) {
+                result.HeaderErrors.Add("CSV must include an 'ID' column.");
+                return result;
             }
 
-            var soFields = GetSerializedFields(targetType);
-            var idField = soFields.FirstOrDefault(f => f.Name.Equals("id", StringComparison.OrdinalIgnoreCase));
-            if (idField == null)
-            {
-                CustomLogger.LogError(LogSystem.CSVImporter, $"Target ScriptableObject '{targetType.Name}' is missing an 'id' field.");
-                return new CSVValidationResult();
-            }
+            var fields = soType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+            var props = soType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
 
-            var result = new CSVValidationResult
-            {
-                HeaderFields = fieldMap.Values.Select(f => f.fieldName).ToList()
-            };
+            for (int i = 0; i < headers.Length; i++) {
+                string header = headers[i];
+                string declaredType = declaredTypes[i];
 
-            for (int i = 1; i < lines.Length; i++)
-            {
-                var line = lines[i];
-                var values = line.Split(',');
-
-                if (values.Length != headerParts.Length)
-                {
-                    result.InvalidRows.Add(i);
-                    CustomLogger.LogError(LogSystem.CSVImporter, $"Row {i} has incorrect number of columns. Expected {headerParts.Length}, got {values.Length}.");
+                if (header.Equals("ID", StringComparison.OrdinalIgnoreCase)) {
+                    bool found = fields.Any(f => f.Name.Equals("id", StringComparison.OrdinalIgnoreCase)) ||
+                                 props.Any(p => p.Name.Equals("ID", StringComparison.OrdinalIgnoreCase));
+                    if (!found)
+                        result.HeaderErrors.Add($"Header '{header}' not found as 'id' field or property in {soType.Name}.");
                     continue;
                 }
 
-                var rowId = values[Array.FindIndex(headerParts, h => h.StartsWith("id:"))].Trim();
-                if (string.IsNullOrWhiteSpace(rowId))
-                {
-                    result.MissingIDs.Add(i);
-                    CustomLogger.Log(LogSystem.CSVImporter, $"Row {i} is missing an ID.");
+                bool hasField = fields.Any(f => f.Name.Equals(header, StringComparison.OrdinalIgnoreCase));
+                bool hasProp = props.Any(p => p.Name.Equals(header, StringComparison.OrdinalIgnoreCase));
+
+                if (!hasField && !hasProp)
+                    result.HeaderErrors.Add($"Header '{header}' not found as field or property in {soType.Name}.");
+
+                Type actualType = hasField
+                    ? fields.First(f => f.Name.Equals(header, StringComparison.OrdinalIgnoreCase)).FieldType
+                    : props.First(p => p.Name.Equals(header, StringComparison.OrdinalIgnoreCase)).PropertyType;
+
+                if (!CSVTypeParsers.Parsers.ContainsKey(declaredType.ToLower()))
+                    result.HeaderErrors.Add($"Declared type '{declaredType}' for column '{header}' is not supported.");
+            }
+
+            if (result.HeaderMismatch) return result;
+
+            HashSet<string> seenIds = new();
+            Dictionary<string, ScriptableObject> existing = AssetDatabase.FindAssets($"t:{soType.Name}", new[] { outputFolder })
+                .Select(guid => AssetDatabase.LoadAssetAtPath<ScriptableObject>(AssetDatabase.GUIDToAssetPath(guid)))
+                .Where(so => so != null)
+                .ToDictionary(so => ((BaseDataSO)so).ID);
+
+            for (int row = 1; row < lines.Length; row++) {
+                string[] values = lines[row].Split(',');
+                if (values.Length != headers.Length) {
+                    result.EntryErrors.Add($"Row {row + 1}: Column count mismatch. Expected {headers.Length}, got {values.Length}.");
                     continue;
                 }
 
-                result.ValidIDs.Add(rowId);
+                string id = values[idIndex].Trim();
+                if (string.IsNullOrEmpty(id)) {
+                    result.EntryErrors.Add($"Row {row + 1}: Missing ID.");
+                    continue;
+                }
+
+                if (seenIds.Contains(id)) {
+                    result.EntryWarnings.Add($"Row {row + 1}: Duplicate ID '{id}' detected. Only latest will be used.");
+                }
+                seenIds.Add(id);
+
+                List<string> missingFields = new();
+                List<string> typeMismatch = new();
+
+                for (int c = 0; c < headers.Length; c++) {
+                    string val = values[c].Trim();
+                    if (string.IsNullOrEmpty(val) && c != idIndex)
+                        missingFields.Add(headers[c]);
+                    else if (!CSVTypeParsers.Parsers[declaredTypes[c].ToLower()].Invoke(null, val, row + 1, headers[c]))
+                        typeMismatch.Add(headers[c]);
+                }
+
+                if (missingFields.Any())
+                    result.EntryWarnings.Add($"Row {row + 1}: Missing data in column(s): {string.Join(", ", missingFields)}.");
+
+                if (typeMismatch.Any())
+                    result.EntryWarnings.Add($"Row {row + 1}: Type mismatch in column(s): {string.Join(", ", typeMismatch)}.");
+
+                if (missingFields.Any() || typeMismatch.Any())
+                    result.InvalidIDs.Add(id);
+                else {
+                    result.ValidIDs.Add(id);
+                    if (existing.ContainsKey(id)) result.UpdatedIDs.Add(id);
+                    else result.NewIDs.Add(id);
+                }
+            }
+
+            // Mark for deletion
+            foreach (var id in existing.Keys) {
+                if (!seenIds.Contains(id)) result.DeletedIDs.Add(id);
             }
 
             return result;
         }
-
-        private static List<FieldInfo> GetSerializedFields(Type type)
-        {
-            return type.GetFields(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance)
-                       .Where(f => f.IsPublic || f.GetCustomAttribute<SerializeField>() != null)
-                       .ToList();
-        }
-    }
-
-    public class CSVValidationResult
-    {
-        public List<string> HeaderFields = new();
-        public List<string> ValidIDs = new();
-        public List<int> InvalidRows = new();
-        public List<int> MissingIDs = new();
     }
 }
