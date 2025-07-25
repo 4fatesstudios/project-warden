@@ -16,7 +16,11 @@ MonoBehaviour:
   skillType: 0
   skillDescription: Empty Description
   _skillID: 66ad3df8-4358-4085-834d-ab8988b9396c
-  damageInstances: []
+  damageInstances:
+  - baseDamage: 0
+    stagger: 0
+    damageType: 0
+    aspect: 0
   healingInstances: []
   buffStatInstances: []
   buffHealInstances: []

@@ -1,6 +1,7 @@
 using FourFatesStudios.ProjectWarden.Enums;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.PotionEffects;
 using System.Collections.Generic;
+using FourFatesStudios.ProjectWarden.Structs;
 using UnityEngine;
 
 namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
@@ -17,13 +18,37 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
         [SerializeField, Tooltip("Is alchemical ingredient corrupted or not.")]
         private bool isCorrupted;
 
+        [Header("Ingredient Effect")] 
+        [SerializeField, Tooltip("The infusion(s) given from the ingredient")] 
+        private List<Infusion> infusions;
+
+        [Header("Refinement")] 
+        [SerializeField] private bool canGrind;
+        [SerializeField] private Ingredient grindingResult;
+        
+        [SerializeField] private bool canDistill;
+        [SerializeField] private Ingredient distillingResult;
+        
+        [SerializeField] private bool canRoast;
+        [SerializeField] private Ingredient roastingResult;
+        
+        // to delete
+        [Header("DEPRECATED, REMOVE ALL USES")]
         [SerializeField, Tooltip("Potion effects this ingredient can provide.")]
         private List<PotionEffect> potionEffects;
+        public IReadOnlyList<PotionEffect> PotionEffects => potionEffects;
+        // end to delete
 
         public IngredientArchetype IngredientArchetype => ingredientArchetype;
         public Aspect IngredientAspect => ingredientAspect;
         public bool IsCorrupted => isCorrupted;
-        public IReadOnlyList<PotionEffect> PotionEffects => potionEffects;
+        public List<Infusion> Infusions => infusions;
+        public bool CanGrind => canGrind;
+        public Ingredient GrindingResult => grindingResult;
+        public bool CanDistill => canDistill;
+        public Ingredient DistillingResult => distillingResult;
+        public bool CanRoast => canRoast;
+        public Ingredient RoastingResult => roastingResult;
 
 #if UNITY_EDITOR
         private void OnValidate()

@@ -19,7 +19,6 @@ MonoBehaviour:
   damageInstances:
   - baseDamage: 50
     stagger: 5
-    exposure: 0
     damageType: 0
     aspect: 0
   healingInstances: []
