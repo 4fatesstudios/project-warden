@@ -148,18 +148,4 @@ public class CSVToSOImporter : EditorWindow
             CustomLogger.Log(LogSystem.CSVImporter, $"IDs to create ({result.NewIDs.Count}): {string.Join(", ", result.NewIDs)}");
     }
 
-    private bool IsTypeCompatible(string declaredType, System.Type actualType) {
-        declaredType = declaredType.ToLower();
-        return CSVTypeParsers.Parsers.ContainsKey(declaredType);
-    }
-    
-    private bool TryParseAndSetProperty(SerializedProperty prop, string declaredType, string value, int csvRow, string header) {
-        declaredType = declaredType.ToLower();
-        if (CSVTypeParsers.Parsers.TryGetValue(declaredType, out var parser))
-            return parser(prop, value, csvRow, header);
-
-        CustomLogger.LogError(LogSystem.CSVImporter, $"Row {csvRow}: Unsupported declared type '{declaredType}' for '{header}'.");
-        return false;
-    }
-
 }
