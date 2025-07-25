@@ -7,8 +7,13 @@ using UnityEngine;
 namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
 {
     [CreateAssetMenu(fileName = "NewIngredient", menuName = "Items/Ingredient")]
-    public class Ingredient : Item
-    {
+    public class Ingredient : Item {
+        [SerializeField, Tooltip("Descriptive noun for custom potion naming.")] 
+        private string noun;
+        
+        [SerializeField, Tooltip("Descriptive adjective for custom potion naming.")]
+        private string adjective;
+        
         [SerializeField, Tooltip("Alchemical ingredient type.")]
         private IngredientArchetype ingredientArchetype;
 
@@ -32,13 +37,13 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
         [SerializeField] private bool canRoast;
         [SerializeField] private Ingredient roastingResult;
         
-        // to delete
-        [Header("DEPRECATED, REMOVE ALL USES")]
-        [SerializeField, Tooltip("Potion effects this ingredient can provide.")]
+        // DEPRECATED, REMOVE ALL USES, to delete
         private List<PotionEffect> potionEffects;
         public IReadOnlyList<PotionEffect> PotionEffects => potionEffects;
         // end to delete
 
+        public string Noun => noun;
+        public string Adjective => adjective;
         public IngredientArchetype IngredientArchetype => ingredientArchetype;
         public Aspect IngredientAspect => ingredientAspect;
         public bool IsCorrupted => isCorrupted;
@@ -60,6 +65,10 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
             {
                 Debug.LogWarning($"[{name}] contains null entries in its PotionEffects list.", this);
             }
+            
+            if (!canGrind) grindingResult = null;
+            if (!canDistill) distillingResult = null;
+            if (!canRoast) roastingResult = null;
         }
 #endif
         public override string ToString()
