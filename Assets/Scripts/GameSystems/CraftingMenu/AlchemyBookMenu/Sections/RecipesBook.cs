@@ -1,8 +1,8 @@
 using UnityEngine;
 
-namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyBookMenu
+namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyBookMenu.Sections
 {
-    public class AlchemyBook : MonoBehaviour
+    public class RecipesBook : MonoBehaviour
     {
         // Start is called once before the first execution of Update after the MonoBehaviour is created
         void Start()
