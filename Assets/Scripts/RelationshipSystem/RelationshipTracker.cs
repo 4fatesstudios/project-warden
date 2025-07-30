@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks.Triggers;
 using UnityEngine;
 
 
@@ -12,7 +13,6 @@ namespace FourFatesStudios.ProjectWarden.RelationshipSystem
         Allied = 3,
         Romanced= 4
     }
-
     public enum RelationshipThresholds
     {
         Distrustful = -10,
@@ -25,25 +25,81 @@ namespace FourFatesStudios.ProjectWarden.RelationshipSystem
 
     public class RelationshipTracker : MonoBehaviour
     {
+        [SerializeField] private string characterName; // Set this in the inspector
+        
         public RelationshipStatus relationshipStatus { get; private set; } = RelationshipStatus.Neutral;
         public int relationshipPoints { get; private set; } = 0;
+        
+        private void Awake()
+        {
+            // Register this character with the relationship manager
+            if (!string.IsNullOrEmpty(characterName))
+            {
+                RelationshipManager.Instance?.RegisterCharacter(characterName, this);
+            }
+        }
 
 
         /// <summary>
         /// Changes the relationship points of the character given a positive or negative value.
-        /// This will also update the relationship status based on the new points.
+        /// Points are capped at the next threshold until UpdateRelationshipStatus() is called externally.
         /// </summary>
         /// <param name="points"></param>
         public void ChangeRelationshipPoints(int points)
         {
-            relationshipPoints += points;
-            UpdateRelationshipStatus();
+
+            int newPoints = relationshipPoints + points;
+
+            /// Enforces the invariant that points must be within minus 10 of Distrustful and plus 20 of Romanced.
+            if (relationshipStatus == RelationshipStatus.Distrustful)
+            {
+                //points cannot be greater than (int)RelationshipThreshold.Neutral
+                if (newPoints > (int)RelationshipThresholds.Neutral)
+                {
+                    newPoints = (int)RelationshipThresholds.Neutral;
+                }
+            }
+            else if (relationshipStatus == RelationshipStatus.Neutral)
+            {
+                //points cannot be greater than (int)RelationshipThreshold.Aquainted
+                if (newPoints > (int)RelationshipThresholds.Aquainted)
+                {
+                    newPoints = (int)RelationshipThresholds.Aquainted;
+                }
+            }
+            else if (relationshipStatus == RelationshipStatus.Aquainted)
+            {
+                //points cannot be greater than (int)RelationshipThreshold.Friendly
+                if (newPoints > (int)RelationshipThresholds.Friendly)
+                {
+                    newPoints = (int)RelationshipThresholds.Friendly;
+                }
+            }
+            else if (relationshipStatus == RelationshipStatus.Friendly)
+            {
+                //points cannot be greater than (int)RelationshipThreshold.Allied
+                if (newPoints > (int)RelationshipThresholds.Allied)
+                {
+                    newPoints = (int)RelationshipThresholds.Allied;
+                }
+            }
+            else if (relationshipStatus == RelationshipStatus.Allied)
+            {
+                //points cannot be greater than (int)RelationshipThreshold.Romanced
+                if (newPoints > (int)RelationshipThresholds.Romanced)
+                {
+                    newPoints = (int)RelationshipThresholds.Romanced;
+                }
+            }
+
+            relationshipPoints = Mathf.Clamp(newPoints, (int)RelationshipThresholds.Distrustful - 10, (int)RelationshipThresholds.Romanced + 20);
         }
+
 
         /// <summary>
         /// Updates the relationship status based on the current relationship points.
         /// </summary>
-        void UpdateRelationshipStatus()
+        public void UpdateRelationshipStatus()
         {
             if (relationshipPoints < (int)RelationshipThresholds.Distrustful)
             {
@@ -51,21 +107,25 @@ namespace FourFatesStudios.ProjectWarden.RelationshipSystem
             }
             else if (relationshipPoints < (int)RelationshipThresholds.Neutral)
             {
-                relationshipStatus = RelationshipStatus.Neutral;
+                relationshipStatus = RelationshipStatus.Distrustful;
             }
             else if (relationshipPoints < (int)RelationshipThresholds.Aquainted)
             {
-                relationshipStatus = RelationshipStatus.Aquainted;
+                relationshipStatus = RelationshipStatus.Neutral;
             }
             else if (relationshipPoints < (int)RelationshipThresholds.Friendly)
             {
-                relationshipStatus = RelationshipStatus.Friendly;
+                relationshipStatus = RelationshipStatus.Aquainted;
             }
             else if (relationshipPoints < (int)RelationshipThresholds.Allied)
             {
+                relationshipStatus = RelationshipStatus.Friendly;
+            }
+            else if (relationshipPoints < (int)RelationshipThresholds.Romanced)
+            {
                 relationshipStatus = RelationshipStatus.Allied;
             }
-            else if (relationshipPoints >= (int)RelationshipThresholds.Romanced)
+            else
             {
                 relationshipStatus = RelationshipStatus.Romanced;
             }
