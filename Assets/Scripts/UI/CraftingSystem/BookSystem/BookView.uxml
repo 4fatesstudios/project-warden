@@ -1,0 +1,13 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/Scripts/UI/CraftingSystem/BookSystem/BookStyles.uss?fileID=7433441132597879392&amp;guid=108f59917729b6c45a9479e381f8a209&amp;type=3#BookStyles" />
+    <ui:VisualElement name="book-root" class="book-root">
+        <ui:VisualElement class="book-page-container">
+            <ui:VisualElement name="left-page" class="book-page" />
+            <ui:VisualElement name="right-page" class="book-page" />
+        </ui:VisualElement>
+        <ui:VisualElement class="book-nav">
+            <ui:Button name="prev-button" text="◀" class="book-button" />
+            <ui:Button name="next-button" text="▶" class="book-button" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

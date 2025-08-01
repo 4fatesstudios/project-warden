@@ -1,0 +1,36 @@
+<ui:UXML 
+    xmlns:ui="UnityEngine.UIElements"
+    editor-extension-mode="False">
+
+    <Style src="project://database/Assets/Scripts/UI/CraftingSystem/BookSystem/AlcBookStyles.uss?fileID=7433441132597879392&amp;guid=3e59a270b49e0f54b9b13f4e3a2c475a&amp;type=3#AlcBookStyles" />
+
+    <!-- Fixed page container -->
+    <ui:VisualElement class="bestiary-page">
+
+        <!-- Entry title -->
+        <ui:Label name="entry-title" text="Black King" class="entry-title" />
+
+        <!-- Image and stats side-by-side -->
+        <ui:VisualElement class="entry-content">
+            <ui:VisualElement name="creature-image" class="creature-image" />
+            <ui:VisualElement class="entry-stats">
+                <ui:Label text="HP: 300" class="entry-stat" />
+                <ui:Label text="Weakness: Ice" class="entry-stat" />
+                <ui:Label text="Null: Fire" class="entry-stat" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Description -->
+        <ui:Label name="entry-description"
+                  text="A dark knight that guards Yukiko's castle. Heavy armor, slow but powerful."
+                  class="entry-description" />
+
+        <!-- Skills -->
+        <ui:Label name="entry-skills-title" text="Skills:" class="entry-subtitle" />
+        <ui:VisualElement class="entry-skills">
+            <ui:Label text="Power Slash" class="entry-skill" />
+            <ui:Label text="Tarukaja" class="entry-skill" />
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+</ui:UXML>
