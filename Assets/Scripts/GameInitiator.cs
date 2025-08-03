@@ -9,9 +9,12 @@ namespace FourFatesStudios.ProjectWarden
         private async void Start() {
             // BindObjects();
             // _loadingScreen.Show();
-            // await InitializeObjects();
-            // await CreateObjects();
-            // PrepareGame();
+            // Load BaseStats save
+            // Instantiate StatsComponent
+            // Load Equipment
+            // // Equip Equipment
+            // // // Calls to StatsComponent's statModifierManager to update
+            // Update StatsComponent
             // _loadingScreen.Hide();
         }
     

@@ -1,4 +1,6 @@
 using FourFatesStudios.ProjectWarden.Enums;
+using FourFatesStudios.ProjectWarden.Stats;
+using UnityEditor;
 using UnityEngine;
 
 
@@ -9,7 +11,24 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
     {
         [SerializeField, Tooltip("Trinket type.")]
         private ItemTrinketType itemTrinketType;
+        
+        [SerializeField, Tooltip("Trinket stat modifiers.")]
+        private StatModifierList statModifierList;
 
         public ItemTrinketType ItemTrinketType => itemTrinketType;
+        public StatModifierList StatModifierList {
+            get => statModifierList;
+            set => statModifierList = value;
+        }
+
+#if UNITY_EDITOR
+        protected override void OnValidate() {
+            base.OnValidate();
+
+            if (statModifierList == null) return;
+            statModifierList.SetSourceID(ItemID);
+            EditorUtility.SetDirty(this);
+        }
+#endif
     }
 }

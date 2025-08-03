@@ -39,6 +39,10 @@ namespace FourFatesStudios.ProjectWarden.Characters.Components
         public int GetCurrentHealthPercentage() {
             return (int)Mathf.Round((float)currentHealth / (float)maxHealth * 100f);
         }
+
+        public int SetMaxHealth(int maxHealth){
+            return this.maxHealth = maxHealth;
+        }
     }
     
 }

@@ -1,0 +1,17 @@
+.ListShown {
+    flex-grow: 1;
+    position: absolute;
+    right: 0;
+    width: 40%;
+    height: 80%;
+    background-image: url("project://database/Assets/Art/Placeholder_Assets/HealthBar_Front_Placeholder.png?fileID=2800000&guid=97c730b06127c0d49a0cc1506bad03af&type=3#HealthBar_Front_Placeholder");
+    background-color: rgba(58, 116, 187, 0);
+    -unity-background-image-tint-color: rgba(0, 0, 0, 0.88);
+    transition-duration: 0.5s;
+}
+
+.ListHidden {
+    translate: 1565px 0;
+    opacity: 1;
+    transition-duration: 0.5s;
+}
