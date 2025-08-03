@@ -17,11 +17,7 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.Combat
             //implement selecting character ui and implementation
             playerController = GameObject.FindFirstObjectByType<PlayerController>();
             BindInputs();
-            Exit();
-        }
-
-        public override void Exit(){
-            Debug.Log("Exiting Party State");
+            combatUIManager.OpenPartySelection();
             combatManager.SwitchState(combatManager.partySelectActionState);
         }
         

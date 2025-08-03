@@ -1,45 +1,60 @@
 using System;
 using System.Collections.Generic;
+using FourFatesStudios.ProjectWarden.Characters.Components;
 using FourFatesStudios.ProjectWarden.Characters.Controllers;
+using FourFatesStudios.ProjectWarden.GameSystems;
 using FourFatesStudios.ProjectWarden.ScriptableObjects;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Class;
+using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
 using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEngine.InputSystem;
-
-public enum CombatUIState{
-    SelectingAction, SelectingSkill, SelectingItem, NormalAttack, Guard, Targeting
-}
 
 namespace FourFatesStudios.ProjectWarden.UI
 {
     public class CombatUIManager : MonoBehaviour
     {
-
+        private CombatManager combatManager;
+        
         private VisualElement root;
+        public VisualElement partyWrapper;
         public VisualElement skillsWrapper;
         public VisualElement itemsWrapper;
+        public VisualElement targetingWrapper;
         private ScrollView skillsScrollView;
+        private ScrollView itemsScrollView;
+        private ScrollView targetingScrollView;
         
-        public List<Button> buttonsList = new List<Button>();
-
-        private CombatUIState CurrentState { get; set; } = CombatUIState.SelectingAction;
+        public List<Button> skillButtonsList = new List<Button>();
+        public List<Button> itemButtonsList = new List<Button>();
+        public List<Button> targetingButtonsList = new List<Button>();
+        
+        public Skill selectedSkill;
+        public Item selectedItem;
+        public CombatController selectedTarget;
 
         private void Start()
         {
+            combatManager = FindFirstObjectByType<CombatManager>();
+            
             root = GetComponent<UIDocument>().rootVisualElement;
             skillsWrapper = root.Q<VisualElement>("SkillsWrapper");
             itemsWrapper = root.Q<VisualElement>("ItemsWrapper");
+            targetingWrapper = root.Q<VisualElement>("TargetingWrapper");
             skillsScrollView = root.Q<ScrollView>("SkillsScrollView");
+            itemsScrollView = root.Q<ScrollView>("ItemsScrollView");
+            targetingScrollView = root.Q<ScrollView>("TargetingScrollView");
 
             skillsWrapper.AddToClassList("ListHidden");
             itemsWrapper.AddToClassList("ListHidden");
+            targetingWrapper.AddToClassList("ListHidden");
 
         }
 
-        public void SetState(CombatUIState newState)
+        public void OpenPartySelection() 
         {
-            CurrentState = newState;
+            //partyWrapper.RemoveFromClassList("ListHidden");
+            
         }
 
         public void OpenSkillsList()
@@ -48,6 +63,7 @@ namespace FourFatesStudios.ProjectWarden.UI
             //     return;
             // SetState(CombatUIState.SelectingSkill);
             skillsWrapper.RemoveFromClassList("ListHidden");
+            Debug.Log("Skills list no longer hidden");
         }
 
         public void OpenItemsList()
@@ -60,58 +76,119 @@ namespace FourFatesStudios.ProjectWarden.UI
 
         public void ConfirmGuard()
         {
-            if (CurrentState != CombatUIState.SelectingAction)
-                return;
-            SetState(CombatUIState.Guard);
             //skillsWrapper.RemoveFromClassList("GuardHidden");
         }
 
         public void SelectTarget()
         {
-            if (CurrentState != CombatUIState.SelectingAction)
-                return;
-            SetState(CombatUIState.Targeting);
-            //skillsWrapper.RemoveFromClassList("TargetingHidden");
+            targetingWrapper.RemoveFromClassList("ListHidden");
         }
+        
+        public void GenerateTargetingButtons(List<CombatController> targets){
+            targetingButtonsList.Clear();
+            targetingScrollView.Clear();
 
-        public void OnBack()
-        {
-            if(!skillsWrapper.ClassListContains("ListHidden"))
-                skillsWrapper.AddToClassList("ListHidden");
-            else if(!itemsWrapper.ClassListContains("ListHidden"))
-                itemsWrapper.AddToClassList("ListHidden");
-            // if (CurrentState != CombatUIState.SelectingAction)
-            // {
-            //     skillsWrapper.AddToClassList("ListHidden");
-            //     itemsWrapper.AddToClassList("ListHidden");
-            //     SetState(CombatUIState.SelectingAction);
-            // }
-        }
-
-        public void GenerateButtons(List<IntPair<Skill>> skills){
-            buttonsList.Clear();
-            skillsScrollView.Clear();
-            int count = skills.Count;
-
-            for (int i = 0; i < count; i++)
+            foreach (CombatController target in targets)
             {
-                int index = i;
-                Button button = new Button()
+                Button button = new Button(() =>
                 {
-                    text = $"{skills[i].key.SkillName}",
+                    Debug.Log("Target clicked: " + target.name);
+                    selectedTarget = target;
+                    RemoveUIMenu();
+                    combatManager.SwitchState(combatManager.updateState);
+                })
+                {
+                    text = $"{target.name}",
+                    focusable = true
+                };
+                targetingButtonsList.Add(button);
+                targetingScrollView.Add(button);
+            }
+        }
+
+        public void RemoveUIMenu()
+        {
+            if (!skillsWrapper.ClassListContains("ListHidden")) {
+                skillsWrapper.AddToClassList("ListHidden");
+                for (int i = 0; i < skillButtonsList.Count; i++) {
+                    skillButtonsList[i].focusable = false;
+                }
+            }
+            else if (!itemsWrapper.ClassListContains("ListHidden")) {
+                itemsWrapper.AddToClassList("ListHidden");
+                for (int i = 0; i < skillButtonsList.Count; i++) {
+                    itemButtonsList[i].focusable = false;
+                }
+            }
+            else if (!targetingWrapper.ClassListContains("ListHidden"))
+            {
+                targetingWrapper.AddToClassList("ListHidden");
+                for (int i = 0; i < targetingButtonsList.Count; i++)
+                {
+                    targetingButtonsList[i].focusable = false;
+                }
+            }
+        }
+
+        public void GenerateSkillsButtons(List<IntPair<Skill>> skills){
+            skillButtonsList.Clear();
+            skillsScrollView.Clear();
+
+            for (int i = 0; i < skills.Count; i++)
+            {
+                Skill skill = skills[i].key;
+                
+                Button button = new Button(() =>
+                {
+                    Debug.Log("Skill clicked: " + skill.SkillName);
+                    selectedSkill = skill;
+                    RemoveUIMenu();
+                    combatManager.SwitchState(combatManager.targetingState);
+                })
+                {
+                    text = $"{skill.SkillName}",
                     focusable = true
                 };
                 
-                buttonsList.Add(button);
+                skillButtonsList.Add(button);
                 skillsScrollView.Add(button);
             }
         }
 
         public void FocusSkillButton(int index) {
-            Button button = buttonsList[index];
+            Button button = skillButtonsList[index];
             button.Focus();
             skillsScrollView.ScrollTo(button);
             Debug.Log("focusing skill " + index);
         }
+        
+        public void GenerateItemButtons(List<Item> items){
+            itemButtonsList.Clear();
+            itemsScrollView.Clear();
+
+            foreach (Item item in items)
+            {
+                Button button = new Button(() =>
+                {
+                    Debug.Log("Item clicked: " + item.ItemName);
+                    selectedItem = item;
+                })
+                {
+                    text = $"{item.ItemName}",
+                    focusable = true
+                };
+                
+                itemButtonsList.Add(button);
+                itemsScrollView.Add(button);
+            }
+        }
+
+        public void FocusItemButton(int index) {
+            Button button = itemButtonsList[index];
+            button.Focus();
+            itemsScrollView.ScrollTo(button);
+            Debug.Log("focusing item " + index);
+        }
+
     }
 }

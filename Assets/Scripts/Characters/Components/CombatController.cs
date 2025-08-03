@@ -6,7 +6,7 @@ namespace FourFatesStudios.ProjectWarden.Characters.Components
     public class CombatController : MonoBehaviour
     {
         private StatsComponent statsComponent;
-        private HealthComponent healthComponent;
+        [SerializeField] public HealthComponent healthComponent;
         private NumoComponent numoComponent;
         
         [SerializeField] public ClassComponent classComponent;

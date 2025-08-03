@@ -26,11 +26,17 @@
         </ui:VisualElement>
         <ui:VisualElement name="ItemsWrapper" class="ListShown ListHidden" style="font-size: 100%;">
             <ui:Label text="ITEMS" name="Label" style="font-size: 100%; color: rgb(255, 255, 255); max-width: 50%;" />
-            <ui:ScrollView name="ItemsList" style="height: 100%;">
+            <ui:ScrollView name="ItemsScrollView" style="height: 100%;">
                 <ui:Button text="item_name" name="Button" style="font-size: 70%;" />
                 <ui:Button text="item_name" name="Button" style="font-size: 70%;" />
             </ui:ScrollView>
         </ui:VisualElement>
-        <ui:Label text="Label" name="DisplayState" style="align-self: flex-end; font-size: 200px;" />
+        <ui:VisualElement name="TargetingWrapper" class="ListShown ListHidden" style="font-size: 100%;">
+            <ui:Label text="Select Target" name="Label" style="font-size: 100%; color: rgb(255, 255, 255); max-width: 50%;" />
+            <ui:ScrollView name="TargetingScrollView" style="height: 100%;">
+                <ui:Button text="item_name" name="Button" style="font-size: 70%;" />
+                <ui:Button text="item_name" name="Button" style="font-size: 70%;" />
+            </ui:ScrollView>
+        </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

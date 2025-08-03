@@ -7,6 +7,7 @@ using FourFatesStudios.ProjectWarden.Characters.Controllers;
 using FourFatesStudios.ProjectWarden.Enums;
 using FourFatesStudios.ProjectWarden.GameSystems.Combat;
 using FourFatesStudios.ProjectWarden.UI;
+using UnityEngine.EventSystems;
 
 namespace FourFatesStudios.ProjectWarden.GameSystems
 {
@@ -18,27 +19,37 @@ namespace FourFatesStudios.ProjectWarden.GameSystems
         public PartyState partyState = new PartyState();
         public PartySelectActionState partySelectActionState = new PartySelectActionState();
         public TargetingState targetingState = new TargetingState();
+        public PerformActionState performActionState = new PerformActionState();
+        public UpdateState updateState = new UpdateState();
 
-        private List<CombatController> partyLineup;
-        private List<CombatController> enemyLineup;
+        public List<CombatController> partyLineup;
+        public List<CombatController> enemyLineup;
 
         public CombatController currentPartyMember;
+        public CombatController selectedTarget;
 
         private void Start()
         {
-            currentState = partyState;
-            combatUIManager = FindFirstObjectByType<CombatUIManager>();
-            Debug.Log("Entering Party State");
-            
-            partyLineup.Add(FindFirstObjectByType<CombatController>());
-            
-            currentState.Enter(this, combatUIManager);
-            
+            InitializeCombatController(partyLineup, enemyLineup);
         }
 
         private void Update()
         {
 
+        }
+
+        public void InitializeCombatController(List<CombatController> partyLineup, List<CombatController> enemyLineup)
+        {
+            this.partyLineup = partyLineup;
+            this.enemyLineup = enemyLineup;
+            
+            currentState = partyState;
+            combatUIManager = FindFirstObjectByType<CombatUIManager>();
+            Debug.Log("Entering Party State");
+            
+            currentPartyMember = FindFirstObjectByType<CombatController>();
+            enemyLineup.Add(currentPartyMember);
+            currentState.Enter(this, combatUIManager);
         }
 
         public void SwitchState(CombatState newState)
@@ -60,8 +71,10 @@ namespace FourFatesStudios.ProjectWarden.GameSystems
                 
                 PlayerController.OnCycleUp += partySelectActionState.CycleUp;
                 PlayerController.OnCycleDown += partySelectActionState.CycleDown;
-                PlayerController.OnCycleLeft += partySelectActionState.CycleLeft;
-                PlayerController.OnCycleRight += partySelectActionState.CycleRight;
+                // PlayerController.OnCycleLeft += partySelectActionState.CycleLeft;
+                // PlayerController.OnCycleRight += partySelectActionState.CycleRight;
+                PlayerController.OnSelect += partySelectActionState.Select;
+                
             }
             
             else if (currentState == targetingState)
@@ -77,6 +90,7 @@ namespace FourFatesStudios.ProjectWarden.GameSystems
             PlayerController.OnGuard -= partySelectActionState.ConfirmGuard;
             PlayerController.OnAttack -= partySelectActionState.SelectTarget;
             PlayerController.OnBack -= partySelectActionState.OnBack;
+            // PlayerController.OnSelect -= partySelectActionState.Select;
             
             //Disable targetingState inputs
             PlayerController.OnBack -= targetingState.OnBack;
