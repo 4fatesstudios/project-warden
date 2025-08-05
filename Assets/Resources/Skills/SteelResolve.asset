@@ -16,24 +16,12 @@ MonoBehaviour:
   skillType: 0
   skillDescription: Empty Description
   _skillID: 66ad3df8-4358-4085-834d-ab8988b9396c
-  damageInstances:
-  - baseDamage: 0
-    stagger: 0
-    damageType: 0
-    aspect: 0
-  healingInstances: []
-  buffStatInstances: []
-  buffHealInstances: []
-  buffShieldInstances: []
-  debuffStatInstances:
-  - statModifierList:
-      statModifiers: []
-      _sourceModifierID: 66ad3df8-4358-4085-834d-ab8988b9396c
-    effectTimingInfo:
-      effectTiming: 2
-      turnDuration: 1
-  debuffDOTInstances: []
+  effects:
+    Effects: []
   targetTeam: 0
   targeting: 0
   numoCost: 0
   uniqueCost: 0
+  references:
+    version: 2
+    RefIds: []

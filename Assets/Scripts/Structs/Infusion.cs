@@ -13,6 +13,6 @@ namespace FourFatesStudios.ProjectWarden.Structs
         [SerializeField] private EffectBundle effects;
 
         public string InfusionName { get => infusionName; set => infusionName = value; }
-        public EffectBundle Effects { get => this.effects; set => this.effects = value; }
+        public EffectBundle Effects { get => effects; set => effects = value; }
     }
 }
