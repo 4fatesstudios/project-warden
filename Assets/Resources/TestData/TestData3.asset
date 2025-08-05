@@ -9,14 +9,22 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 92807fa69839fcc439664144a6566037, type: 3}
-  m_Name: TestTrinket2
+  m_Script: {fileID: 11500000, guid: 633877114a2b1514981595fad53fcd63, type: 3}
+  m_Name: TestData3
   m_EditorClassIdentifier: 
-  id: 2
-  itemName: Test Ingredient 2
-  itemDescription: Empty Description
-  itemRarity: 0
-  itemTrinketType: 0
+  id: 3
+  quantityTwo: 6
+  info: test3
+  tested: 1
+  aspect: 4
+  statModifier:
+    stat: 2
+    type: 0
+    modifier: 10
   statModifierList:
-    statModifiers: []
-    _sourceModifierID: 
+  - stat: 3
+    type: 0
+    modifier: 10
+  - stat: 3
+    type: 1
+    modifier: 3

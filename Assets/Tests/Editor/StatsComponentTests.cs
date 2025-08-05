@@ -21,7 +21,7 @@ namespace Tests.Editor {
         public void Setup() {
             _trinketA = ScriptableObject.CreateInstance<Trinket>();
             _trinketA.name = "Trinket A";
-            _trinketA.RegenerateID();
+            _trinketA.ID = "1";
             _trinketA.StatModifierList = new StatModifierList{
                 StatModifiers = new List<StatModifier>{
                     new(Stat.Vitality, StatModifierType.Multiplicative, 5),
@@ -29,11 +29,11 @@ namespace Tests.Editor {
                     new(Stat.CritChance, StatModifierType.Additive, 15)
                 }
             };
-            _trinketA.StatModifierList.SetSourceID(_trinketA.ItemID);
+            _trinketA.StatModifierList.SetSourceID(_trinketA.ID);
 
             _trinketB = ScriptableObject.CreateInstance<Trinket>();
             _trinketB.name = "Trinket B";
-            _trinketB.RegenerateID();
+            _trinketB.ID = "2";
             _trinketB.StatModifierList = new StatModifierList {
                 StatModifiers = new List<StatModifier> {
                     new (Stat.Vitality, StatModifierType.Additive, -6),
@@ -41,7 +41,7 @@ namespace Tests.Editor {
                     new (Stat.CritChance, StatModifierType.Additive, -20)
                 }
             };
-            _trinketB.StatModifierList.SetSourceID(_trinketB.ItemID);
+            _trinketB.StatModifierList.SetSourceID(_trinketB.ID);
 
             _statModifierManager = new StatModifierManager();
 
@@ -64,7 +64,7 @@ namespace Tests.Editor {
             Assert.IsNotNull(_statsAllocation);
             Assert.IsNotNull(_baseStatSO);
             Assert.IsNotNull(_statsComponent);
-            Assert.AreNotEqual(_trinketA.ItemID, _trinketB.ItemID);
+            Assert.AreNotEqual(_trinketA.ID, _trinketB.ID);
         }
 
         [Test]
