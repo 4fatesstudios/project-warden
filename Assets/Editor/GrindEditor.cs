@@ -17,8 +17,8 @@ public class GrindEditor : Editor
         bool isValid = ValidateGrind(grind);
 
         EditorGUI.BeginDisabledGroup(true);
-        EditorGUILayout.TextField("Input Ingredient", grind.InputIngredient?.ItemID ?? "None");
-        EditorGUILayout.TextField("Output Ingredient", grind.OutputIngredient?.ItemID ?? "None");
+        EditorGUILayout.TextField("Input Ingredient", grind.InputIngredient?.ID ?? "None");
+        EditorGUILayout.TextField("Output Ingredient", grind.OutputIngredient?.ID ?? "None");
         EditorGUI.EndDisabledGroup();
 
         if (GUILayout.Button("Validate Grind"))

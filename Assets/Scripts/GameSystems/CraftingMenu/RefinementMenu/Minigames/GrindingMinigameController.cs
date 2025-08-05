@@ -192,7 +192,7 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.Minigames
 
             if (output != null)
             {
-                Debug.Log($"Grinding successful! Output ingredient: {output.ItemID}");
+                Debug.Log($"Grinding successful! Output ingredient: {output.ID}");
                 // Optionally pass to inventory or result system
             }
             else
