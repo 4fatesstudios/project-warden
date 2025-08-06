@@ -1,9 +1,11 @@
 using System.Collections.Generic;
+using UnityEngine;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.AlchemyRecipes;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
-using UnityEngine;
+using ScriptableObjects.Items;
 
-namespace GameSystems.CraftingMenu.AlchemyMenu
+
+namespace FourFatesStudios.ProjectWarden.GameSystems
 {
     public class AlchemyManager : MonoBehaviour
     {
