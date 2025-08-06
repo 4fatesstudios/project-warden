@@ -1,9 +1,0 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
-    <Style src="project://database/Assets/Scripts/UI/CraftingSystem/AlchemyStyles.uss?fileID=7433441132597879392&amp;guid=362800bc4b3b0a64d97d7e752021ff29&amp;type=3#AlchemyStyles" />
-    <ui:VisualElement class="menu-root">
-        <ui:Label text="Alchemy Menu" class="menu-title" />
-        <ui:Button name="potionCraftingButton" text="Potion Brewing" class="menu-button" />
-        <ui:Button name="potionEnhancingButton" text="Potion Infusing" class="menu-button" />
-        <ui:Button name="backButton" text="Back" class="menu-button" />
-    </ui:VisualElement>
-</ui:UXML>
