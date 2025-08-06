@@ -1,9 +1,0 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
-    <Style src="project://database/Assets/Scripts/UI/RefinementStyles.uss?fileID=7433441132597879392&amp;guid=aa9bae3aa47d0ed439208f78ed79b366&amp;type=3#RefinementStyles" />
-    <ui:VisualElement class="menu-container">
-        <ui:Button name="grindingButton" text="Start Grinding" />
-        <ui:Button name="distillingButton" text="Start Distilling" />
-        <ui:Button name="roastingButton" text="Start Roasting" />
-        <ui:Button name="backButton" text="Back" />
-    </ui:VisualElement>
-</ui:UXML>

@@ -1,9 +1,0 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
-    <Style src="project://database/Assets/Scripts/UI/CraftingStyles.uss?fileID=7433441132597879392&amp;guid=552a475f5c6f9ae44b9f5ad84c101400&amp;type=3#CraftingStyles" />
-    <ui:VisualElement class="menu-container">
-        <ui:Button name="ingredientsButton" text="Ingredients Book" />
-        <ui:Button name="refinementsButton" text="Refinements" />
-        <ui:Button name="alchemyButton" text="Alchemy" />
-        <ui:Button name="backButton" text="Back" />
-    </ui:VisualElement>
-</ui:UXML>
