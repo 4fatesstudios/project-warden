@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyBookMenu.Sections;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -17,15 +18,15 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyBookMen
         VisualTreeAsset pageTemplate; // Assign via Inspector or Resources.Load
 
         private int currentPageIndex;
-        public List<BestiaryEntry> entries = new List<BestiaryEntry>
+        public List<BestiaryEntry> Entries = new List<BestiaryEntry>
         {
             new BestiaryEntry {
-                title = "Black King",
-                hp = 300,
-                weakness = "Ice",
-                nullified = "Fire",
-                description = "A dark knight that guards Yukiko's castle. Heavy armor, slow but powerful.",
-                skills = new List<string> { "Power Slash", "Tarukaja" }
+                Title = "Black King",
+                Hp = 300,
+                Weakness = "Ice",
+                Nullified = "Fire",
+                Description = "A dark knight that guards Yukiko's castle. Heavy armor, slow but powerful.",
+                Skills = new List<string> { "Power Slash", "Tarukaja" }
             },
             // Add more entries here
         };
@@ -46,7 +47,7 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyBookMen
 
         void FlipPage(int direction)
         {
-            currentPageIndex = Mathf.Clamp(currentPageIndex + direction * 2, 0, pages.Count - 2);
+            currentPageIndex = Mathf.Clamp(currentPageIndex + direction * 2, 0, Entries.Count - 2);
             UpdatePages();
         }
 
@@ -56,23 +57,23 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyBookMen
             rightPage.Clear();
 
             AddEntryToPage(leftPage, currentPageIndex);
-            if (currentPageIndex + 1 < entries.Count)
+            if (currentPageIndex + 1 < Entries.Count)
                 AddEntryToPage(rightPage, currentPageIndex + 1);
         }
         
         void AddEntryToPage(VisualElement pageRoot, int index)
         {
-            var entryData = entries[index];
+            var entryData = Entries[index];
             var entryElement = pageTemplate.CloneTree();
 
-            entryElement.Q<Label>("entry-title").text = entryData.title;
-            entryElement.Q<Label>("entry-description").text = entryData.description;
-            entryElement.Q<Label>("entry-stat").text = $"HP: {entryData.hp}\nWeakness: {entryData.weakness}\nNull: {entryData.nullified}";
+            entryElement.Q<Label>("entry-title").text = entryData.Title;
+            entryElement.Q<Label>("entry-description").text = entryData.Description;
+            entryElement.Q<Label>("entry-stat").text = $"HP: {entryData.Hp}\nWeakness: {entryData.Weakness}\nNull: {entryData.Nullified}";
 
             var skillContainer = entryElement.Q<VisualElement>("entry-skills");
             skillContainer.Clear();
-            foreach (var skill in entryData.skills)
-                skillContainer.Add(new Label(skill) { classList = { "entry-skill" } });
+            foreach (var skill in entryData.Skills)
+                //skillContainer.Add(new Label(skill) { classList = { "entry-skill" } });
 
             pageRoot.Add(entryElement);
         }

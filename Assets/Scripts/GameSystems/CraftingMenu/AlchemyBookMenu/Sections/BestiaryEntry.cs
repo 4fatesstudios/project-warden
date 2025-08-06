@@ -1,15 +1,17 @@
-using UnityEngine;
+//using UnityEngine;
+using System.Collections.Generic;
+
 
 namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyBookMenu.Sections
 {
     
     public class BestiaryEntry
     {
-        public string title;
-        public int hp;
-        public string weakness;
-        public string nullified;
-        public string description;
-        public List<string> skills;
+        public string Title;
+        public int Hp;
+        public string Weakness;
+        public string Nullified;
+        public string Description;
+        public List<string> Skills;
     }
 }
