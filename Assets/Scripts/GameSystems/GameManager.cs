@@ -1,16 +1,34 @@
+using FourFatesStudios.ProjectWarden.ScriptableObjects.PotionEffects;
+using FourFatesStudios.ProjectWarden.ScriptableObjects.Databases;
 using UnityEngine;
 
-public class GameManager : MonoBehaviour
+namespace FourFatesStudios.ProjectWarden.GameSystems
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    
+    public class GameManager : MonoBehaviour
     {
-        
-    }
+        // Start is called once before the first execution of Update after the MonoBehaviour is created
+        void Start()
+        {
+            
+        }
+    
+        // Update is called once per frame
+        void Update()
+        {
+            
+        }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+        [SerializeField] private PotionEffectDatabase potionEffectDb;
+        // [SerializeField] private ItemDatabase itemDb;
+
+        private void Awake()
+        {
+        }
+
+        private void OnApplicationQuit()
+        {
+        }
     }
+    
 }

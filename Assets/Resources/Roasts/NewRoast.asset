@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 258699b012223df46a4932c37f8427e2, type: 3}
+  m_Name: NewRoast
+  m_EditorClassIdentifier: 
+  inputIngredient: {fileID: 11400000, guid: 6b252c7e9ad9a18449f7859adb9a844b, type: 2}
+  outputIngredient: {fileID: 11400000, guid: 333c9956f37e17245919788be20db395, type: 2}
+  totalCookTime: 10
+  totalDisplayedIngredients: 3
+  requiredCookedTime: 6
+  uncookedThreshold: 0
+  cookedThreshold: 1
+  burntThreshold: 2
+  requiresCorruptedCooking: 0
+  requiredCookCount: 0
+  cookedTime: 0

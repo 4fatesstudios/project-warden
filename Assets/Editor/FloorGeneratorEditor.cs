@@ -1,0 +1,28 @@
+#if UNITY_EDITOR
+using FourFatesStudios.ProjectWarden.ProceduralGeneration;
+using UnityEditor;
+using UnityEngine;
+
+[CustomEditor(typeof(FloorGenerator))]
+public class FloorGeneratorEditor : Editor
+{
+    
+    public override void OnInspectorGUI() {
+        FloorGenerator floorGenerator = (FloorGenerator)target;
+        
+        DrawDefaultInspector();
+        
+        if (GUILayout.Button("Generate Floor")) {
+            floorGenerator.GenerateFloor();
+        }
+
+        if (GUILayout.Button("Clear Floor")) {
+            floorGenerator.ClearFloor();
+        }
+
+        if (GUILayout.Button("Prune Dead End Hallways")) {
+            floorGenerator.PruneDeadEndHallways();
+        }
+    }
+}
+#endif

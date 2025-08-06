@@ -1,0 +1,6 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/Scripts/UI/RefinementMinigame/Grinding/GrindingStyles.uss?fileID=7433441132597879392&amp;guid=1a9a81c4cd24bf44bace75d405f426b9&amp;type=3#GrindingStyles" />
+    <ui:ProgressBar value="22" title="Grinding Speed" name="grindSpeedBar" style="top: 0%;" />
+    <ui:ProgressBar value="22" title="Pounding Rate" name="poundRateBar" style="top: 0%;" />
+    <ui:Label text="resultLabel" name="resultLabel" style="justify-content: flex-start; align-content: auto; align-self: center; bottom: 10%; -unity-text-align: lower-center; position: absolute;" />
+</ui:UXML>
