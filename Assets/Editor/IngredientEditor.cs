@@ -2,10 +2,12 @@ using UnityEditor;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
 
 [CustomEditor(typeof(Ingredient))]
-public class IngredientEditor : Editor
+public class IngredientEditor : BaseDataSOEditor
 {
     public override void OnInspectorGUI()
     {
+        DrawDataBaseInspector();
+        
         serializedObject.Update();
 
         // Exclude refinement fields from auto-draw
@@ -36,6 +38,7 @@ public class IngredientEditor : Editor
         if (GetBool("canRoast")) DrawProperty("roastingResult");
 
         serializedObject.ApplyModifiedProperties();
+        
     }
 
     private void DrawProperty(string name)

@@ -58,6 +58,7 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
 #if UNITY_EDITOR
         private void OnValidate()
         {
+            base.OnValidate();
             if (potionEffects == null)
                 return;
 
