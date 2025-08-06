@@ -1,4 +1,4 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/Scripts/UI/CraftingSystem/BookSystem/AlchemyBookStyles.uss?fileID=7433441132597879392&amp;guid=71a7e5f385de0864cb1a78951d8dc82f&amp;type=3#AlchemyBookStyles" />
     <ui:VisualElement name="book-container" class="book-container">
         <ui:VisualElement name="front-cover" class="cover front-cover">
@@ -9,15 +9,15 @@
             <ui:Label text="End of Book" class="cover-end-text" />
         </ui:VisualElement>
         <ui:VisualElement name="tabs-container" class="tabs-container">
-            <ui:Button name="bookmark-tab" text="Bookmarked" class="tab-button bookmark-tab" />
             <ui:Button name="bestiary-tab" text="Bestiary" class="tab-button" />
             <ui:Button name="recipe-tab" text="Recipes" class="tab-button" />
             <ui:Button name="ingredient-tab" text="Ingredients" class="tab-button" />
             <ui:Button name="help-tab" text="Help" class="tab-button" />
+            <ui:Button name="bookmark-tab" text="⭐" class="tab-button bookmark-tab" />
         </ui:VisualElement>
         <ui:VisualElement name="search-container" class="search-container">
             <ui:TextField name="search-field" placeholder-text="Search entries..." class="search-field" />
-            <ui:Button name="search-button" text="Enter" class="search-button" />
+            <ui:Button name="search-button" text="🔍" class="search-button" />
         </ui:VisualElement>
         <ui:VisualElement name="pages-container" class="pages-container">
             <ui:VisualElement name="left-page" class="page left-page" />
@@ -25,7 +25,6 @@
         </ui:VisualElement>
         <ui:VisualElement name="navigation-container" class="navigation-container">
             <ui:Button name="prev-button" text="◀ Previous" class="nav-button prev-button" />
-            <ui:Button name="close-button" text="✖" class="nav-button close-button" />
             <ui:Button name="next-button" text="Next ▶" class="nav-button next-button" />
         </ui:VisualElement>
     </ui:VisualElement>
