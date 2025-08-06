@@ -1,4 +1,3 @@
-using ScriptableObjects.Items;
 using UnityEngine;
 
 namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
@@ -16,7 +15,7 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
         public Ingredient BaseIngredient2 => baseIngredient2;
 
 #if UNITY_EDITOR
-        private void OnValidate()
+        private new void OnValidate()
         {
             if (baseIngredient1 == null || baseIngredient2 == null)
             {

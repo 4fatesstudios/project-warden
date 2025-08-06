@@ -56,7 +56,7 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
         public Ingredient RoastingResult => roastingResult;
 
 #if UNITY_EDITOR
-        private void OnValidate()
+        private new void OnValidate()
         {
             base.OnValidate();
             if (potionEffects == null)

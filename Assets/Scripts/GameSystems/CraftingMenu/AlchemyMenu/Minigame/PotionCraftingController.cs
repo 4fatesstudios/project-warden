@@ -4,7 +4,6 @@ using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.PotionEffects;
 using System.Collections.Generic;
 using System.Linq;
-using ScriptableObjects.Items;
 using UnityEngine;
 using UnityEngine.UIElements;
 

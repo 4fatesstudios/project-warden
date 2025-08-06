@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
-using ScriptableObjects.Items;
 using UnityEngine;
 
 

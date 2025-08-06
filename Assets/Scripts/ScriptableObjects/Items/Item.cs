@@ -24,7 +24,7 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
         public Rarity ItemRarity => itemRarity;
 
 #if UNITY_EDITOR
-        private void OnValidate()
+        private new void OnValidate()
         {
             base.OnValidate();
             if (string.IsNullOrEmpty(itemName)) itemName = "Unnamed Item";

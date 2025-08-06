@@ -100,7 +100,7 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
         }
 
 #if UNITY_EDITOR
-        private void OnValidate()
+        private new void OnValidate()
         {
             if (potionEffects.Contains(null))
             {
