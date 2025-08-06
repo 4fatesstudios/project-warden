@@ -1,6 +1,7 @@
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
 using System.Collections.Generic;
 using System.Linq;
+using ScriptableObjects.Items;
 using UnityEngine;
 
 namespace FourFatesStudios.ProjectWarden.ScriptableObjects.AlchemyRecipes

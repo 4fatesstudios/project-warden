@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using FourFatesStudios.ProjectWarden.Enums;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
+using ScriptableObjects.Items;
 
 #if UNITY_EDITOR
 using UnityEditor;
