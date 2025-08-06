@@ -8,27 +8,29 @@ namespace FourFatesStudios.ProjectWarden.Structs
 {
     [System.Serializable]
     public struct DamageInstance {
-        [SerializeField, Tooltip("Base Damage"), Range(0, 9999)] private int baseDamage;
-        [SerializeField, Tooltip("Stagger Damage"), Range(0, 999)] private int stagger;
+        [SerializeField, Tooltip("Base Damage"), Range(1, 9999)] private int baseDamage;
+        [SerializeField, Tooltip("Stagger Damage"), Range(1, 999)] private int stagger;
+        [SerializeField, Tooltip("Exposure Damage"), Range(1, 999)] private int exposure;
         [SerializeField, Tooltip("Damage Type")] private DamageType damageType;
         [SerializeField, Tooltip("Aspect")] private Aspect aspect;
         
         public int BaseDamage { get => baseDamage; set => baseDamage = value; }
         public int Stagger { get => stagger; set => stagger = value; }
+        public int Exposure { get => exposure; set => exposure = value; }
         public DamageType DamageType { get => damageType; set => damageType = value; }
         public Aspect Aspect { get => aspect; set => aspect = value; }
     }
 
     [System.Serializable]
     public struct HealInstance {
-        [SerializeField, Tooltip("Base Heal"), Range(0, 9999)] private int baseHeal;
+        [SerializeField, Tooltip("Base Heal"), Range(1, 9999)] private int baseHeal;
         
         public int BaseHeal { get => baseHeal; set => baseHeal = value; }
     }
     
     [System.Serializable]
     public struct ShieldInstance {
-        [SerializeField, Tooltip("Base Shield"), Range(0, 9999)] private int baseShield;
+        [SerializeField, Tooltip("Base Shield"), Range(1, 9999)] private int baseShield;
         
         public int BaseHeal { get => baseShield; set => baseShield = value; }
     }

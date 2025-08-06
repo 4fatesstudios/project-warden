@@ -19,10 +19,4 @@ MonoBehaviour:
   ingredientArchetype: 0
   ingredientAspect: 0
   isCorrupted: 0
-  infusions: []
-  canGrind: 0
-  grindingResult: {fileID: 0}
-  canDistill: 0
-  distillingResult: {fileID: 0}
-  canRoast: 0
-  roastingResult: {fileID: 0}
+  potionEffects: []
