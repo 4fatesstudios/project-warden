@@ -1,3 +1,4 @@
+using ScriptableObjects.Items;
 using UnityEngine;
 
 namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items

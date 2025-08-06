@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
+using ScriptableObjects.Items;
 
 #if UNITY_EDITOR
 using UnityEditor;
