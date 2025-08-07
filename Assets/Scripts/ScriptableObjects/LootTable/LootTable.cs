@@ -11,8 +11,8 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.LootTable
     public class LootTable : ScriptableObject, IEnumerable<LootTableEntry> {
         [SerializeField] private LootTableEntry[] lootEntries;
 
-        public ItemRarity GetHighestRarity() {
-            var highest = ItemRarity.Common;
+        public Rarity GetHighestRarity() {
+            var highest = Rarity.Common;
 
             foreach (var entry in lootEntries) {
                 if (entry == null || entry.Item == null) continue;

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 92807fa69839fcc439664144a6566037, type: 3}
   m_Name: TestTrinket1
   m_EditorClassIdentifier: 
-  id: 1
+  id: 91fb6a30-a1b7-4a21-b4a7-cad53847b417
   itemName: Test Ingredient 1
   itemDescription: Empty Description
   itemRarity: 0
