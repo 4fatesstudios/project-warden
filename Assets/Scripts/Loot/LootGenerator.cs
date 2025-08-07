@@ -8,5 +8,6 @@ namespace FourFatesStudios.ProjectWarden.Loot
         [SerializeField] private LootTable lootTable;
         [SerializeField] private Transform lootGenerationOrigin;
         
+        
     }
 }
