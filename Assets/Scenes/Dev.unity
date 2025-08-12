@@ -11450,6 +11450,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 45fec559c4f6dca43839a05b25293c27, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  characterName: The NPC Guy
 --- !u!43 &549102128
 Mesh:
   m_ObjectHideFlags: 0
@@ -42924,8 +42925,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 612633007a03f1f4bb5f6cc3317e003b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  defaultStats: {fileID: 11400000, guid: f3fc840f20a057945b2e43a29bb568e0, type: 2}
-  level: 0
+  baseStats: {fileID: 0}
 --- !u!43 &1824151030
 Mesh:
   m_ObjectHideFlags: 0
