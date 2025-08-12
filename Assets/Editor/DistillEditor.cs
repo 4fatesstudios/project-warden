@@ -19,8 +19,8 @@ public class DistillEditor : Editor
         bool isValid = ValidateDistill(distill);
 
         EditorGUI.BeginDisabledGroup(true);
-        EditorGUILayout.TextField("Input Ingredient", distill.InputIngredient?.ItemID ?? "None");
-        EditorGUILayout.TextField("Output Ingredient", distill.OutputIngredient?.ItemID ?? "None");
+        EditorGUILayout.TextField("Input Ingredient", distill.InputIngredient?.ID ?? "None");
+        EditorGUILayout.TextField("Output Ingredient", distill.OutputIngredient?.ID ?? "None");
         EditorGUILayout.FloatField("Required Duration", distill.RequiredDuration);
         EditorGUILayout.FloatField("Total Duration", distill.TotalDuration);
         EditorGUILayout.IntField("Progression Stages", distill.ProgressionStages?.Count ?? 0);

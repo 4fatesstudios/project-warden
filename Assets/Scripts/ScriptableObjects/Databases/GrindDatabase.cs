@@ -38,7 +38,7 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Databases
             {
                 if (grind == null || grind.InputIngredient == null) continue;
 
-                string key = grind.InputIngredient.ItemID;
+                string key = grind.InputIngredient.ID;
 
                 if (string.IsNullOrEmpty(key))
                 {

@@ -20,7 +20,7 @@ namespace FourFatesStudios.ProjectWarden.GameSystems
         }
 
         [SerializeField] private PotionEffectDatabase potionEffectDb;
-        [SerializeField] private ItemDatabase itemDb;
+        // [SerializeField] private ItemDatabase itemDb;
 
         private void Awake()
         {

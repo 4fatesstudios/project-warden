@@ -16,19 +16,12 @@ MonoBehaviour:
   skillType: 0
   skillDescription: Strikes an enemy with a greatshield, dealing Corporeal damage.
   _skillID: cb301529-09e6-4480-9a64-80917ef34162
-  damageInstances:
-  - baseDamage: 50
-    stagger: 5
-    exposure: 0
-    damageType: 0
-    aspect: 0
-  healingInstances: []
-  buffStatInstances: []
-  buffHealInstances: []
-  buffShieldInstances: []
-  debuffStatInstances: []
-  debuffDOTInstances: []
+  effects:
+    Effects: []
   targetTeam: 1
   targeting: 0
   numoCost: 0
   uniqueCost: 0
+  references:
+    version: 2
+    RefIds: []

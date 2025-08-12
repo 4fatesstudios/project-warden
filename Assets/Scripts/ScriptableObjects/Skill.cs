@@ -1,4 +1,5 @@
 using System;
+using FourFatesStudios.ProjectWarden.Effects;
 using FourFatesStudios.ProjectWarden.Enums;
 using FourFatesStudios.ProjectWarden.Structs;
 using UnityEditor;
@@ -19,22 +20,9 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects
         private string skillDescription;
         
         [SerializeField, HideInInspector] private string _skillID;
-
-        [Header("Damage")] 
-        [SerializeField, Tooltip("Damage Instances")] private DamageInstance[] damageInstances;
         
-        [Header("Healing")]
-        [SerializeField, Tooltip("Damage Instances")] private HealInstance[] healingInstances;
-        
-        [Header("Buffing")]
-        [SerializeField] private BuffStatInstance[] buffStatInstances;
-        [SerializeField] private BuffHealInstance[] buffHealInstances;
-        [SerializeField] private BuffShieldInstance[] buffShieldInstances;
-        
-        
-        [Header("Debuffing")]
-        [SerializeField] private DebuffStatInstance[] debuffStatInstances;
-        [SerializeField] private DebuffDOTInstance[] debuffDOTInstances;
+        [Header("Skill Effects")]
+        [SerializeField] private EffectBundle effects;
         
         [Header("Common Attributes")]
         [SerializeField, Tooltip("Target Team")] private Team targetTeam;
@@ -47,13 +35,7 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects
         public SkillType SkillType {get => skillType; set => skillType = value;}
         public string SkillDescription { get => skillDescription; set => skillDescription = value; }
         public string SkillID => _skillID;
-        public DamageInstance[] DamageInstances => damageInstances;
-        public HealInstance[] HealingInstances => healingInstances;
-        public BuffStatInstance[] BuffStatInstances => buffStatInstances;
-        public BuffHealInstance[] BuffHealInstances => buffHealInstances;
-        public BuffShieldInstance[] BuffShieldInstances => buffShieldInstances;
-        public DebuffStatInstance[] DebuffStatInstances => debuffStatInstances;
-        public DebuffDOTInstance[] DebuffDOTInstances => debuffDOTInstances;
+        public EffectBundle Effects { get => this.effects; set => this.effects = value; }
         public Team TargetTeam { get => targetTeam; set => targetTeam = value; }
         public Targeting Targeting { get => targeting; set => targeting = value; }
         public int NumoCost {get => numoCost; set => numoCost = value;}
@@ -70,12 +52,13 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects
             if (string.IsNullOrEmpty(_skillID))
                 _skillID = Guid.NewGuid().ToString();
             
-            if (buffStatInstances is { Length: > 0 })
-                foreach (var instance in buffStatInstances)
-                    instance.StatModifierList.SetSourceID(_skillID);
-            if (debuffStatInstances is { Length: > 0 })
-                foreach (var instance in debuffStatInstances)
-                    instance.StatModifierList.SetSourceID(_skillID);
+            // for always having source of debuff, buff instances
+            // if (buffStatInstances is { Length: > 0 })
+            //     foreach (var instance in buffStatInstances)
+            //         instance.StatModifierList.SetSourceID(_skillID);
+            // if (debuffStatInstances is { Length: > 0 })
+            //     foreach (var instance in debuffStatInstances)
+            //         instance.StatModifierList.SetSourceID(_skillID);
             
             EditorUtility.SetDirty(this);
         }

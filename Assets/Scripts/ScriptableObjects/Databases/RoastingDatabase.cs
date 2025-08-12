@@ -38,7 +38,7 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Databases
             {
                 if (roast == null || roast.InputIngredient == null) continue;
 
-                string key = roast.InputIngredient.ItemID;
+                string key = roast.InputIngredient.ID;
 
                 if (string.IsNullOrEmpty(key))
                 {

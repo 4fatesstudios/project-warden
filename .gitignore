@@ -633,3 +633,6 @@ PythonBackend/macos/
 !Packages/manifest.json
 !Packages/packages-lock.json
 .bezisidekick/.settings.json
+
+# ignore imported CSV files and folder
+

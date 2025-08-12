@@ -38,7 +38,7 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Databases
             {
                 if (distill == null || distill.InputIngredient == null) continue;
 
-                string key = distill.InputIngredient.ItemID;
+                string key = distill.InputIngredient.ID;
 
                 if (string.IsNullOrEmpty(key))
                 {
