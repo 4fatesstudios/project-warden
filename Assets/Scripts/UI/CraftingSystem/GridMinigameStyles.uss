@@ -1,0 +1,162 @@
+.main-container {
+    flex-grow: 1;
+    background-color: rgb(20, 30, 40);
+    padding: 20px;
+    border-radius: 15px;
+    border-width: 3px;
+    border-color: rgb(60, 90, 120);
+}
+
+.header-container {
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: rgba(40, 60, 80, 0.8);
+    border-radius: 10px;
+}
+
+.title-label {
+    font-size: 28px;
+    color: rgb(200, 230, 255);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.instructions-label {
+    font-size: 14px;
+    color: rgb(170, 200, 230);
+    -unity-text-align: middle-center;
+    margin-top: 5px;
+}
+
+.game-area {
+    flex-direction: row;
+    gap: 30px;
+    flex-grow: 1;
+    margin-bottom: 20px;
+}
+
+.grid-container {
+    flex: 2;
+    align-items: center;
+    justify-content: center;
+}
+
+.crafting-grid {
+    width: 400px;
+    height: 400px;
+    background-color: rgba(30, 50, 70, 0.9);
+    border-radius: 10px;
+    border-width: 3px;
+    border-color: rgb(80, 120, 160);
+    background-image: url('project://database/Assets/UI/Textures/grid_pattern.png');
+}
+
+.ingredient-queue {
+    flex: 1;
+    background-color: rgba(40, 30, 60, 0.9);
+    border-radius: 10px;
+    border-width: 2px;
+    border-color: rgb(80, 60, 120);
+    padding: 15px;
+    gap: 10px;
+}
+
+.queue-label {
+    font-size: 16px;
+    color: rgb(255, 220, 150);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    margin-bottom: 10px;
+}
+
+.queue-items {
+    flex-grow: 1;
+    gap: 10px;
+}
+
+.controls-area {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background-color: rgba(30, 25, 45, 0.9);
+    border-radius: 10px;
+    border-width: 2px;
+    border-color: rgb(70, 50, 110);
+}
+
+.score-container, .rank-container {
+    align-items: center;
+    gap: 5px;
+}
+
+.score-label, .rank-label {
+    font-size: 14px;
+    color: rgb(200, 200, 200);
+    -unity-font-style: bold;
+}
+
+.score-value {
+    font-size: 24px;
+    color: rgb(100, 200, 255);
+    -unity-font-style: bold;
+}
+
+.rank-value {
+    font-size: 32px;
+    color: rgb(255, 200, 100);
+    -unity-font-style: bold;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.button-container {
+    flex-direction: row;
+    gap: 15px;
+}
+
+.action-button {
+    width: 100px;
+    height: 40px;
+    border-radius: 8px;
+    border-width: 2px;
+    font-size: 14px;
+    -unity-font-style: bold;
+    transition-duration: 0.2s;
+}
+
+.action-button {
+    background-color: rgb(80, 80, 120);
+    border-color: rgb(120, 120, 160);
+    color: rgb(255, 255, 255);
+}
+
+.action-button:hover {
+    background-color: rgb(100, 100, 140);
+    scale: 1.05;
+}
+
+.action-button.primary {
+    background-color: rgb(80, 120, 80);
+    border-color: rgb(120, 160, 120);
+}
+
+.action-button.primary:hover {
+    background-color: rgb(100, 140, 100);
+}
+
+.action-button.complete {
+    background-color: rgb(120, 80, 80);
+    border-color: rgb(160, 120, 120);
+}
+
+.action-button.complete:hover {
+    background-color: rgb(140, 100, 100);
+}
+
+.action-button:disabled {
+    background-color: rgb(60, 60, 60);
+    border-color: rgb(80, 80, 80);
+    color: rgb(120, 120, 120);
+}

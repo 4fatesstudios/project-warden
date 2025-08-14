@@ -1,0 +1,60 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/Scripts/UI/CraftingSystem/RefinementSystem/DistillationMinigameStyles.uss?fileID=7433441132597879392&amp;guid=&amp;type=3#DistillationMinigameStyles" />
+    <ui:VisualElement name="MainContainer" class="main-container">
+        <ui:VisualElement name="HeaderContainer" class="header-container">
+            <ui:Label text="Distillation Laboratory" name="TitleLabel" class="title-label" />
+            <ui:Label text="Maintain optimal pressure for efficient distillation!" name="InstructionsLabel" class="instructions-label" />
+        </ui:VisualElement>
+        
+        <ui:VisualElement name="LabArea" class="lab-area">
+            <!-- Distillation Apparatus -->
+            <ui:VisualElement name="DistillationSetup" class="distillation-setup">
+                <!-- Boiling Flask -->
+                <ui:VisualElement name="BoilingFlask" class="boiling-flask">
+                    <ui:VisualElement name="LiquidLevel" class="liquid-level" />
+                    <ui:VisualElement name="Bubbles" class="bubbles" />
+                    <ui:VisualElement name="HeatSource" class="heat-source" />
+                </ui:VisualElement>
+                
+                <!-- Distillation Column -->
+                <ui:VisualElement name="DistillationColumn" class="distillation-column">
+                    <ui:VisualElement name="SteamPipe" class="steam-pipe" />
+                </ui:VisualElement>
+                
+                <!-- Condenser -->
+                <ui:VisualElement name="Condenser" class="condenser">
+                    <ui:VisualElement name="CoolingCoils" class="cooling-coils" />
+                </ui:VisualElement>
+                
+                <!-- Collection Flask -->
+                <ui:VisualElement name="CollectionFlask" class="collection-flask">
+                    <ui:VisualElement name="Distillate" class="distillate" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+        
+        <ui:VisualElement name="ControlsArea" class="controls-area">
+            <!-- Pressure Control -->
+            <ui:VisualElement name="PressureContainer" class="pressure-container">
+                <ui:Label text="Pressure Control" class="control-label" />
+                <ui:ProgressBar name="PressureGauge" class="pressure-gauge" low-value="0" high-value="100" />
+                <ui:VisualElement name="TargetZone" class="target-zone" />
+                <ui:VisualElement name="PressureButtons" class="pressure-buttons">
+                    <ui:Button text="▲" name="AdjustPressureUp" class="pressure-button pressure-up" />
+                    <ui:Button text="▼" name="AdjustPressureDown" class="pressure-button pressure-down" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            
+            <!-- Progress -->
+            <ui:VisualElement name="ProgressContainer" class="progress-container">
+                <ui:Label text="Distillation Progress" class="control-label" />
+                <ui:ProgressBar name="ProgressBar" class="progress-bar" low-value="0" high-value="100" />
+            </ui:VisualElement>
+            
+            <!-- Status -->
+            <ui:VisualElement name="StatusContainer" class="status-container">
+                <ui:Label text="Heating..." name="StatusLabel" class="status-label" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

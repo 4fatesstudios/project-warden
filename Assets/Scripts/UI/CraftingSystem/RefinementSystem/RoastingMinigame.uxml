@@ -1,0 +1,46 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/Scripts/UI/CraftingSystem/RefinementSystem/RoastingMinigameStyles.uss?fileID=7433441132597879392&amp;guid=&amp;type=3#RoastingMinigameStyles" />
+    <ui:VisualElement name="MainContainer" class="main-container">
+        <ui:VisualElement name="HeaderContainer" class="header-container">
+            <ui:Label text="Roasting Station" name="TitleLabel" class="title-label" />
+            <ui:Label text="Watch the temperature and stop at the perfect moment!" name="InstructionsLabel" class="instructions-label" />
+        </ui:VisualElement>
+        
+        <ui:VisualElement name="CookingArea" class="cooking-area">
+            <!-- Fire/Heat Source -->
+            <ui:VisualElement name="FireContainer" class="fire-container">
+                <ui:VisualElement name="FireFlames" class="fire-flames" />
+            </ui:VisualElement>
+            
+            <!-- Frying Pan -->
+            <ui:VisualElement name="FryingPan" class="frying-pan">
+                <ui:VisualElement name="PanHandle" class="pan-handle" />
+                <ui:VisualElement name="PanBase" class="pan-base">
+                    <ui:VisualElement name="IngredientSprite" class="ingredient-sprite" />
+                    <ui:VisualElement name="SteamEffect" class="steam-effect" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+        
+        <ui:VisualElement name="ControlsArea" class="controls-area">
+            <!-- Temperature Gauge -->
+            <ui:VisualElement name="TemperatureContainer" class="temperature-container">
+                <ui:Label text="Temperature" class="gauge-label" />
+                <ui:ProgressBar name="TemperatureGauge" class="temperature-gauge" low-value="0" high-value="100" />
+                <ui:VisualElement name="PerfectZone" class="perfect-zone" />
+            </ui:VisualElement>
+            
+            <!-- Roasting Progress -->
+            <ui:VisualElement name="ProgressContainer" class="progress-container">
+                <ui:Label text="Roasting Progress" class="gauge-label" />
+                <ui:ProgressBar name="RoastingProgress" class="roasting-progress" low-value="0" high-value="100" />
+            </ui:VisualElement>
+            
+            <!-- Status and Controls -->
+            <ui:VisualElement name="StatusContainer" class="status-container">
+                <ui:Label text="Raw" name="StatusLabel" class="status-label" />
+                <ui:Button text="Stop Roasting" name="StopButton" class="stop-button" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

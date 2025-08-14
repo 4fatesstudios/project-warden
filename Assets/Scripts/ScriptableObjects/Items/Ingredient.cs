@@ -23,6 +23,26 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
         [SerializeField, Tooltip("Is alchemical ingredient corrupted or not.")]
         private bool isCorrupted;
 
+        [Header("Crafting Properties")]
+        [SerializeField, Tooltip("Potency level for alchemy crafting (1-5, higher = stronger effects).")]
+        [Range(1, 5)]
+        private int potency = 1;
+
+        [SerializeField, Tooltip("Grid width for tetris-style crafting.")]
+        [Range(1, 4)]
+        private int gridWidth = 1;
+
+        [SerializeField, Tooltip("Grid height for tetris-style crafting.")]
+        [Range(1, 4)]
+        private int gridHeight = 1;
+
+        [SerializeField, Tooltip("Can this ingredient unlock additional grid space when placed?")]
+        private bool unlocksAdditionalSpace = false;
+
+        [SerializeField, Tooltip("Additional grid spaces unlocked (if applicable).")]
+        [Range(0, 8)]
+        private int additionalSpaceCount = 0;
+
         [Header("Ingredient Effect")] 
         [SerializeField, Tooltip("The infusion(s) given from the ingredient")] 
         private List<Infusion> infusions;
@@ -47,6 +67,11 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
         public IngredientArchetype IngredientArchetype => ingredientArchetype;
         public Aspect IngredientAspect => ingredientAspect;
         public bool IsCorrupted => isCorrupted;
+        public virtual int Potency => potency;
+        public virtual int GridWidth => gridWidth;
+        public virtual int GridHeight => gridHeight;
+        public virtual bool UnlocksAdditionalSpace => unlocksAdditionalSpace;
+        public virtual int AdditionalSpaceCount => additionalSpaceCount;
         public List<Infusion> Infusions => infusions;
         public bool CanGrind => canGrind;
         public Ingredient GrindingResult => grindingResult;

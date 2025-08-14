@@ -1,0 +1,51 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/Scripts/UI/CraftingSystem/RefinementSystem/GrindingMinigameStyles.uss?fileID=7433441132597879392&amp;guid=&amp;type=3#GrindingMinigameStyles" />
+    <ui:VisualElement name="MainContainer" class="main-container">
+        <ui:VisualElement name="HeaderContainer" class="header-container">
+            <ui:Label text="Grinding Workshop" name="TitleLabel" class="title-label" />
+            <ui:Label text="Click in rhythm for better grinding results!" name="InstructionsLabel" class="instructions-label" />
+        </ui:VisualElement>
+        
+        <ui:VisualElement name="WorkArea" class="work-area">
+            <!-- Grinding Setup -->
+            <ui:VisualElement name="GrindingStation" class="grinding-station">
+                <!-- Mortar -->
+                <ui:VisualElement name="Mortar" class="mortar">
+                    <ui:VisualElement name="IngredientPieces" class="ingredient-pieces" />
+                    <ui:VisualElement name="GrindParticles" class="grind-particles" />
+                </ui:VisualElement>
+                
+                <!-- Pestle -->
+                <ui:VisualElement name="Pestle" class="pestle" />
+            </ui:VisualElement>
+            
+            <!-- Rhythm Indicator -->
+            <ui:VisualElement name="RhythmContainer" class="rhythm-container">
+                <ui:VisualElement name="RhythmIndicator" class="rhythm-indicator" />
+                <ui:Label text="Rhythm Zone" class="rhythm-label" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        
+        <ui:VisualElement name="ControlsArea" class="controls-area">
+            <!-- Rhythm Meter -->
+            <ui:VisualElement name="RhythmMeterContainer" class="rhythm-meter-container">
+                <ui:Label text="Rhythm Timing" class="control-label" />
+                <ui:ProgressBar name="RhythmMeter" class="rhythm-meter" low-value="0" high-value="100" />
+                <ui:VisualElement name="PerfectZone" class="perfect-zone" />
+            </ui:VisualElement>
+            
+            <!-- Progress -->
+            <ui:VisualElement name="ProgressContainer" class="progress-container">
+                <ui:Label text="Grinding Progress" class="control-label" />
+                <ui:ProgressBar name="GrindingProgress" class="grinding-progress" low-value="0" high-value="100" />
+                <ui:Label text="0/20" name="GrindCountLabel" class="grind-count-label" />
+            </ui:VisualElement>
+            
+            <!-- Controls -->
+            <ui:VisualElement name="ControlButtonsContainer" class="control-buttons-container">
+                <ui:Button text="GRIND" name="GrindButton" class="grind-button" />
+                <ui:Label text="Ready to grind" name="StatusLabel" class="status-label" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

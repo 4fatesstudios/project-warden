@@ -14,6 +14,45 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
         public Ingredient BaseIngredient1 => baseIngredient1;
         public Ingredient BaseIngredient2 => baseIngredient2;
 
+        public override int Potency
+        {
+            get
+            {
+                if (baseIngredient1 != null && baseIngredient2 != null)
+                {
+                    // Component potency is average of base ingredients, rounded up
+                    return Mathf.CeilToInt((baseIngredient1.Potency + baseIngredient2.Potency) / 2f);
+                }
+                return base.Potency;
+            }
+        }
+
+        public override int GridWidth
+        {
+            get
+            {
+                if (baseIngredient1 != null && baseIngredient2 != null)
+                {
+                    // Component size is the larger of the two base ingredients
+                    return Mathf.Max(baseIngredient1.GridWidth, baseIngredient2.GridWidth);
+                }
+                return base.GridWidth;
+            }
+        }
+
+        public override int GridHeight
+        {
+            get
+            {
+                if (baseIngredient1 != null && baseIngredient2 != null)
+                {
+                    // Component size is the larger of the two base ingredients
+                    return Mathf.Max(baseIngredient1.GridHeight, baseIngredient2.GridHeight);
+                }
+                return base.GridHeight;
+            }
+        }
+
 #if UNITY_EDITOR
         private new void OnValidate()
         {

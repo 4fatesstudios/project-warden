@@ -1,0 +1,231 @@
+.main-container {
+    flex-grow: 1;
+    background-color: rgb(25, 25, 35);
+    padding: 20px;
+    border-radius: 15px;
+    border-width: 3px;
+    border-color: rgb(80, 60, 120);
+    background-image: url('project://database/Assets/UI/Textures/alchemy_background.png');
+}
+
+.header-container {
+    align-items: center;
+    margin-bottom: 30px;
+    padding: 15px;
+    background-color: rgba(50, 40, 80, 0.8);
+    border-radius: 10px;
+}
+
+.title-label {
+    font-size: 32px;
+    color: rgb(255, 220, 150);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    margin-bottom: 5px;
+}
+
+.subtitle-label {
+    font-size: 16px;
+    color: rgb(200, 180, 130);
+    -unity-text-align: middle-center;
+    font-style: italic;
+}
+
+.crafting-area {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin: 30px 0;
+    padding: 25px;
+    background-color: rgba(40, 30, 60, 0.9);
+    border-radius: 15px;
+    border-width: 2px;
+    border-color: rgb(100, 80, 150);
+}
+
+.ingredient-selection, .result-display {
+    align-items: center;
+    gap: 15px;
+}
+
+.section-label {
+    font-size: 18px;
+    color: rgb(255, 220, 150);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    margin-bottom: 10px;
+}
+
+.ingredient-slots {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+}
+
+.ingredient-slot {
+    width: 80px;
+    height: 80px;
+    background-color: rgb(60, 50, 90);
+    border-radius: 12px;
+    border-width: 3px;
+    border-color: rgb(120, 100, 180);
+    font-size: 24px;
+    color: rgb(200, 200, 200);
+    -unity-font-style: bold;
+    transition-duration: 0.2s;
+}
+
+.ingredient-slot:hover {
+    background-color: rgb(80, 70, 110);
+    border-color: rgb(160, 140, 220);
+    scale: 1.05;
+}
+
+.ingredient-slot:active {
+    scale: 0.95;
+}
+
+.plus-separator {
+    font-size: 28px;
+    color: rgb(150, 150, 150);
+    -unity-font-style: bold;
+    margin: 0 5px;
+}
+
+.arrow {
+    align-items: center;
+    justify-content: center;
+    margin: 0 20px;
+}
+
+.arrow-symbol {
+    font-size: 36px;
+    color: rgb(255, 200, 100);
+    -unity-font-style: bold;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.result-slot {
+    width: 120px;
+    height: 120px;
+    background-color: rgb(50, 40, 80);
+    border-radius: 15px;
+    border-width: 4px;
+    border-color: rgb(150, 120, 200);
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+.result-icon {
+    font-size: 48px;
+    color: rgb(255, 255, 255);
+    -unity-font-style: bold;
+}
+
+.result-name {
+    font-size: 12px;
+    color: rgb(200, 200, 200);
+    -unity-text-align: middle-center;
+    white-space: normal;
+}
+
+.crafting-controls {
+    flex-direction: row;
+    justify-content: space-around;
+    gap: 20px;
+    margin: 30px 0;
+    padding: 20px;
+    background-color: rgba(30, 25, 45, 0.8);
+    border-radius: 10px;
+}
+
+.manual-crafting, .auto-crafting, .bulk-crafting {
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+}
+
+.craft-button {
+    width: 160px;
+    height: 50px;
+    border-radius: 8px;
+    border-width: 2px;
+    font-size: 16px;
+    -unity-font-style: bold;
+    transition-duration: 0.2s;
+}
+
+.primary-button {
+    background-color: rgb(100, 150, 100);
+    border-color: rgb(120, 180, 120);
+    color: rgb(255, 255, 255);
+}
+
+.primary-button:hover {
+    background-color: rgb(120, 170, 120);
+    scale: 1.05;
+}
+
+.primary-button:disabled {
+    background-color: rgb(60, 60, 60);
+    border-color: rgb(80, 80, 80);
+    color: rgb(120, 120, 120);
+}
+
+.secondary-button {
+    background-color: rgb(100, 100, 150);
+    border-color: rgb(120, 120, 180);
+    color: rgb(255, 255, 255);
+}
+
+.secondary-button:hover {
+    background-color: rgb(120, 120, 170);
+    scale: 1.05;
+}
+
+.secondary-button:disabled {
+    background-color: rgb(60, 60, 60);
+    border-color: rgb(80, 80, 80);
+    color: rgb(120, 120, 120);
+}
+
+.tertiary-button {
+    background-color: rgb(150, 100, 100);
+    border-color: rgb(180, 120, 120);
+    color: rgb(255, 255, 255);
+}
+
+.tertiary-button:hover {
+    background-color: rgb(170, 120, 120);
+    scale: 1.05;
+}
+
+.tertiary-button:disabled {
+    background-color: rgb(60, 60, 60);
+    border-color: rgb(80, 80, 80);
+    color: rgb(120, 120, 120);
+}
+
+.craft-description {
+    font-size: 12px;
+    color: rgb(180, 180, 180);
+    -unity-text-align: middle-center;
+    white-space: normal;
+    max-width: 150px;
+}
+
+.status-area {
+    padding: 15px;
+    background-color: rgba(40, 40, 40, 0.8);
+    border-radius: 8px;
+    align-items: center;
+}
+
+.status-label {
+    font-size: 16px;
+    color: rgb(255, 255, 255);
+    -unity-text-align: middle-center;
+    -unity-font-style: bold;
+}
