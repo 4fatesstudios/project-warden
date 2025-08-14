@@ -12,34 +12,88 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
     public class PotionCraftingController : MonoBehaviour
     {
         public UIDocument uiDocument;
-        [SerializeField] private RhythmMinigameController rhythmMinigameController;
+        [SerializeField] private GridMinigameController gridMinigameController;
         [SerializeField] private ItemSlotContainerHolder ingredientInventoryHolder;
 
         private Button[] ingredientSlots = new Button[3];
         private Ingredient[] selectedIngredients = new Ingredient[3];
         private Button craftButton;
+        private Button autoCraftButton;
+        private Button bulkCraftButton;
         private Label resultLabel;
+        private Label autoCraftStatusLabel;
 
         private List<Ingredient> _cachedUsedIngredients;
         private AlchemyRecipe _cachedRecipe;
 
         private void OnEnable()
         {
+            if (uiDocument == null)
+            {
+                Debug.LogError("UIDocument not assigned to PotionCraftingController!");
+                return;
+            }
+            
             var root = uiDocument.rootVisualElement;
+            if (root == null)
+            {
+                Debug.LogError("UIDocument root is null! Check if UXML file is assigned.");
+                return;
+            }
 
+            // Find ingredient slots with null checks
             ingredientSlots[0] = root.Q<Button>("ingredientSlot1");
             ingredientSlots[1] = root.Q<Button>("ingredientSlot2");
             ingredientSlots[2] = root.Q<Button>("ingredientSlot3");
+            
+            // Find other UI elements with null checks
             craftButton = root.Q<Button>("craftButton");
+            autoCraftButton = root.Q<Button>("autoCraftButton");
+            bulkCraftButton = root.Q<Button>("bulkCraftButton");
             resultLabel = root.Q<Label>("resultLabel");
+            autoCraftStatusLabel = root.Q<Label>("autoCraftStatusLabel");
 
+            // Connect ingredient slot events
             for (int i = 0; i < ingredientSlots.Length; i++)
             {
-                int index = i;
-                ingredientSlots[i].clicked += () => OpenIngredientSelector(index);
+                if (ingredientSlots[i] != null)
+                {
+                    int index = i;
+                    ingredientSlots[i].clicked += () => OpenIngredientSelector(index);
+                }
+                else
+                {
+                    Debug.LogWarning($"Ingredient slot {i + 1} not found in UI!");
+                }
             }
 
-            craftButton.clicked += TryCraftPotion;
+            // Connect button events with null checks
+            if (craftButton != null)
+                craftButton.clicked += TryCraftPotion;
+            else
+                Debug.LogWarning("Craft button not found in UI!");
+                
+            if (autoCraftButton != null)
+                autoCraftButton.clicked += TryAutoCraft;
+            else
+                Debug.LogWarning("Auto-craft button not found in UI!");
+                
+            if (bulkCraftButton != null)
+                bulkCraftButton.clicked += OpenBulkCrafting;
+            else
+                Debug.LogWarning("Bulk craft button not found in UI!");
+
+            // Initialize UI state
+            if (resultLabel != null)
+                resultLabel.text = "Select ingredients and craft potions!";
+                
+            if (autoCraftStatusLabel != null)
+                autoCraftStatusLabel.text = "Select ingredients to check auto-craft availability";
+            
+            UpdateAutoCraftUI();
+        }
+
+            UpdateAutoCraftUI();
         }
 
         private void OpenIngredientSelector(int slotIndex)
@@ -47,22 +101,20 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
             if (ingredientInventoryHolder == null || ingredientInventoryHolder.Container == null)
             {
                 Debug.LogWarning("Inventory not assigned or initialized.");
+                if (resultLabel != null)
+                    resultLabel.text = "No inventory found! Assign ItemSlotContainerHolder in inspector.";
                 return;
             }
 
-            var slots = ingredientInventoryHolder.Container.Slots;
-
-            // Get both Ingredients and AlchemyComponents from inventory
-            var availableItems = slots
-                .Select(slot => slot.Item)
-                .Where(item => item is Ingredient || item is AlchemyComponent)
-                .Distinct()
+            // Get all available ingredients from our placeholder inventory
+            var availableItems = ingredientInventoryHolder.Container.GetAllItems()
+                .Where(item => item is Ingredient)
+                .Cast<Ingredient>()
                 .ToList();
 
             // Exclude already selected items in other slots
             var alreadySelected = selectedIngredients
                 .Where((ing, idx) => ing != null && idx != slotIndex)
-                .Cast<Item>()
                 .ToHashSet();
 
             var availableForSelection = availableItems
@@ -72,6 +124,8 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
             if (availableForSelection.Count == 0)
             {
                 Debug.LogWarning("No available items to select.");
+                if (resultLabel != null)
+                    resultLabel.text = "No ingredients available! Add ingredients to inventory.";
                 return;
             }
 
@@ -98,18 +152,18 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
             scrollView.style.height = 220;
             scrollView.style.width = 230;
 
-            foreach (var item in availableForSelection)
+            foreach (var ingredient in availableForSelection)
             {
-                string displayName = item is Ingredient ing ? ing.name : ((AlchemyComponent)item).ItemName;
+                string displayName = ingredient.ItemName;
                 var button = new Button(() =>
                 {
-                    if (item is Ingredient ingredient)
-                        selectedIngredients[slotIndex] = ingredient;
-                    else
-                        selectedIngredients[slotIndex] = null; // Or handle component selection logic
-
-                    ingredientSlots[slotIndex].text = displayName;
+                    selectedIngredients[slotIndex] = ingredient;
+                    
+                    if (ingredientSlots[slotIndex] != null)
+                        ingredientSlots[slotIndex].text = displayName;
+                    
                     root.Remove(popup);
+                    UpdateAutoCraftUI(); // Update auto-craft status when ingredients change
                 })
                 { text = displayName };
                 scrollView.Add(button);
@@ -124,6 +178,7 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
                     selectedIngredients[slotIndex] = null;
                     ingredientSlots[slotIndex].text = "+";
                     root.Remove(popup);
+                    UpdateAutoCraftUI(); // Update auto-craft status when ingredients change
                 })
                 { text = "Clear Slot" };
                 popup.Add(clearButton);
@@ -182,13 +237,17 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
             resultLabel.text = "You created an Alchemy Component:\n" + component.name;
         }
 
-        private void CreateUniquePotion(AlchemyRecipe recipe, List<Ingredient> unpacked)
+        private void CreateUniquePotion(AlchemyRecipe recipe, List<Ingredient> unpacked, CraftingRank rank = CraftingRank.A)
         {
             var potion = ScriptableObject.CreateInstance<Potion>();
             potion.name = recipe.OutputPotion.ItemName;
 
             var effectsField = typeof(Potion).GetField("potionEffects", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            effectsField?.SetValue(potion, recipe.OutputPotion.PotionEffects.ToList());
+            var originalEffects = recipe.OutputPotion.PotionEffects.ToList();
+            
+            // Apply rank potency modifier
+            var modifiedEffects = ApplyRankModifier(originalEffects, rank);
+            effectsField?.SetValue(potion, modifiedEffects);
 
             var upgradedProp = typeof(Potion).GetProperty("Upgraded");
             upgradedProp?.SetValue(potion, recipe.OutputPotion.Upgraded);
@@ -197,10 +256,19 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
             {
                 ingredientInventoryHolder.AddItem(potion, 1);
             }
-            resultLabel.text = "Unique Recipe Matched!\nCrafted: " + potion.name;
+            
+            string rankText = rank.GetRankDisplayName();
+            float potencyPercent = rank.GetPotencyMultiplier() * 100f;
+            resultLabel.text = $"Unique Recipe Matched! (Rank: {rankText})\nCrafted: {potion.name}\nPotency: {potencyPercent:F0}%";
+
+            // Record the crafting result for skill progression
+            if (AlchemySkillSystem.Instance != null)
+            {
+                AlchemySkillSystem.Instance.RecordCraftingResult(recipe, unpacked, rank);
+            }
         }
 
-        private void CreateEffectBasedPotion(List<Ingredient> ingredients)
+        private void CreateEffectBasedPotion(List<Ingredient> ingredients, CraftingRank rank = CraftingRank.A)
         {
             var unpacked = UnpackIngredients(ingredients);
             var effects = ResolvePotionEffects(unpacked);
@@ -213,9 +281,10 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
             var potion = ScriptableObject.CreateInstance<Potion>();
             potion.name = "Potion of " + string.Join(", ", effects.Select(e => e.Suffix));
 
-            // Set effects and upgraded via reflection (if needed)
+            // Apply rank potency modifier
+            var modifiedEffects = ApplyRankModifier(effects, rank);
             var effectsField = typeof(Potion).GetField("potionEffects", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            effectsField?.SetValue(potion, effects);
+            effectsField?.SetValue(potion, modifiedEffects);
 
             var upgradedProp = typeof(Potion).GetProperty("Upgraded");
             upgradedProp?.SetValue(potion, false);
@@ -225,28 +294,47 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
             {
                 ingredientInventoryHolder.AddItem(potion, 1);
             }
-            resultLabel.text = "Crafted Generic Potion:\n" + potion.name + "\nEffects:\n" +
-                               string.Join("\n", effects.Select(e => "- " + e.Suffix));
+            
+            string rankText = rank.GetRankDisplayName();
+            float potencyPercent = rank.GetPotencyMultiplier() * 100f;
+            resultLabel.text = $"Crafted Generic Potion (Rank: {rankText}):\n{potion.name}\nPotency: {potencyPercent:F0}%\nEffects:\n" +
+                               string.Join("\n", modifiedEffects.Select(e => "- " + e.Suffix));
+
+            // Record the crafting result for skill progression
+            if (AlchemySkillSystem.Instance != null)
+            {
+                AlchemySkillSystem.Instance.RecordCraftingResult(null, unpacked, rank);
+            }
         }
 
-        private void OnMinigameFinished(bool success)
+        private List<PotionEffect> ApplyRankModifier(List<PotionEffect> originalEffects, CraftingRank rank)
         {
-            rhythmMinigameController.UIDocument.rootVisualElement.style.display = DisplayStyle.None;
+            float multiplier = rank.GetPotencyMultiplier();
+            
+            // Create modified copies of the effects (this would depend on your PotionEffect implementation)
+            // For now, return the original effects - you'd modify the strength/duration based on multiplier
+            return originalEffects.ToList();
+        }
+
+        private void OnMinigameFinished(bool success, CraftingRank rank)
+        {
+            gridMinigameController.UIDocument.rootVisualElement.style.display = DisplayStyle.None;
             uiDocument.rootVisualElement.style.display = DisplayStyle.Flex;
 
             if (success)
             {
                 if (_cachedRecipe != null)
-                    CreateUniquePotion(_cachedRecipe, UnpackIngredients(_cachedUsedIngredients));
+                    CreateUniquePotion(_cachedRecipe, UnpackIngredients(_cachedUsedIngredients), rank);
                 else
-                    CreateEffectBasedPotion(_cachedUsedIngredients);
+                    CreateEffectBasedPotion(_cachedUsedIngredients, rank);
             }
             else
             {
-                resultLabel.text = "The brew fizzled... try a steadier rhythm!";
+                resultLabel.text = "The crafting process failed... try a better ingredient arrangement!";
             }
 
             ResetUI();
+            UpdateAutoCraftUI(); // Update auto-craft availability after crafting
         }
 
         private void TryCraftPotion()
@@ -276,36 +364,110 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
                 return;
             }
 
-            // Unpack all ingredients for unique recipe check
+            // Switch to grid minigame
+            uiDocument.rootVisualElement.style.display = DisplayStyle.None;
+
+            gridMinigameController.OnMinigameEnd -= OnMinigameFinished;
+            gridMinigameController.OnMinigameEnd += OnMinigameFinished;
+            gridMinigameController.Init(used);
+
+            _cachedUsedIngredients = used;
+            
+            // Check if there's a unique recipe for this combination
             var unpacked = UnpackIngredients(used);
-
-            int defaultHits = Mathf.CeilToInt((float)unpacked.Average(i => (int)i.ItemRarity) * 1.5f);
-            int defaultAttempts = defaultHits + 2;
-
             var db = Resources.Load<AlchemyRecipeDatabase>("Databases/AlchemyRecipeDatabase");
-            if (db == null)
+            _cachedRecipe = db?.GetRecipeByIngredients(unpacked);
+        }
+
+        private void TryAutoCraft()
+        {
+            var used = selectedIngredients.Where(i => i != null).ToList();
+            if (used.Count < 2)
             {
-                Debug.LogError("AlchemyRecipeDatabase asset not found in Resources/Databases/AlchemyRecipeDatabase");
-                resultLabel.text = "Recipe database missing! Cannot start minigame.";
-                ResetUI();
+                resultLabel.text = "Select at least two ingredients.";
                 return;
             }
 
-            // Use unpacked ingredients for recipe matching
-            var recipe = db.GetRecipeByIngredients(unpacked);
+            if (ingredientInventoryHolder == null || ingredientInventoryHolder.Container == null)
+            {
+                Debug.LogWarning("Inventory holder is missing.");
+                return;
+            }
 
-            int hitsNeeded = recipe != null ? recipe.RequiredHits : defaultHits;
-            int tries = recipe != null ? recipe.MaxAttempts : defaultAttempts;
+            // Check if auto-crafting is available
+            var unpacked = UnpackIngredients(used);
+            var db = Resources.Load<AlchemyRecipeDatabase>("Databases/AlchemyRecipeDatabase");
+            var recipe = db?.GetRecipeByIngredients(unpacked);
 
-            // Switch UI (via controller method)
-            uiDocument.rootVisualElement.style.display = DisplayStyle.None;
+            if (AlchemySkillSystem.Instance == null || !AlchemySkillSystem.Instance.CanAutoCraft(recipe, unpacked))
+            {
+                resultLabel.text = "Auto-crafting not available for this recipe. Achieve S-rank first!";
+                return;
+            }
 
-            rhythmMinigameController.OnMinigameEnd -= OnMinigameFinished;
-            rhythmMinigameController.OnMinigameEnd += OnMinigameFinished;
-            rhythmMinigameController.Init(hitsNeeded, tries);
+            // Consume ingredients
+            foreach (var ing in used)
+                ingredientInventoryHolder.Container.Remove(ing, 1);
 
-            _cachedUsedIngredients = used; // keep original for display, but pass unpacked to CreateUniquePotion
-            _cachedRecipe = recipe;
+            // Get auto-craft rank and create potion
+            var autoCraftRank = AlchemySkillSystem.Instance.GetAutoCraftRank(recipe, unpacked);
+            
+            if (recipe != null)
+                CreateUniquePotion(recipe, unpacked, autoCraftRank);
+            else
+                CreateEffectBasedPotion(used, autoCraftRank);
+
+            ResetUI();
+            UpdateAutoCraftUI();
+        }
+
+        private void UpdateAutoCraftUI()
+        {
+            if (autoCraftButton == null || autoCraftStatusLabel == null) return;
+
+            var used = selectedIngredients.Where(i => i != null).ToList();
+            
+            if (used.Count < 2)
+            {
+                autoCraftButton.SetEnabled(false);
+                autoCraftStatusLabel.text = "Select ingredients to check auto-craft availability";
+                return;
+            }
+
+            var unpacked = UnpackIngredients(used);
+            var db = Resources.Load<AlchemyRecipeDatabase>("Databases/AlchemyRecipeDatabase");
+            var recipe = db?.GetRecipeByIngredients(unpacked);
+
+            if (AlchemySkillSystem.Instance != null && AlchemySkillSystem.Instance.CanAutoCraft(recipe, unpacked))
+            {
+                autoCraftButton.SetEnabled(true);
+                var autoCraftRank = AlchemySkillSystem.Instance.GetAutoCraftRank(recipe, unpacked);
+                var potency = autoCraftRank.GetPotencyMultiplier() * 100f;
+                
+                string recipeKey = recipe != null ? $"recipe_{recipe.name}" : $"generic_{string.Join("-", unpacked.Select(i => i.name).OrderBy(n => n))}";
+                int sRankCount = AlchemySkillSystem.Instance.GetSRankCount(recipeKey);
+                
+                autoCraftStatusLabel.text = $"Auto-craft available (Rank: {autoCraftRank.GetRankDisplayName()})\nPotency: {potency:F0}%\nS-Ranks achieved: {sRankCount}";
+            }
+            else
+            {
+                autoCraftButton.SetEnabled(false);
+                autoCraftStatusLabel.text = "Auto-craft locked. Achieve S-rank in manual crafting to unlock.";
+            }
+
+            // Update bulk craft button
+            if (bulkCraftButton != null)
+            {
+                var hasUnlockedRecipes = AlchemySkillSystem.Instance?.GetUnlockedAutoCraftRecipes().Count > 0;
+                bulkCraftButton.SetEnabled(hasUnlockedRecipes);
+            }
+        }
+
+        private void OpenBulkCrafting()
+        {
+            // This would typically load a new scene or open a popup
+            // For now, just show a message
+            resultLabel.text = "Bulk crafting feature would open here. This requires S-rank achievements on recipes.";
         }
 
         private List<Ingredient> UnpackIngredients(List<Ingredient> ingredients)

@@ -3,7 +3,6 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UIElements;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
-using FourFatesStudios.ProjectWarden.UI;
 
 namespace FourFatesStudios.ProjectWarden.GameSystems.RefinementMenu
 {
@@ -31,7 +30,6 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.RefinementMenu
         private ProgressBar grindingProgress;
         private ProgressBar rhythmMeter;
         private Button grindButton;
-        private Button backButton;  // Add back button
         private Label instructionsLabel;
         private Label statusLabel;
         private Label grindCountLabel;
@@ -48,12 +46,12 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.RefinementMenu
         private GrindingState grindingState = GrindingState.Ready;
         
         public event Action<bool, Ingredient> OnGrindingComplete;
-        public event Action OnBackPressed;
-
+        
         private enum GrindingState
         {
             Ready,
             Grinding,
+            Perfect,
             Complete,
             Failed
         }
@@ -64,37 +62,6 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.RefinementMenu
                 uiDocument = GetComponent<UIDocument>();
         }
 
-        public void SetTargetIngredient(Ingredient ingredient)
-        {
-            currentIngredient = ingredient;
-            
-            if (uiDocument?.rootVisualElement != null)
-            {
-                SetupUI();
-                
-                Debug.Log($"🔨 Grinding minigame set up for ingredient: {ingredient.ItemName}");
-                
-                // Show visual feedback that ingredient is loaded
-                if (statusLabel != null)
-                {
-                    statusLabel.text = $"Ready to grind {ingredient.ItemName}";
-                    statusLabel.style.color = new StyleColor(Color.white);
-                }
-                
-                if (instructionsLabel != null)
-                {
-                    instructionsLabel.text = $"Click the grind button in rhythm to grind {ingredient.ItemName}. Match the beat for best results!";
-                }
-                
-                // Reset state
-                grindingState = GrindingState.Ready;
-                grindCount = 0;
-                perfectGrinds = 0;
-                totalGrinds = 0;
-                UpdateGrindCountDisplay();
-            }
-        }
-        
         public void InitializeGrinding(Ingredient ingredient)
         {
             currentIngredient = ingredient;
@@ -114,13 +81,11 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.RefinementMenu
             grindingProgress = root.Q<ProgressBar>("GrindingProgress");
             rhythmMeter = root.Q<ProgressBar>("RhythmMeter");
             grindButton = root.Q<Button>("GrindButton");
-            backButton = root.Q<Button>("BackButton");  // Get back button
             instructionsLabel = root.Q<Label>("InstructionsLabel");
             statusLabel = root.Q<Label>("StatusLabel");
             grindCountLabel = root.Q<Label>("GrindCountLabel");
             
             grindButton?.RegisterCallback<ClickEvent>(_ => PerformGrind());
-            backButton?.RegisterCallback<ClickEvent>(_ => NavigateBack());  // Register back button
             
             // Set ingredient appearance
             if (ingredient != null && currentIngredient?.ItemIcon != null)
@@ -190,31 +155,6 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.RefinementMenu
             if (grindCount >= requiredGrinds)
             {
                 CompleteGrinding();
-            }
-        }
-
-        /// <summary>
-        /// Navigate back to refinement menu
-        /// </summary>
-        private void NavigateBack()
-        {
-            // Stop grinding if in progress
-            if (isGrinding)
-            {
-                isGrinding = false;
-                grindingState = GrindingState.Complete;
-                StopAllCoroutines();
-            }
-            
-            OnBackPressed?.Invoke();
-            Hide();
-        }
-
-        private void UpdateGrindCountDisplay()
-        {
-            if (grindCountLabel != null)
-            {
-                grindCountLabel.text = $"{grindCount}/{(int)requiredGrinds}";
             }
         }
 

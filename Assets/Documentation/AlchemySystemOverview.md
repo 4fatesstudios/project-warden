@@ -101,7 +101,7 @@ public virtual int AdditionalSpaceCount;         // How many cells to add
 4. **Bulk production**: Mass-craft unlocked recipes efficiently
 
 ### Integration with Existing Systems
-- **Inventory system**: Full compatibility with `/Assets/Scripts/Inventory/ItemSlotContainerHolder.cs`
+- **Inventory system**: Full compatibility with existing ItemSlotContainerHolder
 - **Recipe database**: Works with current AlchemyRecipeDatabase
 - **Component system**: Enhanced AlchemyComponent with inherited properties
 - **Effect system**: Compatible with existing PotionEffect system

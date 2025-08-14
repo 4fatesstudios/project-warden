@@ -1,9 +1,8 @@
 using System;
 using System.Collections;
-using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
-using FourFatesStudios.ProjectWarden.UI;
 using UnityEngine;
 using UnityEngine.UIElements;
+using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
 
 namespace FourFatesStudios.ProjectWarden.GameSystems.RefinementMenu
 {
@@ -14,7 +13,7 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.RefinementMenu
         
         [Header("Roasting Settings")]
         [SerializeField] private float roastingDuration = 10f;
-        //[SerializeField] private float perfectRoastWindow = 2f;
+        [SerializeField] private float perfectRoastWindow = 2f;
         [SerializeField] private float burnThreshold = 15f;
         
         [Header("Animation Settings")]
@@ -29,19 +28,16 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.RefinementMenu
         private ProgressBar roastingProgress;
         private ProgressBar temperatureGauge;
         private Button stopButton;
-        private Button startButton;
-        private Button backButton;  // Add back button
         private Label instructionsLabel;
         private Label statusLabel;
         
         private Ingredient currentIngredient;
-        private float roastingTime;
-        private bool isRoasting;
-        private float currentTemperature;
+        private float roastingTime = 0f;
+        private bool isRoasting = false;
+        private float currentTemperature = 0f;
         private RoastingState roastingState = RoastingState.Raw;
         
         public event Action<bool, Ingredient> OnRoastingComplete;
-        public event Action OnBackPressed;  // Add back event
         
         private enum RoastingState
         {
@@ -58,33 +54,9 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.RefinementMenu
                 uiDocument = GetComponent<UIDocument>();
         }
 
-        public void SetTargetIngredient(Ingredient ingredient)
+        public void InitializeRoasting(Ingredient ingredient)
         {
             currentIngredient = ingredient;
-            
-            if (uiDocument?.rootVisualElement != null)
-            {
-                SetupUI();
-                
-                Debug.Log($"🔥 Roasting minigame set up for ingredient: {ingredient.ItemName}");
-                
-                // Show visual feedback that ingredient is loaded
-                if (statusLabel != null)
-                {
-                    statusLabel.text = $"Ready to roast {ingredient.ItemName}";
-                    statusLabel.style.color = new StyleColor(Color.white);
-                }
-                
-                if (instructionsLabel != null)
-                {
-                    instructionsLabel.text = $"Click Start to begin roasting {ingredient.ItemName}. Watch the temperature and stop at the perfect moment!";
-                }
-            }
-        }
-
-        public void InitializeRoasting(Ingredient ingredientTemp)
-        {
-            currentIngredient = ingredientTemp;
             SetupUI();
             StartRoasting();
         }
@@ -100,14 +72,10 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.RefinementMenu
             roastingProgress = root.Q<ProgressBar>("RoastingProgress");
             temperatureGauge = root.Q<ProgressBar>("TemperatureGauge");
             stopButton = root.Q<Button>("StopButton");
-            startButton = root.Q<Button>("StartButton");
-            backButton = root.Q<Button>("BackButton");
             instructionsLabel = root.Q<Label>("InstructionsLabel");
             statusLabel = root.Q<Label>("StatusLabel");
             
             stopButton?.RegisterCallback<ClickEvent>(_ => StopRoasting());
-            startButton?.RegisterCallback<ClickEvent>(_ => StartRoasting());
-            backButton?.RegisterCallback<ClickEvent>(_ => NavigateBack());
             
             // Set ingredient sprite
             if (ingredient != null && currentIngredient?.ItemIcon != null)
@@ -121,18 +89,6 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.RefinementMenu
             instructionsLabel.text = $"Roasting {currentIngredient?.ItemName}. Watch the temperature and stop at the perfect moment!";
             statusLabel.text = "Raw";
             
-            // Show/hide buttons based on state
-            if (startButton != null)
-            {
-                startButton.style.display = isRoasting ? DisplayStyle.None : DisplayStyle.Flex;
-                startButton.text = $"Start Roasting {currentIngredient?.ItemName}";
-            }
-            
-            if (stopButton != null)
-            {
-                stopButton.style.display = isRoasting ? DisplayStyle.Flex : DisplayStyle.None;
-            }
-            
             // Hide steam initially
             if (steamEffect != null)
                 steamEffect.style.opacity = 0f;
@@ -140,34 +96,10 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.RefinementMenu
 
         private void StartRoasting()
         {
-            if (currentIngredient == null)
-            {
-                Debug.LogWarning("Cannot start roasting: No ingredient selected");
-                return;
-            }
-            
-            if (isRoasting)
-            {
-                Debug.LogWarning("Roasting already in progress");
-                return;
-            }
-            
             isRoasting = true;
             roastingTime = 0f;
             currentTemperature = 0f;
             roastingState = RoastingState.Raw;
-            
-            // Update button visibility
-            if (startButton != null)
-                startButton.style.display = DisplayStyle.None;
-            if (stopButton != null)
-                stopButton.style.display = DisplayStyle.Flex;
-            
-            // Update instructions
-            if (instructionsLabel != null)
-                instructionsLabel.text = $"Roasting {currentIngredient.ItemName} in progress! Watch the temperature and stop at the perfect moment!";
-            
-            Debug.Log($"🔥 Started roasting {currentIngredient.ItemName}");
             
             StartCoroutine(RoastingProcess());
             StartCoroutine(AnimateFireFlames());
@@ -182,68 +114,10 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.RefinementMenu
             isRoasting = false;
             StopAllCoroutines();
             
-            // Update button visibility
-            if (startButton != null)
-            {
-                startButton.style.display = DisplayStyle.Flex;
-                startButton.text = "Start New Roast";
-            }
-            if (stopButton != null)
-                stopButton.style.display = DisplayStyle.None;
-            
             bool success = roastingState == RoastingState.Perfect;
             Ingredient result = success ? currentIngredient.RoastingResult : null;
             
-            // Update status based on result
-            if (statusLabel != null)
-            {
-                if (success)
-                {
-                    statusLabel.text = $"SUCCESS! {currentIngredient.ItemName} roasted perfectly!";
-                    statusLabel.style.color = new StyleColor(Color.green);
-                }
-                else
-                {
-                    statusLabel.text = $"Failed to roast {currentIngredient.ItemName} properly";
-                    statusLabel.style.color = new StyleColor(Color.red);
-                }
-            }
-            
-            if (instructionsLabel != null)
-            {
-                instructionsLabel.text = success ? 
-                    $"Perfect! You successfully roasted {currentIngredient.ItemName}!" :
-                    $"Better luck next time! Try roasting {currentIngredient.ItemName} again.";
-            }
-            
-            Debug.Log($"🔥 Roasting completed. Success: {success}, Result: {result?.ItemName ?? "None"}");
-            
             OnRoastingComplete?.Invoke(success, result);
-        }
-
-        /// <summary>
-        /// Navigate back to refinement menu
-        /// </summary>
-        private void NavigateBack()
-        {
-            // Stop roasting if in progress
-            if (isRoasting)
-            {
-                isRoasting = false;
-                StopAllCoroutines();
-            }
-            
-            // Try to use CraftingNavigationController navigation
-            var navigationController = FindFirstObjectByType<CraftingNavigationController>();
-            if (navigationController != null)
-            {
-                navigationController.ShowRefinement();
-            }
-            else
-            {
-                // Fallback to event
-                OnBackPressed?.Invoke();
-            }
         }
 
         private IEnumerator RoastingProcess()

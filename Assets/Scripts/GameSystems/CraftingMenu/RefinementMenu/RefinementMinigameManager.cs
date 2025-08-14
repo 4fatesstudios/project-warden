@@ -1,11 +1,9 @@
 using System;
-using FourFatesStudios.ProjectWarden;
-using FourFatesStudios.ProjectWarden.GameSystems.RefinementMenu;
-using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
-using FourFatesStudios.ProjectWarden.Inventory;
 using UnityEngine;
+using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
+using FourFatesStudios.ProjectWarden.Enums;
 
-namespace GameSystems.CraftingMenu.RefinementMenu
+namespace FourFatesStudios.ProjectWarden.GameSystems.RefinementMenu
 {
     public class RefinementMinigameManager : MonoBehaviour
     {
@@ -39,16 +37,10 @@ namespace GameSystems.CraftingMenu.RefinementMenu
                 roastingController.OnRoastingComplete += OnRoastingComplete;
             
             if (distillationController != null)
-            {
                 distillationController.OnDistillationComplete += OnDistillationComplete;
-                distillationController.OnBackPressed += OnBackToRefinementMenu;
-            }
             
             if (grindingController != null)
-            {
                 grindingController.OnGrindingComplete += OnGrindingComplete;
-                grindingController.OnBackPressed += OnBackToRefinementMenu;
-            }
         }
 
         private void OnDestroy()
@@ -58,16 +50,10 @@ namespace GameSystems.CraftingMenu.RefinementMenu
                 roastingController.OnRoastingComplete -= OnRoastingComplete;
             
             if (distillationController != null)
-            {
                 distillationController.OnDistillationComplete -= OnDistillationComplete;
-                distillationController.OnBackPressed -= OnBackToRefinementMenu;
-            }
             
             if (grindingController != null)
-            {
                 grindingController.OnGrindingComplete -= OnGrindingComplete;
-                grindingController.OnBackPressed -= OnBackToRefinementMenu;
-            }
         }
 
         public bool CanRefineIngredient(Ingredient ingredient, RefinementType refinementType)
@@ -305,21 +291,5 @@ namespace GameSystems.CraftingMenu.RefinementMenu
             }
         }
 #endif
-
-        private void OnBackToRefinementMenu()
-        {
-            // Hide all minigame UIs
-            grindingController?.Hide();
-            distillationController?.Hide();
-            roastingController?.Hide();
-            
-            // Show the main refinement UI
-            if (refinementUI != null)
-            {
-                refinementUI.SetActive(true);
-            }
-            
-            Debug.Log("🔙 Returned to refinement menu");
-        }
     }
 }

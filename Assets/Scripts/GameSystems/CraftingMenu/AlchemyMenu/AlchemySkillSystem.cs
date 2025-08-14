@@ -6,7 +6,7 @@ using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.AlchemyRecipes;
 using FourFatesStudios.ProjectWarden.Enums;
 
-namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu
+namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
 {
     [Serializable]
     public class RecipeSkillData
@@ -24,30 +24,30 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu
         }
     }
 
-    [Serializable]
+    [System.Serializable]
     public class AlchemySkillData
     {
         public List<RecipeSkillData> recipeSkills = new List<RecipeSkillData>();
-        public int totalSRanks;
-        public int autoCraftSuccessChance; // 0-100% for S-rank auto-crafts
+        public int totalSRanks = 0;
+        public int autoCraftSuccessChance = 0; // 0-100% for S-rank auto-crafts
 
         [Header("Skill Tree Bonuses")]
-        public bool hasIngredientRefund;
-        public bool hasOverlapPlacement;
-        public bool hasEnhancedGridSize;
-        public int bonusGridCells;
+        public bool hasIngredientRefund = false;
+        public bool hasOverlapPlacement = false;
+        public bool hasEnhancedGridSize = false;
+        public int bonusGridCells = 0;
     }
 
     public class AlchemySkillSystem : MonoBehaviour
     {
-        private static AlchemySkillSystem instance;
+        private static AlchemySkillSystem _instance;
         public static AlchemySkillSystem Instance
         {
             get
             {
-                if (instance == null)
-                    instance = FindFirstObjectByType<AlchemySkillSystem>();
-                return instance;
+                if (_instance == null)
+                    _instance = FindObjectOfType<AlchemySkillSystem>();
+                return _instance;
             }
         }
 
@@ -57,17 +57,13 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu
 
         private void Awake()
         {
-            if (instance == null)
+            if (_instance == null)
             {
-                instance = this;
-                // Only make root GameObjects persistent to avoid warning
-                if (transform.parent == null)
-                {
-                    DontDestroyOnLoad(gameObject);
-                }
+                _instance = this;
+                DontDestroyOnLoad(gameObject);
                 LoadSkillData();
             }
-            else if (instance != this)
+            else if (_instance != this)
             {
                 Destroy(gameObject);
             }

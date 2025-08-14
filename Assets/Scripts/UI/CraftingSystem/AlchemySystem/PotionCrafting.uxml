@@ -8,14 +8,21 @@
       <ui:Button name="ingredientSlot3" text="+" style="width: 80px; height: 80px;" />
     </ui:VisualElement>
 
-    <!-- Craft Button -->
-    <ui:Button name="craftButton" text="Craft Potion" style="margin-top: 16px; width: 200px; height: 40px;" />
+    <!-- Craft Buttons -->
+    <ui:VisualElement name="CraftButtons" style="flex-direction: row; justify-content: center; gap: 16px; margin-top: 16px;">
+      <ui:Button name="craftButton" text="Manual Craft" style="width: 120px; height: 40px;" />
+      <ui:Button name="autoCraftButton" text="Auto Craft" style="width: 120px; height: 40px;" />
+      <ui:Button name="bulkCraftButton" text="Bulk Craft" style="width: 120px; height: 40px;" />
+    </ui:VisualElement>
+
+    <!-- Auto-Craft Status -->
+    <ui:Label name="autoCraftStatusLabel" style="margin-top: 8px; white-space: normal; width: 400px; min-height: 40px; text-align: center; font-size: 12px;" />
 
     <!-- Result Label -->
-    <ui:Label name="resultLabel" style="margin-top: 16px; white-space: normal; width: 300px; min-height: 60px; text-align: center;" />
+    <ui:Label name="resultLabel" style="margin-top: 16px; white-space: normal; width: 400px; min-height: 60px; text-align: center;" />
 
-    <!-- Optional Rhythm Minigame Slot -->
-    <ui:VisualElement name="RhythmMinigameSlot" style="margin-top: 20px;" />
+    <!-- Grid Minigame Slot -->
+    <ui:VisualElement name="GridMinigameSlot" style="margin-top: 20px;" />
 
   </ui:VisualElement>
 </UXML>
