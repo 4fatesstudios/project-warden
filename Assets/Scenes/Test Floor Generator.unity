@@ -43853,6 +43853,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   lootTable: {fileID: 11400000, guid: 022981d1b172c9e4896c311699be502f, type: 2}
   lootGenerationOrigin: {fileID: 378718390}
+  lootVisualEffect: {fileID: 228515119}
 --- !u!1 &1255389340
 GameObject:
   m_ObjectHideFlags: 0

@@ -9,49 +9,25 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ac12d8c1b64a441a9fd60f1ef7e48a67, type: 3}
+  m_Script: {fileID: 11500000, guid: ccec348f60f7b5c429d2fb1e20182269, type: 3}
   m_Name: TestIngredient1
   m_EditorClassIdentifier: 
-  id: 9beb43e1-4999-43b6-9357-39440c6fbb04
-  itemName: Unnamed Item 1
+  id: 1
+  itemName: Test Ingredient 1
   itemDescription: Empty Description
-  itemRarity: 0
-  itemIcon: {fileID: 0}
+  itemRarity: 1
   noun: 
   adjective: 
   ingredientArchetype: 0
   ingredientAspect: 0
   isCorrupted: 0
-  potency: 1
-  gridWidth: 1
-  gridHeight: 1
-  unlocksAdditionalSpace: 0
-  additionalSpaceCount: 0
-  isUnrefined: 1
-  originalIngredient: {fileID: 0}
-  shapeData:
-    gridWidth: 1
-    gridHeight: 1
-    activeCells:
-    - {x: 0, y: 0}
-    template: 0
-    shapeColor: {r: 0, g: 1, b: 0, a: 1}
-    shapeSprite: {fileID: 0}
-    lastModified: 2025-09-26 02:10:02
-    dataVersion: 1
-  infusionBundle:
-    infusions: []
-  effectBundle:
-    Effects: []
+  infusions: []
   canGrind: 0
   grindingResult: {fileID: 0}
   canDistill: 0
   distillingResult: {fileID: 0}
   canRoast: 0
   roastingResult: {fileID: 0}
-  baseRefiningSuccessRate: 0.7
-  stabilityRating: 0.8
-  minimumRefiningSkill: 1
   references:
     version: 2
     RefIds: []
