@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1001 &5543099523314988359
+--- !u!1001 &7228495444595110161
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -10,7 +10,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1614790179561385052, guid: fc5a1c3d000881444aa59b016bb69d9e, type: 3}
       propertyPath: m_Name
-      value: LootInteractable
+      value: LootGenInteractable
       objectReference: {fileID: 0}
     - target: {fileID: 1614790179561385052, guid: fc5a1c3d000881444aa59b016bb69d9e, type: 3}
       propertyPath: m_Layer
@@ -18,7 +18,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3371233918898253755, guid: fc5a1c3d000881444aa59b016bb69d9e, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.11064196
+      value: -1.4784364
       objectReference: {fileID: 0}
     - target: {fileID: 3371233918898253755, guid: fc5a1c3d000881444aa59b016bb69d9e, type: 3}
       propertyPath: m_LocalPosition.y
@@ -26,7 +26,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3371233918898253755, guid: fc5a1c3d000881444aa59b016bb69d9e, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.277081
+      value: 1.6341329
       objectReference: {fileID: 0}
     - target: {fileID: 3371233918898253755, guid: fc5a1c3d000881444aa59b016bb69d9e, type: 3}
       propertyPath: m_LocalRotation.w
@@ -67,29 +67,29 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 1614790179561385052, guid: fc5a1c3d000881444aa59b016bb69d9e, type: 3}
       insertIndex: 2
-      addedObject: {fileID: 814887764743071550}
+      addedObject: {fileID: 435048844361559750}
   m_SourcePrefab: {fileID: 100100000, guid: fc5a1c3d000881444aa59b016bb69d9e, type: 3}
---- !u!1 &6522875516689062171 stripped
+--- !u!1 &8230369361124482381 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1614790179561385052, guid: fc5a1c3d000881444aa59b016bb69d9e, type: 3}
-  m_PrefabInstance: {fileID: 5543099523314988359}
+  m_PrefabInstance: {fileID: 7228495444595110161}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &814887764743071550
+--- !u!114 &435048844361559750
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6522875516689062171}
+  m_GameObject: {fileID: 8230369361124482381}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0ff80e3188a77154988b949bdf9e896c, type: 3}
+  m_Script: {fileID: 11500000, guid: ff65e808336c64746815ccfd44aec8c7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  interactText: Interact
-  focusVisual: {fileID: 6670070254471257908}
---- !u!1 &6670070254471257908 stripped
+  interactText: Loot
+  focusVisual: {fileID: 8371369703337483106}
+--- !u!1 &8371369703337483106 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1188336960053914227, guid: fc5a1c3d000881444aa59b016bb69d9e, type: 3}
-  m_PrefabInstance: {fileID: 5543099523314988359}
+  m_PrefabInstance: {fileID: 7228495444595110161}
   m_PrefabAsset: {fileID: 0}

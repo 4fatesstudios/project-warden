@@ -37,6 +37,25 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.LootTable
         IEnumerator IEnumerable.GetEnumerator() {
             return GetEnumerator();
         }
+
+        public static List<Item> GenerateRandomArray(LootTable lootTable) {
+            if (lootTable == null) return new List<Item>();
+
+            List<Item> result = new List<Item>();
+
+            foreach (var entry in lootTable.lootEntries) {
+                if (entry == null || entry.Item == null) continue;
+
+                var quantity = Random.Range(entry.MinimumDropAmount, entry.MaximumDropAmount + 1);
+
+                for (var i = 0; i < quantity; i++) {
+                    var randomIndex = Random.Range(0, result.Count + 1);
+                    result.Insert(randomIndex, entry.Item);
+                }
+            }
+
+            return result;
+        }
     }
     
     [System.Serializable]
