@@ -1,3 +1,4 @@
+using System;
 using FourFatesStudios.ProjectWarden.Interfaces;
 using TMPro;
 using UnityEngine;
@@ -22,6 +23,8 @@ namespace FourFatesStudios.ProjectWarden.Interactions.Interactables
         private bool _canInteract = true;
         
         public string InteractText => interactText;
+        
+        public event Action<Interactable> OnDestroyed;
 
         private void Awake() {
             InteractCollider = GetComponent<Collider>();
@@ -29,6 +32,10 @@ namespace FourFatesStudios.ProjectWarden.Interactions.Interactables
             _focusText = focusVisual.GetComponent<TextMeshPro>();
             _focusText.text = interactText;
             focusVisual.SetActive(false);
+        }
+
+        private void OnDestroy() {
+            OnDestroyed?.Invoke(this);
         }
 
         public abstract void Interact(GameObject interactor);
