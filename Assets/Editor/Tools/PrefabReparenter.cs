@@ -2,26 +2,45 @@ using UnityEditor;
 using UnityEngine;
 using System.IO;
 
-public static class PrefabReparenter
+public class PrefabReparenter : EditorWindow
 {
+    private GameObject prefabA;
+    private GameObject prefabZ;
+
     [MenuItem("Tools/Prefabs/Reparent Prefab A under Prefab Z")]
-    static void ReparentPrefabA()
+    public static void ShowWindow()
     {
-        // paths need to be updated for your project
-        string prefabAPath = "Assets/Prefabs/PrefabA.prefab";
-        string prefabZPath = "Assets/Prefabs/PrefabZ.prefab";
+        GetWindow<PrefabReparenter>("Reparent Prefab A under Prefab Z");
+    }
 
-        GameObject prefabA = AssetDatabase.LoadAssetAtPath<GameObject>(prefabAPath);
-        GameObject prefabZ = AssetDatabase.LoadAssetAtPath<GameObject>(prefabZPath);
+    private void OnGUI()
+    {
+        prefabA = (GameObject)EditorGUILayout.ObjectField("Prefab A", prefabA, typeof(GameObject), false);
+        prefabZ = (GameObject)EditorGUILayout.ObjectField("Prefab Z", prefabZ, typeof(GameObject), false);
 
-        if (prefabA == null || prefabZ == null)
+        EditorGUILayout.Space();
+
+        GUI.enabled = (prefabA != null && prefabZ != null);
+        if (GUILayout.Button("Reparent Now"))
         {
-            Debug.LogError("Missing prefab A or Z, check paths!");
+            ReparentPrefabs();
+        }
+        GUI.enabled = true;
+    }
+
+    private void ReparentPrefabs()
+    {
+        string prefabAPath = AssetDatabase.GetAssetPath(prefabA);
+        string prefabZPath = AssetDatabase.GetAssetPath(prefabZ);
+
+        if (string.IsNullOrEmpty(prefabAPath) || string.IsNullOrEmpty(prefabZPath))
+        {
+            Debug.LogError("Invalid prefab references. Make sure both are prefab assets.");
             return;
         }
 
-        // Create a new wrapped prefab = Z with A inside
-        string wrappedPath = Path.GetDirectoryName(prefabAPath) + "/PrefabA_Wrapped.prefab";
+        // Create wrapped prefab = Z with A inside
+        string wrappedPath = Path.Combine(Path.GetDirectoryName(prefabAPath), "PrefabA_Wrapped.prefab");
 
         GameObject zInstance = (GameObject)PrefabUtility.InstantiatePrefab(prefabZ);
         GameObject aInstance = (GameObject)PrefabUtility.InstantiatePrefab(prefabA, zInstance.transform);
@@ -31,8 +50,10 @@ public static class PrefabReparenter
 
         Debug.Log("Created wrapped prefab: " + wrappedPath);
 
-        // Update all Prefab Bs (variants of A) to now be variants of the wrapped prefab
+        // Update all Prefab Bs (variants of A) to be variants of wrapped prefab
         string[] allPrefabs = AssetDatabase.FindAssets("t:Prefab");
+        GameObject wrappedPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(wrappedPath);
+
         foreach (string guid in allPrefabs)
         {
             string path = AssetDatabase.GUIDToAssetPath(guid);
@@ -40,13 +61,11 @@ public static class PrefabReparenter
 
             if (PrefabUtility.GetCorrespondingObjectFromOriginalSource(prefab) == prefabA)
             {
-                // This is a prefab B (variant of A)
                 Debug.Log("Updating variant: " + path);
 
-                GameObject wrapped = AssetDatabase.LoadAssetAtPath<GameObject>(wrappedPath);
-                GameObject variantInstance = (GameObject)PrefabUtility.InstantiatePrefab(wrapped);
+                GameObject variantInstance = (GameObject)PrefabUtility.InstantiatePrefab(wrappedPrefab);
 
-                // copy overrides
+                // Save variant over the same file path
                 PrefabUtility.SaveAsPrefabAsset(variantInstance, path);
                 Object.DestroyImmediate(variantInstance);
             }
@@ -54,5 +73,7 @@ public static class PrefabReparenter
 
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
+
+        Debug.Log("Prefab reparenting complete.");
     }
 }
