@@ -10,6 +10,7 @@ public class SpaceDesignerWindow : EditorWindow
     private GameObject selectedSpacePrefab;
     private SpaceData selectedSpaceData;
     private Editor spaceDataEditor;
+    private Vector2 scrollPosition;
 
     [MenuItem("Tools/Spaces/Space Designer")]
     public static void ShowWindow()
@@ -19,6 +20,8 @@ public class SpaceDesignerWindow : EditorWindow
 
     private void OnGUI()
     {
+        scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition);
+        
         EditorGUILayout.LabelField("Space Designer", EditorStyles.boldLabel);
         selectedSpaceData = EditorGUILayout.ObjectField("Selected Space", selectedSpaceData, typeof(SpaceData), false) as SpaceData;
 
@@ -37,6 +40,8 @@ public class SpaceDesignerWindow : EditorWindow
 
         EditorGUILayout.Space();
         EditorGUILayout.LabelField("Prefab Editing", EditorStyles.boldLabel);
+        
+        GUILayout.Label("***Reminder to always nest ProBuilder assets under Terrain GameObject***");
 
         if (selectedSpacePrefab != null) {
             if (GUILayout.Button("Open Prefab in Prefab Stage")) {
@@ -49,31 +54,43 @@ public class SpaceDesignerWindow : EditorWindow
             }
 
             if (GUILayout.Button("Spawn Prefab in Current Scene")) {
-                if (selectedSpacePrefab != null)
-                {
-                    // Get the last active SceneView camera
-                    SceneView sceneView = SceneView.lastActiveSceneView;
-                    if (sceneView != null)
-                    {
-                        Camera cam = sceneView.camera;
-                        Vector3 spawnPosition = cam.transform.position + cam.transform.forward * 5f; // 5 units in front
-                        Quaternion spawnRotation = Quaternion.identity;
+                SpawnGameObjectInCurrentScene(selectedSpacePrefab);
+            }
 
-                        GameObject instance = PrefabUtility.InstantiatePrefab(selectedSpacePrefab, SceneManager.GetActiveScene()) as GameObject;
-                        instance.transform.position = spawnPosition;
-                        instance.transform.rotation = spawnRotation;
-
-                        Undo.RegisterCreatedObjectUndo(instance, "Spawn Space Prefab");
-                        Selection.activeGameObject = instance;
-
-                        // Frame it in the SceneView
-                        sceneView.FrameSelected();
-                    }
-                }
+            if (GUILayout.Button("Spawn Loot Gen (Loot Orb) in Current Scene")) {
+                HandlePrefabLootGenSpawn();
             }
         }
         else {
             EditorGUILayout.HelpBox("No prefab assigned to this SpaceData.", MessageType.Warning);
         }
+        
+        EditorGUILayout.EndScrollView();
+    }
+
+    private void HandlePrefabLootGenSpawn() {
+        string path = "Assets/Prefabs/LootGenerator.prefab";
+        GameObject prefab = AssetDatabase.LoadAssetAtPath(path, typeof(GameObject)) as GameObject;
+        if (prefab == null) return;
+        
+        SpawnGameObjectInCurrentScene(prefab);
+    }
+
+    private void SpawnGameObjectInCurrentScene(GameObject go) {
+        SceneView sceneView = SceneView.lastActiveSceneView;
+        if (sceneView == null) return;
+        
+        Camera cam = sceneView.camera;
+        Vector3 spawnPosition = cam.transform.position + cam.transform.forward * 5f;
+        Quaternion spawnRotation = Quaternion.identity;
+        
+        GameObject instance = PrefabUtility.InstantiatePrefab(go) as GameObject;
+        instance.transform.position = spawnPosition;
+        instance.transform.rotation = spawnRotation;
+        
+        Undo.RegisterCreatedObjectUndo(instance, $"Spawn {go.name} Prefab");
+        Selection.activeGameObject = instance;
+        
+        sceneView.FrameSelected();
     }
 }

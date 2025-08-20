@@ -8,7 +8,10 @@ using UnityEngine.VFX;
 namespace FourFatesStudios.ProjectWarden.Loot
 {
     public class LootGenerator : MonoBehaviour {
+        [Header("Designer Editable")]
         [SerializeField] private LootTable lootTable;
+        
+        [Header("Internal/Dev Only")]
         [SerializeField] private Transform lootGenerationOrigin;
         [SerializeField] private VisualEffect lootVisualEffect;
         [SerializeField] private GameObject lootInstance;
