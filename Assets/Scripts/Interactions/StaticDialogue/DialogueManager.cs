@@ -23,13 +23,27 @@ namespace FourFatesStudios.ProjectWarden.Interactions.StaticDialogue
         {
             story = new Story(inkJson.text);
             pm = GameObject.FindWithTag("Player").GetComponent<PlayerMovement>();
+        }
+
+        private void Start()
+        {
+            // Check if RelationshipManager exists
+            if (RelationshipManager.Instance == null)
+            {
+                Debug.LogError("[DialogueManager] RelationshipManager.Instance is null! Make sure there's a GameObject with RelationshipManager script in the scene.");
+            }
             
             // Bind the relationship_points function to Ink
             story.BindExternalFunction("relationship_points", (string characterName, int points) => {
+                Debug.Log($"[DialogueManager] relationship_points called: {characterName}, {points}");
                 if (RelationshipManager.Instance != null)
                 {
                     RelationshipManager.Instance.ChangeRelationshipPoints(characterName, points);
                     Debug.Log($"Changed relationship with {characterName} by {points} points");
+                }
+                else
+                {
+                    Debug.LogError("[DialogueManager] RelationshipManager.Instance is null when trying to change relationship points!");
                 }
             });
             
@@ -39,6 +53,7 @@ namespace FourFatesStudios.ProjectWarden.Interactions.StaticDialogue
                 {
                     return RelationshipManager.Instance.GetRelationshipStatus(characterName).ToString();
                 }
+                Debug.LogError("[DialogueManager] RelationshipManager.Instance is null when getting relationship status!");
                 return "Neutral";
             });
             
@@ -48,6 +63,7 @@ namespace FourFatesStudios.ProjectWarden.Interactions.StaticDialogue
                 {
                     return RelationshipManager.Instance.GetRelationshipPoints(characterName);
                 }
+                Debug.LogError("[DialogueManager] RelationshipManager.Instance is null when getting relationship points!");
                 return 0;
             });
             
@@ -57,6 +73,10 @@ namespace FourFatesStudios.ProjectWarden.Interactions.StaticDialogue
                 {
                     RelationshipManager.Instance.UpdateRelationshipStatus(characterName);
                     Debug.Log($"Updated relationship status for {characterName}");
+                }
+                else
+                {
+                    Debug.LogError("[DialogueManager] RelationshipManager.Instance is null when updating relationship status!");
                 }
             });
         }
@@ -107,6 +127,7 @@ namespace FourFatesStudios.ProjectWarden.Interactions.StaticDialogue
         {
             if (story.currentChoices.Count > 0 && currentChoiceIndex != -1)
             {
+                Debug.Log($"[DialogueManager] Making choice {currentChoiceIndex}: {story.currentChoices[currentChoiceIndex].text}");
                 story.ChooseChoiceIndex(currentChoiceIndex);
                 currentChoiceIndex = -1;
             }

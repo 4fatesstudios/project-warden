@@ -47,6 +47,7 @@ namespace FourFatesStudios.ProjectWarden.RelationshipSystem
         /// <param name="points"></param>
         public void ChangeRelationshipPoints(int points)
         {
+            Debug.Log($"ChangeRelationshipPoints called for {characterName}: adding {points} points (current: {relationshipPoints})");
 
             int newPoints = relationshipPoints + points;
 
@@ -93,6 +94,7 @@ namespace FourFatesStudios.ProjectWarden.RelationshipSystem
             }
 
             relationshipPoints = Mathf.Clamp(newPoints, (int)RelationshipThresholds.Distrustful - 10, (int)RelationshipThresholds.Romanced + 20);
+            Debug.Log($"Relationship points for {characterName} updated to: {relationshipPoints}");
         }
 
 
@@ -129,6 +131,13 @@ namespace FourFatesStudios.ProjectWarden.RelationshipSystem
             {
                 relationshipStatus = RelationshipStatus.Romanced;
             }
+        }
+
+        // Temporary test method - remove this later
+        [ContextMenu("Test Add Points")]
+        public void TestAddPoints()
+        {
+            ChangeRelationshipPoints(5);
         }
 
 

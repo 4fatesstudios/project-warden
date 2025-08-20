@@ -15,9 +15,11 @@ namespace FourFatesStudios.ProjectWarden.RelationshipSystem
             {
                 Instance = this;
                 DontDestroyOnLoad(gameObject);
+                Debug.Log("[RelationshipManager] Instance created and set to DontDestroyOnLoad");
             }
             else
             {
+                Debug.Log("[RelationshipManager] Duplicate instance found, destroying this one");
                 Destroy(gameObject);
             }
         }
