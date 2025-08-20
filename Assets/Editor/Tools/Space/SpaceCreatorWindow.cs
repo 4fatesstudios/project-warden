@@ -102,6 +102,11 @@ public class SpaceCreatorWindow : EditorWindow
 
         EditorUtility.DisplayDialog("Success", $"Created:\n- Prefab: {prefabPath}\n- SpaceData: {soPath}", "OK");
         
+        // Open SpaceDesignerWindow after creation for convenience
+        SpaceDesignerWindow.ShowWindow(spaceData);
+        
+        Close();
+        
         // automatically update all databases
         AreaSpacesDatabaseTool.UpdateAllDatabases();
     }

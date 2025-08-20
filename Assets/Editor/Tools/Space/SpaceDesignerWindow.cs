@@ -13,9 +13,14 @@ public class SpaceDesignerWindow : EditorWindow
     private Vector2 scrollPosition;
 
     [MenuItem("Tools/Spaces/Space Designer")]
-    public static void ShowWindow()
-    {
-        GetWindow<SpaceDesignerWindow>("Space Designer Window");
+    public static void ShowWindow() {
+        ShowWindow(null);
+    }
+
+    public static void ShowWindow(SpaceData spaceData) {
+        var window = GetWindow<SpaceDesignerWindow>("Space Designer Window");
+        window.selectedSpaceData = spaceData;
+        window.Focus();
     }
 
     private void OnGUI()
@@ -25,8 +30,16 @@ public class SpaceDesignerWindow : EditorWindow
         EditorGUILayout.LabelField("Space Designer", EditorStyles.boldLabel);
         selectedSpaceData = EditorGUILayout.ObjectField("Selected Space", selectedSpaceData, typeof(SpaceData), false) as SpaceData;
 
-        if (selectedSpaceData == null)
+        if (selectedSpaceData == null) {
+            EditorGUILayout.HelpBox("No Space selected.", MessageType.Info);
+
+            if (GUILayout.Button("Create New Space", GUILayout.Height(30))) {
+                SpaceCreatorWindow.ShowWindow();
+            }
+            
+            EditorGUILayout.EndScrollView();
             return;
+        }
 
         selectedSpacePrefab = selectedSpaceData.SpacePrefab;
 
