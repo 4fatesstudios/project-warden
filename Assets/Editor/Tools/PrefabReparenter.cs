@@ -13,6 +13,7 @@ public class PrefabReparenter : EditorWindow
 
     private void OnGUI()
     {
+        EditorGUILayout.HelpBox("this shit dont work dont use it", MessageType.Error);
         prefabA = (GameObject)EditorGUILayout.ObjectField("Prefab A", prefabA, typeof(GameObject), false);
         prefabZ = (GameObject)EditorGUILayout.ObjectField("Prefab Z", prefabZ, typeof(GameObject), false);
 
@@ -60,17 +61,10 @@ public class PrefabReparenter : EditorWindow
         // Update variants using SaveAsPrefabAssetAndConnect
         GameObject wrappedPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(wrappedPath);
 
-        foreach (string path in prefabBPaths)
-        {
+        foreach (string path in prefabBPaths) {
             GameObject prefabB = AssetDatabase.LoadAssetAtPath<GameObject>(path);
-
-            // Instantiate wrapped prefab in scene
             GameObject instance = (GameObject)PrefabUtility.InstantiatePrefab(wrappedPrefab);
-
-            // Apply all overrides from original variant
             PrefabUtility.RevertObjectOverride(instance, InteractionMode.AutomatedAction);
-    
-            // Replace the prefab asset with the new instance
             PrefabUtility.SaveAsPrefabAsset(instance, path);
 
             Object.DestroyImmediate(instance);
