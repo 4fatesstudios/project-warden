@@ -1,6 +1,10 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/Resources/UI.meta
 guid: 92699c40ce15b4241ad4fd7a892091fc
 folderAsset: yes
+========
+guid: ba6c7f8350b12a14db91188a583894bc
+>>>>>>>> 7134ab6 (Initial Push):Assets/Scenes/Crafting System.unity.meta
 DefaultImporter:
   externalObjects: {}
   userData: 

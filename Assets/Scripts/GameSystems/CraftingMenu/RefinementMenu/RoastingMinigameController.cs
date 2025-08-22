@@ -1,10 +1,10 @@
 using System;
 using System.Collections;
+using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
 using UnityEngine;
 using UnityEngine.UIElements;
-using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
 
-namespace FourFatesStudios.ProjectWarden.GameSystems.RefinementMenu
+namespace GameSystems.CraftingMenu.RefinementMenu
 {
     public class RoastingMinigameController : MonoBehaviour
     {
@@ -13,7 +13,7 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.RefinementMenu
         
         [Header("Roasting Settings")]
         [SerializeField] private float roastingDuration = 10f;
-        [SerializeField] private float perfectRoastWindow = 2f;
+        //[SerializeField] private float perfectRoastWindow = 2f;
         [SerializeField] private float burnThreshold = 15f;
         
         [Header("Animation Settings")]
@@ -32,9 +32,9 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.RefinementMenu
         private Label statusLabel;
         
         private Ingredient currentIngredient;
-        private float roastingTime = 0f;
-        private bool isRoasting = false;
-        private float currentTemperature = 0f;
+        private float roastingTime;
+        private bool isRoasting;
+        private float currentTemperature;
         private RoastingState roastingState = RoastingState.Raw;
         
         public event Action<bool, Ingredient> OnRoastingComplete;
@@ -54,9 +54,9 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.RefinementMenu
                 uiDocument = GetComponent<UIDocument>();
         }
 
-        public void InitializeRoasting(Ingredient ingredient)
+        public void InitializeRoasting(Ingredient ingredientTemp)
         {
-            currentIngredient = ingredient;
+            currentIngredient = ingredientTemp;
             SetupUI();
             StartRoasting();
         }

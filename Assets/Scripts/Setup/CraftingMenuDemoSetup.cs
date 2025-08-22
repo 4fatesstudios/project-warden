@@ -1,10 +1,13 @@
-using UnityEngine;
-using UnityEngine.UIElements;
-using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
+using System.Linq;
+using Demo;
 using FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu;
 using FourFatesStudios.ProjectWarden.GameSystems.RefinementMenu;
+using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
+using GameSystems.CraftingMenu.RefinementMenu;
+using UnityEngine;
+using UnityEngine.UIElements;
 
-namespace FourFatesStudios.ProjectWarden.Setup
+namespace Setup
 {
     /// <summary>
     /// Master setup script for the crafting menu demo system
@@ -27,7 +30,7 @@ namespace FourFatesStudios.ProjectWarden.Setup
         [SerializeField] private PotionCraftingController potionController;
         [SerializeField] private GridMinigameController gridController;
         [SerializeField] private RefinementMinigameManager refinementManager;
-        [SerializeField] private ItemSlotContainerHolder inventoryHolder;
+        [SerializeField] private FourFatesStudios.ProjectWarden.ItemSlotContainerHolder inventoryHolder;
         
         [Header("Current Menu State")]
         [SerializeField] private CraftingMenuType currentMenu = CraftingMenuType.PotionCrafting;
@@ -69,19 +72,19 @@ namespace FourFatesStudios.ProjectWarden.Setup
                 refinementManager = GetComponentInChildren<RefinementMinigameManager>();
                 
             if (inventoryHolder == null)
-                inventoryHolder = GetComponentInChildren<ItemSlotContainerHolder>();
+                inventoryHolder = GetComponentInChildren<FourFatesStudios.ProjectWarden.ItemSlotContainerHolder>();
             
             // Create inventory if not found
             if (inventoryHolder == null)
             {
                 var inventoryGO = new GameObject("Demo Inventory");
                 inventoryGO.transform.SetParent(transform);
-                inventoryHolder = inventoryGO.AddComponent<ItemSlotContainerHolder>();
+                inventoryHolder = inventoryGO.AddComponent<FourFatesStudios.ProjectWarden.ItemSlotContainerHolder>();
                 
                 // Add demo ingredients to inventory
                 if (demoIngredients != null && demoIngredients.Length > 0)
                 {
-                    var holder = inventoryHolder.GetComponent<ItemSlotContainerHolder>();
+                    var holder = inventoryHolder.GetComponent<FourFatesStudios.ProjectWarden.ItemSlotContainerHolder>();
                     // TODO: Set demo items in inspector after creating ItemSlotContainerHolder
                     Debug.Log("Demo inventory created - add demo ingredients in inspector");
                 }
@@ -186,7 +189,32 @@ namespace FourFatesStudios.ProjectWarden.Setup
             }
             else
             {
-                Debug.LogWarning("PotionCrafting UI not assigned! Please assign in inspector.");
+                Debug.LogWarning("PotionCrafting UI not assigned! Auto-searching for SimpleWorkingUI as fallback...");
+                
+                // Try to find SimpleWorkingUI as fallback
+                var simpleUI = FindFirstObjectByType<MonoBehaviour>()?.GetComponent<SimpleWorkingUI>();
+                if (simpleUI == null)
+                {
+                    // Look for any MonoBehaviour with "SimpleWorkingUI" in the name
+                    var allComponents = FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None);
+                    foreach (var comp in allComponents)
+                    {
+                        if (comp.GetType().Name == "SimpleWorkingUI")
+                        {
+                            simpleUI = comp as SimpleWorkingUI;
+                            break;
+                        }
+                    }
+                }
+                
+                if (simpleUI != null)
+                {
+                    Debug.Log("Found SimpleWorkingUI - demo should be visible!");
+                }
+                else
+                {
+                    Debug.LogWarning("No SimpleWorkingUI found either. Please assign potionCraftingUI in inspector or add SimpleWorkingUI component.");
+                }
             }
         }
 

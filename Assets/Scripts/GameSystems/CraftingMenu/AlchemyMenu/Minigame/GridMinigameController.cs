@@ -127,7 +127,11 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
                 ingredientButton.text = $"{ingredient.ItemName}\n{ingredient.GridWidth}x{ingredient.GridHeight}\nPotency: {ingredient.Potency}";
                 ingredientButton.style.width = 100;
                 ingredientButton.style.height = 60;
-                ingredientButton.style.marginAll = 2;
+                ingredientButton.style.marginBottom = 2;
+                ingredientButton.style.marginTop = 2;
+                ingredientButton.style.marginLeft = 2;
+                ingredientButton.style.marginRight = 2;
+
 
                 if (ingredient.UnlocksAdditionalSpace)
                 {
@@ -260,9 +264,9 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
             return ingredient.IngredientArchetype switch
             {
                 IngredientArchetype.Solvent => Color.blue,
-                IngredientArchetype.Base => Color.green,
-                IngredientArchetype.Modifier => Color.red,
-                IngredientArchetype.Catalyst => Color.yellow,
+                IngredientArchetype.Herb => Color.green,
+                IngredientArchetype.Ore => Color.red,
+                IngredientArchetype.Organic => Color.yellow,
                 _ => Color.gray
             };
         }

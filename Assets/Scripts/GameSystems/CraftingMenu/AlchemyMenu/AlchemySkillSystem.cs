@@ -24,30 +24,30 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
         }
     }
 
-    [System.Serializable]
+    [Serializable]
     public class AlchemySkillData
     {
         public List<RecipeSkillData> recipeSkills = new List<RecipeSkillData>();
-        public int totalSRanks = 0;
-        public int autoCraftSuccessChance = 0; // 0-100% for S-rank auto-crafts
+        public int totalSRanks;
+        public int autoCraftSuccessChance; // 0-100% for S-rank auto-crafts
 
         [Header("Skill Tree Bonuses")]
-        public bool hasIngredientRefund = false;
-        public bool hasOverlapPlacement = false;
-        public bool hasEnhancedGridSize = false;
-        public int bonusGridCells = 0;
+        public bool hasIngredientRefund;
+        public bool hasOverlapPlacement;
+        public bool hasEnhancedGridSize;
+        public int bonusGridCells;
     }
 
     public class AlchemySkillSystem : MonoBehaviour
     {
-        private static AlchemySkillSystem _instance;
+        private static AlchemySkillSystem instance;
         public static AlchemySkillSystem Instance
         {
             get
             {
-                if (_instance == null)
-                    _instance = FindObjectOfType<AlchemySkillSystem>();
-                return _instance;
+                if (instance == null)
+                    instance = FindFirstObjectByType<AlchemySkillSystem>();
+                return instance;
             }
         }
 
@@ -57,13 +57,17 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
 
         private void Awake()
         {
-            if (_instance == null)
+            if (instance == null)
             {
-                _instance = this;
-                DontDestroyOnLoad(gameObject);
+                instance = this;
+                // Only make root GameObjects persistent to avoid warning
+                if (transform.parent == null)
+                {
+                    DontDestroyOnLoad(gameObject);
+                }
                 LoadSkillData();
             }
-            else if (_instance != this)
+            else if (instance != this)
             {
                 Destroy(gameObject);
             }

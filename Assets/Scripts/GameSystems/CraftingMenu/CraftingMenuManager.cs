@@ -17,9 +17,9 @@ namespace FourFatesStudios.ProjectWarden.GameSystems
         private Button backButton;
 
         [Header("Panel Navigation Targets")]
-        [SerializeField] private string ingredientsPanel = "AlchemyBookUI";
+        [SerializeField] private string ingredientsPanel = "InventoryPanel";
         [SerializeField] private string refinementsPanel = "Refinement";
-        [SerializeField] private string alchemyPanel = "AlchemyMenu";  // Route to potion brewing menu instead of grid minigame
+        [SerializeField] private string alchemyPanel = "PotionCrafting";
         [SerializeField] private string backPanel = "CraftingMenu";
 
         [Header("Hybrid Architecture")]
@@ -66,14 +66,14 @@ namespace FourFatesStudios.ProjectWarden.GameSystems
         #region Navigation Methods
 
         /// <summary>
-        /// Navigate to ingredients/potion brewing guide panel
+        /// Navigate to ingredients/inventory panel
         /// </summary>
         public void NavigateToIngredients()
         {
             if (useHybridArchitecture && TryNavigateToPanel(ingredientsPanel))
             {
                 if (enableDebugLogging)
-                    Debug.Log($"🎒 Navigated to potion brewing guide panel: {ingredientsPanel}");
+                    Debug.Log($"🎒 Navigated to ingredients panel: {ingredientsPanel}");
                 return;
             }
 
@@ -98,14 +98,14 @@ namespace FourFatesStudios.ProjectWarden.GameSystems
         }
 
         /// <summary>
-        /// Navigate to potion brewing/alchemy panel
+        /// Navigate to alchemy/potion crafting panel
         /// </summary>
         public void NavigateToAlchemy()
         {
             if (useHybridArchitecture && TryNavigateToPanel(alchemyPanel))
             {
                 if (enableDebugLogging)
-                    Debug.Log($"🧪 Navigated to potion brewing panel: {alchemyPanel}");
+                    Debug.Log($"🧪 Navigated to alchemy panel: {alchemyPanel}");
                 return;
             }
 
@@ -120,14 +120,22 @@ namespace FourFatesStudios.ProjectWarden.GameSystems
         {
             if (useHybridArchitecture)
             {
-                // Try to use the navigation controller system
-                var navigationController = FindFirstObjectByType<CraftingNavigationController>();
+                // Try to use the hybrid navigation system
+                var craftingManager = CraftingUIManager.Instance;
+                var simpleManager = FindFirstObjectByType<SimpleCraftingManager>();
 
-                if (navigationController != null)
+                if (craftingManager != null)
                 {
-                    navigationController.GoBack();
+                    craftingManager.GoBack();
                     if (enableDebugLogging)
-                        Debug.Log("⬅️ Used CraftingNavigationController to go back");
+                        Debug.Log("⬅️ Used CraftingUIManager to go back");
+                    return;
+                }
+                else if (simpleManager != null)
+                {
+                    simpleManager.ShowPanel("CraftingMenuSystem");
+                    if (enableDebugLogging)
+                        Debug.Log("⬅️ Used SimpleCraftingManager to go back");
                     return;
                 }
                 else if (TryNavigateToPanel(backPanel))
@@ -154,59 +162,100 @@ namespace FourFatesStudios.ProjectWarden.GameSystems
             if (string.IsNullOrEmpty(panelName))
                 return false;
 
-            // Try CraftingNavigationController first (navigation system)
-            var navigationController = FindFirstObjectByType<CraftingNavigationController>();
-            if (navigationController != null)
+            // Try CraftingUIManager first (advanced hybrid system)
+            if (CraftingUIManager.Instance != null)
             {
                 try
                 {
-                    // Map common panel names to CraftingNavigationController methods
+                    // Map common panel names to CraftingUIManager methods
                     switch (panelName.ToLower())
                     {
                         case "inventory":
                         case "inventorypanel":
                         case "ingredients":
-                        case "alchemybook":
-                            // Navigate to potion brewing guide
-                            FindFirstObjectByType<CraftingNavigationController>()?.ShowAlchemyBook();
+                            // For now, show potion crafting which has inventory access
+                            CraftingUIManager.Instance.ShowPotionCrafting();
                             break;
                         case "refinement":
                         case "refinements":
-                            FindFirstObjectByType<CraftingNavigationController>()?.ShowRefinement();
+                            CraftingUIManager.Instance.ShowRefinement();
                             break;
                         case "alchemy":
-                        case "alchemymenu":
-                        case "alchemy_menu":
-                            FindFirstObjectByType<CraftingNavigationController>()?.ShowAlchemyMenu();
-                            break;
                         case "potioncrafting":
                         case "potion":
-                            FindFirstObjectByType<CraftingNavigationController>()?.ShowAlchemyMenu(); // Redirect to potion brewing menu
-                            break;
-                        case "gridminigame":
-                        case "grid":
-                            FindFirstObjectByType<CraftingNavigationController>()?.ShowGridMinigame();
+                            CraftingUIManager.Instance.ShowPotionCrafting();
                             break;
                         case "craftingmenu":
                         case "mainmenu":
                         case "main":
-                            navigationController.ShowMainMenu();
+                            CraftingUIManager.Instance.ShowMainMenu();
                             break;
                         default:
                             // Try to show panel by name directly
-                            navigationController.ShowPanel(panelName);
+                            CraftingUIManager.Instance.ShowPanel(panelName);
                             break;
                     }
                     return true;
                 }
                 catch (System.Exception e)
                 {
-                    Debug.LogWarning($"⚠️ Failed to navigate with CraftingNavigationController: {e.Message}");
+                    Debug.LogWarning($"⚠️ Failed to navigate with CraftingUIManager: {e.Message}");
+                }
+            }
+
+            // Try SimpleCraftingManager (simple hybrid system)
+            var simpleManager = FindFirstObjectByType<SimpleCraftingManager>();
+            if (simpleManager != null)
+            {
+                try
+                {
+                    // Map panel names to GameObject names for SimpleCraftingManager
+                    string targetPanel = MapPanelNameToGameObject(panelName);
+                    simpleManager.ShowPanel(targetPanel);
+                    return true;
+                }
+                catch (System.Exception e)
+                {
+                    Debug.LogWarning($"⚠️ Failed to navigate with SimpleCraftingManager: {e.Message}");
                 }
             }
 
             return false;
         }
+
+        /// <summary>
+        /// Map panel names to actual GameObject names in the scene
+        /// </summary>
+        private string MapPanelNameToGameObject(string panelName)
+        {
+            switch (panelName.ToLower())
+            {
+                case "inventory":
+                case "inventorypanel":
+                case "ingredients":
+                    return "PotionCraftingUI"; // Potion crafting has inventory access
+                case "refinement":
+                case "refinements":
+                    return "RefinementUI";
+                case "alchemy":
+                case "potioncrafting":
+                case "potion":
+                    return "PotionCraftingUI";
+                case "craftingmenu":
+                case "mainmenu":
+                case "main":
+                    return "CraftingMenuSystem";
+                case "bulkcrafting":
+                case "bulk":
+                    return "BulkCraftingUI";
+                case "gridminigame":
+                case "grid":
+                    return "GridMinigameUI";
+                default:
+                    return panelName; // Return as-is and hope it matches
+            }
+        }
+
         #endregion
 
         #region Legacy Scene Loading (Fallback)
@@ -244,6 +293,14 @@ namespace FourFatesStudios.ProjectWarden.GameSystems
         }
 
         /// <summary>
+        /// Check if hybrid architecture is available
+        /// </summary>
+        public bool IsHybridArchitectureAvailable()
+        {
+            return CraftingUIManager.Instance != null || FindFirstObjectByType<SimpleCraftingManager>() != null;
+        }
+
+        /// <summary>
         /// Get current navigation mode
         /// </summary>
         public string GetNavigationMode()
@@ -251,8 +308,11 @@ namespace FourFatesStudios.ProjectWarden.GameSystems
             if (!useHybridArchitecture)
                 return "Legacy Scene Loading";
             
-            if (FindFirstObjectByType<CraftingNavigationController>() != null)
-                return "Navigation Controller (CraftingNavigationController)";
+            if (CraftingUIManager.Instance != null)
+                return "Advanced Hybrid (CraftingUIManager)";
+            
+            if (FindFirstObjectByType<SimpleCraftingManager>() != null)
+                return "Simple Hybrid (SimpleCraftingManager)";
             
             return "Hybrid (No Manager Found)";
         }
@@ -290,10 +350,10 @@ namespace FourFatesStudios.ProjectWarden.GameSystems
         {
             Debug.Log($"🔍 Navigation Mode: {GetNavigationMode()}");
             Debug.Log($"🔄 Hybrid Architecture: {useHybridArchitecture}");
+            Debug.Log($"✅ Hybrid Available: {IsHybridArchitectureAvailable()}");
             
-            var navigationController = FindFirstObjectByType<CraftingNavigationController>();
-            if (navigationController != null)
-                Debug.Log($"📋 Available Panels: {string.Join(", ", navigationController.GetAllPanelNames())}");
+            if (CraftingUIManager.Instance != null)
+                Debug.Log($"📋 Available Panels: {string.Join(", ", CraftingUIManager.Instance.GetAllPanelNames())}");
         }
 
         #endregion
