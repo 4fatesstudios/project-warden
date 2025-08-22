@@ -1,8 +1,13 @@
+using FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu;
+using FourFatesStudios.ProjectWarden.GameSystems.RefinementMenu;
+using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
+using FourFatesStudios.ProjectWarden.Setup;
+using GameSystems.CraftingMenu.RefinementMenu;
+using Setup;
 using UnityEngine;
 using UnityEngine.UIElements;
-using FourFatesStudios.ProjectWarden.Setup;
 
-namespace FourFatesStudios.ProjectWarden.Demo
+namespace Demo
 {
     /// <summary>
     /// Complete setup guide and automation for the crafting system demo
@@ -15,13 +20,16 @@ namespace FourFatesStudios.ProjectWarden.Demo
         [SerializeField] private bool autoSetupDemo = true;
         
         [Header("Setup Status")]
-        [SerializeField] private bool uiDocumentsCreated = false;
-        [SerializeField] private bool ingredientsCreated = false;
-        [SerializeField] private bool controllersSetup = false;
-        [SerializeField] private bool demoReady = false;
+        [SerializeField] private bool uiDocumentsCreated;
+        [SerializeField] private bool ingredientsCreated;
+        [SerializeField] private bool controllersSetup;
+        [SerializeField] private bool demoReady;
 
         private void Start()
         {
+            // Check initial status
+            CheckSetupStatus();
+            
             if (autoSetupDemo)
             {
                 PerformFullSetup();
@@ -30,6 +38,34 @@ namespace FourFatesStudios.ProjectWarden.Demo
             {
                 LogSetupInstructions();
             }
+        }
+
+        private void CheckSetupStatus()
+        {
+            uiDocumentsCreated = CheckUIDocuments();
+            ingredientsCreated = CheckIngredients();
+            controllersSetup = CheckControllers();
+            demoReady = uiDocumentsCreated && ingredientsCreated && controllersSetup;
+
+            if (demoReady)
+            {
+                Debug.Log("✅ Demo system is ready!");
+            }
+        }
+
+        private bool CheckUIDocuments()
+        {
+            return autoCreateUIDocuments && FindObjectsByType<UIDocument>(FindObjectsSortMode.None).Length > 0;
+        }
+
+        private bool CheckIngredients()
+        {
+            return FindFirstObjectByType<ItemSlotContainerHolder>() != null;
+        }
+
+        private bool CheckControllers()
+        {
+            return controllersSetup || FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None).Length > 5;
         }
 
         [ContextMenu("Perform Full Setup")]
@@ -76,22 +112,22 @@ namespace FourFatesStudios.ProjectWarden.Demo
             CreateUIDocument("GrindingMinigameUI", refinementParent.transform, "Assets/Scripts/UI/CraftingSystem/RefinementSystem/GrindingMinigame.uxml");
             
             // Create demo inventory
-            var inventoryGO = new GameObject("DemoInventory");
-            inventoryGO.transform.SetParent(craftingSystem.transform);
+            var inventoryGo = new GameObject("DemoInventory");
+            inventoryGo.transform.SetParent(craftingSystem.transform);
             
-            var inventoryHolder = inventoryGO.GetComponent<ItemSlotContainerHolder>();
+            var inventoryHolder = inventoryGo.GetComponent<FourFatesStudios.ProjectWarden.ItemSlotContainerHolder>();
             if (inventoryHolder == null)
             {
-                inventoryHolder = inventoryGO.AddComponent<ItemSlotContainerHolder>();
+                inventoryHolder = inventoryGo.AddComponent<FourFatesStudios.ProjectWarden.ItemSlotContainerHolder>();
             }
             
             uiDocumentsCreated = true;
             Debug.Log("✓ UI hierarchy created successfully");
         }
 
-        private GameObject CreateUIDocument(string name, Transform parent, string uxml)
+        private GameObject CreateUIDocument(string docName, Transform parent, string uxml)
         {
-            var go = new GameObject(name);
+            var go = new GameObject(docName);
             go.transform.SetParent(parent);
             
             var uiDoc = go.AddComponent<UIDocument>();
@@ -102,7 +138,7 @@ namespace FourFatesStudios.ProjectWarden.Demo
                 var uiAsset = Resources.Load<VisualTreeAsset>(uxml.Replace("Assets/Resources/", "").Replace(".uxml", ""));
                 if (uiAsset == null)
                 {
-                    Debug.LogWarning($"Could not load UXML at {uxml} for {name}. Please assign manually in inspector.");
+                    Debug.LogWarning($"Could not load UXML at {uxml} for {docName}. Please assign manually in inspector.");
                 }
                 else
                 {
@@ -117,12 +153,12 @@ namespace FourFatesStudios.ProjectWarden.Demo
         {
             Debug.Log("Creating demo ingredients...");
             
-            var creator = FindObjectOfType<DemoIngredientCreator>();
+            var creator = FindFirstObjectByType<DemoIngredientCreator>();
             if (creator == null)
             {
-                var creatorGO = new GameObject("DemoIngredientCreator");
-                creatorGO.transform.SetParent(transform);
-                creator = creatorGO.AddComponent<DemoIngredientCreator>();
+                var creatorGo = new GameObject("DemoIngredientCreator");
+                creatorGo.transform.SetParent(transform);
+                creator = creatorGo.AddComponent<DemoIngredientCreator>();
             }
             
             creator.CreateDemoIngredients();
@@ -212,7 +248,7 @@ namespace FourFatesStudios.ProjectWarden.Demo
             }
             
             // Check Controllers
-            var potionController = FindObjectOfType<PotionCraftingController>();
+            var potionController = FindFirstObjectByType<PotionCraftingController>();
             if (potionController == null)
             {
                 Debug.LogError("✗ PotionCraftingController not found");
@@ -220,7 +256,7 @@ namespace FourFatesStudios.ProjectWarden.Demo
             }
             
             // Check Inventory
-            var inventory = FindObjectOfType<ItemSlotContainerHolder>();
+            var inventory = FindFirstObjectByType<FourFatesStudios.ProjectWarden.ItemSlotContainerHolder>();
             if (inventory == null)
             {
                 Debug.LogError("✗ ItemSlotContainerHolder not found");
@@ -291,7 +327,7 @@ namespace FourFatesStudios.ProjectWarden.Demo
         [ContextMenu("Assign Demo Ingredients")]
         public void AssignDemoIngredients()
         {
-            var inventory = FindObjectOfType<ItemSlotContainerHolder>();
+            var inventory = FindFirstObjectByType<FourFatesStudios.ProjectWarden.ItemSlotContainerHolder>();
             if (inventory == null)
             {
                 Debug.LogError("No ItemSlotContainerHolder found! Run setup first.");

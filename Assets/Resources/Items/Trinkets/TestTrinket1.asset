@@ -16,6 +16,7 @@ MonoBehaviour:
   itemName: Test Ingredient 1
   itemDescription: Empty Description
   itemRarity: 0
+  itemIcon: {fileID: 0}
   itemTrinketType: 0
   statModifierList:
     statModifiers: []

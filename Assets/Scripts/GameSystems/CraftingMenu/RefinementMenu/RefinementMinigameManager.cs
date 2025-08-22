@@ -1,9 +1,9 @@
 using System;
-using UnityEngine;
+using FourFatesStudios.ProjectWarden.GameSystems.RefinementMenu;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
-using FourFatesStudios.ProjectWarden.Enums;
+using UnityEngine;
 
-namespace FourFatesStudios.ProjectWarden.GameSystems.RefinementMenu
+namespace GameSystems.CraftingMenu.RefinementMenu
 {
     public class RefinementMinigameManager : MonoBehaviour
     {
@@ -13,7 +13,7 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.RefinementMenu
         [SerializeField] private GrindingMinigameController grindingController;
         
         [Header("Inventory")]
-        [SerializeField] private ItemSlotContainerHolder inventoryHolder;
+        [SerializeField] private FourFatesStudios.ProjectWarden.ItemSlotContainerHolder inventoryHolder;
         
         [Header("UI References")]
         [SerializeField] private GameObject refinementUI;

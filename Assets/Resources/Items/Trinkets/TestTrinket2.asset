@@ -12,10 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 92807fa69839fcc439664144a6566037, type: 3}
   m_Name: TestTrinket2
   m_EditorClassIdentifier: 
-  id: 
+  id: 7bf01b0d-0de2-40a2-94db-94807b97c356
   itemName: Test Ingredient 2
   itemDescription: Empty Description
   itemRarity: 0
+  itemIcon: {fileID: 0}
   itemTrinketType: 0
   statModifierList:
     statModifiers: []

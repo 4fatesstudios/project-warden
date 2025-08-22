@@ -23,14 +23,20 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
         private Label resultLabel;
         private Label autoCraftStatusLabel;
 
-        private List<Ingredient> _cachedUsedIngredients;
-        private AlchemyRecipe _cachedRecipe;
+        private List<Ingredient> cachedUsedIngredients;
+        private AlchemyRecipe cachedRecipe;
 
         private void OnEnable()
         {
+            // Try to auto-assign UIDocument if not set
             if (uiDocument == null)
             {
-                Debug.LogError("UIDocument not assigned to PotionCraftingController!");
+                uiDocument = GetComponent<UIDocument>();
+            }
+            
+            if (uiDocument == null)
+            {
+                Debug.LogWarning("UIDocument not found on PotionCraftingController - UI functionality disabled until assigned.");
                 return;
             }
             
@@ -90,9 +96,6 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
             if (autoCraftStatusLabel != null)
                 autoCraftStatusLabel.text = "Select ingredients to check auto-craft availability";
             
-            UpdateAutoCraftUI();
-        }
-
             UpdateAutoCraftUI();
         }
 
@@ -323,10 +326,10 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
 
             if (success)
             {
-                if (_cachedRecipe != null)
-                    CreateUniquePotion(_cachedRecipe, UnpackIngredients(_cachedUsedIngredients), rank);
+                if (cachedRecipe != null)
+                    CreateUniquePotion(cachedRecipe, UnpackIngredients(cachedUsedIngredients), rank);
                 else
-                    CreateEffectBasedPotion(_cachedUsedIngredients, rank);
+                    CreateEffectBasedPotion(cachedUsedIngredients, rank);
             }
             else
             {
@@ -371,12 +374,12 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
             gridMinigameController.OnMinigameEnd += OnMinigameFinished;
             gridMinigameController.Init(used);
 
-            _cachedUsedIngredients = used;
+            cachedUsedIngredients = used;
             
             // Check if there's a unique recipe for this combination
             var unpacked = UnpackIngredients(used);
             var db = Resources.Load<AlchemyRecipeDatabase>("Databases/AlchemyRecipeDatabase");
-            _cachedRecipe = db?.GetRecipeByIngredients(unpacked);
+            cachedRecipe = db?.GetRecipeByIngredients(unpacked);
         }
 
         private void TryAutoCraft()

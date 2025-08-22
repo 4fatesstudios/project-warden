@@ -1,0 +1,2 @@
+// Temporarily disabled due to compilation error
+// The SimpleCraftingConverter.cs provides the same functionality

@@ -15,7 +15,7 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.Combat
             Debug.Log("Entering Party State: Select Party Member");
             this.combatManager = combatManager;
             //implement selecting character ui and implementation
-            playerController = GameObject.FindObjectOfType<PlayerController>();
+            playerController = GameObject.FindFirstObjectByType<PlayerController>();
             BindInputs();
             Exit();
         }
