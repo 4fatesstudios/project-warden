@@ -11,6 +11,11 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Exploration {
         [SerializeField] private SpaceSize spaceSize = SpaceSize.Small; // relevant if SpaceType == Room
         [SerializeField] private List<DoorSpawnData> doorSpawnPoints = new();
         [SerializeField] private List<List<DoorSpawnData>> doorSpawnGroups = new();
+
+        [Header("Room Attributes")] 
+        [SerializeField] private int maxInstances = 0;
+        [SerializeField] private int minDistanceFromStart = 0;
+        
         
         public GameObject SpacePrefab { get => spacePrefab; set => spacePrefab = value; }
         public SpaceType SpaceType { get => spaceType; set => spaceType = value; }
