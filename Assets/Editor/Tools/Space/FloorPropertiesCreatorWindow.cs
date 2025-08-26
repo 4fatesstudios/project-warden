@@ -12,7 +12,7 @@ public class FloorPropertiesCreatorWindow : EditorWindow
 
     private string globalDatabasePath = "Assets/Resources/Databases/GlobalAreasDatabase.asset";
 
-    [MenuItem("Tools/Spaces/Create New Floor Properties Asset")]
+    [MenuItem("Tools/Floors/Create New Floor Properties Asset")]
     public static void ShowWindow() {
         GetWindow<FloorPropertiesCreatorWindow>("Create New Floor Properties Asset");
     }
@@ -66,5 +66,8 @@ public class FloorPropertiesCreatorWindow : EditorWindow
         // Selection.activeObject = newFloor;
         
         EditorUtility.DisplayDialog("Success", "Created:\n- FloorProperties: {soPath}", "OK");
+        
+        FloorPropertiesDesignerWindow.ShowWindow(newFloor);
+        Close();
     }
 }
