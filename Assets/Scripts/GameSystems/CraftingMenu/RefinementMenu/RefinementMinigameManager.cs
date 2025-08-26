@@ -1,6 +1,8 @@
 using System;
+using FourFatesStudios.ProjectWarden;
 using FourFatesStudios.ProjectWarden.GameSystems.RefinementMenu;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
+using FourFatesStudios.ProjectWarden.Inventory;
 using UnityEngine;
 
 namespace GameSystems.CraftingMenu.RefinementMenu
@@ -13,7 +15,7 @@ namespace GameSystems.CraftingMenu.RefinementMenu
         [SerializeField] private GrindingMinigameController grindingController;
         
         [Header("Inventory")]
-        [SerializeField] private FourFatesStudios.ProjectWarden.ItemSlotContainerHolder inventoryHolder;
+        [SerializeField] private ItemSlotContainerHolder inventoryHolder;
         
         [Header("UI References")]
         [SerializeField] private GameObject refinementUI;

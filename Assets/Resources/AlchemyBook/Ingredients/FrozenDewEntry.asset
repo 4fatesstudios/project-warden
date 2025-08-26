@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 660ae78ee4ea46e45b231ed7f6deeec4, type: 3}
+  m_Name: FrozenDewEntry
+  m_EditorClassIdentifier: 
+  title: Frozen Dew
+  description: Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut
+    fugit. Crystallized droplets of morning dew from the highest mountain peaks.
+    These delicate crystals contain the essence of pure cold and are prized for their
+    cooling properties in alchemical mixtures.
+  visualElement: {fileID: 0}
+  isSeen: 1
+  isBookmarked: 0
+  pageNumber: 0
+  aspect: 1
+  dropSources:
+  - sourceName: Mountain Peaks
+    sourceType: 6
+    dropChance: 80%
+    location: Frostpeak Mountains
+    sourceImage: {fileID: 0}
+  - sourceName: Ice Elemental
+    sourceType: 0
+    dropChance: 45%
+    location: Frozen Wastes
+    sourceImage: {fileID: 0}
+  availableRefinements:
+  - Distillation
+  hasCorruptedVariant: 0
+  discoveredInfusions:
+  - Frost Effect
+  - Temperature Regulation

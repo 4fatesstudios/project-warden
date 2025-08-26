@@ -3,7 +3,6 @@
     align-items: center;
     justify-content: center;
     padding: 40px;
-    row-gap: 15px;
 }
 
 Button {
@@ -11,5 +10,5 @@ Button {
     width: 200px;
     height: 40px;
     unity-font-style: bold;
-    margin: 5px 0;
+    margin: 15px 0;
 }

@@ -6,6 +6,7 @@ using UnityEngine.UIElements;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.AlchemyRecipes;
 using FourFatesStudios.ProjectWarden.Enums;
+using GameSystems.CraftingMenu.AlchemyBookMenu;
 
 namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
 {
@@ -17,6 +18,7 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
         private DropdownField recipeDropdown;
         private IntegerField quantityField;
         private Button bulkCraftButton;
+        private Button alchemyBookButton;
         private Label costLabel;
         private Label resultLabel;
         private Label statusLabel;
@@ -65,6 +67,7 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
             recipeDropdown = root.Q<DropdownField>("RecipeDropdown");
             quantityField = root.Q<IntegerField>("QuantityField");
             bulkCraftButton = root.Q<Button>("BulkCraftButton");
+            alchemyBookButton = root.Q<Button>("alchemyBookButton");
             costLabel = root.Q<Label>("CostLabel");
             resultLabel = root.Q<Label>("ResultLabel");
             statusLabel = root.Q<Label>("StatusLabel");
@@ -77,6 +80,7 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
 
             recipeDropdown?.RegisterValueChangedCallback(evt => UpdateCostDisplay());
             bulkCraftButton?.RegisterCallback<ClickEvent>(_ => PerformBulkCraft());
+            alchemyBookButton?.RegisterCallback<ClickEvent>(_ => OpenAlchemyBook());
 
             RefreshAvailableRecipes();
             UpdateUI();
@@ -313,6 +317,24 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
         public void Hide()
         {
             gameObject.SetActive(false);
+        }
+
+        private void OpenAlchemyBook()
+        {
+            // Find the alchemy book in the scene
+            var alchemyBook = FindFirstObjectByType<AlchemyBook>();
+            if (alchemyBook != null)
+            {
+                // Open the book to the recipes section
+                alchemyBook.OpenToRecipes();
+                Debug.Log("📚 Opening Alchemy Book to Recipes from Bulk Crafting");
+            }
+            else
+            {
+                Debug.LogWarning("⚠️ AlchemyBook not found in scene. Make sure AlchemyBook GameObject is in the scene.");
+                if (resultLabel != null)
+                    resultLabel.text = "Alchemy Book not available. Please ensure the Alchemy Book is in the scene.";
+            }
         }
     }
 }

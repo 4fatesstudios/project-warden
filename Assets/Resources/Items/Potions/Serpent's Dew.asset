@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 53efbf4862b0b5b4797dee728a66223a, type: 3}
+  m_Name: Serpent's Dew
+  m_EditorClassIdentifier: 
+  id: 
+  itemName: Serpent's Dew
+  itemDescription: Empty Description
+  itemRarity: 1
+  itemIcon: {fileID: 814221718, guid: d4ee4ae08a3c01b4188d6c2cbb1f35ef, type: 3}
+  itemPotionType: 0
+  potionEffects: []

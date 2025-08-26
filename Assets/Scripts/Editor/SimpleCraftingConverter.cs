@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEditor;
 using UnityEngine.SceneManagement;
+using FourFatesStudios.ProjectWarden;
 
 /// <summary>
 /// Simple, guaranteed-to-work crafting scene converter

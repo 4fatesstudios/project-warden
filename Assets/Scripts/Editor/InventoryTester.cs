@@ -45,13 +45,8 @@ namespace FourFatesStudios.ProjectWarden.Editor
                 
                 foreach (var item in allItems)
                 {
-                    // Get quantity via reflection to avoid missing method errors
-                    var countMethod = inventoryHolder.Container.GetType().GetMethod("Count");
-                    if (countMethod != null)
-                    {
-                        var quantity = (int)countMethod.Invoke(inventoryHolder.Container, new object[] { item });
-                        EditorGUILayout.LabelField($"  • {item.ItemName}: {quantity}");
-                    }
+                    var quantity = inventoryHolder.Container.GetItemCount(item);
+                    EditorGUILayout.LabelField($"  • {item.ItemName}: {quantity}");
                 }
             }
 

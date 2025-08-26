@@ -1,0 +1,444 @@
+/* Alchemy Book Entry Styles */
+
+.entry-container {
+    padding: 10px;
+    margin: 5px;
+    border-radius: 8px;
+    border-width: 2px;
+    border-color: rgba(150, 150, 150, 0.5);
+    background-color: rgba(50, 50, 50, 0.9);
+    transition-duration: 0.2s;
+}
+
+.entry-container:hover {
+    border-color: rgba(255, 255, 255, 0.8);
+    background-color: rgba(70, 70, 70, 0.9);
+}
+
+.entry-unseen {
+    opacity: 0.5;
+    background-color: rgba(30, 30, 30, 0.9);
+}
+
+.entry-unknown {
+    font-size: 24px;
+    color: rgba(150, 150, 150, 0.8);
+    -unity-text-align: middle-center;
+    -unity-font-style: bold;
+}
+
+.entry-title {
+    font-size: 18px;
+    color: rgb(255, 215, 0);
+    -unity-font-style: bold;
+    margin-bottom: 5px;
+}
+
+.entry-image {
+    width: 80px;
+    height: 80px;
+    border-radius: 4px;
+    border-width: 1px;
+    border-color: rgba(100, 100, 100, 0.5);
+    margin: 5px 0;
+    align-self: center;
+}
+
+.entry-description {
+    font-size: 12px;
+    color: rgb(220, 220, 220);
+    margin: 5px 0;
+    white-space: normal;
+}
+
+.entry-bookmark {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 20px;
+    height: 20px;
+    background-image: url('project://database/Assets/UI/Icons/bookmark.png');
+    background-color: rgb(255, 215, 0);
+}
+
+/* Ingredient Entry Styles */
+.ingredient-aspect {
+    background-color: rgba(100, 50, 200, 0.3);
+    padding: 5px;
+    border-radius: 4px;
+    margin: 5px 0;
+}
+
+.aspect-label {
+    font-size: 14px;
+    color: rgb(200, 150, 255);
+    -unity-font-style: bold;
+}
+
+.ingredient-sources {
+    background-color: rgba(50, 150, 50, 0.2);
+    padding: 5px;
+    border-radius: 4px;
+    margin: 5px 0;
+}
+
+.sources-title {
+    font-size: 12px;
+    color: rgb(150, 255, 150);
+    -unity-font-style: bold;
+    margin-bottom: 3px;
+}
+
+.source-label {
+    font-size: 11px;
+    color: rgb(200, 255, 200);
+    margin-left: 10px;
+}
+
+.ingredient-refinements {
+    background-color: rgba(150, 100, 50, 0.2);
+    padding: 5px;
+    border-radius: 4px;
+    margin: 5px 0;
+}
+
+.refinements-title {
+    font-size: 12px;
+    color: rgb(255, 200, 150);
+    -unity-font-style: bold;
+    margin-bottom: 3px;
+}
+
+.refinement-label {
+    font-size: 11px;
+    color: rgb(255, 220, 180);
+    margin-left: 10px;
+}
+
+.ingredient-corrupted {
+    background-color: rgba(150, 50, 50, 0.3);
+    padding: 5px;
+    border-radius: 4px;
+    margin: 5px 0;
+}
+
+.corrupted-label {
+    font-size: 12px;
+    color: rgb(255, 100, 100);
+    -unity-font-style: bold;
+}
+
+.ingredient-infusions {
+    background-color: rgba(100, 100, 150, 0.2);
+    padding: 5px;
+    border-radius: 4px;
+    margin: 5px 0;
+}
+
+.infusions-title {
+    font-size: 12px;
+    color: rgb(150, 150, 255);
+    -unity-font-style: bold;
+    margin-bottom: 3px;
+}
+
+.infusion-label {
+    font-size: 11px;
+    color: rgb(180, 180, 255);
+    margin-left: 10px;
+}
+
+/* Recipe Entry Styles */
+.recipe-type {
+    background-color: rgba(200, 100, 50, 0.3);
+    padding: 5px;
+    border-radius: 4px;
+    margin: 5px 0;
+}
+
+.unique-recipe {
+    color: rgb(255, 215, 0);
+    -unity-font-style: bold;
+}
+
+.custom-recipe {
+    color: rgb(150, 200, 255);
+    -unity-font-style: bold;
+}
+
+.recipe-ingredients {
+    background-color: rgba(50, 100, 150, 0.2);
+    padding: 5px;
+    border-radius: 4px;
+    margin: 5px 0;
+}
+
+.ingredients-title {
+    font-size: 12px;
+    color: rgb(150, 200, 255);
+    -unity-font-style: bold;
+    margin-bottom: 3px;
+}
+
+.ingredient-label {
+    font-size: 11px;
+    color: rgb(200, 220, 255);
+    margin-left: 10px;
+}
+
+.ingredient-unknown {
+    font-size: 11px;
+    color: rgb(150, 150, 150);
+    margin-left: 10px;
+    -unity-font-style: italic;
+}
+
+.recipe-infusions {
+    background-color: rgba(100, 50, 150, 0.2);
+    padding: 5px;
+    border-radius: 4px;
+    margin: 5px 0;
+}
+
+/* Bestiary Entry Styles */
+.bestiary-type {
+    background-color: rgba(150, 100, 50, 0.3);
+    padding: 5px;
+    border-radius: 4px;
+    margin: 5px 0;
+}
+
+.type-label {
+    font-size: 14px;
+    color: rgb(255, 200, 100);
+    -unity-font-style: bold;
+}
+
+.bestiary-danger {
+    padding: 5px;
+    border-radius: 4px;
+    margin: 5px 0;
+}
+
+.danger-harmless {
+    background-color: rgba(50, 150, 50, 0.3);
+    color: rgb(100, 255, 100);
+}
+
+.danger-low {
+    background-color: rgba(100, 150, 50, 0.3);
+    color: rgb(200, 255, 100);
+}
+
+.danger-moderate {
+    background-color: rgba(150, 150, 50, 0.3);
+    color: rgb(255, 255, 100);
+}
+
+.danger-high {
+    background-color: rgba(150, 100, 50, 0.3);
+    color: rgb(255, 200, 100);
+}
+
+.danger-extreme {
+    background-color: rgba(150, 50, 50, 0.3);
+    color: rgb(255, 100, 100);
+}
+
+.danger-legendary {
+    background-color: rgba(100, 50, 150, 0.3);
+    color: rgb(200, 100, 255);
+}
+
+.bestiary-habitat, .bestiary-behavior {
+    background-color: rgba(100, 100, 100, 0.2);
+    padding: 5px;
+    border-radius: 4px;
+    margin: 5px 0;
+}
+
+.habitat-label, .behavior-title, .behavior-description {
+    font-size: 12px;
+    color: rgb(220, 220, 220);
+}
+
+.bestiary-weaknesses {
+    background-color: rgba(150, 50, 50, 0.2);
+    padding: 5px;
+    border-radius: 4px;
+    margin: 5px 0;
+}
+
+.weakness-title {
+    font-size: 12px;
+    color: rgb(255, 150, 150);
+    -unity-font-style: bold;
+    margin-bottom: 3px;
+}
+
+.weakness-label {
+    font-size: 11px;
+    color: rgb(255, 200, 200);
+    margin-left: 10px;
+}
+
+.bestiary-resistances {
+    background-color: rgba(50, 150, 50, 0.2);
+    padding: 5px;
+    border-radius: 4px;
+    margin: 5px 0;
+}
+
+.resistance-title {
+    font-size: 12px;
+    color: rgb(150, 255, 150);
+    -unity-font-style: bold;
+    margin-bottom: 3px;
+}
+
+.resistance-label {
+    font-size: 11px;
+    color: rgb(200, 255, 200);
+    margin-left: 10px;
+}
+
+.bestiary-drops {
+    background-color: rgba(150, 150, 50, 0.2);
+    padding: 5px;
+    border-radius: 4px;
+    margin: 5px 0;
+}
+
+.drops-title {
+    font-size: 12px;
+    color: rgb(255, 255, 150);
+    -unity-font-style: bold;
+    margin-bottom: 3px;
+}
+
+.drop-label {
+    font-size: 11px;
+    color: rgb(255, 255, 200);
+    margin-left: 10px;
+}
+
+.bestiary-stats {
+    background-color: rgba(100, 100, 150, 0.2);
+    padding: 5px;
+    border-radius: 4px;
+    margin: 5px 0;
+}
+
+.encounters-label, .defeated-label {
+    font-size: 11px;
+    color: rgb(200, 200, 255);
+}
+
+/* Help Entry Styles */
+.help-category {
+    background-color: rgba(50, 150, 150, 0.3);
+    padding: 5px;
+    border-radius: 4px;
+    margin: 5px 0;
+}
+
+.category-label {
+    font-size: 14px;
+    color: rgb(100, 255, 255);
+    -unity-font-style: bold;
+}
+
+.help-tutorial {
+    background-color: rgba(150, 150, 50, 0.3);
+    padding: 5px;
+    border-radius: 4px;
+    margin: 5px 0;
+}
+
+.tutorial-label {
+    font-size: 12px;
+    color: rgb(255, 255, 100);
+    -unity-font-style: bold;
+}
+
+.help-steps {
+    background-color: rgba(100, 150, 100, 0.2);
+    padding: 5px;
+    border-radius: 4px;
+    margin: 5px 0;
+}
+
+.steps-title {
+    font-size: 12px;
+    color: rgb(150, 255, 150);
+    -unity-font-style: bold;
+    margin-bottom: 3px;
+}
+
+.step-label {
+    font-size: 11px;
+    color: rgb(200, 255, 200);
+    margin: 2px 0 2px 10px;
+}
+
+.help-tips {
+    background-color: rgba(150, 150, 100, 0.2);
+    padding: 5px;
+    border-radius: 4px;
+    margin: 5px 0;
+}
+
+.tips-title {
+    font-size: 12px;
+    color: rgb(255, 255, 150);
+    -unity-font-style: bold;
+    margin-bottom: 3px;
+}
+
+.tip-label {
+    font-size: 11px;
+    color: rgb(255, 255, 200);
+    margin: 2px 0 2px 10px;
+}
+
+.help-images {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin: 5px 0;
+}
+
+.help-illustration {
+    width: 100px;
+    height: 100px;
+    margin: 5px;
+    border-radius: 4px;
+    border-width: 1px;
+    border-color: rgba(100, 100, 100, 0.5);
+}
+
+.help-related {
+    background-color: rgba(100, 100, 150, 0.2);
+    padding: 5px;
+    border-radius: 4px;
+    margin: 5px 0;
+}
+
+.related-title {
+    font-size: 12px;
+    color: rgb(150, 150, 255);
+    -unity-font-style: bold;
+    margin-bottom: 3px;
+}
+
+.related-topic {
+    font-size: 11px;
+    color: rgb(180, 180, 255);
+    margin: 2px 0 2px 10px;
+    cursor: link;
+}
+
+.related-topic:hover {
+    color: rgb(220, 220, 255);
+    -unity-font-style: bold;
+}

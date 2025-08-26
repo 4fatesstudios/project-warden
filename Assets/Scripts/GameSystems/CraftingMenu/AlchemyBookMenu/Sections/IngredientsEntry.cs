@@ -5,7 +5,7 @@ using UnityEngine.UIElements;
 
 namespace GameSystems.CraftingMenu.AlchemyBookMenu.Sections
 {
-    [System.Serializable]
+    [CreateAssetMenu(fileName = "New Ingredient Entry", menuName = "Alchemy Book/Ingredient Entry")]
     public class IngredientEntry : BaseEntry
     {
         [Header("Ingredient Properties")]
@@ -114,6 +114,7 @@ namespace GameSystems.CraftingMenu.AlchemyBookMenu.Sections
     {
         public string sourceName;
         public SourceType sourceType;
+        public string dropChance;
         public string location; // Not implemented yet, but planned
         public Sprite sourceImage; // Not implemented yet, but planned
     }

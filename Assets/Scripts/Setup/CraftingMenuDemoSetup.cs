@@ -1,8 +1,10 @@
 using System.Linq;
 using Demo;
+using FourFatesStudios.ProjectWarden;
 using FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu;
 using FourFatesStudios.ProjectWarden.GameSystems.RefinementMenu;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
+using FourFatesStudios.ProjectWarden.Inventory;
 using GameSystems.CraftingMenu.RefinementMenu;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -30,7 +32,7 @@ namespace Setup
         [SerializeField] private PotionCraftingController potionController;
         [SerializeField] private GridMinigameController gridController;
         [SerializeField] private RefinementMinigameManager refinementManager;
-        [SerializeField] private FourFatesStudios.ProjectWarden.ItemSlotContainerHolder inventoryHolder;
+        [SerializeField] private ItemSlotContainerHolder inventoryHolder;
         
         [Header("Current Menu State")]
         [SerializeField] private CraftingMenuType currentMenu = CraftingMenuType.PotionCrafting;
