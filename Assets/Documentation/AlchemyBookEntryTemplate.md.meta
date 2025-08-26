@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/Documentation/AlchemyBookEntryTemplate.md.meta
 guid: 10516451626a7b04ab2577f2ba466a69
+========
+guid: 1283aefab04a3d14680989d87b282a19
+>>>>>>>> 848c0c6 (Alchemy System Editor tool):Assets/INVENTORY_SYSTEM_CLEANUP_COMPLETED.md.meta
 TextScriptImporter:
   externalObjects: {}
   userData: 
