@@ -3,11 +3,11 @@ using UnityEngine.UIElements;
 
 namespace GameSystems.CraftingMenu.AlchemyBookMenu.Sections
 {
-    [System.Serializable]
-    public abstract class BaseEntry
+    public abstract class BaseEntry : ScriptableObject
     {
         [Header("Base Entry Properties")]
         public string title;
+        [TextArea(3, 6)]
         public string description;
         public Sprite visualElement;
         public bool isSeen;

@@ -25,7 +25,7 @@ CraftingMenuDemo (Scene)
     │   ├── RoastingMinigameUI (GameObject + UIDocument + RoastingMinigameController)
     │   ├── DistillationMinigameUI (GameObject + UIDocument + DistillationMinigameController)
     │   └── GrindingMinigameUI (GameObject + UIDocument + GrindingMinigameController)
-    └── DemoInventory (GameObject + ItemSlotContainerHolder)
+    └── DemoInventory (GameObject + `/Assets/Scripts/Inventory/ItemSlotContainerHolder.cs`)
 ```
 
 ### Step 2: Assign UXML Files
@@ -46,7 +46,7 @@ For each UIDocument component, assign the corresponding UXML file:
 ### Step 4: Setup Inventory
 1. **Find DemoInventory GameObject**
 2. **Add demo ingredients**: Run `CraftingSystemSetupGuide` → `Assign Demo Ingredients`
-3. **Verify inventory**: Check that ItemSlotContainerHolder has demo items
+3. **Verify inventory**: Check that the inventory system (`/Assets/Scripts/Inventory/ItemSlotContainerHolder.cs`) has demo items
 
 ### Step 5: Connect References
 In the `CraftingMenuDemoSetup` component, assign:
@@ -95,7 +95,7 @@ In the `CraftingMenuDemoSetup` component, assign:
 - Check that UXML files exist at specified paths
 
 **"Inventory not found"**
-- Ensure ItemSlotContainerHolder is attached to DemoInventory GameObject
+- Ensure the inventory system (`/Assets/Scripts/Inventory/ItemSlotContainerHolder.cs`) is attached to DemoInventory GameObject
 - Run "Assign Demo Ingredients" to populate inventory
 
 **"No ingredients available"**
@@ -127,8 +127,11 @@ Assets/
 │   │   └── DemoIngredientCreator.cs
 │   ├── Setup/
 │   │   └── CraftingMenuDemoSetup.cs
-│   ├── PlaceholderClasses/
+│   ├── Inventory/
+│   │   ├── ItemSlotContainer.cs
 │   │   └── ItemSlotContainerHolder.cs
+│   ├── PlaceholderClasses/
+│   │   └── ItemSlotContainerHolder.cs  # ⚠️ DEPRECATED - Use /Assets/Scripts/Inventory/ instead
 │   ├── GameSystems/CraftingMenu/
 │   │   ├── AlchemyMenu/
 │   │   │   ├── GridMinigameController.cs

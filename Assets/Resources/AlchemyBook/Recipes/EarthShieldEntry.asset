@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c8d8c8238c412f44fb540ea7e85dd813, type: 3}
+  m_Name: EarthShieldEntry
+  m_EditorClassIdentifier: 
+  title: Earth Shield Elixir
+  description: At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis
+    praesentium. A protective potion that harnesses the power of earth magic to create
+    a defensive barrier around the drinker. The combination of Earth Shard and Shadow
+    Herb creates a unique protective enchantment.
+  visualElement: {fileID: 0}
+  isSeen: 1
+  isBookmarked: 0
+  pageNumber: 0
+  recipeType: 1
+  requiredIngredients:
+  - ingredientName: Earth Shard
+    quantity: 2
+    isDiscovered: 1
+  - ingredientName: Shadow Herb
+    quantity: 1
+    isDiscovered: 1
+  infusions: []
+  isUniquePotionRecipe: 1
+  discoveredInfusions:
+  - Stone Skin
+  - Damage Resistance
+  - Stability
+  minAlchemyLevel: 3
+  successRate: 80
+  brewingTime: 120

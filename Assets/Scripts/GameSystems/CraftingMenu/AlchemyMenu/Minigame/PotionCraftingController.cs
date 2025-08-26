@@ -2,6 +2,8 @@ using FourFatesStudios.ProjectWarden.Enums;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.AlchemyRecipes;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.PotionEffects;
+using FourFatesStudios.ProjectWarden.UI;
+using GameSystems.CraftingMenu.AlchemyBookMenu;
 using System.Collections.Generic;
 using System.Linq;
 using ScriptableObjects.Items;
@@ -15,12 +17,14 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
         public UIDocument uiDocument;
         [SerializeField] private GridMinigameController gridMinigameController;
         [SerializeField] private ItemSlotContainerHolder ingredientInventoryHolder;
+        [SerializeField] private CraftingUIManager craftingUIManager;
 
         private Button[] ingredientSlots = new Button[3];
         private Ingredient[] selectedIngredients = new Ingredient[3];
         private Button craftButton;
         private Button autoCraftButton;
         private Button bulkCraftButton;
+        private Button alchemyBookButton;
         private Label resultLabel;
         private Label autoCraftStatusLabel;
 
@@ -57,6 +61,7 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
             craftButton = root.Q<Button>("craftButton");
             autoCraftButton = root.Q<Button>("autoCraftButton");
             bulkCraftButton = root.Q<Button>("bulkCraftButton");
+            alchemyBookButton = root.Q<Button>("alchemyBookButton");
             resultLabel = root.Q<Label>("resultLabel");
             autoCraftStatusLabel = root.Q<Label>("autoCraftStatusLabel");
 
@@ -89,6 +94,28 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
                 bulkCraftButton.clicked += OpenBulkCrafting;
             else
                 Debug.LogWarning("Bulk craft button not found in UI!");
+                
+            // Replace potion crafting UI with grid crafting UI
+            if (gridMinigameController != null)
+            {
+                gridMinigameController.OnBackPressed += () => craftingUIManager?.ShowPanel("CraftingMenu");
+                gridMinigameController.OnAlchemyBookPressed += OpenAlchemyBook;
+                gridMinigameController.OnCraftingCompleted += OnGridCraftingCompleted;
+            }
+            
+            // Legacy buttons - try to find alchemy book button
+            if (alchemyBookButton == null)
+            {
+                // Try alternative button names
+                alchemyBookButton = root.Q<Button>("AlchemyBook") ?? 
+                                   root.Q<Button>("BookButton") ?? 
+                                   root.Q<Button>("book-button");
+            }
+            
+            if (alchemyBookButton != null)
+                alchemyBookButton.clicked += OpenAlchemyBook;
+            else
+                Debug.LogWarning("Alchemy book button not found in UI! Checked: AlchemyBookButton, AlchemyBook, BookButton, book-button");
 
             // Initialize UI state
             if (resultLabel != null)
@@ -320,15 +347,18 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
             return originalEffects.ToList();
         }
 
-        private void OnMinigameFinished(bool success, CraftingRank rank)
+        private void OnMinigameFinished(AlchemyRecipe recipe, Dictionary<Vector2Int, Ingredient> placedIngredients)
         {
             gridMinigameController.UIDocument.rootVisualElement.style.display = DisplayStyle.None;
             uiDocument.rootVisualElement.style.display = DisplayStyle.Flex;
 
+            bool success = placedIngredients.Count > 0; // Simple success check
+            CraftingRank rank = CraftingRank.B; // Default rank for now
+
             if (success)
             {
-                if (cachedRecipe != null)
-                    CreateUniquePotion(cachedRecipe, UnpackIngredients(cachedUsedIngredients), rank);
+                if (recipe != null)
+                    CreateUniquePotion(recipe, UnpackIngredients(cachedUsedIngredients), rank);
                 else
                     CreateEffectBasedPotion(cachedUsedIngredients, rank);
             }
@@ -371,9 +401,9 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
             // Switch to grid minigame
             uiDocument.rootVisualElement.style.display = DisplayStyle.None;
 
-            gridMinigameController.OnMinigameEnd -= OnMinigameFinished;
-            gridMinigameController.OnMinigameEnd += OnMinigameFinished;
-            gridMinigameController.Init(used);
+            gridMinigameController.OnCraftingCompleted -= OnMinigameFinished;
+            gridMinigameController.OnCraftingCompleted += OnMinigameFinished;
+            gridMinigameController.SetAvailableIngredients(used);
 
             cachedUsedIngredients = used;
             
@@ -474,6 +504,23 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
             resultLabel.text = "Bulk crafting feature would open here. This requires S-rank achievements on recipes.";
         }
 
+        private void OpenAlchemyBook()
+        {
+            // Find the alchemy book in the scene
+            var alchemyBook = FindFirstObjectByType<FourFatesStudios.ProjectWarden.UI.AlchemyBook>();
+            if (alchemyBook != null)
+            {
+                // Open the book to the recipes section
+                alchemyBook.ShowBook();
+                Debug.Log("📚 Opening Alchemy Book to Recipes from Potion Crafting");
+            }
+            else
+            {
+                Debug.LogWarning("⚠️ AlchemyBook not found in scene. Make sure AlchemyBook GameObject is in the scene.");
+                resultLabel.text = "Alchemy Book not available. Please ensure the Alchemy Book is in the scene.";
+            }
+        }
+
         private List<Ingredient> UnpackIngredients(List<Ingredient> ingredients)
         {
             var result = new List<Ingredient>();
@@ -502,6 +549,38 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
                 ingredientSlots[i].text = "+";
                 selectedIngredients[i] = null;
             }
+        }
+        
+        private void OnGridCraftingCompleted(AlchemyRecipe recipe, Dictionary<Vector2Int, Ingredient> placedIngredients)
+        {
+            Debug.Log($"🧪 Grid crafting completed! Recipe: {recipe.ItemName}");
+            
+            // Extract unique ingredients from the grid
+            var uniqueIngredients = placedIngredients.Values.Distinct().ToList();
+            
+            // Create the potion based on the recipe and placed ingredients
+            CreateUniquePotion(recipe, uniqueIngredients, CraftingRank.A); // Default to A rank for pattern completion
+            
+            // Update skill system
+            if (AlchemySkillSystem.Instance != null)
+            {
+                string recipeKey = $"recipe_{recipe.name}";
+                AlchemySkillSystem.Instance.RecordCraftingResult(recipe, uniqueIngredients, CraftingRank.A);
+            }
+            
+            if (resultLabel != null)
+                resultLabel.text = $"Successfully crafted {recipe.ItemName} using grid pattern!";
+                
+            // Return to main crafting menu
+            if (craftingUIManager != null)
+                craftingUIManager.ShowPanel("CraftingMenu");
+        }
+
+        private void Start()
+        {
+            // Find CraftingUIManager if not assigned
+            if (craftingUIManager == null)
+                craftingUIManager = FindFirstObjectByType<CraftingUIManager>();
         }
     }
 }

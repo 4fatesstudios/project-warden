@@ -1,16 +1,17 @@
 using UnityEngine;
 using UnityEngine.UIElements;
+using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
+using FourFatesStudios.ProjectWarden.ScriptableObjects.AlchemyRecipes;
+using FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using GameSystems.CraftingMenu.AlchemyBookMenu.Sections;
-using FourFatesStudios.ProjectWarden.GameSystems;
 
 namespace FourFatesStudios.ProjectWarden.UI
 {
     /// <summary>
-    /// Potion Brewing Guide UI that displays different categories of game information
-    /// Allows players to browse through recipes, ingredients, bestiary, and help content
+    /// Alchemy Book UI that displays available potions and recipes
+    /// Allows players to select recipes and auto-add ingredients to crafting systems
     /// </summary>
     public class AlchemyBook : MonoBehaviour
     {
@@ -20,33 +21,34 @@ namespace FourFatesStudios.ProjectWarden.UI
         [SerializeField] private VisualTreeAsset bookUXML;
         [SerializeField] private StyleSheet bookUSS;
 
-        [Header("Settings")]
+        [Header("Integration")]
         [SerializeField] private bool enableDebugLogging = true;
+        [SerializeField] private float autoCloseDelay = 5f;
 
         // UI Elements
         private VisualElement rootElement;
-        private VisualElement leftPage;
-        private VisualElement rightPage;
+        private VisualElement recipesContainer;
+        private VisualElement potionsContainer;
+        private VisualElement selectedRecipeDetails;
         private TextField searchField;
         private Button closeButton;
-        
-        // Tab buttons
-        private Button bookmarkTabButton;
-        private Button bestiaryTabButton;
-        private Button recipeTabButton;
-        private Button ingredientTabButton;
-        private Button helpTabButton;
+        private Button recipesTabButton;
+        private Button potionsTabButton;
 
-        // Book entries from resources
-        private List<RecipeEntry> recipeEntries;
-        private List<IngredientEntry> ingredientEntries;
-        private List<BestiaryEntry> bestiaryEntries;
-        private List<HelpEntry> helpEntries;
-        
         // State
-        private string currentTab = "recipe"; // "bookmark", "bestiary", "recipe", "ingredient", "help"
+        private List<AlchemyRecipe> availableRecipes;
+        private List<Potion> knownPotions;
+        private AlchemyRecipe selectedRecipe;
+        private Potion selectedPotion;
+        private string currentTab = "recipes"; // "recipes" or "potions"
         private string previousCraftingPanel = "";
         private string searchQuery = "";
+
+        // Integration references
+        private CraftingUIManager craftingUIManager;
+        private PotionCraftingController potionCraftingController;
+        private BulkCraftingController bulkCraftingController;
+        private ItemSlotContainerHolder inventory;
 
         public static AlchemyBook Instance { get; private set; }
 
@@ -62,19 +64,41 @@ namespace FourFatesStudios.ProjectWarden.UI
                 Destroy(gameObject);
                 return;
             }
+
+            InitializeReferences();
         }
 
         private void Start()
         {
             SetupUI();
-            LoadBookEntries();
+            LoadRecipesAndPotions();
             HideBook(); // Start hidden
+        }
+
+        private void InitializeReferences()
+        {
+            if (uiDocument == null)
+                uiDocument = GetComponent<UIDocument>();
+
+            // Find integration components
+            craftingUIManager = FindFirstObjectByType<CraftingUIManager>();
+            potionCraftingController = FindFirstObjectByType<PotionCraftingController>();
+            bulkCraftingController = FindFirstObjectByType<BulkCraftingController>();
+            inventory = FindFirstObjectByType<ItemSlotContainerHolder>();
+
+            if (enableDebugLogging)
+            {
+                Debug.Log($"📚 AlchemyBook initialized:");
+                Debug.Log($"  • CraftingUIManager: {(craftingUIManager != null ? "✅" : "❌")}");
+                Debug.Log($"  • PotionCraftingController: {(potionCraftingController != null ? "✅" : "❌")}");
+                Debug.Log($"  • BulkCraftingController: {(bulkCraftingController != null ? "✅" : "❌")}");
+                Debug.Log($"  • Inventory: {(inventory != null ? "✅" : "❌")}");
+            }
         }
 
         private void SetupUI()
         {
-            if (uiDocument == null)
-                uiDocument = GetComponent<UIDocument>();
+            if (uiDocument == null) return;
 
             // Load UXML and USS if provided
             if (bookUXML != null)
@@ -91,45 +115,25 @@ namespace FourFatesStudios.ProjectWarden.UI
             if (rootElement == null) return;
 
             // Find UI elements
-            leftPage = rootElement.Q<VisualElement>("left-page");
-            rightPage = rootElement.Q<VisualElement>("right-page");
+            recipesContainer = rootElement.Q<ScrollView>("recipes-container");
+            potionsContainer = rootElement.Q<ScrollView>("potions-container");
+            selectedRecipeDetails = rootElement.Q<VisualElement>("recipe-details");
             searchField = rootElement.Q<TextField>("search-field");
             closeButton = rootElement.Q<Button>("close-button");
-            
-            if (enableDebugLogging)
-            {
-                Debug.Log($"📚 Close button found: {closeButton != null}");
-                if (closeButton != null)
-                    Debug.Log($"📚 Close button name: {closeButton.name}");
-            }
-            
-            // Tab buttons
-            bookmarkTabButton = rootElement.Q<Button>("bookmark-tab");
-            bestiaryTabButton = rootElement.Q<Button>("bestiary-tab");
-            recipeTabButton = rootElement.Q<Button>("recipe-tab");
-            ingredientTabButton = rootElement.Q<Button>("ingredient-tab");
-            helpTabButton = rootElement.Q<Button>("help-tab");
+            recipesTabButton = rootElement.Q<Button>("recipes-tab");
+            potionsTabButton = rootElement.Q<Button>("potions-tab");
 
             // Setup event handlers
-            closeButton?.RegisterCallback<ClickEvent>(_ => {
-                if (enableDebugLogging)
-                    Debug.Log("📚 Close button (X) clicked - returning to crafting menu!");
-                HideBook();
-            });
-            
-            // Tab button handlers
-            bookmarkTabButton?.RegisterCallback<ClickEvent>(_ => ShowTab("bookmark"));
-            bestiaryTabButton?.RegisterCallback<ClickEvent>(_ => ShowTab("bestiary"));
-            recipeTabButton?.RegisterCallback<ClickEvent>(_ => ShowTab("recipe"));
-            ingredientTabButton?.RegisterCallback<ClickEvent>(_ => ShowTab("ingredient"));
-            helpTabButton?.RegisterCallback<ClickEvent>(_ => ShowTab("help"));
+            closeButton?.RegisterCallback<ClickEvent>(_ => HideBook());
+            recipesTabButton?.RegisterCallback<ClickEvent>(_ => ShowRecipesTab());
+            potionsTabButton?.RegisterCallback<ClickEvent>(_ => ShowPotionsTab());
             searchField?.RegisterValueChangedCallback(OnSearchChanged);
 
             // Setup keyboard shortcuts
             rootElement?.RegisterCallback<KeyDownEvent>(OnKeyDown);
 
             if (enableDebugLogging)
-                Debug.Log("📚 Potion Brewing Guide UI setup complete");
+                Debug.Log("📚 AlchemyBook UI setup complete");
         }
 
         private void OnKeyDown(KeyDownEvent evt)
@@ -141,32 +145,7 @@ namespace FourFatesStudios.ProjectWarden.UI
                     break;
                 case KeyCode.Tab:
                     ToggleTab();
-                    evt.StopPropagation();
-                    break;
-                case KeyCode.Backspace:
-                    GoBackToPreviousPanel();
-                    evt.StopPropagation();
-                    break;
-                // Quick tab switching with number keys
-                case KeyCode.Alpha1:
-                    ShowTab("bookmark");
-                    evt.StopPropagation();
-                    break;
-                case KeyCode.Alpha2:
-                    ShowTab("bestiary");
-                    evt.StopPropagation();
-                    break;
-                case KeyCode.Alpha3:
-                    ShowTab("recipe");
-                    evt.StopPropagation();
-                    break;
-                case KeyCode.Alpha4:
-                    ShowTab("ingredient");
-                    evt.StopPropagation();
-                    break;
-                case KeyCode.Alpha5:
-                    ShowTab("help");
-                    evt.StopPropagation();
+                    evt.PreventDefault();
                     break;
             }
         }
@@ -177,17 +156,17 @@ namespace FourFatesStudios.ProjectWarden.UI
             RefreshUI();
         }
 
-        private void LoadBookEntries()
+        private void LoadRecipesAndPotions()
         {
-            // Load all book entries from the PotionBrewingGuide resource folders
-            recipeEntries = Resources.LoadAll<RecipeEntry>("AlchemyBook/Recipes").ToList();
-            ingredientEntries = Resources.LoadAll<IngredientEntry>("AlchemyBook/Ingredients").ToList();
-            bestiaryEntries = Resources.LoadAll<BestiaryEntry>("AlchemyBook/Bestiary").ToList();
-            helpEntries = Resources.LoadAll<HelpEntry>("AlchemyBook/Help").ToList();
+            // Load all available recipes
+            availableRecipes = Resources.LoadAll<AlchemyRecipe>("Recipes").ToList();
+            
+            // Load all known potions
+            knownPotions = Resources.LoadAll<Potion>("Potions").ToList();
 
             if (enableDebugLogging)
             {
-                Debug.Log($"📚 Loaded {recipeEntries?.Count ?? 0} recipe entries, {ingredientEntries?.Count ?? 0} ingredient entries, {bestiaryEntries?.Count ?? 0} bestiary entries, {helpEntries?.Count ?? 0} help entries");
+                Debug.Log($"📚 Loaded {availableRecipes.Count} recipes and {knownPotions.Count} potions");
             }
 
             RefreshUI();
@@ -195,235 +174,152 @@ namespace FourFatesStudios.ProjectWarden.UI
 
         private void RefreshUI()
         {
-            switch (currentTab)
+            if (currentTab == "recipes")
             {
-                case "bookmark":
-                    ShowBookmarkedEntries();
-                    break;
-                case "bestiary":
-                    ShowBestiaryEntries();
-                    break;
-                case "recipe":
-                    ShowRecipeEntries();
-                    break;
-                case "ingredient":
-                    ShowIngredientEntries();
-                    break;
-                case "help":
-                    ShowHelpEntries();
-                    break;
-                default:
-                    ShowRecipeEntries();
-                    break;
+                RefreshRecipesList();
+            }
+            else
+            {
+                RefreshPotionsList();
             }
         }
 
-        public void ShowTab(string tabName)
+        private void RefreshRecipesList()
         {
-            currentTab = tabName;
-            UpdateTabButtons();
-            RefreshUI();
-            
-            if (enableDebugLogging)
-                Debug.Log($"📚 Switched to {tabName} tab");
-        }
+            recipesContainer?.Clear();
 
-        private void UpdateTabButtons()
-        {
-            // Remove active class from all tabs
-            bookmarkTabButton?.RemoveFromClassList("active");
-            bestiaryTabButton?.RemoveFromClassList("active");
-            recipeTabButton?.RemoveFromClassList("active");
-            ingredientTabButton?.RemoveFromClassList("active");
-            helpTabButton?.RemoveFromClassList("active");
-
-            // Add active class to current tab
-            switch (currentTab)
+            foreach (var recipe in availableRecipes)
             {
-                case "bookmark":
-                    bookmarkTabButton?.AddToClassList("active");
-                    break;
-                case "bestiary":
-                    bestiaryTabButton?.AddToClassList("active");
-                    break;
-                case "recipe":
-                    recipeTabButton?.AddToClassList("active");
-                    break;
-                case "ingredient":
-                    ingredientTabButton?.AddToClassList("active");
-                    break;
-                case "help":
-                    helpTabButton?.AddToClassList("active");
-                    break;
+                if (recipe == null) continue;
+
+                // Apply search filter
+                if (!string.IsNullOrEmpty(searchQuery))
+                {
+                    bool matchesSearch = recipe.name.ToLower().Contains(searchQuery) ||
+                                       (recipe.OutputPotion != null && recipe.OutputPotion.ItemName.ToLower().Contains(searchQuery)) ||
+                                       (recipe.InputIngredient1 != null && recipe.InputIngredient1.ItemName.ToLower().Contains(searchQuery)) ||
+                                       (recipe.InputIngredient2 != null && recipe.InputIngredient2.ItemName.ToLower().Contains(searchQuery)) ||
+                                       (recipe.InputIngredient3 != null && recipe.InputIngredient3.ItemName.ToLower().Contains(searchQuery));
+
+                    if (!matchesSearch) continue;
+                }
+
+                var recipeElement = CreateRecipeElement(recipe);
+                recipesContainer?.Add(recipeElement);
             }
         }
 
-        private void ShowRecipeEntries()
+        private void RefreshPotionsList()
         {
-            leftPage?.Clear();
-            rightPage?.Clear();
+            potionsContainer?.Clear();
 
-            if (recipeEntries == null || !recipeEntries.Any())
+            foreach (var potion in knownPotions)
             {
-                ShowEmptyPage("No recipe entries found.");
-                return;
+                if (potion == null) continue;
+
+                // Apply search filter
+                if (!string.IsNullOrEmpty(searchQuery))
+                {
+                    bool matchesSearch = potion.ItemName.ToLower().Contains(searchQuery) ||
+                                       potion.ItemDescription.ToLower().Contains(searchQuery) ||
+                                       (potion.PotionEffects != null && potion.PotionEffects.Any(e => e.name.ToLower().Contains(searchQuery)));
+
+                    if (!matchesSearch) continue;
+                }
+
+                var potionElement = CreatePotionElement(potion);
+                potionsContainer?.Add(potionElement);
             }
-
-            var filteredEntries = recipeEntries.Where(entry => 
-                string.IsNullOrEmpty(searchQuery) || 
-                entry.title.ToLower().Contains(searchQuery) ||
-                entry.description.ToLower().Contains(searchQuery)
-            ).ToList();
-
-            DisplayEntries(filteredEntries.Cast<BaseEntry>().ToList(), "Recipe");
         }
 
-        private void ShowIngredientEntries()
-        {
-            leftPage?.Clear();
-            rightPage?.Clear();
-
-            if (ingredientEntries == null || !ingredientEntries.Any())
-            {
-                ShowEmptyPage("No ingredient entries found.");
-                return;
-            }
-
-            var filteredEntries = ingredientEntries.Where(entry => 
-                string.IsNullOrEmpty(searchQuery) || 
-                entry.title.ToLower().Contains(searchQuery) ||
-                entry.description.ToLower().Contains(searchQuery)
-            ).ToList();
-
-            DisplayEntries(filteredEntries.Cast<BaseEntry>().ToList(), "Ingredient");
-        }
-
-        private void ShowBestiaryEntries()
-        {
-            leftPage?.Clear();
-            rightPage?.Clear();
-
-            if (bestiaryEntries == null || !bestiaryEntries.Any())
-            {
-                ShowEmptyPage("No bestiary entries found.");
-                return;
-            }
-
-            var filteredEntries = bestiaryEntries.Where(entry => 
-                string.IsNullOrEmpty(searchQuery) || 
-                entry.title.ToLower().Contains(searchQuery) ||
-                entry.description.ToLower().Contains(searchQuery)
-            ).ToList();
-
-            DisplayEntries(filteredEntries.Cast<BaseEntry>().ToList(), "Bestiary");
-        }
-
-        private void ShowHelpEntries()
-        {
-            leftPage?.Clear();
-            rightPage?.Clear();
-
-            if (helpEntries == null || !helpEntries.Any())
-            {
-                ShowEmptyPage("No help entries found.");
-                return;
-            }
-
-            var filteredEntries = helpEntries.Where(entry => 
-                string.IsNullOrEmpty(searchQuery) || 
-                entry.title.ToLower().Contains(searchQuery) ||
-                entry.description.ToLower().Contains(searchQuery)
-            ).ToList();
-
-            DisplayEntries(filteredEntries.Cast<BaseEntry>().ToList(), "Help");
-        }
-
-        private void ShowBookmarkedEntries()
-        {
-            leftPage?.Clear();
-            rightPage?.Clear();
-
-            var bookmarkedEntries = new List<BaseEntry>();
-            
-            // Collect all bookmarked entries from all categories
-            if (recipeEntries != null)
-                bookmarkedEntries.AddRange(recipeEntries.Where(e => e.isBookmarked).Cast<BaseEntry>());
-            if (ingredientEntries != null)
-                bookmarkedEntries.AddRange(ingredientEntries.Where(e => e.isBookmarked).Cast<BaseEntry>());
-            if (bestiaryEntries != null)
-                bookmarkedEntries.AddRange(bestiaryEntries.Where(e => e.isBookmarked).Cast<BaseEntry>());
-            if (helpEntries != null)
-                bookmarkedEntries.AddRange(helpEntries.Where(e => e.isBookmarked).Cast<BaseEntry>());
-
-            if (!bookmarkedEntries.Any())
-            {
-                ShowEmptyPage("No bookmarked entries found.\nClick the bookmark icon on any entry to add it here.");
-                return;
-            }
-
-            DisplayEntries(bookmarkedEntries, "Bookmarked");
-        }
-
-        private void ShowEmptyPage(string message)
-        {
-            var messageLabel = new Label(message);
-            messageLabel.AddToClassList("empty-page-message");
-            leftPage?.Add(messageLabel);
-        }
-
-        private void DisplayEntries(List<BaseEntry> entries, string categoryName)
-        {
-            if (!entries.Any())
-            {
-                ShowEmptyPage($"No {categoryName.ToLower()} entries found.");
-                return;
-            }
-
-            // Display the first entry on the left page, second on right
-            for (int i = 0; i < Math.Min(entries.Count, 2); i++)
-            {
-                var targetPage = i == 0 ? leftPage : rightPage;
-                var entry = entries[i];
-                var entryElement = CreateEntryElement(entry);
-                targetPage?.Add(entryElement);
-            }
-
-            if (enableDebugLogging)
-                Debug.Log($"📚 Displaying {Math.Min(entries.Count, 2)} {categoryName} entries");
-        }
-
-        private VisualElement CreateEntryElement(BaseEntry entry)
+        private VisualElement CreateRecipeElement(AlchemyRecipe recipe)
         {
             var container = new VisualElement();
-            container.AddToClassList("book-entry");
+            container.AddToClassList("recipe-item");
 
-            // Add bookmark button at the top
-            var headerContainer = new VisualElement();
-            headerContainer.AddToClassList("entry-header");
-            
-            var bookmarkButton = new Button();
-            bookmarkButton.AddToClassList("bookmark-button");
-            bookmarkButton.text = entry.isBookmarked ? "★" : "☆";
-            if (entry.isBookmarked)
-                bookmarkButton.AddToClassList("bookmarked");
-            
-            bookmarkButton.clicked += () => ToggleBookmark(entry);
-            headerContainer.Add(bookmarkButton);
-            container.Add(headerContainer);
+            // Recipe name and info
+            var titleLabel = new Label(recipe.name);
+            titleLabel.AddToClassList("recipe-title");
+            container.Add(titleLabel);
 
-            // Use the entry's built-in visual creation method
-            var entryVisual = entry.CreateEntryVisual();
-            container.Add(entryVisual);
+            // Ingredients preview
+            var ingredientsContainer = new VisualElement();
+            ingredientsContainer.AddToClassList("ingredients-preview");
+
+            if (recipe.InputIngredient1 != null)
+                ingredientsContainer.Add(new Label($"• {recipe.InputIngredient1.ItemName}"));
+            if (recipe.InputIngredient2 != null)
+                ingredientsContainer.Add(new Label($"• {recipe.InputIngredient2.ItemName}"));
+            if (recipe.InputIngredient3 != null)
+                ingredientsContainer.Add(new Label($"• {recipe.InputIngredient3.ItemName}"));
+
+            container.Add(ingredientsContainer);
+
+            // Result potion
+            if (recipe.OutputPotion != null)
+            {
+                var resultLabel = new Label($"→ {recipe.OutputPotion.ItemName}");
+                resultLabel.AddToClassList("recipe-result");
+                container.Add(resultLabel);
+            }
+
+            // Click handler
+            container.RegisterCallback<ClickEvent>(_ => SelectRecipe(recipe));
+
+            // Check if player has ingredients
+            bool hasIngredients = CheckPlayerHasIngredients(recipe);
+            if (hasIngredients)
+            {
+                container.AddToClassList("recipe-available");
+            }
+            else
+            {
+                container.AddToClassList("recipe-unavailable");
+            }
 
             return container;
         }
 
-        private void ToggleBookmark(BaseEntry entry)
+        private VisualElement CreatePotionElement(Potion potion)
         {
-            entry.isBookmarked = !entry.isBookmarked;
-            RefreshUI();
-            if (enableDebugLogging)
-                Debug.Log($"📚 Toggled bookmark for {entry.GetEntryType()}: {entry.title}");
+            var container = new VisualElement();
+            container.AddToClassList("potion-item");
+
+            // Potion name and type
+            var titleLabel = new Label(potion.ItemName);
+            titleLabel.AddToClassList("potion-title");
+            container.Add(titleLabel);
+
+            var typeLabel = new Label($"Type: {potion.ItemPotionType}");
+            typeLabel.AddToClassList("potion-type");
+            container.Add(typeLabel);
+
+            // Effects
+            if (potion.PotionEffects != null && potion.PotionEffects.Count > 0)
+            {
+                var effectsLabel = new Label($"Effects: {string.Join(", ", potion.PotionEffects.Select(e => e.name))}");
+                effectsLabel.AddToClassList("potion-effects");
+                container.Add(effectsLabel);
+            }
+
+            // Click handler
+            container.RegisterCallback<ClickEvent>(_ => SelectPotion(potion));
+
+            return container;
+        }
+
+        private bool CheckPlayerHasIngredients(AlchemyRecipe recipe)
+        {
+            if (inventory == null) return false;
+
+            var requiredIngredients = new List<Ingredient>();
+            if (recipe.InputIngredient1 != null) requiredIngredients.Add(recipe.InputIngredient1);
+            if (recipe.InputIngredient2 != null) requiredIngredients.Add(recipe.InputIngredient2);
+            if (recipe.InputIngredient3 != null) requiredIngredients.Add(recipe.InputIngredient3);
+
+            // Simple check - this would need to be integrated with your actual inventory system
+            // For now, assume player has ingredients if they exist
+            return requiredIngredients.Count > 0;
         }
 
         #region Public Interface
@@ -434,14 +330,12 @@ namespace FourFatesStudios.ProjectWarden.UI
             
             if (bookPanel != null)
                 bookPanel.SetActive(true);
-            
-            // Make sure we start with recipe tab and update buttons
-            currentTab = "recipe";
-            UpdateTabButtons();
-            RefreshUI();
+
+            // Update references in case they changed
+            InitializeReferences();
 
             if (enableDebugLogging)
-                Debug.Log($"📚 Opening Potion Brewing Guide (from: {fromPanel})");
+                Debug.Log($"📚 Opening Alchemy Book (from: {fromPanel})");
         }
 
         public void HideBook()
@@ -450,58 +344,7 @@ namespace FourFatesStudios.ProjectWarden.UI
                 bookPanel.SetActive(false);
 
             if (enableDebugLogging)
-                Debug.Log("📚 Closing Potion Brewing Guide");
-        }
-
-        public void GoBackToPreviousPanel()
-        {
-            if (enableDebugLogging)
-                Debug.Log("📚 GoBackToPreviousPanel called - starting back navigation");
-            
-            // Hide the book first
-            HideBook();
-            
-            // Use the CraftingNavigationController's back navigation system
-            var navigationController = FindFirstObjectByType<CraftingNavigationController>();
-            if (navigationController != null)
-            {
-                if (enableDebugLogging)
-                    Debug.Log("📚 Found CraftingNavigationController");
-                
-                // If we have a specific panel to go back to, navigate there
-                if (!string.IsNullOrEmpty(previousCraftingPanel))
-                {
-                    navigationController.ShowPanel(previousCraftingPanel);
-                    if (enableDebugLogging)
-                        Debug.Log($"📚 Navigating back to: {previousCraftingPanel}");
-                }
-                else
-                {
-                    // Use the navigation controller's built-in back functionality
-                    navigationController.GoBack();
-                    if (enableDebugLogging)
-                        Debug.Log("📚 Using navigation controller's back functionality");
-                }
-            }
-            else
-            {
-                if (enableDebugLogging)
-                    Debug.Log("📚 CraftingNavigationController not found, trying fallback");
-                
-                // Fallback - try to find a basic crafting manager
-                var craftingManager = FindFirstObjectByType<CraftingMenuManager>();
-                if (craftingManager != null)
-                {
-                    if (enableDebugLogging)
-                        Debug.Log("📚 Fallback: Using CraftingMenuManager back navigation");
-                    craftingManager.NavigateBack();
-                }
-                else
-                {
-                    if (enableDebugLogging)
-                        Debug.LogWarning("⚠️ No navigation controller found - staying in book");
-                }
-            }
+                Debug.Log("📚 Closing Alchemy Book");
         }
 
         public void ToggleBook(string fromPanel = "")
@@ -522,98 +365,303 @@ namespace FourFatesStudios.ProjectWarden.UI
 
         public void ShowRecipesTab()
         {
-            ShowTab("recipe");
+            currentTab = "recipes";
+            recipesContainer?.RemoveFromClassList("hidden");
+            potionsContainer?.AddToClassList("hidden");
+            recipesTabButton?.AddToClassList("active");
+            potionsTabButton?.RemoveFromClassList("active");
+            RefreshRecipesList();
         }
 
-        public void OpenToRecipes()
+        private void ShowPotionsTab()
         {
-            ShowBook();
-            ShowTab("recipe");
+            currentTab = "potions";
+            potionsContainer?.RemoveFromClassList("hidden");
+            recipesContainer?.AddToClassList("hidden");
+            potionsTabButton?.AddToClassList("active");
+            recipesTabButton?.RemoveFromClassList("active");
+            RefreshPotionsList();
         }
 
         private void ToggleTab()
         {
-            // Cycle through available tabs
-            switch (currentTab)
+            if (currentTab == "recipes")
+                ShowPotionsTab();
+            else
+                ShowRecipesTab();
+        }
+
+        #endregion
+
+        #region Selection Handlers
+
+        private void SelectRecipe(AlchemyRecipe recipe)
+        {
+            selectedRecipe = recipe;
+            selectedPotion = null;
+
+            ShowRecipeDetails(recipe);
+
+            // Try to auto-add ingredients to active crafting system
+            TryAutoAddIngredients(recipe);
+        }
+
+        private void SelectPotion(Potion potion)
+        {
+            selectedPotion = potion;
+            selectedRecipe = null;
+
+            ShowPotionDetails(potion);
+
+            // Try to find a recipe that creates this potion
+            var recipe = availableRecipes.FirstOrDefault(r => r.OutputPotion == potion);
+            if (recipe != null)
             {
-                case "bookmark":
-                    ShowTab("bestiary");
-                    break;
-                case "bestiary":
-                    ShowTab("recipe");
-                    break;
-                case "recipe":
-                    ShowTab("ingredient");
-                    break;
-                case "ingredient":
-                    ShowTab("help");
-                    break;
-                case "help":
-                    ShowTab("bookmark");
-                    break;
-                default:
-                    ShowTab("recipe");
-                    break;
+                TryAutoAddIngredients(recipe);
+            }
+        }
+
+        private void ShowRecipeDetails(AlchemyRecipe recipe)
+        {
+            selectedRecipeDetails?.Clear();
+
+            var titleLabel = new Label($"Recipe: {recipe.name}");
+            titleLabel.AddToClassList("details-title");
+            selectedRecipeDetails?.Add(titleLabel);
+
+            // Ingredients section
+            var ingredientsSection = new VisualElement();
+            ingredientsSection.AddToClassList("details-section");
+            
+            var ingredientsTitle = new Label("Required Ingredients:");
+            ingredientsTitle.AddToClassList("section-title");
+            ingredientsSection.Add(ingredientsTitle);
+
+            if (recipe.InputIngredient1 != null)
+                ingredientsSection.Add(new Label($"• {recipe.InputIngredient1.ItemName}"));
+            if (recipe.InputIngredient2 != null)
+                ingredientsSection.Add(new Label($"• {recipe.InputIngredient2.ItemName}"));
+            if (recipe.InputIngredient3 != null)
+                ingredientsSection.Add(new Label($"• {recipe.InputIngredient3.ItemName}"));
+
+            selectedRecipeDetails?.Add(ingredientsSection);
+
+            // Result section
+            if (recipe.OutputPotion != null)
+            {
+                var resultSection = new VisualElement();
+                resultSection.AddToClassList("details-section");
+                
+                var resultTitle = new Label("Creates:");
+                resultTitle.AddToClassList("section-title");
+                resultSection.Add(resultTitle);
+
+                var resultLabel = new Label($"• {recipe.OutputPotion.ItemName}");
+                resultSection.Add(resultLabel);
+
+                selectedRecipeDetails?.Add(resultSection);
+            }
+
+            // Action button
+            var craftButton = new Button(() => TryAutoAddIngredients(recipe));
+            craftButton.text = "Add to Crafting";
+            craftButton.AddToClassList("craft-button");
+            selectedRecipeDetails?.Add(craftButton);
+        }
+
+        private void ShowPotionDetails(Potion potion)
+        {
+            selectedRecipeDetails?.Clear();
+
+            var titleLabel = new Label($"Potion: {potion.ItemName}");
+            titleLabel.AddToClassList("details-title");
+            selectedRecipeDetails?.Add(titleLabel);
+
+            var descLabel = new Label(potion.ItemDescription);
+            selectedRecipeDetails?.Add(descLabel);
+
+            // Effects
+            if (potion.PotionEffects != null && potion.PotionEffects.Count > 0)
+            {
+                var effectsSection = new VisualElement();
+                effectsSection.AddToClassList("details-section");
+                
+                var effectsTitle = new Label("Effects:");
+                effectsTitle.AddToClassList("section-title");
+                effectsSection.Add(effectsTitle);
+
+                foreach (var effect in potion.PotionEffects)
+                {
+                    if (effect != null)
+                        effectsSection.Add(new Label($"• {effect.name}"));
+                }
+
+                selectedRecipeDetails?.Add(effectsSection);
             }
         }
 
         #endregion
+
+        #region Auto-Add Ingredients Integration
+
+        private void TryAutoAddIngredients(AlchemyRecipe recipe)
+        {
+            if (recipe == null) return;
+
+            // Determine which crafting system is currently active
+            bool success = false;
+
+            if (IsCurrentlyInPotionCrafting())
+            {
+                success = AddIngredientsToPotionCrafting(recipe);
+            }
+            else if (IsCurrentlyInBulkCrafting())
+            {
+                success = AddIngredientsToBulkCrafting(recipe);
+            }
+
+            if (success)
+            {
+                if (enableDebugLogging)
+                    Debug.Log($"✅ Added ingredients for {recipe.name} to crafting system");
+                
+                // Optionally close the book after successful addition
+                HideBook();
+            }
+            else
+            {
+                if (enableDebugLogging)
+                    Debug.LogWarning($"⚠️ Failed to add ingredients for {recipe.name} - crafting system not active or missing ingredients");
+            }
+        }
+
+        private bool IsCurrentlyInPotionCrafting()
+        {
+            if (craftingUIManager != null)
+            {
+                var activePanel = craftingUIManager.GetActivePanel();
+                return activePanel == "PotionCraftingUI" || previousCraftingPanel == "PotionCraftingUI";
+            }
+            
+            return previousCraftingPanel == "PotionCrafting";
+        }
+
+        private bool IsCurrentlyInBulkCrafting()
+        {
+            if (craftingUIManager != null)
+            {
+                var activePanel = craftingUIManager.GetActivePanel();
+                return activePanel == "BulkCraftingUI" || previousCraftingPanel == "BulkCraftingUI";
+            }
+            
+            return previousCraftingPanel == "BulkCrafting";
+        }
+
+        private bool AddIngredientsToPotionCrafting(AlchemyRecipe recipe)
+        {
+            if (potionCraftingController == null) return false;
+
+            try
+            {
+                // Get the private selectedIngredients array using reflection
+                var controllerType = typeof(PotionCraftingController);
+                var selectedIngredientsField = controllerType.GetField("selectedIngredients", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                var ingredientSlotsField = controllerType.GetField("ingredientSlots", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+                if (selectedIngredientsField != null && ingredientSlotsField != null)
+                {
+                    var selectedIngredients = (Ingredient[])selectedIngredientsField.GetValue(potionCraftingController);
+                    var ingredientSlots = (Button[])ingredientSlotsField.GetValue(potionCraftingController);
+
+                    // Clear existing ingredients
+                    for (int i = 0; i < selectedIngredients.Length; i++)
+                    {
+                        selectedIngredients[i] = null;
+                        if (ingredientSlots[i] != null)
+                            ingredientSlots[i].text = "+";
+                    }
+
+                    // Add new ingredients from recipe
+                    int slotIndex = 0;
+                    if (recipe.InputIngredient1 != null && slotIndex < selectedIngredients.Length)
+                    {
+                        selectedIngredients[slotIndex] = recipe.InputIngredient1;
+                        if (ingredientSlots[slotIndex] != null)
+                            ingredientSlots[slotIndex].text = recipe.InputIngredient1.ItemName;
+                        slotIndex++;
+                    }
+                    if (recipe.InputIngredient2 != null && slotIndex < selectedIngredients.Length)
+                    {
+                        selectedIngredients[slotIndex] = recipe.InputIngredient2;
+                        if (ingredientSlots[slotIndex] != null)
+                            ingredientSlots[slotIndex].text = recipe.InputIngredient2.ItemName;
+                        slotIndex++;
+                    }
+                    if (recipe.InputIngredient3 != null && slotIndex < selectedIngredients.Length)
+                    {
+                        selectedIngredients[slotIndex] = recipe.InputIngredient3;
+                        if (ingredientSlots[slotIndex] != null)
+                            ingredientSlots[slotIndex].text = recipe.InputIngredient3.ItemName;
+                        slotIndex++;
+                    }
+
+                    if (enableDebugLogging)
+                    {
+                        Debug.Log($"🧪 Added ingredients to Potion Crafting:");
+                        if (recipe.InputIngredient1 != null) Debug.Log($"  • Slot 1: {recipe.InputIngredient1.ItemName}");
+                        if (recipe.InputIngredient2 != null) Debug.Log($"  • Slot 2: {recipe.InputIngredient2.ItemName}");
+                        if (recipe.InputIngredient3 != null) Debug.Log($"  • Slot 3: {recipe.InputIngredient3.ItemName}");
+                    }
+
+                    return true;
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Failed to add ingredients to potion crafting: {e.Message}");
+            }
+
+            return false;
+        }
+
+        private bool AddIngredientsToBulkCrafting(AlchemyRecipe recipe)
+        {
+            if (bulkCraftingController == null) return false;
+
+            // This would integrate with your actual bulk crafting system
+            if (enableDebugLogging)
+            {
+                Debug.Log($"🏭 Adding to Bulk Crafting:");
+                if (recipe.InputIngredient1 != null) Debug.Log($"  • {recipe.InputIngredient1.ItemName}");
+                if (recipe.InputIngredient2 != null) Debug.Log($"  • {recipe.InputIngredient2.ItemName}");
+                if (recipe.InputIngredient3 != null) Debug.Log($"  • {recipe.InputIngredient3.ItemName}");
+            }
+
+            // TODO: Implement actual ingredient addition to bulk crafting system
+            return true;
+        }
+
+        #endregion
+
+        #region Unity Events
+
+        private void Update()
+        {
+            // Handle keyboard shortcuts when book is open
+            if (bookPanel != null && bookPanel.activeSelf)
+            {
+                if (Input.GetKeyDown(KeyCode.Escape))
+                {
+                    HideBook();
+                }
+            }
+        }
 
         private void OnDestroy()
         {
             if (Instance == this)
             {
                 Instance = null;
-            }
-        }
-
-        #region Debug Methods
-        
-        [ContextMenu("Test Back Navigation")]
-        private void TestBackNavigation()
-        {
-            Debug.Log("🧪 Testing Potion Brewing Guide back navigation...");
-            
-            var navigationController = FindFirstObjectByType<CraftingNavigationController>();
-            var craftingManager = FindFirstObjectByType<CraftingMenuManager>();
-            
-            Debug.Log($"  • CraftingNavigationController: {(navigationController != null ? "✅ Found" : "❌ Missing")}");
-            Debug.Log($"  • CraftingMenuManager: {(craftingManager != null ? "✅ Found" : "❌ Missing")}");
-            Debug.Log($"  • Previous Panel: {(string.IsNullOrEmpty(previousCraftingPanel) ? "❌ Not Set" : $"✅ {previousCraftingPanel}")}");
-            
-            // Test the actual navigation
-            GoBackToPreviousPanel();
-        }
-
-        [ContextMenu("Test Open From Main Menu")]
-        private void TestOpenFromMainMenu()
-        {
-            ShowBook("CraftingMenuSystem");
-        }
-
-        [ContextMenu("Test Complete Navigation Flow")]
-        private void TestCompleteNavigationFlow()
-        {
-            Debug.Log("🧪 Testing complete navigation flow...");
-            
-            // Start from main menu
-            var navigationController = FindFirstObjectByType<CraftingNavigationController>();
-            if (navigationController != null)
-            {
-                navigationController.ShowMainMenu();
-                Debug.Log("  1. ✅ Showing main menu");
-                
-                // Open book
-                ShowBook("CraftingMenuSystem");
-                Debug.Log("  2. ✅ Opening Potion Brewing Guide from main menu");
-                
-                // Test back navigation
-                Debug.Log("  3. 🧪 Testing back navigation...");
-                GoBackToPreviousPanel();
-            }
-            else
-            {
-                Debug.LogError("  ❌ CraftingNavigationController not found!");
             }
         }
 

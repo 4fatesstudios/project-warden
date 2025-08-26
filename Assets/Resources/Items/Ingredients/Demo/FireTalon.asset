@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ccec348f60f7b5c429d2fb1e20182269, type: 3}
   m_Name: FireTalon
   m_EditorClassIdentifier: 
-  id: 
+  id: 3213cd74-71c9-4faa-81b7-5eb292a67c32
   itemName: Fire Talon
   itemDescription: A smaller talon with weak fire magic
   itemRarity: 1

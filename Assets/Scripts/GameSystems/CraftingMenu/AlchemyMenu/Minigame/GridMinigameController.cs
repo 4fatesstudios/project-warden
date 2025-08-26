@@ -4,365 +4,623 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
+using FourFatesStudios.ProjectWarden.ScriptableObjects.AlchemyRecipes;
 using FourFatesStudios.ProjectWarden.Enums;
 
 namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
 {
     public class GridMinigameController : MonoBehaviour
     {
+        [Header("UI References")]
         [SerializeField] private UIDocument uiDocument;
         public UIDocument UIDocument => uiDocument;
-
+        
         [Header("Grid Settings")]
-        [SerializeField] private int baseGridWidth = 4;
-        [SerializeField] private int baseGridHeight = 4;
-        [SerializeField] private float cellSize = 50f;
-
-        private CraftingGrid craftingGrid;
+        [SerializeField] private int gridWidth = 6;
+        [SerializeField] private int gridHeight = 6;
+        [SerializeField] private float cellSize = 40f;
+        
+        [Header("Recipe Settings")]
+        [SerializeField] private List<AlchemyRecipe> availableRecipes;
+        
+        // UI Elements
+        private VisualElement mainContainer;
+        private Button backButton;
+        private Button alchemyBookButton;
+        private ScrollView ingredientPalette;
         private VisualElement gridContainer;
-        private VisualElement ingredientPalette;
-        private Button confirmButton;
-        private Button cancelButton;
-        private Label instructionsLabel;
+        private ScrollView recipeSelection;
+        private Button clearButton;
+        private Button craftButton;
         private Label gridStatusLabel;
-
+        private Label patternMatchLabel;
+        private Label recipeInfoLabel;
+        
+        // Game State
+        private GridCell[,] craftingGrid;
+        private AlchemyRecipe selectedRecipe;
         private List<Ingredient> availableIngredients;
+        private Dictionary<Vector2Int, Ingredient> placedIngredients;
         private Ingredient selectedIngredient;
-        private bool isDragging;
-        private VisualElement dragPreview;
-
-        public event Action<bool, CraftingRank> OnMinigameEnd;
-
+        
+        // Events
+        public event Action OnBackPressed;
+        public event Action OnAlchemyBookPressed;
+        public event Action<AlchemyRecipe, Dictionary<Vector2Int, Ingredient>> OnCraftingCompleted;
+        
         private void Awake()
         {
             if (uiDocument == null)
                 uiDocument = GetComponent<UIDocument>();
-
-            craftingGrid = new CraftingGrid(baseGridWidth, baseGridHeight);
-            Hide();
+                
+            placedIngredients = new Dictionary<Vector2Int, Ingredient>();
+            InitializeGrid();
         }
-
-        public void Init(List<Ingredient> ingredients)
+        
+        private void OnEnable()
+        {
+            if (uiDocument?.rootVisualElement != null)
+                SetupUI();
+        }
+        
+        private void OnDisable()
+        {
+            CleanupUI();
+        }
+        
+        private void InitializeGrid()
+        {
+            craftingGrid = new GridCell[gridWidth, gridHeight];
+            for (int x = 0; x < gridWidth; x++)
+            {
+                for (int y = 0; y < gridHeight; y++)
+                {
+                    craftingGrid[x, y] = new GridCell();
+                }
+            }
+        }
+        
+        public void SetAvailableIngredients(List<Ingredient> ingredients)
         {
             availableIngredients = new List<Ingredient>(ingredients);
-            craftingGrid.Clear();
-            
-            SetupUI();
-            Show();
+            RefreshIngredientPalette();
         }
-
+        
+        public void SetAvailableRecipes(List<AlchemyRecipe> recipes)
+        {
+            availableRecipes = new List<AlchemyRecipe>(recipes);
+            RefreshRecipeSelection();
+        }
+        
         private void SetupUI()
         {
             var root = uiDocument.rootVisualElement;
-
+            
+            // Get UI elements
+            mainContainer = root.Q<VisualElement>("MainContainer");
+            backButton = root.Q<Button>("BackButton");
+            alchemyBookButton = root.Q<Button>("AlchemyBookButton");
+            ingredientPalette = root.Q<ScrollView>("IngredientPalette");
             gridContainer = root.Q<VisualElement>("GridContainer");
-            ingredientPalette = root.Q<VisualElement>("IngredientPalette");
-            confirmButton = root.Q<Button>("ConfirmButton");
-            cancelButton = root.Q<Button>("CancelButton");
-            instructionsLabel = root.Q<Label>("InstructionsLabel");
+            recipeSelection = root.Q<ScrollView>("RecipeSelection");
+            clearButton = root.Q<Button>("ClearButton");
+            craftButton = root.Q<Button>("CraftButton");
             gridStatusLabel = root.Q<Label>("GridStatusLabel");
-
-            if (gridContainer == null || ingredientPalette == null)
-            {
-                Debug.LogError("GridMinigameController: Missing required UI elements");
-                return;
-            }
-
-            confirmButton?.RegisterCallback<ClickEvent>(_ => ConfirmCrafting());
-            cancelButton?.RegisterCallback<ClickEvent>(_ => CancelCrafting());
-
-            BuildGrid();
-            BuildIngredientPalette();
+            patternMatchLabel = root.Q<Label>("PatternMatchLabel");
+            recipeInfoLabel = root.Q<Label>("RecipeInfoLabel");
+            
+            // Setup event handlers
+            if (backButton != null)
+                backButton.clicked += () => OnBackPressed?.Invoke();
+                
+            if (alchemyBookButton != null)
+                alchemyBookButton.clicked += () => OnAlchemyBookPressed?.Invoke();
+            else
+                Debug.LogWarning("Alchemy book button not found in UI!");
+                
+            if (clearButton != null)
+                clearButton.clicked += ClearGrid;
+                
+            if (craftButton != null)
+                craftButton.clicked += AttemptCrafting;
+            
+            // Initialize UI
+            CreateGridUI();
+            RefreshIngredientPalette();
+            RefreshRecipeSelection();
             UpdateUI();
         }
-
-        private void BuildGrid()
+        
+        private void CleanupUI()
         {
-            gridContainer.Clear();
-            gridContainer.style.width = craftingGrid.Width * cellSize;
-            gridContainer.style.height = craftingGrid.Height * cellSize;
-            gridContainer.style.flexDirection = FlexDirection.Row;
-            gridContainer.style.flexWrap = Wrap.Wrap;
-
-            for (int y = 0; y < craftingGrid.Height; y++)
-            {
-                for (int x = 0; x < craftingGrid.Width; x++)
-                {
-                    var cell = new VisualElement();
-                    cell.name = $"GridCell_{x}_{y}";
-                    cell.style.width = cellSize;
-                    cell.style.height = cellSize;
-                    cell.style.backgroundColor = new StyleColor(Color.gray);
-                    cell.style.borderLeftColor = new StyleColor(Color.black);
-                    cell.style.borderRightColor = new StyleColor(Color.black);
-                    cell.style.borderTopColor = new StyleColor(Color.black);
-                    cell.style.borderBottomColor = new StyleColor(Color.black);
-                    cell.style.borderLeftWidth = 1;
-                    cell.style.borderRightWidth = 1;
-                    cell.style.borderTopWidth = 1;
-                    cell.style.borderBottomWidth = 1;
-
-                    var pos = new GridPosition(x, y);
-                    cell.RegisterCallback<PointerDownEvent>(evt => OnCellClicked(pos));
-                    cell.RegisterCallback<PointerEnterEvent>(evt => OnCellHover(pos));
-
-                    gridContainer.Add(cell);
-                }
-            }
-
-            // Add placed ingredients visual representation
-            foreach (var placed in craftingGrid.PlacedIngredients)
-            {
-                AddIngredientVisual(placed);
-            }
+            if (backButton != null)
+                backButton.clicked -= () => OnBackPressed?.Invoke();
+                
+            if (alchemyBookButton != null)
+                alchemyBookButton.clicked -= () => OnAlchemyBookPressed?.Invoke();
+                
+            if (clearButton != null)
+                clearButton.clicked -= ClearGrid;
+                
+            if (craftButton != null)
+                craftButton.clicked -= AttemptCrafting;
         }
-
-        private void BuildIngredientPalette()
+        
+        private void CreateGridUI()
         {
+            if (gridContainer == null) return;
+            
+            gridContainer.Clear();
+            
+            var gridElement = new VisualElement();
+            gridElement.style.flexDirection = FlexDirection.Column;
+            
+            for (int y = 0; y < gridHeight; y++)
+            {
+                var row = new VisualElement();
+                row.style.flexDirection = FlexDirection.Row;
+                
+                for (int x = 0; x < gridWidth; x++)
+                {
+                    var cell = CreateGridCell(x, y);
+                    row.Add(cell);
+                }
+                
+                gridElement.Add(row);
+            }
+            
+            gridContainer.Add(gridElement);
+        }
+        
+        private VisualElement CreateGridCell(int x, int y)
+        {
+            var cell = new VisualElement();
+            cell.AddToClassList("grid-cell");
+            cell.AddToClassList("empty");
+            
+            cell.style.width = cellSize;
+            cell.style.height = cellSize;
+            
+            var position = new Vector2Int(x, y);
+            
+            // Add click handler
+            cell.RegisterCallback<ClickEvent>(evt =>
+            {
+                if (evt.ctrlKey)
+                {
+                    // Remove ingredient
+                    RemoveIngredient(position);
+                }
+                else if (selectedIngredient != null)
+                {
+                    // Place ingredient
+                    PlaceIngredient(position, selectedIngredient);
+                }
+            });
+            
+            // Add hover effects
+            cell.RegisterCallback<MouseEnterEvent>(evt =>
+            {
+                if (selectedIngredient != null && CanPlaceIngredient(position, selectedIngredient))
+                {
+                    cell.AddToClassList("preview");
+                }
+            });
+            
+            cell.RegisterCallback<MouseLeaveEvent>(evt =>
+            {
+                cell.RemoveFromClassList("preview");
+            });
+            
+            craftingGrid[x, y].visualElement = cell;
+            return cell;
+        }
+        
+        private void RefreshIngredientPalette()
+        {
+            if (ingredientPalette == null || availableIngredients == null) return;
+            
             ingredientPalette.Clear();
-
+            
+            // Group ingredients by relevance (used in selected recipe)
+            var relevantIngredients = new List<Ingredient>();
+            var otherIngredients = new List<Ingredient>();
+            
             foreach (var ingredient in availableIngredients)
             {
-                var ingredientButton = new Button(() => SelectIngredient(ingredient));
-                ingredientButton.text = $"{ingredient.ItemName}\n{ingredient.GridWidth}x{ingredient.GridHeight}\nPotency: {ingredient.Potency}";
-                ingredientButton.style.width = 100;
-                ingredientButton.style.height = 60;
-                ingredientButton.style.marginBottom = 2;
-                ingredientButton.style.marginTop = 2;
-                ingredientButton.style.marginLeft = 2;
-                ingredientButton.style.marginRight = 2;
-
-
-                if (ingredient.UnlocksAdditionalSpace)
+                if (selectedRecipe != null && IsIngredientRelevant(ingredient))
+                    relevantIngredients.Add(ingredient);
+                else
+                    otherIngredients.Add(ingredient);
+            }
+            
+            // Add relevant ingredients first (show only 3)
+            if (relevantIngredients.Count > 0)
+            {
+                var relevantLabel = new Label("Relevant for Recipe:");
+                relevantLabel.AddToClassList("section-title");
+                ingredientPalette.Add(relevantLabel);
+                
+                foreach (var ingredient in relevantIngredients.Take(3))
                 {
-                    ingredientButton.style.backgroundColor = new StyleColor(Color.yellow);
-                    ingredientButton.tooltip = $"Unlocks {ingredient.AdditionalSpaceCount} additional grid spaces";
+                    var item = CreateIngredientItem(ingredient);
+                    ingredientPalette.Add(item);
                 }
-
-                ingredientPalette.Add(ingredientButton);
+            }
+            
+            // Add scroll section for other ingredients
+            if (otherIngredients.Count > 0)
+            {
+                var otherLabel = new Label("All Ingredients:");
+                otherLabel.AddToClassList("section-title");
+                ingredientPalette.Add(otherLabel);
+                
+                foreach (var ingredient in otherIngredients)
+                {
+                    var item = CreateIngredientItem(ingredient);
+                    ingredientPalette.Add(item);
+                }
             }
         }
+        
+        private VisualElement CreateIngredientItem(Ingredient ingredient)
+        {
+            var item = new VisualElement();
+            item.AddToClassList("ingredient-item");
+            
+            // Create tetris block preview
+            var preview = CreateIngredientPreview(ingredient);
+            item.Add(preview);
+            
+            var labelContainer = new VisualElement();
+            labelContainer.style.flexGrow = 1;
+            
+            var nameLabel = new Label(ingredient.ItemName);
+            nameLabel.AddToClassList("ingredient-label");
+            labelContainer.Add(nameLabel);
+            
+            var countLabel = new Label($"x{GetIngredientCount(ingredient)}");
+            countLabel.AddToClassList("ingredient-count");
+            labelContainer.Add(countLabel);
+            
+            item.Add(labelContainer);
+            
+            // Add click handler
+            item.RegisterCallback<ClickEvent>(evt =>
+            {
+                SelectIngredient(ingredient);
+            });
+            
+            return item;
+        }
+        
+        private VisualElement CreateIngredientPreview(Ingredient ingredient)
+        {
+            var preview = new VisualElement();
+            preview.AddToClassList("ingredient-preview");
+            
+            // Create mini grid representation showing tetris block shape
+            var miniGrid = new VisualElement();
+            miniGrid.style.flexDirection = FlexDirection.Column;
+            
+            for (int y = 0; y < ingredient.GridHeight; y++)
+            {
+                var row = new VisualElement();
+                row.style.flexDirection = FlexDirection.Row;
+                
+                for (int x = 0; x < ingredient.GridWidth; x++)
+                {
+                    var cell = new VisualElement();
+                    cell.style.width = 6;
+                    cell.style.height = 6;
+                    cell.style.backgroundColor = GetAspectColor(ingredient.IngredientAspect);
+                    cell.style.marginTop = 1;
+                    cell.style.marginLeft = 1;
+                    row.Add(cell);
+                }
+                
+                miniGrid.Add(row);
+            }
+            
+            preview.Add(miniGrid);
+            return preview;
+        }
 
+        #region Enhanced Recipe and Grid System Methods
+
+        private void RefreshRecipeSelection()
+        {
+            if (recipeSelection == null || availableRecipes == null) return;
+            
+            recipeSelection.Clear();
+            
+            foreach (var recipe in availableRecipes)
+            {
+                var item = CreateRecipeItem(recipe);
+                recipeSelection.Add(item);
+            }
+        }
+        
+        private VisualElement CreateRecipeItem(AlchemyRecipe recipe)
+        {
+            var item = new VisualElement();
+            item.AddToClassList("recipe-item");
+            
+            if (selectedRecipe == recipe)
+                item.AddToClassList("selected");
+            
+            var nameLabel = new Label(recipe.ItemName);
+            nameLabel.AddToClassList("recipe-name");
+            item.Add(nameLabel);
+            
+            var difficultyLabel = new Label("Standard Difficulty");
+            difficultyLabel.AddToClassList("recipe-difficulty");
+            item.Add(difficultyLabel);
+            
+            item.RegisterCallback<ClickEvent>(evt =>
+            {
+                SelectRecipe(recipe);
+            });
+            
+            return item;
+        }
+        
         private void SelectIngredient(Ingredient ingredient)
         {
             selectedIngredient = ingredient;
+            UpdateIngredientSelection();
+        }
+        
+        private void SelectRecipe(AlchemyRecipe recipe)
+        {
+            selectedRecipe = recipe;
+            UpdateRecipeSelection();
+            RefreshIngredientPalette();
+            UpdateRecipeInfo();
             UpdateUI();
         }
-
-        private void OnCellClicked(GridPosition position)
+        
+        private void UpdateIngredientSelection()
         {
-            if (selectedIngredient == null) return;
-
-            // Try to place the ingredient
-            if (craftingGrid.CanPlaceIngredient(selectedIngredient, position))
+            if (ingredientPalette == null) return;
+            
+            var items = ingredientPalette.Query<VisualElement>("ingredient-item").ToList();
+            foreach (var item in items)
             {
-                if (craftingGrid.PlaceIngredient(selectedIngredient, position))
+                item.RemoveFromClassList("selected");
+            }
+        }
+        
+        private void UpdateRecipeSelection()
+        {
+            if (recipeSelection == null) return;
+            
+            var items = recipeSelection.Query<VisualElement>("recipe-item").ToList();
+            foreach (var item in items)
+            {
+                item.RemoveFromClassList("selected");
+                if (selectedRecipe != null)
                 {
-                    // Remove from available ingredients
-                    availableIngredients.Remove(selectedIngredient);
-                    selectedIngredient = null;
-
-                    // Rebuild UI to reflect changes
-                    BuildGrid();
-                    BuildIngredientPalette();
-                    UpdateUI();
+                    var nameLabel = item.Q<Label>();
+                    if (nameLabel?.text == selectedRecipe.ItemName)
+                        item.AddToClassList("selected");
                 }
+            }
+        }
+        
+        private void UpdateRecipeInfo()
+        {
+            if (recipeInfoLabel == null) return;
+            
+            if (selectedRecipe == null)
+            {
+                recipeInfoLabel.text = "Select a recipe to see pattern requirements";
             }
             else
             {
-                Debug.Log("Cannot place ingredient at this position");
+                recipeInfoLabel.text = $"Recipe: {selectedRecipe.ItemName}\nRequired Pattern: {gridWidth}x{gridHeight} grid\nFill specific positions with matching aspect ingredients";
             }
         }
-
-        private void OnCellHover(GridPosition position)
+        
+        private bool CanPlaceIngredient(Vector2Int position, Ingredient ingredient)
         {
-            if (selectedIngredient == null) return;
-
-            // Show preview of where ingredient would be placed
-            ShowPlacementPreview(position);
-        }
-
-        private void ShowPlacementPreview(GridPosition position)
-        {
-            // Clear previous preview
-            ClearPlacementPreview();
-
-            if (selectedIngredient == null) return;
-
-            bool canPlace = craftingGrid.CanPlaceIngredient(selectedIngredient, position);
-            var previewColor = canPlace ? new Color(0, 1, 0, 0.5f) : new Color(1, 0, 0, 0.5f);
-
-            for (int x = 0; x < selectedIngredient.GridWidth; x++)
-            {
-                for (int y = 0; y < selectedIngredient.GridHeight; y++)
-                {
-                    var cellPos = new GridPosition(position.x + x, position.y + y);
-                    if (cellPos.x >= 0 && cellPos.x < craftingGrid.Width &&
-                        cellPos.y >= 0 && cellPos.y < craftingGrid.Height)
-                    {
-                        var cell = gridContainer.Q<VisualElement>($"GridCell_{cellPos.x}_{cellPos.y}");
-                        if (cell != null)
-                        {
-                            cell.style.backgroundColor = new StyleColor(previewColor);
-                            cell.AddToClassList("preview-cell");
-                        }
-                    }
-                }
-            }
-        }
-
-        private void ClearPlacementPreview()
-        {
-            var previewCells = gridContainer.Query<VisualElement>(className: "preview-cell").ToList();
-            foreach (var cell in previewCells)
-            {
-                cell.style.backgroundColor = new StyleColor(Color.gray);
-                cell.RemoveFromClassList("preview-cell");
-            }
-        }
-
-        private void AddIngredientVisual(PlacedIngredient placedIngredient)
-        {
-            var ingredient = placedIngredient.ingredient;
-            var position = placedIngredient.position;
-
             for (int x = 0; x < ingredient.GridWidth; x++)
             {
                 for (int y = 0; y < ingredient.GridHeight; y++)
                 {
-                    var cellPos = new GridPosition(position.x + x, position.y + y);
-                    var cell = gridContainer.Q<VisualElement>($"GridCell_{cellPos.x}_{cellPos.y}");
-                    if (cell != null)
-                    {
-                        cell.style.backgroundColor = new StyleColor(GetIngredientColor(ingredient));
+                    var checkPos = new Vector2Int(position.x + x, position.y + y);
+                    if (checkPos.x >= gridWidth || checkPos.y >= gridHeight)
+                        return false;
                         
-                        // Add ingredient name on the first cell
-                        if (x == 0 && y == 0)
-                        {
-                            var label = new Label(ingredient.ItemName);
-                            label.style.fontSize = 8;
-                            label.style.unityTextAlign = TextAnchor.MiddleCenter;
-                            label.style.color = new StyleColor(Color.white);
-                            cell.Add(label);
-                        }
-
-                        // Make cell clickable for removal
-                        cell.RegisterCallback<ClickEvent>(evt =>
-                        {
-                            if (evt.ctrlKey) // Ctrl+Click to remove
-                            {
-                                RemoveIngredient(placedIngredient);
-                            }
-                        });
+                    if (placedIngredients.ContainsKey(checkPos))
+                        return false;
+                }
+            }
+            
+            return true;
+        }
+        
+        private void PlaceIngredient(Vector2Int position, Ingredient ingredient)
+        {
+            if (!CanPlaceIngredient(position, ingredient)) return;
+            
+            for (int x = 0; x < ingredient.GridWidth; x++)
+            {
+                for (int y = 0; y < ingredient.GridHeight; y++)
+                {
+                    var cellPos = new Vector2Int(position.x + x, position.y + y);
+                    placedIngredients[cellPos] = ingredient;
+                    
+                    var cell = craftingGrid[cellPos.x, cellPos.y].visualElement;
+                    cell.RemoveFromClassList("empty");
+                    cell.AddToClassList("filled");
+                    cell.AddToClassList($"aspect-{ingredient.IngredientAspect.ToString().ToLower()}");
+                    
+                    craftingGrid[cellPos.x, cellPos.y].ingredient = ingredient;
+                    craftingGrid[cellPos.x, cellPos.y].isEmpty = false;
+                }
+            }
+            
+            UpdateUI();
+        }
+        
+        private void RemoveIngredient(Vector2Int position)
+        {
+            if (!placedIngredients.ContainsKey(position)) return;
+            
+            var ingredient = placedIngredients[position];
+            
+            Vector2Int origin = position;
+            for (int x = position.x - ingredient.GridWidth + 1; x <= position.x; x++)
+            {
+                for (int y = position.y - ingredient.GridHeight + 1; y <= position.y; y++)
+                {
+                    var checkPos = new Vector2Int(x, y);
+                    if (x >= 0 && y >= 0 && x < gridWidth && y < gridHeight &&
+                        placedIngredients.ContainsKey(checkPos) && placedIngredients[checkPos] == ingredient)
+                    {
+                        origin = checkPos;
+                        break;
                     }
                 }
             }
-        }
-
-        private Color GetIngredientColor(Ingredient ingredient)
-        {
-            return ingredient.IngredientArchetype switch
+            
+            for (int x = 0; x < ingredient.GridWidth; x++)
             {
-                IngredientArchetype.Solvent => Color.blue,
-                IngredientArchetype.Herb => Color.green,
-                IngredientArchetype.Ore => Color.red,
-                IngredientArchetype.Organic => Color.yellow,
-                _ => Color.gray
-            };
-        }
-
-        private void RemoveIngredient(PlacedIngredient placedIngredient)
-        {
-            if (craftingGrid.RemoveIngredient(placedIngredient))
-            {
-                // Add back to available ingredients
-                availableIngredients.Add(placedIngredient.ingredient);
-
-                // Rebuild UI
-                BuildGrid();
-                BuildIngredientPalette();
-                UpdateUI();
-            }
-        }
-
-        private void UpdateUI()
-        {
-            if (instructionsLabel != null)
-            {
-                if (selectedIngredient != null)
+                for (int y = 0; y < ingredient.GridHeight; y++)
                 {
-                    instructionsLabel.text = $"Click on grid to place {selectedIngredient.ItemName} ({selectedIngredient.GridWidth}x{selectedIngredient.GridHeight})";
-                }
-                else
-                {
-                    instructionsLabel.text = "Select an ingredient from the palette to place it on the grid";
+                    var cellPos = new Vector2Int(origin.x + x, origin.y + y);
+                    if (cellPos.x < gridWidth && cellPos.y < gridHeight)
+                    {
+                        placedIngredients.Remove(cellPos);
+                        
+                        var cell = craftingGrid[cellPos.x, cellPos.y].visualElement;
+                        cell.RemoveFromClassList("filled");
+                        cell.RemoveFromClassList($"aspect-{ingredient.IngredientAspect.ToString().ToLower()}");
+                        cell.AddToClassList("empty");
+                        
+                        craftingGrid[cellPos.x, cellPos.y].ingredient = null;
+                        craftingGrid[cellPos.x, cellPos.y].isEmpty = true;
+                    }
                 }
             }
-
-            if (gridStatusLabel != null)
-            {
-                var efficiency = craftingGrid.CalculateGridEfficiency();
-                var potency = craftingGrid.CalculateTotalPotency();
-                var isValid = craftingGrid.HasValidConfiguration();
-
-                gridStatusLabel.text = $"Grid Efficiency: {efficiency:P0}\nTotal Potency: {potency}\nValid: {(isValid ? "Yes" : "No")}";
-            }
-
-            if (confirmButton != null)
-            {
-                confirmButton.SetEnabled(craftingGrid.HasValidConfiguration());
-            }
+            
+            UpdateUI();
         }
-
-        private void ConfirmCrafting()
+        
+        private void ClearGrid()
         {
-            if (!craftingGrid.HasValidConfiguration())
+            placedIngredients.Clear();
+            
+            for (int x = 0; x < gridWidth; x++)
             {
-                Debug.LogWarning("Invalid crafting configuration");
+                for (int y = 0; y < gridHeight; y++)
+                {
+                    var cell = craftingGrid[x, y].visualElement;
+                    cell.RemoveFromClassList("filled");
+                    
+                    foreach (Aspect aspect in Enum.GetValues(typeof(Aspect)))
+                    {
+                        cell.RemoveFromClassList($"aspect-{aspect.ToString().ToLower()}");
+                    }
+                    
+                    cell.AddToClassList("empty");
+                    
+                    craftingGrid[x, y].ingredient = null;
+                    craftingGrid[x, y].isEmpty = true;
+                }
+            }
+            
+            UpdateUI();
+        }
+        
+        private void AttemptCrafting()
+        {
+            if (selectedRecipe == null)
+            {
+                Debug.LogWarning("No recipe selected!");
                 return;
             }
-
-            var rank = CalculateCraftingRank();
-            OnMinigameEnd?.Invoke(true, rank);
-            Hide();
-        }
-
-        private void CancelCrafting()
-        {
-            OnMinigameEnd?.Invoke(false, CraftingRank.F);
-            Hide();
-        }
-
-        private CraftingRank CalculateCraftingRank()
-        {
-            var efficiency = craftingGrid.CalculateGridEfficiency();
-            var potency = craftingGrid.CalculateTotalPotency();
-            var ingredientCount = craftingGrid.PlacedIngredients.Count;
-
-            // Calculate score based on multiple factors
-            float score = 0f;
             
-            // Efficiency component (40% of score)
-            score += efficiency * 0.4f;
-            
-            // Potency component (30% of score)
-            float avgPotency = (float)potency / ingredientCount;
-            score += (avgPotency / 5f) * 0.3f; // Max potency is 5
-            
-            // Ingredient utilization (30% of score)
-            float utilization = (float)ingredientCount / availableIngredients.Count;
-            score += utilization * 0.3f;
-
-            // Convert score to rank
-            return score switch
+            if (placedIngredients.Count == 0)
             {
-                >= 0.95f => CraftingRank.S,
-                >= 0.85f => CraftingRank.A,
-                >= 0.75f => CraftingRank.B,
-                >= 0.65f => CraftingRank.C,
-                >= 0.50f => CraftingRank.D,
-                >= 0.35f => CraftingRank.E,
-                _ => CraftingRank.F
+                Debug.LogWarning("No ingredients placed!");
+                return;
+            }
+            
+            float patternMatch = CalculatePatternMatch();
+            
+            if (patternMatch >= 0.8f)
+            {
+                OnCraftingCompleted?.Invoke(selectedRecipe, new Dictionary<Vector2Int, Ingredient>(placedIngredients));
+                ClearGrid();
+            }
+            else
+            {
+                Debug.LogWarning($"Pattern match too low: {patternMatch:P}. Need at least 80%.");
+            }
+        }
+        
+        private float CalculatePatternMatch()
+        {
+            if (selectedRecipe == null) return 0f;
+            
+            int totalCells = gridWidth * gridHeight;
+            int filledCells = placedIngredients.Count;
+            
+            return (float)filledCells / totalCells;
+        }
+        
+        private void UpdateUI()
+        {
+            if (gridStatusLabel != null)
+            {
+                string status = placedIngredients.Count == 0 ? "Empty" : $"{placedIngredients.Count} cells filled";
+                gridStatusLabel.text = $"Grid Status: {status}";
+            }
+            
+            if (patternMatchLabel != null)
+            {
+                float match = CalculatePatternMatch();
+                patternMatchLabel.text = $"Pattern Match: {match:P}";
+            }
+            
+            if (craftButton != null)
+            {
+                bool canCraft = selectedRecipe != null && placedIngredients.Count > 0;
+                craftButton.SetEnabled(canCraft);
+            }
+        }
+
+        #endregion
+        
+        private bool IsIngredientRelevant(Ingredient ingredient)
+        {
+            if (selectedRecipe == null) return false;
+            
+            // Check if ingredient is in recipe requirements
+            return selectedRecipe.InputIngredient1 == ingredient || 
+                   selectedRecipe.InputIngredient2 == ingredient || 
+                   selectedRecipe.InputIngredient3 == ingredient;
+        }
+        
+        private int GetIngredientCount(Ingredient ingredient)
+        {
+            // TODO: Get actual count from inventory system
+            return 5; // Placeholder
+        }
+        
+        private Color GetAspectColor(Aspect aspect)
+        {
+            return aspect switch
+            {
+                Aspect.Scorch => new Color(0.8f, 0.3f, 0.3f),
+                Aspect.Frigid => new Color(0.3f, 0.5f, 0.8f),
+                Aspect.Corporeal => new Color(0.5f, 0.6f, 0.3f),
+                Aspect.Arc => new Color(0.7f, 0.7f, 0.3f),
+                Aspect.Divine => new Color(0.6f, 0.5f, 0.7f),
+                Aspect.Caustic => new Color(0.9f, 0.6f, 0.2f),
+                _ => Color.gray
             };
         }
 
@@ -382,6 +640,14 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
                 uiDocument.rootVisualElement.style.display = DisplayStyle.None;
                 enabled = false;
             }
+        }
+        
+        [System.Serializable]
+        private class GridCell
+        {
+            public bool isEmpty = true;
+            public Ingredient ingredient;
+            public VisualElement visualElement;
         }
     }
 }

@@ -171,8 +171,6 @@ namespace FourFatesStudios.ProjectWarden.Runtime
                 Debug.Log($"AutoSceneSaver: Triggering scene save - {reason}");
                 
                 // Use the RuntimeSceneCapture if available
-                var captureWindow = UnityEditor.EditorWindow.GetWindow<FourFatesStudios.ProjectWarden.Editor.RuntimeSceneCapture>(false, "Auto Scene Capture", false);
-                captureWindow.Close(); // Don't show the window for auto-save
                 
                 // Directly call the capture method via reflection or create our own simple save
                 SaveCurrentState();

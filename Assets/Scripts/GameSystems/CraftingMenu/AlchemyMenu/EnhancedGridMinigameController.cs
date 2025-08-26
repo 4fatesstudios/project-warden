@@ -4,7 +4,7 @@
 
 using UnityEngine;
 
-namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu
+namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
 {
     [System.Obsolete("This class has been merged into GridMinigameController. Use GridMinigameController instead.")]
     public class EnhancedGridMinigameController : MonoBehaviour

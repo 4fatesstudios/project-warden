@@ -1,9 +1,5 @@
 fileFormatVersion: 2
-<<<<<<<< HEAD:Assets/Resources/Enemies.meta
 guid: 0cb097399572b7349adad06b3f3bf4fd
-========
-guid: f88431cb5d9dc284eb86448e0f7a3dc4
->>>>>>>> 7134ab6 (Initial Push):Assets/Scripts/Runtime.meta
 folderAsset: yes
 DefaultImporter:
   externalObjects: {}

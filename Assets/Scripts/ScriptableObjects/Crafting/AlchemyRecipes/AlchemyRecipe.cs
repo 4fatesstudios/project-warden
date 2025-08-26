@@ -1,18 +1,15 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine;
-using FourFatesStudios.ProjectWarden.Enums;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
 using ScriptableObjects.Items;
 
 #if UNITY_EDITOR
-using UnityEditor;
 #endif
 
 namespace FourFatesStudios.ProjectWarden.ScriptableObjects.AlchemyRecipes
 {
     [CreateAssetMenu(fileName = "NewRecipe", menuName = "AlchemyRecipes/Generic Recipe")]
-    public class AlchemyRecipe : ScriptableObject
+    public class AlchemyRecipe : Recipe
     {
         [SerializeField, Tooltip("Input ingredient 1 is added.")]
         private Ingredient inputIngredient1;
@@ -48,7 +45,7 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.AlchemyRecipes
         public float TotalDuration => totalDuration;
 
 #if UNITY_EDITOR
-        private void OnValidate()
+        private new void OnValidate()
         {
             if (requiredHits == 0 || requiredHits > maxAttempts)
             {
@@ -78,7 +75,7 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.AlchemyRecipes
             // Sort and preview recipe key for debugging
             if (ingredients[0] != null && ingredients[1] != null && ingredients[2] != null)
             {
-                System.Array.Sort(ingredients, (a, b) => a.name.CompareTo(b.name));
+                Array.Sort(ingredients, (a, b) => String.Compare(a.name, b.name, StringComparison.Ordinal));
                 string keyPreview = $"[{name}] Recipe Key: {ingredients[0].name}, {ingredients[1].name}, {ingredients[2].name}";
                 Debug.Log(keyPreview);
             }

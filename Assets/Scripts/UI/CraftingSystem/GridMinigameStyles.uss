@@ -20,7 +20,6 @@
     color: rgb(200, 230, 255);
     -unity-font-style: bold;
     -unity-text-align: middle-center;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
 }
 
 .instructions-label {
@@ -32,7 +31,6 @@
 
 .game-area {
     flex-direction: row;
-    gap: 30px;
     flex-grow: 1;
     margin-bottom: 20px;
 }
@@ -41,6 +39,7 @@
     flex: 2;
     align-items: center;
     justify-content: center;
+    margin-right: 30px;
 }
 
 .crafting-grid {
@@ -60,7 +59,6 @@
     border-width: 2px;
     border-color: rgb(80, 60, 120);
     padding: 15px;
-    gap: 10px;
 }
 
 .queue-label {
@@ -73,7 +71,6 @@
 
 .queue-items {
     flex-grow: 1;
-    gap: 10px;
 }
 
 .controls-area {
@@ -89,7 +86,6 @@
 
 .score-container, .rank-container {
     align-items: center;
-    gap: 5px;
 }
 
 .score-label, .rank-label {
@@ -108,12 +104,10 @@
     font-size: 32px;
     color: rgb(255, 200, 100);
     -unity-font-style: bold;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .button-container {
     flex-direction: row;
-    gap: 15px;
 }
 
 .action-button {
@@ -124,6 +118,7 @@
     font-size: 14px;
     -unity-font-style: bold;
     transition-duration: 0.2s;
+    margin-right: 15px;
 }
 
 .action-button {

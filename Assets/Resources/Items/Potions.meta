@@ -1,9 +1,5 @@
 fileFormatVersion: 2
-<<<<<<<< HEAD:Assets/Resources/Items/Potions.meta
 guid: ab0d49c14f5ead94584795bfb3c4a45f
-========
-guid: c67cd5606c87d4a41b6409619e33b3a6
->>>>>>>> 7134ab6 (Initial Push):Assets/Scripts/Demo/Ingredients.meta
 folderAsset: yes
 DefaultImporter:
   externalObjects: {}
