@@ -1,4 +1,5 @@
 using FourFatesStudios.ProjectWarden.Enums;
+using FourFatesStudios.ProjectWarden.ProceduralGeneration;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Exploration;
 using UnityEditor;
 using UnityEngine;
@@ -8,6 +9,8 @@ public class FloorPropertiesDesignerWindow : EditorWindow
     private FloorProperties selectedFloorProperties;
     private Editor floorPropertiesEditor;
     private Vector2 scrollPosition;
+    private static readonly string previewRootName = "FloorPreviewRoot";
+    private static EditorConfig config;
     
     [MenuItem("Tools/Floors/Floor Properties Designer")]
     public static void ShowWindow() {
@@ -18,6 +21,14 @@ public class FloorPropertiesDesignerWindow : EditorWindow
         var window = GetWindow<FloorPropertiesDesignerWindow>("Floor Properties Design Tool");
         window.selectedFloorProperties = selectedFloorProperties;
         window.Focus();
+    }
+
+    private void OnEnable() {
+        string[] guids = AssetDatabase.FindAssets("t:EditorConfig");
+        if (guids.Length > 0) {
+            string path = AssetDatabase.GUIDToAssetPath(guids[0]);
+            config = AssetDatabase.LoadAssetAtPath<EditorConfig>(path);
+        }
     }
 
     private void OnGUI() {
@@ -47,9 +58,39 @@ public class FloorPropertiesDesignerWindow : EditorWindow
         
         EditorGUILayout.Space();
         EditorGUILayout.LabelField("Floor Previews", EditorStyles.boldLabel);
-        
-        
+
+        if (GUILayout.Button("Preview Floor in Current Scene")) {
+            GeneratePreview();
+        }
         
         EditorGUILayout.EndScrollView();
+    }
+
+    private void GeneratePreview() {
+        ClearPreview();
+        
+        SceneView sceneView = SceneView.lastActiveSceneView;
+        Camera cam = sceneView.camera;
+        Vector3 spawnPosition = cam.transform.position + cam.transform.transform.forward * 5f;
+        
+        GameObject root = new GameObject(previewRootName) {
+            transform = {
+                position = spawnPosition
+            }
+        };
+
+        // use floor generator here
+        var instance = (GameObject)PrefabUtility.InstantiatePrefab(config.floorGeneratorPrefab);
+        instance.transform.SetParent(root.transform);
+        
+        var generator = instance.GetComponent<FloorGenerator>();
+        // continue generation logic here
+    }
+
+    private void ClearPreview() {
+        GameObject root = GameObject.Find(previewRootName);
+        if (root != null) {
+            GameObject.DestroyImmediate(root);
+        }
     }
 }
