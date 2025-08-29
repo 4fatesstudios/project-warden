@@ -159,8 +159,15 @@ public class FloorPropertiesEditor : BaseDataSOEditor {
         // Only show extra options if enabled
         if (room.enabled) {
             EditorGUI.indentLevel++;
-            room.maxInstances = EditorGUILayout.IntField("Max Instances", room.maxInstances);
-            room.minimumDepthFromStartingRoom = EditorGUILayout.IntField("Min Depth From Start", room.minimumDepthFromStartingRoom);
+            room.maxInstances = EditorGUILayout.IntField(
+                new GUIContent("Max Instances", "0 = no max instances"), 
+                room.maxInstances
+            );
+
+            room.minimumDepthFromStartingRoom = EditorGUILayout.IntField(
+                new GUIContent("Min Depth From Start", "0 = no minimum depth"), 
+                room.minimumDepthFromStartingRoom
+            );
             EditorGUI.indentLevel--;
         }
 

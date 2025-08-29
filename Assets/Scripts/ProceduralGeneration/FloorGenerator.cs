@@ -12,14 +12,7 @@ using Random = UnityEngine.Random;
 namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
 {
     public class FloorGenerator : MonoBehaviour {
-        [SerializeField] private Area area;
-        [SerializeField] private int minimumFreeRooms = 8;
-        [SerializeField] private int maximumFreeRooms = 12;
-        [SerializeField] private int maxAttemptsPerRoom = 4;
-        [SerializeField] private List<GameObject> storyPrefabs;
-        [SerializeField] private SpaceData startingRoom;
-        [SerializeField] private GlobalAreasDatabase globalAreasDatabase;
-        [SerializeField] private SeedRNG seedRNG;
+        [SerializeField] private FloorProperties floorProperties;
 
         private Queue<SpawnGroupQueueItem> _spawnQueue = new();
         private List<PlacedSpace> _placedSpaces = new();
@@ -28,7 +21,7 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
         private int numberOfFreeRooms;
 
         public void GenerateFloor() {
-            if (!startingRoom) {
+            if (!floorProperties.StartingRoom) {
                 Debug.Log("Missing starting room");
                 return;
             }
@@ -36,8 +29,8 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
             InitializeGeneration();
             
             // Obtain all hallways and all rooms from the given Area Database
-            _spaces.Add(SpaceType.Room, globalAreasDatabase.GetDatabaseByArea(area).Rooms);
-            _spaces.Add(SpaceType.Hallway, globalAreasDatabase.GetDatabaseByArea(area).Hallways);
+            _spaces.Add(SpaceType.Room, floorProperties.GlobalAreasDatabase.GetDatabaseByArea(floorProperties.Area).Rooms);
+            _spaces.Add(SpaceType.Hallway, floorProperties.GlobalAreasDatabase.GetDatabaseByArea(floorProperties.Area).Hallways);
             
             // Place the starting room
             // Enqueue starting room door spawn groups and add starting room to placed spaces
@@ -127,7 +120,7 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
             queueItem.AttemptCount++;
             bool placedAny = false;
             
-            Debug.Log($"[Attempt {queueItem.AttemptCount}/{maxAttemptsPerRoom}] Trying group {queueItem.GroupID} from {source.SourceData.name}");
+            Debug.Log($"[Attempt {queueItem.AttemptCount}/{floorProperties.MaxAttemptsPerRoom}] Trying group {queueItem.GroupID} from {source.SourceData.name}");
             
             foreach (var sourceDoorGO in doorGroup) {
                 placedAny = TryPlaceSpaceByDepth(queueItem, sourceDoorGO, source, queueItem.HallwayDepth);
@@ -137,7 +130,7 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
             if (placedAny) {
                 Debug.Log($"✅ Success: Placed space from group {queueItem.GroupID} (Attempt {queueItem.AttemptCount})");
                 LogSpawnQueue("After Successful Placement");
-            } else if (queueItem.AttemptCount >= maxAttemptsPerRoom) {
+            } else if (queueItem.AttemptCount >= floorProperties.MaxAttemptsPerRoom) {
                 Debug.LogWarning($"❌ Max attempts reached for group {queueItem.GroupID} from {source.SourceData.name}");
                 LogSpawnQueue("After Failed Placement & Max Attempts");
             } else {
@@ -152,7 +145,7 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
                 case 0:
                     return TryPlace(queueItem, doorGO, source, SpaceType.Hallway, hallwayDepth + 1);
                 case 1:
-                    return seedRNG.Rng.Next(4) == 1 
+                    return floorProperties.SeedRNG.Rng.Next(4) == 1 
                         ? TryPlace(queueItem, doorGO, source, SpaceType.Hallway, hallwayDepth + 1) 
                         : TryPlace(queueItem, doorGO, source, SpaceType.Room, 0);
                 case 2:
@@ -170,10 +163,10 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
                 .ToList();
             // If nothing valid left to try, set attempts to max (probably cleaner way to do this later)
             if (filtered.Count == 0) {
-                queueItem.AttemptCount = maxAttemptsPerRoom;
+                queueItem.AttemptCount = floorProperties.MaxAttemptsPerRoom;
                 return false;
             }
-            var spaceData = filtered[seedRNG.Rng.Next(filtered.Count)];
+            var spaceData = filtered[floorProperties.SeedRNG.Rng.Next(filtered.Count)];
 
             Debug.Log($"→ Attempting to place {spaceTypeToTry}: {spaceData.name} | Size: {spaceData.SpaceSize} | Remaining options: {filtered.Count}");
             
@@ -190,13 +183,13 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
         }
         
         private PlacedSpace PlaceStartingRoom() {
-            var placed = InstantiateSpaceAtOrigin(startingRoom, transform.position);
+            var placed = InstantiateSpaceAtOrigin(floorProperties.StartingRoom, transform.position);
             if (placed == null) return null;
             EnqueueSpaceDoorSpawnGroups(placed);
             _placedSpaces.Add(placed);
             
             Debug.Log($"\n--- STARTING ROOM ---\n" +
-                      $"Prefab: {startingRoom.name}\n" +
+                      $"Prefab: {floorProperties.StartingRoom.name}\n" +
                       $"Position: {placed.Instance.transform.position}\n" +
                       $"----------------------\n");
             
@@ -205,10 +198,10 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
 
         private void InitializeGeneration() {
             // Set up rng and reset necessary structures
-            seedRNG.SetRandomSeed();
+            floorProperties.SeedRNG.SetRandomSeed();
             _placedSpaces = new List<PlacedSpace>();
             _spawnQueue = new Queue<SpawnGroupQueueItem>();
-            numberOfFreeRooms = seedRNG.Rng.Next(minimumFreeRooms, maximumFreeRooms + 1);
+            numberOfFreeRooms = floorProperties.SeedRNG.Rng.Next(floorProperties.MinimumFreeRooms, floorProperties.MaximumFreeRooms + 1);
             _spaceConnections = new List<SpaceConnectionItem>();
         }
 
@@ -372,7 +365,7 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
         
         private void ShuffleList<T>(List<T> list) {
             for (int i = list.Count - 1; i > 0; i--) {
-                int j = seedRNG.Rng.Next(i + 1);
+                int j = floorProperties.SeedRNG.Rng.Next(i + 1);
                 (list[i], list[j]) = (list[j], list[i]);
             }
         }
