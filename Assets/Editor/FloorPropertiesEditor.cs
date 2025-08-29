@@ -76,7 +76,7 @@ public class FloorPropertiesEditor : BaseDataSOEditor {
             EditorGUILayout.EndHorizontal();
 
             foreach (var room in floorProps.FreeRooms) {
-                DrawPrefabProperty(room.freeRoomPrefab, ref room.enabled);
+                DrawFreeRoomProperty(room);
             }
         }
 
@@ -95,7 +95,7 @@ public class FloorPropertiesEditor : BaseDataSOEditor {
             EditorGUILayout.EndHorizontal();
 
             foreach (var hall in floorProps.Hallways) {
-                DrawPrefabProperty(hall.hallwayPrefab, ref hall.enabled);
+                DrawHallwayProperty(hall);
             }
         }
 
@@ -144,15 +144,50 @@ public class FloorPropertiesEditor : BaseDataSOEditor {
     }
 
     // Draw prefab with preview and enabled toggle
-    private void DrawPrefabProperty(GameObject prefab, ref bool enabled) {
+    private void DrawFreeRoomProperty(FloorProperties.FreeRoomProperties room) {
+        EditorGUILayout.BeginVertical("box");
+
         EditorGUILayout.BeginHorizontal();
-        enabled = EditorGUILayout.Toggle(enabled, GUILayout.Width(20));
-        if (prefab != null) {
-            Texture2D preview = AssetPreview.GetAssetPreview(prefab);
+        room.enabled = EditorGUILayout.Toggle(room.enabled, GUILayout.Width(20));
+        if (room.freeRoomPrefab != null) {
+            Texture2D preview = AssetPreview.GetAssetPreview(room.freeRoomPrefab);
             GUILayout.Label(preview, GUILayout.Width(50), GUILayout.Height(50));
-            EditorGUILayout.LabelField(prefab.name);
+            EditorGUILayout.LabelField(room.freeRoomPrefab.name);
         }
         EditorGUILayout.EndHorizontal();
+
+        // Only show extra options if enabled
+        if (room.enabled) {
+            EditorGUI.indentLevel++;
+            room.maxInstances = EditorGUILayout.IntField("Max Instances", room.maxInstances);
+            room.minimumDepthFromStartingRoom = EditorGUILayout.IntField("Min Depth From Start", room.minimumDepthFromStartingRoom);
+            EditorGUI.indentLevel--;
+        }
+
+        EditorGUILayout.EndVertical();
+    }
+
+    private void DrawHallwayProperty(FloorProperties.HallwayProperties hall) {
+        EditorGUILayout.BeginVertical("box");
+
+        EditorGUILayout.BeginHorizontal();
+        hall.enabled = EditorGUILayout.Toggle(hall.enabled, GUILayout.Width(20));
+        if (hall.hallwayPrefab != null) {
+            Texture2D preview = AssetPreview.GetAssetPreview(hall.hallwayPrefab);
+            GUILayout.Label(preview, GUILayout.Width(50), GUILayout.Height(50));
+            EditorGUILayout.LabelField(hall.hallwayPrefab.name);
+        }
+        EditorGUILayout.EndHorizontal();
+
+        // Only show extra options if enabled
+        if (hall.enabled) {
+            EditorGUI.indentLevel++;
+            // Example: if you add more fields later
+            // hall.maxInstances = EditorGUILayout.IntField("Max Instances", hall.maxInstances);
+            EditorGUI.indentLevel--;
+        }
+
+        EditorGUILayout.EndVertical();
     }
 
     private void SetAllEnabled<T>(System.Collections.Generic.List<T> list, bool state) {

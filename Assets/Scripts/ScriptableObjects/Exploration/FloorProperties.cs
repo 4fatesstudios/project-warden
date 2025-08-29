@@ -40,8 +40,8 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Exploration
         public class FreeRoomProperties {
             public GameObject freeRoomPrefab;
             public bool enabled;
-            public int maxInstances = 0;
-            public int minimumDepthFromStartingRoom = 0;
+            [SerializeField] public int maxInstances = 0;
+            [SerializeField] public int minimumDepthFromStartingRoom = 0;
         }
         
         [System.Serializable]
