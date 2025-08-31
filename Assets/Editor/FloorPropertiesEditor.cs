@@ -113,29 +113,27 @@ public class FloorPropertiesEditor : BaseDataSOEditor {
 
         foreach (var space in dbSpaces) {
             if (space == null || space.SpacePrefab == null) continue;
-
-            GameObject prefab = space.SpacePrefab;
-
+            
             bool exists = false;
             foreach (var entry in targetList) {
                 if (isFreeRoom) {
                     var pr = (FloorProperties.FreeRoomProperties)(object)entry;
-                    if (pr.freeRoomPrefab == prefab) { exists = true; break; }
+                    if (pr.freeRoomSpaceData == space) { exists = true; break; }
                 } else {
                     var pr = (FloorProperties.HallwayProperties)(object)entry;
-                    if (pr.hallwayPrefab == prefab) { exists = true; break; }
+                    if (pr.hallwaySpaceData == space) { exists = true; break; }
                 }
             }
 
             if (!exists) {
                 if (isFreeRoom) {
                     targetList.Add((T)(object)new FloorProperties.FreeRoomProperties {
-                        freeRoomPrefab = prefab,
+                        freeRoomSpaceData = space,
                         enabled = true
                     });
                 } else {
                     targetList.Add((T)(object)new FloorProperties.HallwayProperties {
-                        hallwayPrefab = prefab,
+                        hallwaySpaceData = space,
                         enabled = true
                     });
                 }
@@ -149,10 +147,10 @@ public class FloorPropertiesEditor : BaseDataSOEditor {
 
         EditorGUILayout.BeginHorizontal();
         room.enabled = EditorGUILayout.Toggle(room.enabled, GUILayout.Width(20));
-        if (room.freeRoomPrefab != null) {
-            Texture2D preview = AssetPreview.GetAssetPreview(room.freeRoomPrefab);
+        if (room.freeRoomSpaceData != null) {
+            Texture2D preview = AssetPreview.GetAssetPreview(room.freeRoomSpaceData.SpacePrefab);
             GUILayout.Label(preview, GUILayout.Width(50), GUILayout.Height(50));
-            EditorGUILayout.LabelField(room.freeRoomPrefab.name);
+            EditorGUILayout.LabelField(room.freeRoomSpaceData.SpacePrefab.name);
         }
         EditorGUILayout.EndHorizontal();
 
@@ -179,10 +177,10 @@ public class FloorPropertiesEditor : BaseDataSOEditor {
 
         EditorGUILayout.BeginHorizontal();
         hall.enabled = EditorGUILayout.Toggle(hall.enabled, GUILayout.Width(20));
-        if (hall.hallwayPrefab != null) {
-            Texture2D preview = AssetPreview.GetAssetPreview(hall.hallwayPrefab);
+        if (hall.hallwaySpaceData != null) {
+            Texture2D preview = AssetPreview.GetAssetPreview(hall.hallwaySpaceData.SpacePrefab);
             GUILayout.Label(preview, GUILayout.Width(50), GUILayout.Height(50));
-            EditorGUILayout.LabelField(hall.hallwayPrefab.name);
+            EditorGUILayout.LabelField(hall.hallwaySpaceData.SpacePrefab.name);
         }
         EditorGUILayout.EndHorizontal();
 

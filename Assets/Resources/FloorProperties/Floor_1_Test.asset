@@ -12,97 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a5c5abc736a180a4f81425e89c374798, type: 3}
   m_Name: Floor_1_Test
   m_EditorClassIdentifier: 
-  id: 1487a787-8657-46ff-8f8b-2780d8f8231d
+  id: 
   floorNumber: 1
   area: 0
   minimumFreeRooms: 8
   maximumFreeRooms: 12
   maxAttemptsPerRoom: 4
   storyRooms: []
-  freeRooms:
-  - freeRoomPrefab: {fileID: 1726751025465976600, guid: ba44a81881f3cd7489db031c8d8d3471, type: 3}
-    enabled: 1
-    maxInstances: 0
-    minimumDepthFromStartingRoom: 0
-  - freeRoomPrefab: {fileID: 1726751025465976600, guid: 99fa9e1e76621084f83b8848ba07875b, type: 3}
-    enabled: 1
-    maxInstances: 0
-    minimumDepthFromStartingRoom: 0
-  - freeRoomPrefab: {fileID: 1726751025465976600, guid: b4934f987713e324389734c04d0893ee, type: 3}
-    enabled: 1
-    maxInstances: 0
-    minimumDepthFromStartingRoom: 0
-  - freeRoomPrefab: {fileID: 1726751025465976600, guid: f0bd0ae804c25804fb8bf107ba153ed0, type: 3}
-    enabled: 1
-    maxInstances: 0
-    minimumDepthFromStartingRoom: 0
-  - freeRoomPrefab: {fileID: 1726751025465976600, guid: 24f107779ee07974ca955cd0dc959176, type: 3}
-    enabled: 1
-    maxInstances: 0
-    minimumDepthFromStartingRoom: 0
-  - freeRoomPrefab: {fileID: 4360744087744814406, guid: ac989f66333d9d24181c287ac079fc57, type: 3}
-    enabled: 1
-    maxInstances: 0
-    minimumDepthFromStartingRoom: 0
-  - freeRoomPrefab: {fileID: 4360744087744814406, guid: 96f932f875be16244a76bcc5d489be98, type: 3}
-    enabled: 1
-    maxInstances: 0
-    minimumDepthFromStartingRoom: 0
-  - freeRoomPrefab: {fileID: 4360744087744814406, guid: 454872b2e71906545bc0b90e1b2f3fab, type: 3}
-    enabled: 1
-    maxInstances: 0
-    minimumDepthFromStartingRoom: 0
-  - freeRoomPrefab: {fileID: 4360744087744814406, guid: 15504ff3d3037b440b74e2dd452c84d1, type: 3}
-    enabled: 1
-    maxInstances: 0
-    minimumDepthFromStartingRoom: 0
-  - freeRoomPrefab: {fileID: 4360744087744814406, guid: 058cfda342c040e4b8fa5004cccc6757, type: 3}
-    enabled: 1
-    maxInstances: 0
-    minimumDepthFromStartingRoom: 0
-  - freeRoomPrefab: {fileID: 1057880228274817227, guid: a4c6334ff79366649b4ce00f473480a5, type: 3}
-    enabled: 1
-    maxInstances: 0
-    minimumDepthFromStartingRoom: 0
-  - freeRoomPrefab: {fileID: 1057880228274817227, guid: f889d687ab9fb7e4280addb5f0f54b92, type: 3}
-    enabled: 1
-    maxInstances: 0
-    minimumDepthFromStartingRoom: 0
-  - freeRoomPrefab: {fileID: 1057880228274817227, guid: 737c70cba2e2b3d4fb1c481648a7f3ee, type: 3}
-    enabled: 1
-    maxInstances: 0
-    minimumDepthFromStartingRoom: 0
-  - freeRoomPrefab: {fileID: 1057880228274817227, guid: f357e5e64ba92634791cca25ae0b1ac2, type: 3}
-    enabled: 1
-    maxInstances: 0
-    minimumDepthFromStartingRoom: 0
-  - freeRoomPrefab: {fileID: 1057880228274817227, guid: 5ff381113dde9c745bc4425f874d767a, type: 3}
-    enabled: 1
-    maxInstances: 0
-    minimumDepthFromStartingRoom: 0
-  - freeRoomPrefab: {fileID: 3461808318882019289, guid: dc06b21dadb648f4aafaaaabcfa8d12b, type: 3}
-    enabled: 1
-    maxInstances: 0
-    minimumDepthFromStartingRoom: 0
-  hallways:
-  - hallwayPrefab: {fileID: 4683246599415034093, guid: 36c20ff02fc54a640bcb101b9b446eeb, type: 3}
-    enabled: 1
-  - hallwayPrefab: {fileID: 4683246599415034093, guid: 708f637314803b74dbeed17fc3c7a025, type: 3}
-    enabled: 1
-  - hallwayPrefab: {fileID: 4683246599415034093, guid: 7b356183b14d4c244a0c48dc13ca5df2, type: 3}
-    enabled: 1
-  - hallwayPrefab: {fileID: 4506452909063083736, guid: 7d48cdcff40e9cf4ba04e08327a227c5, type: 3}
-    enabled: 1
-  - hallwayPrefab: {fileID: 4506452909063083736, guid: b16a991bd0b05114bb3fe3c840b66f53, type: 3}
-    enabled: 1
-  - hallwayPrefab: {fileID: 4506452909063083736, guid: 8da060c74c79c0b409e36733cdd6e986, type: 3}
-    enabled: 1
-  - hallwayPrefab: {fileID: 5402994261259005216, guid: 7c19d9891d865ca488fed6412af42d69, type: 3}
-    enabled: 1
-  - hallwayPrefab: {fileID: 5402994261259005216, guid: a693728d61a38f845851755bb453d98a, type: 3}
-    enabled: 1
-  - hallwayPrefab: {fileID: 5402994261259005216, guid: 44de06341d0830a4f831b6951577c7b2, type: 3}
-    enabled: 1
+  freeRooms: []
+  hallways: []
   startingRoom: {fileID: 0}
   seedRNG:
     randomSeed: 0
+  globalAreasDatabase: {fileID: 11400000, guid: 8ae72178073f07546b3c4e99441a3445, type: 2}

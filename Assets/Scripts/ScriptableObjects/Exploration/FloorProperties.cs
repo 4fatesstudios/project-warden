@@ -21,7 +21,7 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Exploration
         [SerializeField] private List<HallwayProperties> hallways;
         [SerializeField] private SpaceData startingRoom;
         [SerializeField] private SeedRNG seedRNG;
-        private GlobalAreasDatabase globalAreasDatabase;
+        [SerializeField] private GlobalAreasDatabase globalAreasDatabase;
 
         
         public int FloorNumber { get => floorNumber; set => floorNumber = value; }
@@ -55,7 +55,7 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Exploration
         
         [System.Serializable]
         public class FreeRoomProperties {
-            public GameObject freeRoomPrefab;
+            public SpaceData freeRoomSpaceData;
             public bool enabled;
             [SerializeField, Tooltip("0 = no max instances")] public int maxInstances = 0;
             [SerializeField, Tooltip("0 = no minimum depth")] public int minimumDepthFromStartingRoom = 0;
@@ -64,13 +64,13 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Exploration
 
         [System.Serializable]
         public class StoryRoomProperties {
-            public GameObject storyPrefab;
+            public SpaceData storyRoomSpaceData;
             public int minimumDepthFromStartingRoom = 0;
         }
         
         [System.Serializable]
         public class HallwayProperties {
-            public GameObject hallwayPrefab;
+            public SpaceData hallwaySpaceData;
             public bool enabled;
             // private int maxInstances = 0;
             // private int minimumDepthFromStartingRoom = 0;

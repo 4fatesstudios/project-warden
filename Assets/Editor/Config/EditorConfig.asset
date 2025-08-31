@@ -13,3 +13,4 @@ MonoBehaviour:
   m_Name: EditorConfig
   m_EditorClassIdentifier: 
   floorGeneratorPrefab: {fileID: 947328609840266066, guid: 9c3f9b2f03205e14890b30927ca8ca7f, type: 3}
+  globalAreasDatabase: {fileID: 11400000, guid: 8ae72178073f07546b3c4e99441a3445, type: 2}
