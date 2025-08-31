@@ -5,7 +5,8 @@ namespace FourFatesStudios.ProjectWarden.Enums
 {
     public enum SpaceType
     {
-        Room,
-        Hallway
+        FreeRoom,
+        Hallway,
+        StoryRoom
     }
 }

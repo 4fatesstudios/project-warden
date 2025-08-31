@@ -118,22 +118,22 @@ public class FloorPropertiesEditor : BaseDataSOEditor {
             foreach (var entry in targetList) {
                 if (isFreeRoom) {
                     var pr = (FloorProperties.FreeRoomProperties)(object)entry;
-                    if (pr.freeRoomSpaceData == space) { exists = true; break; }
+                    if (pr.spaceData == space) { exists = true; break; }
                 } else {
                     var pr = (FloorProperties.HallwayProperties)(object)entry;
-                    if (pr.hallwaySpaceData == space) { exists = true; break; }
+                    if (pr.spaceData == space) { exists = true; break; }
                 }
             }
 
             if (!exists) {
                 if (isFreeRoom) {
                     targetList.Add((T)(object)new FloorProperties.FreeRoomProperties {
-                        freeRoomSpaceData = space,
+                        spaceData = space,
                         enabled = true
                     });
                 } else {
                     targetList.Add((T)(object)new FloorProperties.HallwayProperties {
-                        hallwaySpaceData = space,
+                        spaceData = space,
                         enabled = true
                     });
                 }
@@ -147,24 +147,24 @@ public class FloorPropertiesEditor : BaseDataSOEditor {
 
         EditorGUILayout.BeginHorizontal();
         room.enabled = EditorGUILayout.Toggle(room.enabled, GUILayout.Width(20));
-        if (room.freeRoomSpaceData != null) {
-            Texture2D preview = AssetPreview.GetAssetPreview(room.freeRoomSpaceData.SpacePrefab);
+        if (room.spaceData != null) {
+            Texture2D preview = AssetPreview.GetAssetPreview(room.spaceData.SpacePrefab);
             GUILayout.Label(preview, GUILayout.Width(50), GUILayout.Height(50));
-            EditorGUILayout.LabelField(room.freeRoomSpaceData.SpacePrefab.name);
+            EditorGUILayout.LabelField(room.spaceData.SpacePrefab.name);
         }
         EditorGUILayout.EndHorizontal();
 
         // Only show extra options if enabled
         if (room.enabled) {
             EditorGUI.indentLevel++;
-            room.maxInstances = EditorGUILayout.IntField(
+            room.MaxInstances = EditorGUILayout.IntField(
                 new GUIContent("Max Instances", "0 = no max instances"), 
-                room.maxInstances
+                room.MaxInstances
             );
 
-            room.minimumDepthFromStartingRoom = EditorGUILayout.IntField(
+            room.MinimumDepthFromStartingRoom = EditorGUILayout.IntField(
                 new GUIContent("Min Depth From Start", "0 = no minimum depth"), 
-                room.minimumDepthFromStartingRoom
+                room.MinimumDepthFromStartingRoom
             );
             EditorGUI.indentLevel--;
         }
@@ -177,10 +177,10 @@ public class FloorPropertiesEditor : BaseDataSOEditor {
 
         EditorGUILayout.BeginHorizontal();
         hall.enabled = EditorGUILayout.Toggle(hall.enabled, GUILayout.Width(20));
-        if (hall.hallwaySpaceData != null) {
-            Texture2D preview = AssetPreview.GetAssetPreview(hall.hallwaySpaceData.SpacePrefab);
+        if (hall.spaceData != null) {
+            Texture2D preview = AssetPreview.GetAssetPreview(hall.spaceData.SpacePrefab);
             GUILayout.Label(preview, GUILayout.Width(50), GUILayout.Height(50));
-            EditorGUILayout.LabelField(hall.hallwaySpaceData.SpacePrefab.name);
+            EditorGUILayout.LabelField(hall.spaceData.SpacePrefab.name);
         }
         EditorGUILayout.EndHorizontal();
 

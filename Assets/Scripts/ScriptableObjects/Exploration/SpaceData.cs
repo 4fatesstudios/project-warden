@@ -7,7 +7,7 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Exploration {
     [CreateAssetMenu(fileName = "New Space Data", menuName = "Exploration/Space Data")]
     public class SpaceData : ScriptableObject {
         [SerializeField] private GameObject spacePrefab; // Reference to the main prefab
-        [SerializeField] private SpaceType spaceType = SpaceType.Room;
+        [SerializeField] private SpaceType spaceType = SpaceType.FreeRoom;
         [SerializeField] private SpaceSize spaceSize = SpaceSize.Small; // relevant if SpaceType == Room
         [SerializeField] private List<DoorSpawnData> doorSpawnPoints = new();
         [SerializeField] private List<List<DoorSpawnData>> doorSpawnGroups = new();

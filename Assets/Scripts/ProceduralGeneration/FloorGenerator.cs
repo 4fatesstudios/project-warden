@@ -13,9 +13,11 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
 {
     public class FloorGenerator : MonoBehaviour {
         [SerializeField] private FloorProperties floorProperties;
+        [SerializeField] private GameObject rootGameObject;
 
         private Queue<SpawnGroupQueueItem> _spawnQueue = new();
         private List<PlacedSpace> _placedSpaces = new();
+        
         private List<SpaceConnectionItem> _spaceConnections = new();
         private Dictionary<SpaceType, IReadOnlyList<SpaceData>> _spaces = new();
         private int numberOfFreeRooms;
@@ -29,7 +31,7 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
             InitializeGeneration();
             
             // Obtain all hallways and all rooms from the given Area Database
-            _spaces.Add(SpaceType.Room, floorProperties.GlobalAreasDatabase.GetDatabaseByArea(floorProperties.Area).Rooms);
+            _spaces.Add(SpaceType.FreeRoom, floorProperties.GlobalAreasDatabase.GetDatabaseByArea(floorProperties.Area).Rooms);
             _spaces.Add(SpaceType.Hallway, floorProperties.GlobalAreasDatabase.GetDatabaseByArea(floorProperties.Area).Hallways);
             
             // Place the starting room
@@ -47,14 +49,14 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
         }
         
         private void ProcessSpawnQueue() {
-            while (_placedSpaces.Count(s => s.SourceData.SpaceType == SpaceType.Room) < numberOfFreeRooms 
+            while (_placedSpaces.Count(s => s.SourceData.SpaceType == SpaceType.FreeRoom) < numberOfFreeRooms 
                    && _spawnQueue.Count > 0) {
                 var queueItem = _spawnQueue.Dequeue();
                 TryPlaceFromSpawnGroup(queueItem);
             }
             
             Debug.Log($"\n### Processed Queue ###\n" +
-                      $"Placed Rooms: {_placedSpaces.Count(p => p.SourceData.SpaceType == SpaceType.Room)} / {numberOfFreeRooms}\n" +
+                      $"Placed Rooms: {_placedSpaces.Count(p => p.SourceData.SpaceType == SpaceType.FreeRoom)} / {numberOfFreeRooms}\n" +
                       $"Remaining Queue Items: {_spawnQueue.Count}\n" +
                       // $"Attempts: {attempts} / {maxAttempts}\n" +
                       $"########################\n");
@@ -147,9 +149,9 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
                 case 1:
                     return floorProperties.SeedRNG.Rng.Next(4) == 1 
                         ? TryPlace(queueItem, doorGO, source, SpaceType.Hallway, hallwayDepth + 1) 
-                        : TryPlace(queueItem, doorGO, source, SpaceType.Room, 0);
+                        : TryPlace(queueItem, doorGO, source, SpaceType.FreeRoom, 0);
                 case 2:
-                    return TryPlace(queueItem, doorGO, source, SpaceType.Room, 0);
+                    return TryPlace(queueItem, doorGO, source, SpaceType.FreeRoom, 0);
                 default:
                     return false;
             }

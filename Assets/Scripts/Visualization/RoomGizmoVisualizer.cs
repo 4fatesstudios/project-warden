@@ -12,7 +12,7 @@ namespace FourFatesStudios.ProjectWarden.Visualization
             var box = GetComponent<BoxCollider>();
             if (box == null) return;
             Gizmos.color = spaceType switch {
-                SpaceType.Room => Color.green,
+                SpaceType.FreeRoom => Color.green,
                 SpaceType.Hallway => Color.blue,
                 _ => Color.black
             };
