@@ -274,7 +274,7 @@ PrefabInstance:
       objectReference: {fileID: 1919372605}
     - target: {fileID: 2497630245201985707, guid: 5e701b2bf502a014cbc3b4e5bb1bb58b, type: 3}
       propertyPath: m_VersionIndex
-      value: 25758
+      value: 25761
       objectReference: {fileID: 0}
     - target: {fileID: 3110658206448645229, guid: 5e701b2bf502a014cbc3b4e5bb1bb58b, type: 3}
       propertyPath: m_LocalPosition.x
@@ -1053,6 +1053,14 @@ PrefabInstance:
       value: 69420
       objectReference: {fileID: 0}
     - target: {fileID: 6106722518351401832, guid: 9c3f9b2f03205e14890b30927ca8ca7f, type: 3}
+      propertyPath: rootGameObject
+      value: 
+      objectReference: {fileID: 8462124890415016846}
+    - target: {fileID: 6106722518351401832, guid: 9c3f9b2f03205e14890b30927ca8ca7f, type: 3}
+      propertyPath: floorProperties
+      value: 
+      objectReference: {fileID: 11400000, guid: f76441b173fcff743b9c479042271fe3, type: 2}
+    - target: {fileID: 6106722518351401832, guid: 9c3f9b2f03205e14890b30927ca8ca7f, type: 3}
       propertyPath: maximumFreeRooms
       value: 20
       objectReference: {fileID: 0}
@@ -1105,6 +1113,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 9c3f9b2f03205e14890b30927ca8ca7f, type: 3}
+--- !u!1 &8462124890415016846 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 947328609840266066, guid: 9c3f9b2f03205e14890b30927ca8ca7f, type: 3}
+  m_PrefabInstance: {fileID: 8462124890415016845}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

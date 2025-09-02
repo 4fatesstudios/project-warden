@@ -47,6 +47,10 @@ public class FloorPropertiesEditor : BaseDataSOEditor {
         // Seed RNG
         SerializedProperty seedRNG = serializedObject.FindProperty("seedRNG");
         EditorGUILayout.PropertyField(seedRNG);
+        
+        // Starting Room
+        SerializedProperty startingRoom = serializedObject.FindProperty("startingRoom");
+        EditorGUILayout.PropertyField(startingRoom);
 
         // =======================
         // Auto-populate Free Rooms + Hallways from Global DB

@@ -19,7 +19,7 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
         private List<PlacedSpace> _placedSpaces = new();
         
         private List<SpaceConnectionItem> _spaceConnections = new();
-        private Dictionary<SpaceType, IReadOnlyList<SpaceData>> _spaces = new();
+        private Dictionary<SpaceType, List<FloorProperties.SpacePlacementProperties>> _spaces = new();
         private int numberOfFreeRooms;
 
         public void GenerateFloor() {
@@ -31,8 +31,9 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
             InitializeGeneration();
             
             // Obtain all hallways and all rooms from the given Area Database
-            _spaces.Add(SpaceType.FreeRoom, floorProperties.GlobalAreasDatabase.GetDatabaseByArea(floorProperties.Area).Rooms);
-            _spaces.Add(SpaceType.Hallway, floorProperties.GlobalAreasDatabase.GetDatabaseByArea(floorProperties.Area).Hallways);
+            _spaces.Add(SpaceType.FreeRoom, ToEnabledList(floorProperties.FreeRooms));
+            _spaces.Add(SpaceType.Hallway,  ToEnabledList(floorProperties.Hallways));
+            // _spaces.Add(SpaceType.StoryRoom, ToEnabledList(floorProperties.StoryRooms));
             
             // Place the starting room
             // Enqueue starting room door spawn groups and add starting room to placed spaces
@@ -46,6 +47,15 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
             // PruneDeadEndHallways();
 
             // Third pass, connection pass to connect rooms that can be connected together
+        }
+        
+        private List<FloorProperties.SpacePlacementProperties> 
+            ToEnabledList<T>(IEnumerable<T> source) where T : FloorProperties.SpacePlacementProperties
+        {
+            return source
+                .Where(s => s.enabled)
+                .Cast<FloorProperties.SpacePlacementProperties>()
+                .ToList();
         }
         
         private void ProcessSpawnQueue() {
@@ -161,7 +171,7 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
             int hallwayDepth) {
             var list = _spaces[spaceTypeToTry];
             var filtered = list
-                .Where(space => !queueItem.FailedRoomSizes.Contains(space.SpaceSize))
+                .Where(space => !queueItem.FailedRoomSizes.Contains(space.spaceData.SpaceSize))
                 .ToList();
             // If nothing valid left to try, set attempts to max (probably cleaner way to do this later)
             if (filtered.Count == 0) {
@@ -170,9 +180,9 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
             }
             var spaceData = filtered[floorProperties.SeedRNG.Rng.Next(filtered.Count)];
 
-            Debug.Log($"→ Attempting to place {spaceTypeToTry}: {spaceData.name} | Size: {spaceData.SpaceSize} | Remaining options: {filtered.Count}");
+            Debug.Log($"→ Attempting to place {spaceTypeToTry}: {spaceData.spaceData.name} | Size: {spaceData.spaceData.SpaceSize} | Remaining options: {filtered.Count}");
             
-            if (!TryPlaceSpaceAtDoor(queueItem, doorGO, source, spaceData, hallwayDepth, out var placed)) return false;
+            if (!TryPlaceSpaceAtDoor(queueItem, doorGO, source, spaceData.spaceData, hallwayDepth, out var placed)) return false;
             _placedSpaces.Add(placed);
 
             var userGroupId = placed.DoorLookup.First(
