@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/Resources/Potions.meta
 guid: a6684ed344017a049903f4e526f3508d
+========
+guid: 0db47caac49b2da489cd92ed15e3a404
+>>>>>>>> cd130b1 (Shapes are now integrated!):Assets/Resources/TestIngredients.meta
 folderAsset: yes
 DefaultImporter:
   externalObjects: {}

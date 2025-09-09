@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/Resources/TestIngredients/Earth Root.asset.meta
 guid: 91a433150e932274f9487ca48880f1d8
+========
+guid: 302920b723c10514f825f3f04195db88
+>>>>>>>> cd130b1 (Shapes are now integrated!):Assets/Resources/Potions/NewPotion.asset.meta
 NativeFormatImporter:
   externalObjects: {}
   mainObjectFileID: 11400000

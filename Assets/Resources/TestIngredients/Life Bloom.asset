@@ -19,15 +19,23 @@ MonoBehaviour:
   itemIcon: {fileID: 0}
   noun: 
   adjective: 
+<<<<<<<< HEAD:Assets/Resources/TestIngredients/Life Bloom.asset
   ingredientArchetype: 2
   ingredientAspect: 5
+========
+  ingredientArchetype: 0
+  ingredientAspect: 2
+>>>>>>>> cd130b1 (Shapes are now integrated!):Assets/Resources/Items/Ingredients/FireTalon.asset
   isCorrupted: 0
   potency: 3
   gridWidth: 1
   gridHeight: 1
   unlocksAdditionalSpace: 0
   additionalSpaceCount: 0
-  infusions: []
+  infusions:
+  - infusionName: Burning
+    effects:
+      Effects: []
   canGrind: 0
   grindingResult: {fileID: 0}
   canDistill: 0
