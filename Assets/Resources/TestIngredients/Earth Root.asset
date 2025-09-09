@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ccec348f60f7b5c429d2fb1e20182269, type: 3}
   m_Name: Earth Root
   m_EditorClassIdentifier: 
+<<<<<<<< HEAD:Assets/Resources/TestIngredients/Earth Root.asset
   id: 
   itemName: Earth Root
   itemDescription: A root that draws power from the earth
@@ -20,11 +21,21 @@ MonoBehaviour:
   noun: 
   adjective: 
   ingredientArchetype: 2
+========
+  id: 63b6024e-4c7e-4083-8857-437994a40e03
+  itemName: Earth Shard
+  itemDescription: A crystallized piece of earth
+  itemRarity: 1
+  itemIcon: {fileID: 0}
+  noun: 
+  adjective: 
+  ingredientArchetype: 0
+>>>>>>>> cd130b1 (Shapes are now integrated!):Assets/Resources/Items/Ingredients/EarthShard.asset
   ingredientAspect: 0
   isCorrupted: 0
   potency: 2
   gridWidth: 2
-  gridHeight: 1
+  gridHeight: 2
   unlocksAdditionalSpace: 0
   additionalSpaceCount: 0
   infusions: []

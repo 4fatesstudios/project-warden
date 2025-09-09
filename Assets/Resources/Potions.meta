@@ -1,9 +1,9 @@
 fileFormatVersion: 2
-<<<<<<<< HEAD:Assets/Scripts/GameSystems/CraftingMenu/AlchemyMenu/Tools.meta
-guid: 5f839de6f790a404bb321c77467a435c
-========
+<<<<<<<< HEAD:Assets/Resources/Potions.meta
 guid: a6684ed344017a049903f4e526f3508d
->>>>>>>> d974821 (Shapes are now integrated!):Assets/Resources/Potions.meta
+========
+guid: 0db47caac49b2da489cd92ed15e3a404
+>>>>>>>> cd130b1 (Shapes are now integrated!):Assets/Resources/TestIngredients.meta
 folderAsset: yes
 DefaultImporter:
   externalObjects: {}

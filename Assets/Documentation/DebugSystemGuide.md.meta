@@ -1,6 +1,11 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/Documentation/DebugSystemGuide.md.meta
 guid: eb1d106a592e4114fbc6cb87d3c81407
 TextScriptImporter:
+========
+guid: c1ed7ffd555bb5646bddc56b774dc26b
+DefaultImporter:
+>>>>>>>> cd130b1 (Shapes are now integrated!):Assets/Scenes/GridDemo.unity.meta
   externalObjects: {}
   userData: 
   assetBundleName: 

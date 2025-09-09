@@ -1,9 +1,9 @@
 fileFormatVersion: 2
-<<<<<<<< HEAD:Assets/Resources/Items/Ingredients/FireClaw.asset.meta
-guid: a16e37f582140e64f9d62203078a572a
-========
+<<<<<<<< HEAD:Assets/Resources/TestIngredients/Fire Essence.asset.meta
 guid: 84b0183348c9f164b92bdafcf500d571
->>>>>>>> d974821 (Shapes are now integrated!):Assets/Resources/TestIngredients/Fire Essence.asset.meta
+========
+guid: 91a433150e932274f9487ca48880f1d8
+>>>>>>>> cd130b1 (Shapes are now integrated!):Assets/Resources/TestIngredients/Earth Root.asset.meta
 NativeFormatImporter:
   externalObjects: {}
   mainObjectFileID: 11400000

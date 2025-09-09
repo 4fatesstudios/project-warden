@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/Documentation/ContinuousParticleEffectsGuide.md.meta
 guid: 67eb68d605353d649a86ce320ed9a920
+========
+guid: e33f82bf996e09d408d023abcedfd03c
+>>>>>>>> cd130b1 (Shapes are now integrated!):Assets/Documentation/ComprehensiveCraftingSystemGuide.md.meta
 TextScriptImporter:
   externalObjects: {}
   userData: 
