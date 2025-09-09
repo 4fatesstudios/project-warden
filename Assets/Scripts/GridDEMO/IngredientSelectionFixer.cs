@@ -249,7 +249,7 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                 case Aspect.Arc: 
                     return new Color(1f, 1f, 0.3f, 0.8f);
                 case Aspect.Caustic: 
-                    return new Color(0.6f, 1.0f, 0.2f, 0.8f); // Acid Green
+                    return new Color(0.8f, 0.5f, 0.2f, 0.8f);
                 case Aspect.Corporeal: 
                     return new Color(0.7f, 0.7f, 0.7f, 0.8f);
                 case Aspect.Divine: 

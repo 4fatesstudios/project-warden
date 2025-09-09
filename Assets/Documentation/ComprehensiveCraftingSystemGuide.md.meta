@@ -1,9 +1,5 @@
 fileFormatVersion: 2
-<<<<<<<< HEAD:Assets/Documentation/ComprehensiveCraftingSystemGuide.md.meta
 guid: e33f82bf996e09d408d023abcedfd03c
-========
-guid: 10516451626a7b04ab2577f2ba466a69
->>>>>>>> cd130b1 (Shapes are now integrated!):Assets/Documentation/AlchemyBookEntryTemplate.md.meta
 TextScriptImporter:
   externalObjects: {}
   userData: 

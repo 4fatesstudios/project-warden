@@ -1,6 +1,11 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/Documentation/CustomGridImplementation.md.meta
 guid: 199347a90dcfaf24d9063c345344c3d9
 TextScriptImporter:
+========
+guid: c1ed7ffd555bb5646bddc56b774dc26b
+DefaultImporter:
+>>>>>>>> d974821 (Shapes are now integrated!):Assets/Scenes/GridDemo.unity.meta
   externalObjects: {}
   userData: 
   assetBundleName: 

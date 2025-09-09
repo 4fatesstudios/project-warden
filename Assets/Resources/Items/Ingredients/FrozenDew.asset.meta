@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/Resources/Items/Ingredients/FrozenDew.asset.meta
 guid: 66791e30368a954498cf06710efc9df9
+========
+guid: 7c318e49a2f57804d89c4c1fcb5eab74
+>>>>>>>> d974821 (Shapes are now integrated!):Assets/Resources/TestIngredients/Life Bloom.asset.meta
 NativeFormatImporter:
   externalObjects: {}
   mainObjectFileID: 11400000

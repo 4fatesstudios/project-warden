@@ -9,11 +9,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ac12d8c1b64a441a9fd60f1ef7e48a67, type: 3}
+  m_Script: {fileID: 11500000, guid: ccec348f60f7b5c429d2fb1e20182269, type: 3}
   m_Name: TestIngredient2
   m_EditorClassIdentifier: 
-  id: b359a3de-7d98-4cac-a0d4-bed61efc2e5b
-  itemName: Unnamed Item
+  id: 2
+  itemName: Test Ingredient 2
   itemDescription: Empty Description
   itemRarity: 0
   itemIcon: {fileID: 0}
@@ -23,27 +23,12 @@ MonoBehaviour:
   ingredientAspect: 0
   isCorrupted: 0
   potency: 1
-  gridWidth: 1
-  gridHeight: 1
+  gridWidth: 4
+  gridHeight: 4
   unlocksAdditionalSpace: 0
   additionalSpaceCount: 0
-  isUnrefined: 1
-  originalIngredient: {fileID: 0}
-  shapeData:
-    gridWidth: 1
-    gridHeight: 1
-    activeCells:
-    - {x: 0, y: 0}
-    template: 0
-    shapeColor: {r: 0, g: 1, b: 0, a: 1}
-    shapeSprite: {fileID: 0}
-    lastModified: 2025-09-25 10:39:04
-    dataVersion: 1
-  infusionBundle:
-    infusions: []
-  effectBundle:
-    Effects: []
-  canGrind: 0
+  infusions: []
+  canGrind: 1
   grindingResult: {fileID: 0}
   canDistill: 0
   distillingResult: {fileID: 0}

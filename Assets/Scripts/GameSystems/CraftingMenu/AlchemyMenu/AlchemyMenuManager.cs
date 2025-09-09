@@ -13,7 +13,7 @@ namespace FourFatesStudios.ProjectWarden.GameSystems
         private Button backButton;
 
         [Header("Panel Navigation Targets")]
-        [SerializeField] private string potionCraftingPanel = "CraftingModeSelector"; // Updated to use mode selector
+        [SerializeField] private string potionCraftingPanel = "GridMinigameUI";
         [SerializeField] private string potionEnhancingPanel = "BulkCrafting";
         [SerializeField] private string backPanel = "CraftingMenu";
 
@@ -130,10 +130,9 @@ namespace FourFatesStudios.ProjectWarden.GameSystems
                     {
                         case "potioncrafting":
                         case "potion":
-                        case "craftingmodeselector":
-                            navigationController.ShowCraftingModeSelector();
-                            break;
                         case "gridminigameui":
+                            navigationController.ShowGridMinigame();
+                            break;
                         case "gridminigame":
                         case "grid":
                             navigationController.ShowGridMinigame();

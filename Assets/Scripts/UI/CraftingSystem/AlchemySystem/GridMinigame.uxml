@@ -3,7 +3,7 @@
     <ui:VisualElement name="MainContainer" class="main-container">
         <ui:VisualElement name="HeaderContainer" class="header-container">
             <ui:Label text="Alchemy Grid Crafting" name="TitleLabel" class="title-label" />
-            <ui:Label text="Select ingredients and place them on the grid. Use Ctrl+Click to remove placed ingredients." name="InstructionsLabel" class="instructions-label" />
+            <ui:Label text="🖱️ Drag ingredients from the left panel onto the grid, or click an ingredient then click a grid cell. Use Ctrl+Click to remove placed ingredients. Press Escape to go back, Ctrl+C to clear grid, Enter to craft." name="InstructionsLabel" class="instructions-label" />
         </ui:VisualElement>
         
         <ui:VisualElement name="ContentContainer" class="content-container">

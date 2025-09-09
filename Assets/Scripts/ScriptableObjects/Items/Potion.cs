@@ -1,7 +1,6 @@
 using FourFatesStudios.ProjectWarden.Enums;
 using FourFatesStudios.ProjectWarden.Effects;
 using FourFatesStudios.ProjectWarden.Structs;
-using FourFatesStudios.ProjectWarden.ScriptableObjects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,12 +16,9 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
         [SerializeField, Tooltip("Potion item type.")]
         private ItemPotionType itemPotionType;
 
-        [Header("Potion Potency")]
-        [SerializeField] private int potency = 100;
-        
-        [Header("Infusion System")]
-        [SerializeField, Tooltip("Infusions added to this potion")]
-        private InfusionBundle infusionBundle = new InfusionBundle();
+        [Header("Effect System")]
+        [SerializeField, Tooltip("Effects using the new Effect system.")]
+        private EffectBundle effectBundle;
         
         [Header("Crafting System Properties")]
         [SerializeField] private PotionRarity rarity = PotionRarity.Common;
@@ -67,8 +63,7 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
         public event EventHandler OnUpgradeStatusChanged;
 
         public ItemPotionType ItemPotionType => itemPotionType;
-        public InfusionBundle InfusionBundle => infusionBundle;
-        public int Potency => potency;
+        public EffectBundle EffectBundle => effectBundle;
         
         // New crafting system properties
         public PotionRarity Rarity => rarity;
@@ -110,19 +105,18 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
         }
 
         public void InitializeFromCrafting(PotionRarity potionRarity, PotionTone potionTone, BottleType bottle, 
-            InfusionBundle infusions, float quality, string crafter, List<Ingredient> ingredients, int basePotency = 100)
+            EffectBundle effects, float quality, string crafter, List<Ingredient> ingredients)
         {
             rarity = potionRarity;
             tone = potionTone;
             bottleType = bottle;
-            infusionBundle = infusions ?? new InfusionBundle();
+            effectBundle = effects ?? new EffectBundle();
             craftQuality = quality;
             crafterName = crafter;
-            potency = basePotency;
             if (ingredients != null) sourceIngredients = new List<Ingredient>(ingredients);
             
             UpdateAppearanceFromIngredients(ingredients);
-            UpdatePropertiesFromInfusions();
+            UpdatePropertiesFromEffects();
         }
         
         private void UpdateAppearanceFromIngredients(List<Ingredient> ingredients)
@@ -212,7 +206,7 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
                 Aspect.Frigid => new Color(0.2f, 0.6f, 0.9f), // Ice blue
                 Aspect.Arc => new Color(0.9f, 0.9f, 0.2f),    // Electric yellow
                 Aspect.Divine => new Color(0.9f, 0.8f, 0.2f), // Golden
-                Aspect.Caustic => new Color(0.6f, 1.0f, 0.2f, 1.0f), // Acid Green
+                Aspect.Caustic => new Color(0.5f, 0.2f, 0.8f), // Purple
                 Aspect.Corporeal => new Color(0.4f, 0.7f, 0.3f), // Green
                 _ => new Color(0.5f, 0.5f, 0.8f) // Default blue
             };
@@ -233,107 +227,24 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
             return PotionTurbidity.Opaque;
         }
         
-        private void UpdatePropertiesFromInfusions()
+        private void UpdatePropertiesFromEffects()
         {
-            if (infusionBundle?.Infusions == null || infusionBundle.Infusions.Count == 0) return;
+            if (effectBundle == null || effectBundle.Effects == null || effectBundle.Effects.Count == 0) return;
             
-            var allEffects = infusionBundle.GetAllEffects();
-            
-            // Determine usage contexts based on effect types from infusions
+            // Determine usage contexts based on effect types
             canBeUsedInCombat = HasEffectOfType<DamageEffect>() || HasEffectOfType<HealEffect>() || HasEffectOfType<BuffStatEffect>();
             canBeUsedOutOfCombat = HasEffectOfType<HealEffect>() || HasEffectOfType<BuffHealEffect>() || HasEffectOfType<BuffStatEffect>();
             canBeUsedInExploration = HasEffectOfType<BuffStatEffect>(); // Could add more specific exploration effects
             
-            // Set visual effects based on infusion count and types
-            hasGlow = infusionBundle.Infusions.Count > 3 || HasEffectOfType<BuffStatEffect>();
-            hasBubbles = infusionBundle.Infusions.Count > 2;
+            // Set visual effects based on effect count and types
+            hasGlow = effectBundle.Effects.Count > 3 || HasEffectOfType<BuffStatEffect>();
+            hasBubbles = effectBundle.Effects.Count > 2;
             hasParticles = rarity >= PotionRarity.Rare || HasEffectOfType<DamageEffect>();
         }
         
         private bool HasEffectOfType<T>() where T : IEffect
         {
-            // Check infusion effects only
-            if (infusionBundle?.Infusions != null)
-            {
-                var infusionEffects = infusionBundle.GetAllEffects();
-                return infusionEffects.Any(effect => effect is T);
-            }
-            
-            return false;
-        }
-        
-        /// <summary>
-        /// Get all effects from infusions
-        /// </summary>
-        public List<IEffect> GetAllEffects()
-        {
-            var allEffects = new List<IEffect>();
-            
-            // Add infusion effects
-            if (infusionBundle?.Infusions != null)
-            {
-                allEffects.AddRange(infusionBundle.GetAllEffects());
-            }
-            
-            return allEffects;
-        }
-        
-        /// <summary>
-        /// Get total power level from all infusions
-        /// </summary>
-        public int GetInfusionPowerLevel()
-        {
-            return infusionBundle?.GetTotalPowerLevel() ?? 0;
-        }
-        
-        /// <summary>
-        /// Check if potion has any infusions
-        /// </summary>
-        public bool HasInfusions()
-        {
-            return infusionBundle?.Infusions?.Count > 0;
-        }
-        
-        /// <summary>
-        /// Add an infusion to this potion
-        /// </summary>
-        public void AddInfusion(Infusion infusion)
-        {
-            if (infusion != null)
-            {
-                infusionBundle.AddInfusion(infusion);
-                UpdatePropertiesFromInfusions(); // Refresh properties based on new effects
-            }
-        }
-        
-        /// <summary>
-        /// Remove an infusion from this potion
-        /// </summary>
-        public bool RemoveInfusion(Infusion infusion)
-        {
-            if (infusion != null && infusionBundle.RemoveInfusion(infusion))
-            {
-                UpdatePropertiesFromInfusions(); // Refresh properties after removal
-                return true;
-            }
-            return false;
-        }
-        
-        /// <summary>
-        /// Get a description that includes infusion information
-        /// </summary>
-        public string GetEnhancedDescription()
-        {
-            string baseDesc = GetVisualDescription();
-            
-            if (HasInfusions())
-            {
-                var infusionNames = infusionBundle.Infusions.Select(i => i.InfusionName).Distinct();
-                baseDesc += $"\\n\\nInfused with: {string.Join(", ", infusionNames)}";
-                baseDesc += $"\\nInfusion Power: {GetInfusionPowerLevel()}";
-            }
-            
-            return baseDesc;
+            return effectBundle?.Effects?.Any(effect => effect is T) ?? false;
         }
         
         public bool CanCombineWith(AbilityInfusionTag abilityTag)
@@ -372,22 +283,15 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
             return "mysterious";
         }
 
-        /// <summary>
-        /// Add an infusion containing the specified effect
-        /// </summary>
-        public void AddEffectViaInfusion(IEffect effect, string infusionName = "Custom Infusion")
+        public void AddEffect(IEffect effect)
         {
             if (effect == null)
                 throw new ArgumentNullException(nameof(effect));
-            
-            // Create a temporary infusion to hold this effect
-            var tempInfusion = ScriptableObject.CreateInstance<Infusion>();
-            #if UNITY_EDITOR
-            tempInfusion.InitializeInfusion(infusionName, $"Contains {effect.GetType().Name}", Color.white);
-            // Note: This would require extending Infusion to support runtime effect addition
-            #endif
-            
-            AddInfusion(tempInfusion);
+                
+            if (effectBundle == null)
+                effectBundle = new EffectBundle();
+                
+            effectBundle.Effects.Add(effect);
         }
         
         
@@ -397,24 +301,15 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
             if (ItemPotionType != other.ItemPotionType) return false;
             if (Upgraded != other.Upgraded) return false;
             
-            // Compare infusion bundles
-            if (infusionBundle?.Infusions?.Count != other.infusionBundle?.Infusions?.Count) return false;
+            // Compare effect bundles
+            if (effectBundle?.Effects?.Count != other.effectBundle?.Effects?.Count) return false;
             
-            if (infusionBundle?.Infusions != null && other.infusionBundle?.Infusions != null)
+            if (effectBundle?.Effects != null && other.effectBundle?.Effects != null)
             {
-                // Check if both have the same infusions
-                for (int i = 0; i < infusionBundle.Infusions.Count; i++)
+                for (int i = 0; i < effectBundle.Effects.Count; i++)
                 {
-                    bool foundMatch = false;
-                    for (int j = 0; j < other.infusionBundle.Infusions.Count; j++)
-                    {
-                        if (infusionBundle.Infusions[i] == other.infusionBundle.Infusions[j])
-                        {
-                            foundMatch = true;
-                            break;
-                        }
-                    }
-                    if (!foundMatch) return false;
+                    if (!effectBundle.Effects[i].Equals(other.effectBundle.Effects[i]))
+                        return false;
                 }
             }
 
@@ -429,11 +324,10 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
             builder.Append("_");
             builder.Append(Upgraded ? "U" : "N");
 
-            // Include InfusionBundle effects if they exist
-            if (infusionBundle?.Infusions != null)
+            // Include EffectBundle if it exists
+            if (effectBundle?.Effects != null)
             {
-                var allEffects = infusionBundle.GetAllEffects();
-                foreach (var effect in allEffects)
+                foreach (var effect in effectBundle.Effects)
                 {
                     builder.Append("|");
                     builder.Append(effect.GetType().Name);
@@ -470,14 +364,11 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
 #if UNITY_EDITOR
         private new void OnValidate()
         {
-            // Initialize infusion bundle if it doesn't exist
-            if (infusionBundle == null)
+            // Initialize effect bundle if it doesn't exist
+            if (effectBundle == null)
             {
-                infusionBundle = new InfusionBundle();
+                effectBundle = new EffectBundle();
             }
-            
-            // Update properties based on current infusions
-            UpdatePropertiesFromInfusions();
         }
 #endif
     }

@@ -1,11 +1,11 @@
 fileFormatVersion: 2
-<<<<<<<< HEAD:Assets/Scenes/CraftingSystemComplete.unity.meta
-guid: 3d1dacca76dfcdf4586f95b1bdf56a2e
+<<<<<<<< HEAD:Assets/Documentation/AspectObstacleColorMapping.md.meta
+guid: 416808fbd1f086c4fab09d8a3d1952b6
+TextScriptImporter:
 ========
-guid: ff32f2a8b075e3e40bf6a01d21708279
-folderAsset: yes
->>>>>>>> 848c0c6 (Alchemy System Editor tool):Assets/Resources/AlchemyBook.meta
+guid: 3d1dacca76dfcdf4586f95b1bdf56a2e
 DefaultImporter:
+>>>>>>>> d974821 (Shapes are now integrated!):Assets/Scenes/CraftingSystemComplete.unity.meta
   externalObjects: {}
   userData: 
   assetBundleName: 

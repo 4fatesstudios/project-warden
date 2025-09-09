@@ -1,5 +1,4 @@
 using UnityEngine;
-using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
 
 namespace FourFatesStudios.ProjectWarden.GridDemo.UI
 {
@@ -33,7 +32,7 @@ namespace FourFatesStudios.ProjectWarden.GridDemo.UI
             if (compactUIDesigner != null)
             {
                 // These should now work without errors
-                System.Action<Ingredient> a1 = compactUIDesigner.OnIngredientSelected;
+                System.Action<FourFatesStudios.ProjectWarden.ScriptableObjects.Items.Ingredient> a1 = compactUIDesigner.OnIngredientSelected;
                 System.Action a2 = compactUIDesigner.OnGridCleared;
                 System.Action a3 = compactUIDesigner.OnGridRandomized;
                 System.Action<int> a4 = compactUIDesigner.OnGridSizeChanged; // int, not Vector2Int

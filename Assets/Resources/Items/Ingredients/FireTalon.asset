@@ -9,43 +9,28 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ac12d8c1b64a441a9fd60f1ef7e48a67, type: 3}
+  m_Script: {fileID: 11500000, guid: ccec348f60f7b5c429d2fb1e20182269, type: 3}
   m_Name: FireTalon
   m_EditorClassIdentifier: 
-  id: 91c22615-6141-4e39-b570-dab80551a860
+  id: 3213cd74-71c9-4faa-81b7-5eb292a67c32
   itemName: Fire Talon
-  itemDescription: Empty Description
-  itemRarity: 0
+  itemDescription: A smaller talon with weak fire magic
+  itemRarity: 1
   itemIcon: {fileID: 0}
   noun: 
   adjective: 
-  ingredientArchetype: 1
+  ingredientArchetype: 0
   ingredientAspect: 2
   isCorrupted: 0
   potency: 1
-  gridWidth: 2
-  gridHeight: 2
+  gridWidth: 1
+  gridHeight: 1
   unlocksAdditionalSpace: 0
   additionalSpaceCount: 0
-  isUnrefined: 1
-  originalIngredient: {fileID: 0}
-  shapeData:
-    gridWidth: 2
-    gridHeight: 2
-    activeCells:
-    - {x: 0, y: 0}
-    - {x: 1, y: 0}
-    - {x: 1, y: 1}
-    template: 0
-    shapeColor: {r: 0, g: 1, b: 0, a: 1}
-    shapeSprite: {fileID: 0}
-    lastModified: 2025-09-25 16:11:16
-    dataVersion: 1
-  infusionBundle:
-    infusions:
-    - {fileID: 11400000, guid: cb1d239c98a377240872ece2b29e296a, type: 2}
-  effectBundle:
-    Effects: []
+  infusions:
+  - infusionName: Burning
+    effects:
+      Effects: []
   canGrind: 0
   grindingResult: {fileID: 0}
   canDistill: 0

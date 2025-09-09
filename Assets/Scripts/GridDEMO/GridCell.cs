@@ -13,11 +13,6 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         public bool IsHighlighted { get; set; }
         public bool IsValidPlacement { get; set; }
         
-        // Obstacle properties
-        public bool HasObstacle { get; private set; }
-        public AspectObstacle Obstacle { get; private set; }
-        public bool completedObstacle { get; private set; }
-        
         // Visual state properties
         public CellVisualState VisualState { get; private set; }
         public Color CellColor { get; private set; }
@@ -32,16 +27,11 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         
         public void SetOccupied(Ingredient ingredient)
         {
-            Debug.Log($"GridCell.SetOccupied: Setting cell ({Position.x},{Position.y}) as occupied by {ingredient?.ItemName ?? "NULL"}");
-            
             IsOccupied = true;
             OccupiedByIngredient = ingredient;
             CellAspect = ingredient.IngredientAspect;
             CellIntensity = ingredient.Potency / 5f; // Normalize potency to 0-1
             UpdateVisualState();
-            
-            // Verify the change took effect
-            Debug.Log($"GridCell.SetOccupied RESULT: Cell ({Position.x},{Position.y}) -> IsOccupied = {IsOccupied}, OccupiedByIngredient = {OccupiedByIngredient?.ItemName ?? "NULL"}");
         }
         
         public void Clear()
@@ -52,31 +42,14 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             IsValidPlacement = true;
             CellAspect = null;
             CellIntensity = 0f;
-            HasObstacle = false;
-            Obstacle = null;
-            
-            // Update visual state to empty (this was commented out but is needed!)
-            UpdateVisualState();
+            VisualState = CellVisualState.Empty;
+            UpdateCellColor();
         }
         
         public void SetHighlighted(bool highlighted, bool validPlacement = true)
         {
             IsHighlighted = highlighted;
             IsValidPlacement = validPlacement;
-            UpdateVisualState();
-        }
-        
-        public void SetObstacle(AspectObstacle obstacle)
-        {
-            HasObstacle = obstacle != null;
-            Obstacle = obstacle;
-            UpdateVisualState();
-        }
-        
-        public void RemoveObstacle()
-        {
-            HasObstacle = false;
-            Obstacle = null;
             UpdateVisualState();
         }
         
@@ -89,10 +62,6 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             else if (IsHighlighted)
             {
                 VisualState = IsValidPlacement ? CellVisualState.ValidHighlight : CellVisualState.InvalidHighlight;
-            }
-            else if (HasObstacle)
-            {
-                VisualState = CellVisualState.Obstacle;
             }
             else
             {
@@ -119,13 +88,7 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                     break;
                     
                 case CellVisualState.Occupied:
-                    // Keep occupied cells white so only the ingredient model shows color
-                    CellColor = Color.white;
-                    break;
-                    
-                case CellVisualState.Obstacle:
-                    // Use the obstacle's designated color
-                    CellColor = Obstacle?.GetObstacleColor() ?? Color.gray;
+                    CellColor = GetAspectColor();
                     break;
             }
         }
@@ -187,30 +150,6 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                    CellAspect.Value == Aspect.Arc ||
                    CellAspect.Value == Aspect.Caustic;
         }
-        
-        /// <summary>
-        /// Debug method to get detailed cell information
-        /// </summary>
-        public string GetDebugInfo()
-        {
-            var info = $"GridCell at {Position}:\n";
-            info += $"  IsOccupied: {IsOccupied}\n";
-            info += $"  IsHighlighted: {IsHighlighted}\n";
-            info += $"  IsValidPlacement: {IsValidPlacement}\n";
-            info += $"  VisualState: {VisualState}\n";
-            info += $"  CellColor: {CellColor}\n";
-            
-            if (IsOccupied)
-            {
-                info += $"  OccupiedBy: {OccupiedByIngredient?.ItemName ?? "NULL"}\n";
-                info += $"  CellAspect: {CellAspect}\n";
-                info += $"  CellIntensity: {CellIntensity:F2}\n";
-                info += $"  Temperature: {GetTemperature():F2}\n";
-                info += $"  HasElementalAspect: {HasElementalAspect()}\n";
-            }
-            
-            return info;
-        }
     }
     
     public enum CellVisualState
@@ -218,7 +157,6 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         Empty,
         ValidHighlight,
         InvalidHighlight,
-        Occupied,
-        Obstacle
+        Occupied
     }
 }

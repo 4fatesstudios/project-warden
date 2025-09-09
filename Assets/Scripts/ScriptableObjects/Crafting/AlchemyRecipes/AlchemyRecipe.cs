@@ -1,84 +1,356 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
-using ScriptableObjects.Items;
-
-#if UNITY_EDITOR
-#endif
+using FourFatesStudios.ProjectWarden.Enums;
 
 namespace FourFatesStudios.ProjectWarden.ScriptableObjects.AlchemyRecipes
 {
-    [CreateAssetMenu(fileName = "NewRecipe", menuName = "AlchemyRecipes/Generic Recipe")]
+    [Serializable]
+    public class RequiredIngredientPosition
+    {
+        [SerializeField] public Vector2Int gridPosition;
+        [SerializeField] public Ingredient requiredIngredient;
+        [SerializeField] public bool mustBeExactPosition = true;
+        [SerializeField] public bool allowsAdjacency = false;
+        
+        public RequiredIngredientPosition(Vector2Int position, Ingredient ingredient, bool exactPosition = true, bool allowAdjacency = false)
+        {
+            gridPosition = position;
+            requiredIngredient = ingredient;
+            mustBeExactPosition = exactPosition;
+            allowsAdjacency = allowAdjacency;
+        }
+    }
+
+    [Serializable]
+    public class RequiredIngredientPattern
+    {
+        [SerializeField] public string patternName;
+        [SerializeField] public List<Vector2Int> positions = new List<Vector2Int>();
+        [SerializeField] public Ingredient requiredIngredient;
+        [SerializeField] public bool isOptional = false;
+        [SerializeField] public float successBonus = 0.1f;
+        
+        public RequiredIngredientPattern(string name, List<Vector2Int> patternPositions, Ingredient ingredient)
+        {
+            patternName = name;
+            positions = patternPositions;
+            requiredIngredient = ingredient;
+        }
+    }
+
+    [Serializable]
+    public class AspectSynergy
+    {
+        [SerializeField] public Aspect primaryAspect;
+        [SerializeField] public Aspect synergyAspect;
+        [SerializeField] public float synergyMultiplier = 1.2f;
+        [SerializeField] public bool requiresAdjacency = true;
+        [SerializeField] public string synergyDescription;
+    }
+
+    [Serializable]
+    public class GridRequirement
+    {
+        [SerializeField] public int minimumIngredientsUsed = 2;
+        [SerializeField] public int maximumIngredientsUsed = 10;
+        [SerializeField] public bool requiresSymmetry = false;
+        [SerializeField] public bool requiresCompactness = false;
+        [SerializeField] public float compactnessThreshold = 0.7f;
+    }
+
+    [CreateAssetMenu(fileName = "NewAlchemyRecipe", menuName = "AlchemyRecipes/Grid Recipe")]
     public class AlchemyRecipe : Recipe
     {
-        [SerializeField, Tooltip("Input ingredient 1 is added.")]
+        [Header("Core Ingredients")]
+        [SerializeField, Tooltip("Primary ingredient (required).")]
         private Ingredient inputIngredient1;
-        [SerializeField, Tooltip("Input ingredient 2 is added.")]
+        [SerializeField, Tooltip("Secondary ingredient (required).")]
         private Ingredient inputIngredient2;
-        [SerializeField, Tooltip("Input ingredient 3 is added.")]
+        [SerializeField, Tooltip("Tertiary ingredient (optional for advanced recipes).")]
         private Ingredient inputIngredient3;
 
-        [SerializeField, Tooltip("Number of successful hits required.")]
-        private int requiredHits;
-
-        [SerializeField, Tooltip("Maximum allowed attempts.")]
-        private int maxAttempts;
-
-        [SerializeField, Tooltip("Output potion to be created.")]
+        [Header("Output")]
+        [SerializeField, Tooltip("Potion created when recipe succeeds.")]
         private Potion outputPotion;
+        
+        [SerializeField, Tooltip("Number of potions created on success.")]
+        [Range(1, 5)]
+        private int outputQuantity = 1;
 
-        [SerializeField, Tooltip("How long the process must stay in the correct state (seconds).")]
-        private float requiredTemperature = 5f;
+        [Header("Grid-Based Recipe Configuration")]
+        [SerializeField, Tooltip("Is this a key/story recipe that prevents failure?")]
+        private bool isKeyRecipe = false;
+        
+        [SerializeField, Tooltip("Recipe difficulty level affecting success thresholds.")]
+        private RecipeDifficulty difficulty = RecipeDifficulty.Standard;
+        
+        [SerializeField, Tooltip("Required grid positions for specific ingredients.")]
+        private List<RequiredIngredientPosition> requiredPositions = new List<RequiredIngredientPosition>();
+        
+        [SerializeField, Tooltip("Spatial patterns that improve success rate.")]
+        private List<RequiredIngredientPattern> bonusPatterns = new List<RequiredIngredientPattern>();
+        
+        [SerializeField, Tooltip("Aspect synergies that provide bonuses.")]
+        private List<AspectSynergy> aspectSynergies = new List<AspectSynergy>();
+        
+        [Header("Success Criteria")]
+        [SerializeField, Tooltip("Minimum space efficiency required for success (0-1).")]
+        [Range(0f, 1f)]
+        private float minimumEfficiency = 0.6f;
+        
+        [SerializeField, Tooltip("Grid arrangement requirements.")]
+        private GridRequirement gridRequirements = new GridRequirement();
+        
+        [SerializeField, Tooltip("Does this recipe benefit from ingredient interactions?")]
+        private bool allowsIngredientInteractions = true;
+        
+        [SerializeField, Tooltip("Forbidden ingredient combinations that cause failure.")]
+        private List<Ingredient> forbiddenIngredients = new List<Ingredient>();
+        
+        [SerializeField, Tooltip("Alternative ingredients that can substitute for main ingredients.")]
+        private List<Ingredient> alternativeIngredients = new List<Ingredient>();
+        
+        [Header("Advanced Features")]
+        [SerializeField, Tooltip("Custom success condition script for complex recipes.")]
+        private MonoBehaviour customSuccessEvaluator;
+        
+        [SerializeField, Tooltip("Recipe hints for the player.")]
+        [TextArea(2, 4)]
+        private string recipeHints = "Arrange ingredients to create a stable reaction.";
 
-        [SerializeField, Tooltip("Maximum time allowed to complete the distillation (seconds).")]
-        private float totalDuration = 10f;
-        public int RequiredHits => requiredHits;
-        public int MaxAttempts => maxAttempts;
-
+        // Public Properties for GridMinigameController Integration
         public Ingredient InputIngredient1 => inputIngredient1;
         public Ingredient InputIngredient2 => inputIngredient2;
         public Ingredient InputIngredient3 => inputIngredient3;
-
         public Potion OutputPotion => outputPotion;
+        public int OutputQuantity => outputQuantity;
+        
+        public bool IsKeyRecipe => isKeyRecipe;
+        public RecipeDifficulty Difficulty => difficulty;
+        public float MinimumEfficiency => minimumEfficiency;
+        public bool AllowsIngredientInteractions => allowsIngredientInteractions;
+        public string RecipeHints => recipeHints;
+        
+        public IReadOnlyList<RequiredIngredientPosition> RequiredPositions => requiredPositions;
+        public IReadOnlyList<RequiredIngredientPattern> BonusPatterns => bonusPatterns;
+        public IReadOnlyList<AspectSynergy> AspectSynergies => aspectSynergies;
+        public GridRequirement GridRequirements => gridRequirements;
+        public IReadOnlyList<Ingredient> ForbiddenIngredients => forbiddenIngredients;
+        public IReadOnlyList<Ingredient> AlternativeIngredients => alternativeIngredients;
 
-        public float RequiredDuration => requiredTemperature;
-        public float TotalDuration => totalDuration;
+        /// <summary>
+        /// Get all required ingredients for this recipe (excluding null entries)
+        /// </summary>
+        public List<Ingredient> GetRequiredIngredients()
+        {
+            var ingredients = new List<Ingredient>();
+            if (inputIngredient1 != null) ingredients.Add(inputIngredient1);
+            if (inputIngredient2 != null) ingredients.Add(inputIngredient2);
+            if (inputIngredient3 != null) ingredients.Add(inputIngredient3);
+            return ingredients;
+        }
+
+        /// <summary>
+        /// Check if an ingredient is required for this recipe
+        /// </summary>
+        public bool RequiresIngredient(Ingredient ingredient)
+        {
+            return ingredient == inputIngredient1 || 
+                   ingredient == inputIngredient2 || 
+                   ingredient == inputIngredient3 ||
+                   alternativeIngredients.Contains(ingredient);
+        }
+
+        /// <summary>
+        /// Check if an ingredient is forbidden in this recipe
+        /// </summary>
+        public bool IsForbiddenIngredient(Ingredient ingredient)
+        {
+            return forbiddenIngredients.Contains(ingredient);
+        }
+
+        /// <summary>
+        /// Get the minimum efficiency based on difficulty
+        /// </summary>
+        public float GetAdjustedMinimumEfficiency()
+        {
+            return difficulty switch
+            {
+                RecipeDifficulty.Beginner => minimumEfficiency * 0.8f,
+                RecipeDifficulty.Standard => minimumEfficiency,
+                RecipeDifficulty.Advanced => minimumEfficiency * 1.2f,
+                RecipeDifficulty.Master => minimumEfficiency * 1.5f,
+                _ => minimumEfficiency
+            };
+        }
+
+        /// <summary>
+        /// Check if a specific pattern is satisfied by the given ingredient positions
+        /// </summary>
+        public bool CheckPatternSatisfied(RequiredIngredientPattern pattern, Dictionary<Vector2Int, Ingredient> placedIngredients)
+        {
+            foreach (var position in pattern.positions)
+            {
+                if (!placedIngredients.ContainsKey(position) || 
+                    placedIngredients[position] != pattern.requiredIngredient)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Calculate success bonus from satisfied patterns
+        /// </summary>
+        public float CalculatePatternBonus(Dictionary<Vector2Int, Ingredient> placedIngredients)
+        {
+            float totalBonus = 0f;
+            foreach (var pattern in bonusPatterns)
+            {
+                if (CheckPatternSatisfied(pattern, placedIngredients))
+                {
+                    totalBonus += pattern.successBonus;
+                }
+            }
+            return totalBonus;
+        }
+
+        /// <summary>
+        /// Calculate aspect synergy bonuses
+        /// </summary>
+        public float CalculateAspectSynergyBonus(Dictionary<Vector2Int, Ingredient> placedIngredients)
+        {
+            float totalBonus = 0f;
+            
+            foreach (var synergy in aspectSynergies)
+            {
+                if (HasAspectSynergy(synergy, placedIngredients))
+                {
+                    totalBonus += (synergy.synergyMultiplier - 1.0f);
+                }
+            }
+            
+            return totalBonus;
+        }
+
+        private bool HasAspectSynergy(AspectSynergy synergy, Dictionary<Vector2Int, Ingredient> placedIngredients)
+        {
+            var primaryPositions = new List<Vector2Int>();
+            var synergyPositions = new List<Vector2Int>();
+
+            // Find positions of each aspect
+            foreach (var kvp in placedIngredients)
+            {
+                if (kvp.Value.IngredientAspect == synergy.primaryAspect)
+                    primaryPositions.Add(kvp.Key);
+                else if (kvp.Value.IngredientAspect == synergy.synergyAspect)
+                    synergyPositions.Add(kvp.Key);
+            }
+
+            if (primaryPositions.Count == 0 || synergyPositions.Count == 0)
+                return false;
+
+            // Check adjacency if required
+            if (synergy.requiresAdjacency)
+            {
+                foreach (var primaryPos in primaryPositions)
+                {
+                    foreach (var synergyPos in synergyPositions)
+                    {
+                        if (Vector2Int.Distance(primaryPos, synergyPos) <= 1.5f) // Adjacent (including diagonal)
+                            return true;
+                    }
+                }
+                return false;
+            }
+
+            return true; // Synergy exists without adjacency requirement
+        }
 
 #if UNITY_EDITOR
         private new void OnValidate()
         {
-            if (requiredHits == 0 || requiredHits > maxAttempts)
-            {
-                Debug.LogWarning($"Recipe [{name}] is an Invalid amount compared to Max Attempt.");
-            }
-            if (maxAttempts == 0 || requiredHits > maxAttempts)
-            {
-                Debug.LogWarning($"Recipe [{name}] is an Invalid amount compared to Required Hits.");
-            }
-
-            var ingredients = new[] { inputIngredient1, inputIngredient2, inputIngredient3 };
-
-            // Check for missing input ingredients
-            if (ingredients[0] == null)
-                Debug.LogWarning($"[{name}] Input ingredient 1 is not assigned.");
-            if (ingredients[1] == null)
-                Debug.LogWarning($"[{name}] Input ingredient 2 is not assigned.");
-            if (ingredients[2] == null)
-                Debug.LogWarning($"[{name}] Input ingredient 3 is not assigned.");
+            // Validate core ingredients
+            if (inputIngredient1 == null)
+                Debug.LogWarning($"[{name}] Primary ingredient (Input 1) is required.");
+            if (inputIngredient2 == null)
+                Debug.LogWarning($"[{name}] Secondary ingredient (Input 2) is required.");
 
             if (outputPotion == null)
                 Debug.LogWarning($"[{name}] Output Potion is not assigned.");
 
-            if (totalDuration < 0 || requiredTemperature < 0)
-                Debug.LogWarning($"[{name}] Thresholds cannot be negative.");
+            // Validate output quantity
+            if (outputQuantity <= 0)
+                outputQuantity = 1;
 
-            // Sort and preview recipe key for debugging
-            if (ingredients[0] != null && ingredients[1] != null && ingredients[2] != null)
+            // Validate efficiency thresholds
+            if (minimumEfficiency < 0.1f)
+                Debug.LogWarning($"[{name}] Minimum efficiency is very low ({minimumEfficiency:P}). Consider increasing for better gameplay.");
+            
+            if (minimumEfficiency > 0.95f)
+                Debug.LogWarning($"[{name}] Minimum efficiency is very high ({minimumEfficiency:P}). This might make the recipe too difficult.");
+
+            // Validate grid requirements
+            if (gridRequirements.minimumIngredientsUsed < 1)
+                gridRequirements.minimumIngredientsUsed = 1;
+            
+            if (gridRequirements.maximumIngredientsUsed < gridRequirements.minimumIngredientsUsed)
+                gridRequirements.maximumIngredientsUsed = gridRequirements.minimumIngredientsUsed;
+
+            // Validate key recipe configuration
+            if (isKeyRecipe && requiredPositions.Count == 0)
+                Debug.LogWarning($"[{name}] Key recipe should have required ingredient positions defined for proper constraints.");
+
+            // Check for conflicting forbidden and required ingredients
+            var requiredIngredients = GetRequiredIngredients();
+            foreach (var forbidden in forbiddenIngredients)
             {
-                Array.Sort(ingredients, (a, b) => String.Compare(a.name, b.name, StringComparison.Ordinal));
-                string keyPreview = $"[{name}] Recipe Key: {ingredients[0].name}, {ingredients[1].name}, {ingredients[2].name}";
-                Debug.Log(keyPreview);
+                if (requiredIngredients.Contains(forbidden))
+                    Debug.LogError($"[{name}] Ingredient '{forbidden.name}' cannot be both required and forbidden!");
             }
+
+            // Validate patterns
+            foreach (var pattern in bonusPatterns)
+            {
+                if (pattern.positions.Count == 0)
+                    Debug.LogWarning($"[{name}] Pattern '{pattern.patternName}' has no positions defined.");
+                
+                if (pattern.successBonus < 0f)
+                    Debug.LogWarning($"[{name}] Pattern '{pattern.patternName}' has negative bonus. Consider using positive values.");
+            }
+
+            // Validate aspect synergies
+            foreach (var synergy in aspectSynergies)
+            {
+                if (synergy.primaryAspect == synergy.synergyAspect)
+                    Debug.LogWarning($"[{name}] Aspect synergy has same primary and synergy aspect ({synergy.primaryAspect}). This is redundant.");
+                
+                if (synergy.synergyMultiplier <= 0f)
+                    Debug.LogWarning($"[{name}] Synergy multiplier should be positive (current: {synergy.synergyMultiplier}).");
+            }
+
+            // Generate recipe preview for debugging
+            if (inputIngredient1 != null && inputIngredient2 != null)
+            {
+                var ingredients = GetRequiredIngredients();
+                ingredients.Sort((a, b) => String.Compare(a.name, b.name, StringComparison.Ordinal));
+                
+                string preview = $"[{name}] Recipe: {string.Join(", ", ingredients.Select(i => i.name))}";
+                preview += $" -> {(outputPotion != null ? outputPotion.name : "Unknown")}";
+                
+                if (isKeyRecipe) preview += " (KEY RECIPE)";
+                if (difficulty != RecipeDifficulty.Standard) preview += $" [{difficulty}]";
+                
+                Debug.Log(preview);
+            }
+
+            // Validate recipe hints
+            if (string.IsNullOrWhiteSpace(recipeHints))
+                recipeHints = "Arrange ingredients to create a stable reaction.";
         }
 #endif
     }

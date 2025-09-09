@@ -17,5 +17,31 @@ MonoBehaviour:
   itemDescription: Empty Description
   itemRarity: 1
   itemIcon: {fileID: 814221718, guid: d4ee4ae08a3c01b4188d6c2cbb1f35ef, type: 3}
-  itemPotionType: 0
+  itemPotionType: 3
   potionEffects: []
+  rarity: 0
+  tone: 2
+  bottleType: 0
+  isCustomPotion: 0
+  primaryColor: {r: 0, g: 0, b: 1, a: 1}
+  secondaryColor: {r: 1, g: 1, b: 1, a: 1}
+  turbidity: 1
+  hasGlow: 0
+  hasBubbles: 0
+  hasParticles: 0
+  compatibleAbilities: 
+  canBeUsedInCombat: 1
+  canBeUsedOutOfCombat: 1
+  canBeUsedInExploration: 1
+  maxStackSize: 10
+  shelfLife: 7200
+  degradesOverTime: 1
+  consumeTime: 2
+  isKeyItem: 0
+  isThrowable: 0
+  throwRange: 10
+  affectsArea: 0
+  areaRadius: 3
+  craftQuality: 1
+  crafterName: 
+  sourceIngredients: []

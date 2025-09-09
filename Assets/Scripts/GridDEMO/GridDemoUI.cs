@@ -72,10 +72,10 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             if (dragDropDemo == null)
             {
                 dragDropDemo = gameObject.AddComponent<DragDropDemo>();
-                DebugSystemConfig.LogTesting("Added DragDropDemo component");
+                Debug.Log("GridDemoUI: Added DragDropDemo component");
             }
             
-            DebugSystemConfig.LogTesting("Migrated to new UI system with SmartClickDetector and Drag & Drop. Consider removing this legacy component.");
+            Debug.Log("GridDemoUI: Migrated to new UI system with SmartClickDetector and Drag & Drop. Consider removing this legacy component.");
         }
         
         private void SetupLegacyUI()
@@ -83,16 +83,10 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             // Setup clear grid button
             if (clearGridButton != null)
             {
-                Debug.Log("✅ Clear Grid button found and connected!");
                 clearGridButton.onClick.AddListener(() => {
-                    Debug.Log("🧹 Clear Grid button clicked!");
                     gridManager.ClearGrid();
                     UpdateGridInfo();
                 });
-            }
-            else
-            {
-                Debug.LogWarning("⚠️ Clear Grid button is NULL! Adding keyboard shortcut as fallback.");
             }
             
             // Setup randomize button
@@ -351,36 +345,15 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                 case Aspect.Scorch: return Color.red;
                 case Aspect.Frigid: return Color.cyan;
                 case Aspect.Arc: return Color.yellow;
-                case Aspect.Caustic: return new Color(0.6f, 1.0f, 0.2f, 1.0f); // Acid Green
+                case Aspect.Caustic: return new Color(0.5f, 0.3f, 0.1f); // Brown
                 case Aspect.Corporeal: return Color.gray;
-                case Aspect.Divine: return new Color(1f, .7f, 1f, 1.0f);;
+                case Aspect.Divine: return Color.white;
                 default: return Color.gray;
             }
         }
         
         private void Update()
         {
-            // Keyboard shortcut fallback for Clear Grid (Ctrl+C)
-            if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.C))
-            {
-                Debug.Log("🧹 Clear Grid keyboard shortcut (Ctrl+C) pressed!");
-                if (gridManager != null)
-                {
-                    gridManager.ClearGrid();
-                    UpdateGridInfo();
-                }
-            }
-            
-            // Debug shortcut (Ctrl+D) to show grid state
-            if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.D))
-            {
-                Debug.Log("🔍 Debug Grid keyboard shortcut (Ctrl+D) pressed!");
-                if (gridManager != null)
-                {
-                    gridManager.DebugGridState();
-                }
-            }
-            
             // Update grid info periodically
             if (Time.frameCount % 60 == 0) // Every 60 frames
             {

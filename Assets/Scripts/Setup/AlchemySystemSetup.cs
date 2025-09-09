@@ -1,5 +1,5 @@
 using UnityEngine;
-using FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu;
+using FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu;
 
 namespace FourFatesStudios.ProjectWarden.Setup
 {

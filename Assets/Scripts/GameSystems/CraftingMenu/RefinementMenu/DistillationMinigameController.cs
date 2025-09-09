@@ -3,6 +3,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UIElements;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
+using FourFatesStudios.ProjectWarden.UI;
 
 namespace FourFatesStudios.ProjectWarden.GameSystems.RefinementMenu
 {
@@ -33,6 +34,7 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.RefinementMenu
         private ProgressBar progressBar;
         private Button adjustPressureUp;
         private Button adjustPressureDown;
+        private Button backButton;  // Add back button
         private Label instructionsLabel;
         private Label statusLabel;
         
@@ -44,7 +46,8 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.RefinementMenu
         private DistillationState distillationState = DistillationState.Heating;
         
         public event Action<bool, Ingredient> OnDistillationComplete;
-        
+        public event Action OnBackPressed;
+
         private enum DistillationState
         {
             Heating,
@@ -60,6 +63,36 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.RefinementMenu
                 uiDocument = GetComponent<UIDocument>();
         }
 
+        public void SetTargetIngredient(Ingredient ingredient)
+        {
+            currentIngredient = ingredient;
+            
+            if (uiDocument?.rootVisualElement != null)
+            {
+                SetupUI();
+                
+                Debug.Log($"🧪 Distillation minigame set up for ingredient: {ingredient.ItemName}");
+                
+                // Show visual feedback that ingredient is loaded
+                if (statusLabel != null)
+                {
+                    statusLabel.text = $"Ready to distill {ingredient.ItemName}";
+                    statusLabel.style.color = new StyleColor(Color.white);
+                }
+                
+                if (instructionsLabel != null)
+                {
+                    instructionsLabel.text = $"Control pressure carefully to distill {ingredient.ItemName}. Keep pressure in the green zone!";
+                }
+                
+                // Reset state
+                distillationState = DistillationState.Heating;
+                distillationTime = 0f;
+                currentPressure = 0.5f;
+                distillateAmount = 0f;
+            }
+        }
+        
         public void InitializeDistillation(Ingredient ingredient)
         {
             currentIngredient = ingredient;
@@ -83,11 +116,13 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.RefinementMenu
             progressBar = root.Q<ProgressBar>("ProgressBar");
             adjustPressureUp = root.Q<Button>("AdjustPressureUp");
             adjustPressureDown = root.Q<Button>("AdjustPressureDown");
+            backButton = root.Q<Button>("BackButton");  // Get back button
             instructionsLabel = root.Q<Label>("InstructionsLabel");
             statusLabel = root.Q<Label>("StatusLabel");
             
             adjustPressureUp?.RegisterCallback<ClickEvent>(_ => AdjustPressure(0.05f));
             adjustPressureDown?.RegisterCallback<ClickEvent>(_ => AdjustPressure(-0.05f));
+            backButton?.RegisterCallback<ClickEvent>(_ => NavigateBack());  // Register back button
             
             // Initialize UI state
             pressureGauge.value = currentPressure * 100f;
@@ -141,6 +176,22 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.RefinementMenu
                 
                 pressureGauge.Q<VisualElement>("unity-progress-bar").style.backgroundColor = new StyleColor(gaugeColor);
             }
+        }
+
+        /// <summary>
+        /// Navigate back to refinement menu
+        /// </summary>
+        private void NavigateBack()
+        {
+            // Stop distillation if in progress
+            if (isDistilling)
+            {
+                isDistilling = false;
+                StopAllCoroutines();
+            }
+            
+            OnBackPressed?.Invoke();
+            Hide();
         }
 
         private IEnumerator DistillationProcess()

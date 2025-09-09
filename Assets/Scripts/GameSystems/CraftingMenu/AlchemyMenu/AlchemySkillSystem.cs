@@ -6,7 +6,7 @@ using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.AlchemyRecipes;
 using FourFatesStudios.ProjectWarden.Enums;
 
-namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
+namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu
 {
     [Serializable]
     public class RecipeSkillData

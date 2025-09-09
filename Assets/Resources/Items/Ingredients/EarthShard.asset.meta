@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/Resources/Items/Ingredients/EarthShard.asset.meta
 guid: 423d0de164656a647bfa171f53d26c14
+========
+guid: 91a433150e932274f9487ca48880f1d8
+>>>>>>>> d974821 (Shapes are now integrated!):Assets/Resources/TestIngredients/Earth Root.asset.meta
 NativeFormatImporter:
   externalObjects: {}
   mainObjectFileID: 11400000

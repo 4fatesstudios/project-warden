@@ -9,13 +9,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ac12d8c1b64a441a9fd60f1ef7e48a67, type: 3}
+  m_Script: {fileID: 11500000, guid: ccec348f60f7b5c429d2fb1e20182269, type: 3}
   m_Name: FrozenDew
   m_EditorClassIdentifier: 
-  id: 19ae1b31-7700-42e7-be70-3b06602ecbe0
+  id: 50070c0b-5540-451f-9ca8-907b669238cf
   itemName: Frozen Dew
-  itemDescription: Empty Description
-  itemRarity: 0
+  itemDescription: Pure magical frigid essence
+  itemRarity: 1
   itemIcon: {fileID: 0}
   noun: 
   adjective: 
@@ -27,22 +27,8 @@ MonoBehaviour:
   gridHeight: 1
   unlocksAdditionalSpace: 0
   additionalSpaceCount: 0
-  isUnrefined: 1
-  originalIngredient: {fileID: 0}
-  shapeData:
-    gridWidth: 1
-    gridHeight: 1
-    activeCells:
-    - {x: 0, y: 0}
-    template: 0
-    shapeColor: {r: 0, g: 1, b: 0, a: 1}
-    shapeSprite: {fileID: 0}
-    lastModified: 2025-09-25 16:11:16
-    dataVersion: 1
-  infusionBundle:
-    infusions: []
-  effectBundle:
-    Effects: []
+  infusions: []
+  potionEffects: []
   canGrind: 0
   grindingResult: {fileID: 0}
   canDistill: 0

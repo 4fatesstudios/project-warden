@@ -1,0 +1,12 @@
+fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/Resources/Items/Ingredients/FireClaw.asset.meta
+guid: a16e37f582140e64f9d62203078a572a
+========
+guid: 84b0183348c9f164b92bdafcf500d571
+>>>>>>>> d974821 (Shapes are now integrated!):Assets/Resources/TestIngredients/Fire Essence.asset.meta
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

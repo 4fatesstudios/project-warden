@@ -1,4 +1,3 @@
-/* COMMENTED OUT - Template Setup (Development Component)
 using UnityEngine;
 using UnityEditor;
 using UnityEngine.UIElements;
@@ -7,7 +6,7 @@ using GameSystems.CraftingMenu.AlchemyBookMenu;
 namespace FourFatesStudios.ProjectWarden.Editor
 {
     /// <summary>
-    /// Editor utility to set up AlchemyBook with the entry template - DISABLED FOR PRODUCTION
+    /// Editor utility to set up AlchemyBook with the entry template
     /// </summary>
     public class AlchemyBookTemplateSetup : EditorWindow
     {
@@ -142,4 +141,3 @@ namespace FourFatesStudios.ProjectWarden.Editor
         }
     }
 }
-END COMMENTED OUT - Template Setup */

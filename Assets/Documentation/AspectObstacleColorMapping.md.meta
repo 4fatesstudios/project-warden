@@ -1,6 +1,11 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/Documentation/AspectObstacleColorMapping.md.meta
 guid: 416808fbd1f086c4fab09d8a3d1952b6
 TextScriptImporter:
+========
+guid: 3d1dacca76dfcdf4586f95b1bdf56a2e
+DefaultImporter:
+>>>>>>>> d974821 (Shapes are now integrated!):Assets/Scenes/CraftingSystemComplete.unity.meta
   externalObjects: {}
   userData: 
   assetBundleName: 

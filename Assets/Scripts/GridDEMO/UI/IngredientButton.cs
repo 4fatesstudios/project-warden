@@ -134,6 +134,15 @@ namespace FourFatesStudios.ProjectWarden.GridDemo.UI
                 nameText.color = aspectColor;
             }
             
+            // Update background color
+            if (backgroundImage != null)
+            {
+                Color bgColor = aspectColor;
+                bgColor.a = 0.3f;
+                backgroundImage.color = bgColor;
+                originalColor = bgColor;
+            }
+            
             // Update icon
             if (iconImage != null)
             {
@@ -149,75 +158,46 @@ namespace FourFatesStudios.ProjectWarden.GridDemo.UI
                 }
             }
             
-            // Update button colors using the new system
-            UpdateButtonColors();
+            // Update glow color
+            if (glowOutline != null)
+            {
+                glowOutline.effectColor = aspectColor;
+            }
         }
         
         public void SetSelected(bool selected)
         {
             isSelected = selected;
-            UpdateButtonColors();
-        }
-        
-        private void UpdateButtonColors()
-        {
-            if (button == null || associatedIngredient == null) return;
             
-            Color aspectColor = GetAspectColor(associatedIngredient.IngredientAspect);
-            ColorBlock colors = button.colors;
-            
-            if (isSelected)
+            if (button != null)
             {
-                // Selected state: lighter version of aspect color
-                Color selectedColor = Color.Lerp(aspectColor, Color.white, 0.4f);
-                selectedColor.a = 0.8f;
+                ColorBlock colors = button.colors;
                 
-                colors.normalColor = selectedColor;
-                colors.highlightedColor = Color.Lerp(selectedColor, Color.white, 0.3f);
-                colors.pressedColor = Color.Lerp(selectedColor, Color.black, 0.2f);
-                colors.selectedColor = selectedColor;
-            }
-            else
-            {
-                // Normal state: aspect color with proper hover/click states
-                Color normalColor = aspectColor;
-                normalColor.a = 0.6f;
-                
-                // Hover state: darker shade
-                Color hoverColor = Color.Lerp(aspectColor, Color.black, 0.3f);
-                hoverColor.a = 0.8f;
-                
-                // Click state: lighter shade
-                Color clickColor = Color.Lerp(aspectColor, Color.white, 0.3f);
-                clickColor.a = 0.9f;
-                
-                colors.normalColor = normalColor;
-                colors.highlightedColor = hoverColor;
-                colors.pressedColor = clickColor;
-                colors.selectedColor = normalColor;
-            }
-            
-            button.colors = colors;
-            
-            // Update background image if available
-            if (backgroundImage != null)
-            {
-                backgroundImage.color = colors.normalColor;
-                originalColor = colors.normalColor;
-            }
-            
-            // Update glow effect
-            if (glowOutline != null)
-            {
-                glowOutline.enabled = isSelected;
-                if (isSelected)
+                if (selected)
                 {
-                    glowOutline.effectDistance = Vector2.one * 2f;
-                    glowOutline.effectColor = aspectColor;
+                    colors.normalColor = Color.white;
+                    colors.highlightedColor = Color.yellow;
+                    colors.selectedColor = Color.white;
                 }
                 else
                 {
-                    glowOutline.effectDistance = Vector2.zero;
+                    Color aspectColor = GetAspectColor(associatedIngredient?.IngredientAspect ?? Aspect.Corporeal);
+                    aspectColor.a = 0.3f;
+                    colors.normalColor = aspectColor;
+                    colors.highlightedColor = aspectColor * 1.2f;
+                    colors.selectedColor = aspectColor;
+                }
+                
+                button.colors = colors;
+            }
+            
+            // Update glow
+            if (glowOutline != null)
+            {
+                glowOutline.enabled = selected;
+                if (selected)
+                {
+                    glowOutline.effectDistance = Vector2.one * 2f;
                 }
             }
         }
@@ -319,9 +299,9 @@ namespace FourFatesStudios.ProjectWarden.GridDemo.UI
                 case Aspect.Scorch: return new Color(1f, 0.3f, 0.3f, 1f);
                 case Aspect.Frigid: return new Color(0.3f, 0.8f, 1f, 1f);
                 case Aspect.Arc: return new Color(1f, 1f, 0.3f, 1f);
-                case Aspect.Caustic: return new Color(0.6f, 1.0f, 0.2f, 1f); // Acid Green
+                case Aspect.Caustic: return new Color(0.8f, 0.5f, 0.2f, 1f);
                 case Aspect.Corporeal: return new Color(0.7f, 0.7f, 0.7f, 1f);
-                case Aspect.Divine: return new Color(.95f, .65f, .95f, 1f);
+                case Aspect.Divine: return new Color(1f, 1f, 1f, 1f);
                 default: return new Color(0.6f, 0.6f, 0.6f, 1f);
             }
         }

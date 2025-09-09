@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UIElements;
+using Debug = UnityEngine.Debug;
 
 /// <summary>
 /// Simple working UI demo that creates UI programmatically
