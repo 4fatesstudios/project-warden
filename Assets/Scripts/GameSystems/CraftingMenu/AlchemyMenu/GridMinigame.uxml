@@ -9,7 +9,12 @@
         
         <ui:VisualElement name="ContentContainer" class="content-container">
             <ui:VisualElement name="LeftPanel" class="left-panel">
-                <ui:Label text="Available Ingredients" class="section-title" />
+                <ui:Label text="Ingredients Inventory" class="section-title" />
+                <ui:VisualElement name="IngredientHeader" class="ingredient-header">
+                    <ui:Label text="Name" class="header-name" />
+                    <ui:Label text="Icon" class="header-icon" />
+                    <ui:Label text="Qty" class="header-quantity" />
+                </ui:VisualElement>
                 <ui:ScrollView name="IngredientPalette" class="ingredient-palette" />
                 
                 <ui:VisualElement name="StatusContainer" class="status-container">

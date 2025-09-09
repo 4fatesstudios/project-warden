@@ -27,7 +27,6 @@ namespace FourFatesStudios.ProjectWarden.Utilities.CSVImport
                 if (prop != null) prop.intValue = result;
                 return true;
             }
-            LogFail(row, header, val, "int");
             return false;
         }
 
@@ -36,7 +35,6 @@ namespace FourFatesStudios.ProjectWarden.Utilities.CSVImport
                 if (prop != null) prop.boolValue = result;
                 return true;
             }
-            LogFail(row, header, val, "bool");
             return false;
         }
 
@@ -45,29 +43,24 @@ namespace FourFatesStudios.ProjectWarden.Utilities.CSVImport
                 if (prop != null) prop.enumValueIndex = (int)result;
                 return true;
             }
-            LogFail(row, header, val, $"enum of type {typeof(T).Name}");
             return false;
         }
 
         private static bool TryStatModifier(SerializedProperty prop, string val, int row, string header) {
             var parts = val.Split('|');
             if (parts.Length != 3) {
-                LogFail(row, header, val, "format Stat|Type|Value");
                 return false;
             }
 
             if (!Enum.TryParse(parts[0], out Stat stat)) {
-                LogFail(row, header, parts[0], "Stat enum");
                 return false;
             }
 
             if (!Enum.TryParse(parts[1], out StatModifierType type)) {
-                LogFail(row, header, parts[1], "StatModifierType enum");
                 return false;
             }
 
             if (!int.TryParse(parts[2], out int amount)) {
-                LogFail(row, header, parts[2], "int modifier");
                 return false;
             }
 
@@ -91,10 +84,6 @@ namespace FourFatesStudios.ProjectWarden.Utilities.CSVImport
                     return false;
             }
             return true;
-        }
-
-        private static void LogFail(int row, string header, string value, string expectedType) {
-            CustomLogger.LogError(LogSystem.CSVImporter, $"Row {row}: Failed to parse '{value}' for column '{header}'. Expected {expectedType}.");
         }
     }
 }

@@ -306,8 +306,8 @@ Camera:
   m_GameObject: {fileID: 263890354}
   m_Enabled: 1
   serializedVersion: 2
-  m_ClearFlags: 1
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_ClearFlags: 2
+  m_BackGroundColor: {r: 0.1, g: 0.1, b: 0.15, a: 1}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -594,7 +594,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ingredientsPanel: InventoryPanel
   refinementsPanel: Refinement
-  alchemyPanel: PotionCrafting
+  alchemyPanel: AlchemyMenu
   backPanel: CraftingMenu
   useHybridArchitecture: 1
   enableDebugLogging: 1
@@ -602,6 +602,79 @@ MonoBehaviour:
   refinementsScene: RefinementMenuScene
   alchemyScene: AlchemyMenuScene
   backScene: MainMenu
+--- !u!1 &570888125
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 570888128}
+  - component: {fileID: 570888127}
+  - component: {fileID: 570888126}
+  m_Layer: 5
+  m_Name: AlchemyMenuUI
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &570888126
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 570888125}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b96dc1ae32ee2924daf6782052ded53e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  potionCraftingPanel: PotionCrafting
+  potionEnhancingPanel: GridMinigame
+  backPanel: CraftingMenu
+  useHybridArchitecture: 1
+  enableDebugLogging: 1
+  potionCraftingSceneName: PotionCraftingScene
+  potionEnhancingSceneName: PotionEnhancingScene
+  previousSceneName: CraftingMenuSystem
+  hasEnhancingSkill: 0
+--- !u!114 &570888127
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 570888125}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_PanelSettings: {fileID: 11400000, guid: f38ba207d27279c49b31bc20747a4b71, type: 2}
+  m_ParentUI: {fileID: 0}
+  sourceAsset: {fileID: 9197481963319205126, guid: 882ba36a4251e394fb73fa865f25cc7b, type: 3}
+  m_SortingOrder: 0
+  m_WorldSpaceSizeMode: 1
+  m_WorldSpaceWidth: 1920
+  m_WorldSpaceHeight: 1080
+--- !u!4 &570888128
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 570888125}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 104.76898, y: 128.75912, z: -16.087008}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &881824004
 GameObject:
   m_ObjectHideFlags: 0
@@ -611,7 +684,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 881824006}
-  - component: {fileID: 881824005}
+  - component: {fileID: 881824007}
   m_Layer: 5
   m_Name: Inventory
   m_TagString: Untagged
@@ -619,23 +692,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &881824005
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 881824004}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f801b9330669eca46bc459c810c01796, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  demoItems:
-  - {fileID: 11400000, guid: d194b4e7033c81a489abf6db78c70009, type: 2}
-  - {fileID: 11400000, guid: 6a52147714a48ff419e7b6d5c32332f4, type: 2}
-  - {fileID: 11400000, guid: d194b4e7033c81a489abf6db78c70009, type: 2}
-  - {fileID: 11400000, guid: 66791e30368a954498cf06710efc9df9, type: 2}
 --- !u!4 &881824006
 Transform:
   m_ObjectHideFlags: 0
@@ -651,6 +707,25 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &881824007
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 881824004}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6ca0e049563689e418aedacbfb0eee21, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  initialItems:
+  - {fileID: 11400000, guid: d194b4e7033c81a489abf6db78c70009, type: 2}
+  - {fileID: 11400000, guid: 6a52147714a48ff419e7b6d5c32332f4, type: 2}
+  - {fileID: 11400000, guid: 66791e30368a954498cf06710efc9df9, type: 2}
+  initialQuantities: 0a0000000a0000000a000000
+  maxQuantityPerSlot: 499
+  maxSlots: 30
 --- !u!1 &962596697
 GameObject:
   m_ObjectHideFlags: 0
@@ -697,9 +772,31 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   uiDocument: {fileID: 962596700}
-  baseGridWidth: 4
-  baseGridHeight: 4
+  inventoryHolder: {fileID: 881824007}
+  useInventoryIngredients: 1
+  consumeIngredientsFromInventory: 1
+  addResultsToInventory: 1
+  baseGridWidth: 3
+  baseGridHeight: 3
+  maxGridWidth: 5
+  maxGridHeight: 5
+  currentGridWidth: 3
+  currentGridHeight: 3
   cellSize: 50
+  allowOverlapping: 0
+  maxOverlapTiles: 0
+  showIngredientInteractions: 1
+  availableRecipes:
+  - {fileID: 11400000, guid: dd0534be969afd34085cdb22dac4b9ed, type: 2}
+  knownInteractions: []
+  allowSyntheticCreation: 1
+  syntheticIngredientTemplate: {fileID: 0}
+  dragStartSound: {fileID: 0}
+  dragDropSound: {fileID: 0}
+  dragCancelSound: {fileID: 0}
+  snapSound: {fileID: 0}
+  enableDebugMode: 1
+  showDragPreview: 1
 --- !u!114 &962596700
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -783,132 +880,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a4c57acc62e7cb64e9d3491dc67236c3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  grindingPanel: GrindingMinigame
+  distillingPanel: DistillingMinigame
+  roastingPanel: RoastingMinigame
+  backPanel: CraftingMenu
+  useHybridArchitecture: 1
+  enableDebugLogging: 1
   grindingSceneName: GrindingScene
   distillingSceneName: DistillingScene
   roastingSceneName: RoastingScene
   previousSceneName: MainMenu
---- !u!1 &1219147373
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1219147374}
-  - component: {fileID: 1219147376}
-  - component: {fileID: 1219147375}
-  m_Layer: 5
-  m_Name: PotionCraftingUI
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1219147374
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1219147373}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 104.76898, y: 128.75912, z: -16.087008}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1219147375
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1219147373}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b4c4813e59b1be74fa1b01bb6850a73e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  uiDocument: {fileID: 1219147376}
-  gridMinigameController: {fileID: 962596699}
-  ingredientInventoryHolder: {fileID: 881824005}
---- !u!114 &1219147376
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1219147373}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_PanelSettings: {fileID: 11400000, guid: f38ba207d27279c49b31bc20747a4b71, type: 2}
-  m_ParentUI: {fileID: 0}
-  sourceAsset: {fileID: 9197481963319205126, guid: 910cd5f87418a7a4990721f20f44d850, type: 3}
-  m_SortingOrder: 0
-  m_WorldSpaceSizeMode: 1
-  m_WorldSpaceWidth: 1920
-  m_WorldSpaceHeight: 1080
---- !u!1 &1272267875
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1272267877}
-  - component: {fileID: 1272267876}
-  m_Layer: 5
-  m_Name: CraftingUIManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1272267876
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1272267875}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0ddc605fca755664687a6c9a47943573, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  enableDebugLogging: 1
-  hideInactivePanels: 1
-  craftingMenuSystem: {fileID: 375124886}
-  potionCraftingUI: {fileID: 1219147373}
-  gridMinigameUI: {fileID: 962596697}
-  bulkCraftingUI: {fileID: 1966634156}
-  refinementUI: {fileID: 997728924}
-  roastingMinigameUI: {fileID: 1322777997}
-  distillingMinigameUI: {fileID: 123304371}
-  grindingMinigameUI: {fileID: 2096520960}
-  inventoryHolder: {fileID: 881824005}
---- !u!4 &1272267877
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1272267875}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  availableIngredients: []
+  enabledButtonColor: {r: 0.2, g: 0.6, b: 0.2, a: 1}
+  disabledButtonColor: {r: 0.4, g: 0.4, b: 0.4, a: 1}
 --- !u!1 &1322777997
 GameObject:
   m_ObjectHideFlags: 0
@@ -980,6 +964,78 @@ MonoBehaviour:
   fireFlickerSpeed: 2
   panShakeIntensity: 0.1
   steamOpacityMax: 0.8
+--- !u!1 &1550123228
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1550123231}
+  - component: {fileID: 1550123230}
+  - component: {fileID: 1550123229}
+  m_Layer: 5
+  m_Name: AlchemyBookUI
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1550123229
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1550123228}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e9a418ceef9c924b8fbb0f2b7bb33fe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  uiDocument: {fileID: 1550123230}
+  entryTemplate: {fileID: 0}
+  bookStyleSheet: {fileID: 7433441132597879392, guid: 71a7e5f385de0864cb1a78951d8dc82f, type: 3}
+  distanceFromCamera: 5
+  bestiaryEntries: []
+  recipeEntries: []
+  ingredientEntries: []
+  helpEntries: []
+--- !u!114 &1550123230
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1550123228}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_PanelSettings: {fileID: 11400000, guid: f38ba207d27279c49b31bc20747a4b71, type: 2}
+  m_ParentUI: {fileID: 0}
+  sourceAsset: {fileID: 9197481963319205126, guid: 9beaae5fc9090b74993d2fd09224faf5, type: 3}
+  m_SortingOrder: 0
+  m_WorldSpaceSizeMode: 1
+  m_WorldSpaceWidth: 1920
+  m_WorldSpaceHeight: 1080
+--- !u!4 &1550123231
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1550123228}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 104.76898, y: 128.75912, z: -16.087008}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1966634156
 GameObject:
   m_ObjectHideFlags: 0
@@ -1026,7 +1082,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   uiDocument: {fileID: 1966634159}
-  ingredientInventoryHolder: {fileID: 881824005}
+  ingredientInventoryHolder: {fileID: 0}
 --- !u!114 &1966634159
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1148,6 +1204,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e9299a2fb62b4f4ea100146e025f759, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  enableDebugLogging: 1
 --- !u!4 &2140288139
 Transform:
   m_ObjectHideFlags: 0
@@ -1171,13 +1228,13 @@ SceneRoots:
   - {fileID: 274497597}
   - {fileID: 92360225}
   - {fileID: 375124888}
-  - {fileID: 1219147374}
+  - {fileID: 1550123231}
+  - {fileID: 570888128}
   - {fileID: 962596698}
   - {fileID: 1966634157}
   - {fileID: 997728925}
   - {fileID: 1322777998}
   - {fileID: 123304372}
   - {fileID: 2096520961}
-  - {fileID: 1272267877}
   - {fileID: 881824006}
   - {fileID: 2140288139}

@@ -16,13 +16,27 @@ MonoBehaviour:
   itemName: Test Ingredient 2
   itemDescription: Empty Description
   itemRarity: 0
+  itemIcon: {fileID: 0}
+  noun: 
+  adjective: 
   ingredientArchetype: 0
   ingredientAspect: 0
   isCorrupted: 0
+  potency: 1
+  gridWidth: 4
+  gridHeight: 4
+  unlocksAdditionalSpace: 0
+  additionalSpaceCount: 0
   infusions: []
-  canGrind: 0
+  canGrind: 1
   grindingResult: {fileID: 0}
   canDistill: 0
   distillingResult: {fileID: 0}
   canRoast: 0
   roastingResult: {fileID: 0}
+  baseRefiningSuccessRate: 0.7
+  stabilityRating: 0.8
+  minimumRefiningSkill: 1
+  references:
+    version: 2
+    RefIds: []

@@ -1,0 +1,354 @@
+/* Tetris-like Alchemy Grid Styles */
+
+/* Main Grid Container */
+.grid-container {
+    flex-direction: column;
+    background-color: rgba(20, 25, 35, 0.9);
+    border-radius: 8px;
+    border-width: 2px;
+    border-color: rgba(100, 150, 200, 0.5);
+    padding: 10px;
+    margin: 5px;
+}
+
+/* Grid Row */
+.grid-row {
+    flex-direction: row;
+    height: 40px;
+}
+
+/* Grid Cell - Base */
+.grid-cell {
+    width: 40px;
+    height: 40px;
+    border-width: 1px;
+    border-color: rgba(150, 150, 150, 0.3);
+    margin: 1px;
+    transition-duration: 0.2s;
+    transition-property: background-color, border-color, scale;
+}
+
+/* Empty Cell */
+.grid-cell.empty {
+    background-color: rgba(40, 45, 55, 0.8);
+    border-color: rgba(100, 100, 100, 0.4);
+}
+
+.grid-cell.empty:hover {
+    background-color: rgba(60, 70, 85, 0.9);
+    border-color: rgba(150, 200, 255, 0.6);
+}
+
+/* Filled Cell */
+.grid-cell.filled {
+    background-color: rgba(80, 120, 160, 0.9);
+    border-color: rgba(120, 180, 220, 0.8);
+    border-width: 2px;
+}
+
+/* Aspect-based colors */
+.grid-cell.aspect-scorch {
+    background-color: rgba(200, 80, 80, 0.9);
+    border-color: rgba(255, 120, 120, 0.8);
+}
+
+.grid-cell.aspect-frigid {
+    background-color: rgba(80, 130, 200, 0.9);
+    border-color: rgba(120, 170, 255, 0.8);
+}
+
+.grid-cell.aspect-corporeal {
+    background-color: rgba(130, 150, 80, 0.9);
+    border-color: rgba(170, 200, 120, 0.8);
+}
+
+.grid-cell.aspect-arc {
+    background-color: rgba(180, 180, 80, 0.9);
+    border-color: rgba(220, 220, 120, 0.8);
+}
+
+.grid-cell.aspect-divine {
+    background-color: rgba(150, 130, 180, 0.9);
+    border-color: rgba(190, 170, 220, 0.8);
+}
+
+.grid-cell.aspect-caustic {
+    background-color: rgba(230, 150, 50, 0.9);
+    border-color: rgba(255, 190, 90, 0.8);
+}
+
+/* Placement Preview States */
+.grid-cell.preview-valid {
+    background-color: rgba(80, 200, 80, 0.7);
+    border-color: rgba(120, 255, 120, 0.9);
+    border-width: 3px;
+    scale: 1.05;
+}
+
+.grid-cell.preview-invalid {
+    background-color: rgba(200, 80, 80, 0.7);
+    border-color: rgba(255, 120, 120, 0.9);
+    border-width: 3px;
+    scale: 0.95;
+}
+
+.grid-cell.preview-overlap {
+    background-color: rgba(200, 150, 80, 0.7);
+    border-color: rgba(255, 190, 120, 0.9);
+    border-width: 3px;
+    scale: 1.02;
+}
+
+/* Overlapping State */
+.grid-cell.overlapping {
+    border-style: dashed;
+    border-width: 2px;
+    background-color: rgba(150, 100, 200, 0.8);
+}
+
+/* Interaction Highlight */
+.grid-cell.interaction-highlight {
+    background-color: rgba(255, 215, 0, 0.6);
+    border-color: rgba(255, 255, 100, 0.9);
+    border-width: 3px;
+    scale: 1.1;
+}
+
+/* Placement Feedback Animations */
+.grid-cell.placement-success {
+    background-color: rgba(80, 255, 80, 0.9);
+    scale: 1.2;
+    transition-duration: 0.5s;
+}
+
+.grid-cell.placement-failed {
+    background-color: rgba(255, 80, 80, 0.9);
+    scale: 0.8;
+    transition-duration: 0.3s;
+}
+
+/* Expanded Grid Cells */
+.grid-cell.expanded {
+    border-color: rgba(100, 255, 150, 0.6);
+    background-color: rgba(50, 80, 60, 0.8);
+}
+
+/* Key Recipe Locked Cells */
+.grid-cell.key-locked {
+    border-style: double;
+    border-width: 3px;
+    border-color: rgba(255, 215, 0, 0.8);
+    background-color: rgba(80, 70, 30, 0.9);
+}
+
+/* Ingredient Palette */
+.ingredient-palette {
+    flex-direction: column;
+    background-color: rgba(30, 35, 45, 0.95);
+    border-radius: 6px;
+    border-width: 1px;
+    border-color: rgba(80, 120, 160, 0.6);
+    padding: 8px;
+    margin: 5px;
+    max-height: 400px;
+}
+
+.ingredient-item {
+    flex-direction: row;
+    align-items: center;
+    padding: 8px;
+    margin: 2px;
+    border-radius: 4px;
+    border-width: 1px;
+    border-color: rgba(100, 100, 100, 0.3);
+    background-color: rgba(50, 55, 65, 0.8);
+    transition-duration: 0.2s;
+}
+
+.ingredient-item:hover {
+    background-color: rgba(70, 80, 95, 0.9);
+    border-color: rgba(150, 200, 255, 0.7);
+    scale: 1.02;
+}
+
+.ingredient-item.selected {
+    background-color: rgba(80, 120, 160, 0.9);
+    border-color: rgba(120, 180, 220, 0.9);
+    border-width: 2px;
+}
+
+.ingredient-item.required {
+    border-color: rgba(255, 215, 0, 0.8);
+    background-color: rgba(80, 70, 30, 0.7);
+}
+
+.ingredient-preview {
+    width: 32px;
+    height: 32px;
+    background-color: rgba(80, 120, 160, 0.8);
+    border-radius: 3px;
+    margin-right: 8px;
+    border-width: 1px;
+    border-color: rgba(120, 180, 220, 0.6);
+}
+
+.ingredient-name {
+    color: rgba(220, 220, 220, 1);
+    font-size: 14px;
+    flex-grow: 1;
+}
+
+.ingredient-count {
+    color: rgba(180, 180, 180, 0.8);
+    font-size: 12px;
+    min-width: 20px;
+    text-align: center;
+}
+
+/* Status Labels */
+.status-label {
+    color: rgba(200, 220, 240, 1);
+    font-size: 14px;
+    padding: 4px 8px;
+    background-color: rgba(20, 25, 35, 0.8);
+    border-radius: 4px;
+    border-width: 1px;
+    border-color: rgba(80, 120, 160, 0.5);
+    margin: 2px;
+}
+
+.status-label.warning-text {
+    color: rgba(255, 200, 100, 1);
+    background-color: rgba(80, 60, 20, 0.9);
+    border-color: rgba(255, 180, 80, 0.7);
+}
+
+/* Buttons */
+.craft-button {
+    padding: 12px 20px;
+    font-size: 16px;
+    -unity-font-style: bold;
+    background-color: rgba(80, 120, 160, 0.9);
+    color: rgba(255, 255, 255, 1);
+    border-radius: 6px;
+    border-width: 2px;
+    border-color: rgba(120, 180, 220, 0.8);
+    margin: 8px;
+    transition-duration: 0.2s;
+}
+
+.craft-button:hover {
+    background-color: rgba(100, 140, 180, 1);
+    border-color: rgba(140, 200, 240, 1);
+    scale: 1.05;
+}
+
+.craft-button:disabled {
+    background-color: rgba(60, 60, 60, 0.5);
+    color: rgba(120, 120, 120, 0.8);
+    border-color: rgba(80, 80, 80, 0.5);
+}
+
+.clear-button {
+    background-color: rgba(160, 80, 80, 0.9);
+    border-color: rgba(200, 120, 120, 0.8);
+}
+
+.clear-button:hover {
+    background-color: rgba(180, 100, 100, 1);
+    border-color: rgba(220, 140, 140, 1);
+}
+
+/* Recipe Selection */
+.recipe-item {
+    flex-direction: row;
+    align-items: center;
+    padding: 6px;
+    margin: 2px;
+    border-radius: 4px;
+    border-width: 1px;
+    border-color: rgba(100, 100, 100, 0.3);
+    background-color: rgba(50, 55, 65, 0.8);
+    transition-duration: 0.2s;
+}
+
+.recipe-item:hover {
+    background-color: rgba(70, 80, 95, 0.9);
+    border-color: rgba(150, 200, 255, 0.7);
+}
+
+.recipe-item.selected {
+    background-color: rgba(80, 120, 160, 0.9);
+    border-color: rgba(120, 180, 220, 0.9);
+    border-width: 2px;
+}
+
+.recipe-item.key-recipe {
+    border-color: rgba(255, 215, 0, 0.8);
+    background-color: rgba(80, 70, 30, 0.7);
+}
+
+.recipe-name {
+    color: rgba(220, 220, 220, 1);
+    font-size: 13px;
+    flex-grow: 1;
+}
+
+.recipe-difficulty {
+    color: rgba(180, 180, 180, 0.8);
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 10px;
+    background-color: rgba(60, 60, 60, 0.6);
+}
+
+/* Animations */
+@keyframes pulse {
+    0% { scale: 1; }
+    50% { scale: 1.05; }
+    100% { scale: 1; }
+}
+
+@keyframes glow {
+    0% { border-color: rgba(255, 215, 0, 0.3); }
+    50% { border-color: rgba(255, 215, 0, 0.9); }
+    100% { border-color: rgba(255, 215, 0, 0.3); }
+}
+
+.grid-cell.interaction-highlight {
+    animation-name: pulse;
+    animation-duration: 1s;
+    animation-iteration-count: infinite;
+}
+
+.grid-cell.key-locked {
+    animation-name: glow;
+    animation-duration: 2s;
+    animation-iteration-count: infinite;
+}
+
+/* Responsive Design */
+.grid-container.compact .grid-cell {
+    width: 30px;
+    height: 30px;
+}
+
+.grid-container.large .grid-cell {
+    width: 50px;
+    height: 50px;
+}
+
+/* Dark Mode Overrides */
+.dark-theme .grid-container {
+    background-color: rgba(10, 15, 25, 0.95);
+    border-color: rgba(60, 100, 140, 0.6);
+}
+
+.dark-theme .grid-cell.empty {
+    background-color: rgba(20, 25, 35, 0.9);
+}
+
+.dark-theme .status-label {
+    background-color: rgba(10, 15, 25, 0.9);
+    color: rgba(180, 200, 220, 1);
+}

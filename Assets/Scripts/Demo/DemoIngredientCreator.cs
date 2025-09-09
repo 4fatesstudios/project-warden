@@ -3,8 +3,9 @@ using FourFatesStudios.ProjectWarden.Enums;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
 using UnityEditor;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
-namespace Demo
+namespace FourFatesStudios.ProjectWarden.Demo
 {
     /// <summary>
     /// Helper script to create demo ingredients for testing the crafting system

@@ -25,6 +25,7 @@
         </ui:VisualElement>
         <ui:VisualElement name="navigation-container" class="navigation-container">
             <ui:Button name="prev-button" text="◀ Previous" class="nav-button prev-button" />
+            <ui:Button name="close-button" text="✖" class="nav-button close-button" />
             <ui:Button name="next-button" text="Next ▶" class="nav-button next-button" />
         </ui:VisualElement>
     </ui:VisualElement>

@@ -5,7 +5,7 @@ using UnityEditor;
 using UnityEngine;
 
 [CustomEditor(typeof(AlchemyRecipe))]
-public class AlchemyRecipeEditor : Editor
+public class AlchemyRecipeEditor : UnityEditor.Editor // Fixed namespace conflict
 {
     // cached styles
     private GUIStyle _warningStyle;

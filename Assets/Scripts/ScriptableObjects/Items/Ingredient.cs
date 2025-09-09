@@ -1,6 +1,6 @@
 using FourFatesStudios.ProjectWarden.Enums;
-using FourFatesStudios.ProjectWarden.ScriptableObjects.PotionEffects;
 using System.Collections.Generic;
+using FourFatesStudios.ProjectWarden.Effects;
 using FourFatesStudios.ProjectWarden.Structs;
 using UnityEngine;
 
@@ -43,24 +43,43 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
         [Range(0, 8)]
         private int additionalSpaceCount = 0;
 
+        [Header("Visual Shape Design")]
+        [SerializeField, Tooltip("Serialized shape data for the ingredient's visual grid design.")]
+        private IngredientShapeData shapeData = new IngredientShapeData();
+
         [Header("Ingredient Effect")] 
         [SerializeField, Tooltip("The infusion(s) given from the ingredient")] 
         private List<Infusion> infusions;
 
-        [Header("Refinement")] 
-        [SerializeField] private bool canGrind;
-        [SerializeField] private Ingredient grindingResult;
+        [Header("Refinement Configuration")] 
+        [SerializeField, Tooltip("Can this ingredient be ground (for Ore types)?")]
+        private bool canGrind;
+        [SerializeField, Tooltip("Result of grinding (optional - can be auto-generated)")]
+        private Ingredient grindingResult;
         
-        [SerializeField] private bool canDistill;
-        [SerializeField] private Ingredient distillingResult;
+        [SerializeField, Tooltip("Can this ingredient be distilled (for Herb/Organic/Solvent types)?")]
+        private bool canDistill;
+        [SerializeField, Tooltip("Result of distilling (optional - can be auto-generated)")]
+        private Ingredient distillingResult;
         
-        [SerializeField] private bool canRoast;
-        [SerializeField] private Ingredient roastingResult;
+        [SerializeField, Tooltip("Can this ingredient be roasted (for Herb/Organic types)?")]
+        private bool canRoast;
+        [SerializeField, Tooltip("Result of roasting (optional - can be auto-generated)")]
+        private Ingredient roastingResult;
         
-        // DEPRECATED, REMOVE ALL USES, to delete
-        private List<PotionEffect> potionEffects;
-        public IReadOnlyList<PotionEffect> PotionEffects => potionEffects;
-        // end to delete
+        [Header("Refining Properties")]
+        [SerializeField, Tooltip("Base success rate for refining this ingredient (0.0-1.0)")]
+        [Range(0f, 1f)]
+        private float baseRefiningSuccessRate = 0.7f;
+        
+        [SerializeField, Tooltip("How resistant this ingredient is to being lost during failed refining")]
+        [Range(0f, 1f)]
+        private float stabilityRating = 0.8f;
+        
+        [SerializeField, Tooltip("Minimum skill level required to attempt refining this ingredient")]
+        [Range(1, 100)]
+        private int minimumRefiningSkill = 1;
+        
 
         public string Noun => noun;
         public string Adjective => adjective;
@@ -79,22 +98,172 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
         public Ingredient DistillingResult => distillingResult;
         public bool CanRoast => canRoast;
         public Ingredient RoastingResult => roastingResult;
+        public float BaseRefiningSuccessRate => baseRefiningSuccessRate;
+        public float StabilityRating => stabilityRating;
+        public int MinimumRefiningSkill => minimumRefiningSkill;
+        public bool CanBeRefined => canGrind || canDistill || canRoast;
+
+        // Shape Data Properties
+        public IngredientShapeData ShapeData => shapeData;
+        
+        /// <summary>
+        /// Get the ingredient's shape as a bool array for grid operations
+        /// </summary>
+        public bool[,] GetShape()
+        {
+            if (shapeData == null)
+            {
+                shapeData = new IngredientShapeData(gridWidth, gridHeight);
+            }
+            return shapeData.ToBoolArray();
+        }
+        
+        /// <summary>
+        /// Set the ingredient's shape from a bool array (used by grid editor)
+        /// </summary>
+        public void SetShape(bool[,] shape)
+        {
+            if (shapeData == null)
+            {
+                shapeData = new IngredientShapeData();
+            }
+            shapeData.SetFromBoolArray(shape);
+            
+            // Update grid dimensions to match shape
+            gridWidth = shapeData.GridWidth;
+            gridHeight = shapeData.GridHeight;
+            
+#if UNITY_EDITOR
+            UnityEditor.EditorUtility.SetDirty(this);
+#endif
+        }
+        
+        /// <summary>
+        /// Apply a shape template to this ingredient
+        /// </summary>
+        public void ApplyShapeTemplate(ShapeTemplate template)
+        {
+            if (shapeData == null)
+            {
+                shapeData = new IngredientShapeData(gridWidth, gridHeight, template);
+            }
+            else
+            {
+                shapeData.ApplyTemplate(template);
+            }
+            
+#if UNITY_EDITOR
+            UnityEditor.EditorUtility.SetDirty(this);
+#endif
+        }
+        
+        /// <summary>
+        /// Check if the ingredient occupies a specific grid cell
+        /// </summary>
+        public bool OccupiesCell(int x, int y)
+        {
+            if (shapeData == null) return x == 0 && y == 0; // Default to single cell
+            return shapeData.IsCellActive(x, y);
+        }
+        
+        /// <summary>
+        /// Export shape data for external tools (ASE, etc.)
+        /// </summary>
+        public string ExportShapeData()
+        {
+            if (shapeData == null)
+            {
+                shapeData = new IngredientShapeData(gridWidth, gridHeight);
+            }
+            return shapeData.ExportAsString();
+        }
+        
+        /// <summary>
+        /// Import shape data from external tools
+        /// </summary>
+        public bool ImportShapeData(string data)
+        {
+            if (shapeData == null)
+            {
+                shapeData = new IngredientShapeData();
+            }
+            
+            bool success = shapeData.ImportFromString(data);
+            if (success)
+            {
+                gridWidth = shapeData.GridWidth;
+                gridHeight = shapeData.GridHeight;
+                
+#if UNITY_EDITOR
+                UnityEditor.EditorUtility.SetDirty(this);
+#endif
+            }
+            return success;
+        }
 
 #if UNITY_EDITOR
         private new void OnValidate()
         {
             base.OnValidate();
-            if (potionEffects == null)
-                return;
-
-            if (potionEffects.Contains(null))
+            
+            // Validate infusions are properly initialized
+            if (infusions == null)
             {
-                Debug.LogWarning($"[{name}] contains null entries in its PotionEffects list.", this);
+                infusions = new List<Infusion>();
             }
             
+            // Validate and initialize shape data
+            if (shapeData == null)
+            {
+                shapeData = new IngredientShapeData(gridWidth, gridHeight);
+            }
+            else
+            {
+                // Ensure shape data matches current grid dimensions
+                if (shapeData.GridWidth != gridWidth || shapeData.GridHeight != gridHeight)
+                {
+                    shapeData.ResizeGrid(gridWidth, gridHeight);
+                }
+                
+                // Validate shape data consistency
+                shapeData.ValidateAndFix();
+            }
+
             if (!canGrind) grindingResult = null;
             if (!canDistill) distillingResult = null;
             if (!canRoast) roastingResult = null;
+            
+            // Validate refining methods match ingredient archetype
+            if (canGrind && ingredientArchetype != IngredientArchetype.Ore)
+            {
+                Debug.LogWarning($"[{name}] Grinding is only valid for Ore ingredients, but this is {ingredientArchetype}", this);
+            }
+            
+            if (canDistill && !(ingredientArchetype == IngredientArchetype.Herb || 
+                               ingredientArchetype == IngredientArchetype.Organic || 
+                               ingredientArchetype == IngredientArchetype.Solvent))
+            {
+                Debug.LogWarning($"[{name}] Distilling is only valid for Herb, Organic, or Solvent ingredients, but this is {ingredientArchetype}", this);
+            }
+            
+            if (canRoast && !(ingredientArchetype == IngredientArchetype.Herb || 
+                             ingredientArchetype == IngredientArchetype.Organic))
+            {
+                Debug.LogWarning($"[{name}] Roasting is only valid for Herb or Organic ingredients, but this is {ingredientArchetype}", this);
+            }
+            
+            // Warn about refined effects
+            if ((canGrind || canDistill || canRoast) && 
+                grindingResult == null && distillingResult == null && roastingResult == null)
+            {
+                Debug.LogWarning($"[{name}] Can be refined but has no refined results assigned. Consider creating refined versions or the ingredient will be lost.", this);
+            }
+            
+            // Validate skill requirements
+            if (minimumRefiningSkill > potency * 20)
+            {
+                Debug.LogWarning($"[{name}] Minimum refining skill ({minimumRefiningSkill}) seems very high for potency {potency}. Consider lowering it.", this);
+            }
         }
 #endif
         public override string ToString()
