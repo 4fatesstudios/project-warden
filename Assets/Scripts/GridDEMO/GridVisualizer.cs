@@ -43,6 +43,13 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         
         private void CreateGridVisuals()
         {
+            // Prevent duplicate grid creation - preserve existing grid visuals
+            if (cellVisuals != null && cellVisuals.Length > 0)
+            {
+                Debug.Log("🔄 GridVisualizer: Grid visuals already exist, preserving them.");
+                return;
+            }
+            
             cellVisuals = new GameObject[gridManager.gridWidth, gridManager.gridHeight];
             cellRenderers = new MeshRenderer[gridManager.gridWidth, gridManager.gridHeight];
             
@@ -92,6 +99,13 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         private void CreateGridLines()
         {
             if (!showGridLines) return;
+            
+            // Prevent duplicate grid line creation
+            if (gridLines.Count > 0)
+            {
+                Debug.Log("🔄 GridVisualizer: Grid lines already exist, preserving them.");
+                return;
+            }
             
             // Vertical lines
             for (int x = 0; x <= gridManager.gridWidth; x++)

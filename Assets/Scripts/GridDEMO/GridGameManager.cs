@@ -102,11 +102,45 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                 }
             }
 
+            // Auto-load ingredients if none are assigned
+            if (availableIngredients.Count == 0)
+            {
+                LoadTestIngredients();
+            }
+
             // Setup input
             SetupInput();
 
             // Center camera on grid after initialization
             CenterCameraOnGrid();
+        }
+        
+        private void LoadTestIngredients()
+        {
+            Debug.Log("🧪 Loading test ingredients from Resources...");
+            
+            // Try to load from different possible locations
+            string[] possiblePaths = {
+                "Items/Ingredients/TestIngredient1",
+                "TestIngredients/Ice Crystal",
+                "TestIngredients/Life Bloom"
+            };
+            
+            foreach (string path in possiblePaths)
+            {
+                var ingredient = Resources.Load<Ingredient>(path);
+                if (ingredient != null)
+                {
+                    availableIngredients.Add(ingredient);
+                    Debug.Log($"✅ Loaded ingredient: {ingredient.ItemName}");
+                }
+                else
+                {
+                    Debug.LogWarning($"⚠️ Could not load ingredient from: {path}");
+                }
+            }
+            
+            Debug.Log($"🧪 Total ingredients loaded: {availableIngredients.Count}");
         }
 
         private void SetupInput()
@@ -140,15 +174,15 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             // Calculate grid center in world space
             Vector3 gridCenter = CalculateGridCenter();
             
-            // Calculate optimal camera distance based on grid size
+            // Calculate optimal camera distance based on grid size - much further back
             float gridDiagonal = Mathf.Sqrt(gridWidth * gridWidth + gridHeight * gridHeight) * cellSize;
-            float cameraDistance = Mathf.Max(gridDiagonal * 0.7f, 8f); // Minimum distance of 8 units
+            float cameraDistance = Mathf.Max(gridDiagonal * 1.2f, 12f); // Increased distance and minimum
             
-            // Position camera at an angle above and behind the grid center
+            // Position camera at an angle above and behind the grid center - further back
             Vector3 cameraOffset = new Vector3(
                 gridCenter.x,
-                cameraDistance * 0.8f, // Height above grid (increased)
-                gridCenter.z - cameraDistance * 0.5f // Distance back from center
+                cameraDistance * 0.9f, // Height above grid (increased)
+                gridCenter.z - cameraDistance * 0.8f // Much further back from center
             );
             
             gameCamera.transform.position = cameraOffset;
@@ -156,7 +190,7 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             // Look at the grid center
             gameCamera.transform.LookAt(gridCenter);
             
-            Debug.Log($"Camera centered on grid at {gridCenter}, camera position: {cameraOffset}");
+            Debug.Log($"Camera positioned further back - Grid center: {gridCenter}, Camera position: {cameraOffset}");
         }
 
         /// <summary>
@@ -1273,12 +1307,12 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         
         public void ClearGrid()
         {
-            Debug.LogWarning("🧹 ClearGrid() called! This will clear all placed ingredients.");
+            Debug.LogWarning("🧹 ClearGrid() called! This will clear all placed ingredients but keep the grid visualization.");
             
             Debug.Log("🧹 Grid state BEFORE clearing:");
             DebugGridState();
             
-            // Clear grid data
+            // Clear grid data (ingredient occupancy only)
             for (int x = 0; x < gridWidth; x++)
             {
                 for (int y = 0; y < gridHeight; y++)
@@ -1286,19 +1320,43 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                     if (gridCells[x, y].IsOccupied)
                     {
                         Debug.Log($"🧹 Clearing occupied cell ({x},{y}) with {gridCells[x, y].OccupiedByIngredient?.ItemName}");
+                        gridCells[x, y].Clear(); // Only clear occupancy, not the visual grid cell
                     }
-                    gridCells[x, y].Clear();
                 }
             }
             
-            // Clear visual ingredients
-            ingredientPlacer.ClearAllIngredients();
-            visualizer.RefreshGrid();
+            // Clear visual ingredients with detailed logging (but preserve grid visualization)
+            Debug.Log("🧹 Calling IngredientPlacer.ClearAllIngredients()...");
+            if (ingredientPlacer != null)
+            {
+                int ingredientCountBefore = ingredientPlacer.GetAllPlacedIngredients().Count;
+                Debug.Log($"🧹 Ingredients to clear: {ingredientCountBefore}");
+                
+                ingredientPlacer.ClearAllIngredients();
+                
+                int ingredientCountAfter = ingredientPlacer.GetAllPlacedIngredients().Count;
+                Debug.Log($"🧹 Ingredients remaining after clear: {ingredientCountAfter}");
+            }
+            else
+            {
+                Debug.LogError("🚨 IngredientPlacer is null! Cannot clear visual ingredients.");
+            }
+            
+            // Refresh grid visualization (this will update colors but preserve the grid)
+            Debug.Log("🧹 Refreshing grid visualization...");
+            if (visualizer != null)
+            {
+                visualizer.RefreshGrid(); // This should update the grid colors but keep the grid structure
+            }
+            else
+            {
+                Debug.LogError("🚨 GridVisualizer is null! Cannot refresh grid.");
+            }
             
             Debug.Log("🧹 Grid state AFTER clearing:");
             DebugGridState();
             
-            Debug.Log("✅ ClearGrid() complete!");
+            Debug.Log("✅ ClearGrid() complete! Grid structure preserved, ingredients removed.");
         }
 
         /// <summary>
