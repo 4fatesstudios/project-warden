@@ -143,17 +143,30 @@ namespace FourFatesStudios.ProjectWarden.GridDemo.UI
             var raycastResults = new System.Collections.Generic.List<RaycastResult>();
             EventSystem.current.RaycastAll(pointerData, raycastResults);
             
+            if (enableDebugLogs && raycastResults.Count > 0)
+            {
+                Debug.Log($"🔍 UI Raycast found {raycastResults.Count} hits:");
+                foreach (var result in raycastResults)
+                {
+                    Debug.Log($"  - {result.gameObject.name} (layer: {LayerMask.LayerToName(result.gameObject.layer)})");
+                }
+            }
+            
             foreach (var result in raycastResults)
             {
                 // Check if clicking on any UI element
-                if (result.gameObject.GetComponent<UnityEngine.UI.Graphic>() != null ||
-                    result.gameObject.name.Contains("Compact Sidebar") ||
-                    result.gameObject.name.Contains("Right Info Panel") ||
-                    result.gameObject.name.Contains("Button") ||
-                    result.gameObject.name.Contains("Scroll"))
+                bool isUI = result.gameObject.GetComponent<UnityEngine.UI.Graphic>() != null ||
+                           result.gameObject.name.Contains("Compact Sidebar") ||
+                           result.gameObject.name.Contains("Right Info Panel") ||
+                           result.gameObject.name.Contains("Button") ||
+                           result.gameObject.name.Contains("Scroll") ||
+                           result.gameObject.layer == LayerMask.NameToLayer("UI") ||
+                           result.gameObject.GetComponentInParent<Canvas>() != null;
+                
+                if (isUI)
                 {
                     if (enableDebugLogs)
-                        Debug.Log($"ImprovedClickDetector: UI click detected on {result.gameObject.name}");
+                        Debug.Log($"✋ ImprovedClickDetector: UI click detected on {result.gameObject.name}");
                     
                     return true;
                 }
@@ -237,13 +250,31 @@ namespace FourFatesStudios.ProjectWarden.GridDemo.UI
         
         private void TriggerNormalGridPlacement(Vector2Int gridPos)
         {
-            if (gridManager != null && gridManager.CurrentSelectedIngredient != null)
+            Debug.Log($"🎯 TriggerNormalGridPlacement called at {gridPos}");
+            
+            if (gridManager == null)
             {
-                bool success = gridManager.TryPlaceIngredient(gridManager.CurrentSelectedIngredient, gridPos);
-                if (success && enableDebugLogs)
-                {
-                    Debug.Log($"ImprovedClickDetector: Placed {gridManager.CurrentSelectedIngredient.ItemName} at {gridPos}");
-                }
+                Debug.LogError("❌ gridManager is null!");
+                return;
+            }
+            
+            if (gridManager.CurrentSelectedIngredient == null)
+            {
+                Debug.LogError("❌ CurrentSelectedIngredient is null!");
+                return;
+            }
+            
+            Debug.Log($"🎯 About to call TryPlaceIngredient with {gridManager.CurrentSelectedIngredient.ItemName} at {gridPos}");
+            bool success = gridManager.TryPlaceIngredient(gridManager.CurrentSelectedIngredient, gridPos);
+            Debug.Log($"🎯 TryPlaceIngredient returned: {success}");
+            
+            if (success)
+            {
+                Debug.Log($"✅ ImprovedClickDetector: Successfully placed {gridManager.CurrentSelectedIngredient.ItemName} at {gridPos}");
+            }
+            else
+            {
+                Debug.LogWarning($"❌ ImprovedClickDetector: Failed to place {gridManager.CurrentSelectedIngredient.ItemName} at {gridPos}");
             }
         }
         

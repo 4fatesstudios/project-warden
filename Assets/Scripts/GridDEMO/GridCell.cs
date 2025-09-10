@@ -27,11 +27,16 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         
         public void SetOccupied(Ingredient ingredient)
         {
+            Debug.Log($"GridCell.SetOccupied: Setting cell ({Position.x},{Position.y}) as occupied by {ingredient?.ItemName ?? "NULL"}");
+            
             IsOccupied = true;
             OccupiedByIngredient = ingredient;
             CellAspect = ingredient.IngredientAspect;
             CellIntensity = ingredient.Potency / 5f; // Normalize potency to 0-1
             UpdateVisualState();
+            
+            // Verify the change took effect
+            Debug.Log($"GridCell.SetOccupied RESULT: Cell ({Position.x},{Position.y}) -> IsOccupied = {IsOccupied}, OccupiedByIngredient = {OccupiedByIngredient?.ItemName ?? "NULL"}");
         }
         
         public void Clear()
@@ -149,6 +154,30 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                    CellAspect.Value == Aspect.Frigid ||
                    CellAspect.Value == Aspect.Arc ||
                    CellAspect.Value == Aspect.Caustic;
+        }
+        
+        /// <summary>
+        /// Debug method to get detailed cell information
+        /// </summary>
+        public string GetDebugInfo()
+        {
+            var info = $"GridCell at {Position}:\n";
+            info += $"  IsOccupied: {IsOccupied}\n";
+            info += $"  IsHighlighted: {IsHighlighted}\n";
+            info += $"  IsValidPlacement: {IsValidPlacement}\n";
+            info += $"  VisualState: {VisualState}\n";
+            info += $"  CellColor: {CellColor}\n";
+            
+            if (IsOccupied)
+            {
+                info += $"  OccupiedBy: {OccupiedByIngredient?.ItemName ?? "NULL"}\n";
+                info += $"  CellAspect: {CellAspect}\n";
+                info += $"  CellIntensity: {CellIntensity:F2}\n";
+                info += $"  Temperature: {GetTemperature():F2}\n";
+                info += $"  HasElementalAspect: {HasElementalAspect()}\n";
+            }
+            
+            return info;
         }
     }
     

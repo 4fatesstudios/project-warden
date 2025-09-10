@@ -60,11 +60,24 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                 RemoveIngredient(gridPosition);
             }
             
-            // Calculate world position
-            Vector3 worldPosition = gridManager.GridToWorldPosition(gridPosition);
+            // Mark grid cells as occupied first
+            bool occupancySuccess = MarkGridCellsOccupied(ingredient, gridPosition);
+            if (!occupancySuccess)
+            {
+                Debug.LogError($"Failed to mark grid cells occupied for {ingredient.ItemName} at {gridPosition}");
+                return;
+            }
             
-            // Create ingredient visual based on shape data
+            // Create visual representation 
+            Vector3 worldPosition = gridManager.GridToWorldPosition(gridPosition);
             GameObject ingredientObj = CreateIngredientVisual(ingredient, gridPosition, worldPosition);
+            
+            if (ingredientObj == null)
+            {
+                Debug.LogError($"Failed to create visual for {ingredient.ItemName}");
+                ClearGridCellsOccupied(ingredient, gridPosition);
+                return;
+            }
             
             // Store the ingredient instance
             IngredientInstance instance = new IngredientInstance
@@ -77,13 +90,16 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             
             placedIngredients[gridPosition] = instance;
             
-            // Play placement effect
+            // Effects and reactions
             gridVisualizer.PlayPlacementEffect(gridPosition, ingredient);
-            
-            // Trigger any reactions with neighboring ingredients
             CheckForReactions(gridPosition, ingredient);
             
-            Debug.Log($"Placed {ingredient.ItemName} at {gridPosition}");
+            // Final verification
+            bool verificationPassed = VerifyPlacementIntegrity(ingredient, gridPosition);
+            if (!verificationPassed)
+            {
+                Debug.LogError($"Placement verification failed for {ingredient.ItemName} at {gridPosition}");
+            }
         }
         
         private GameObject CreateIngredientVisual(Ingredient ingredient, Vector2Int gridPosition, Vector3 worldPosition)
@@ -260,7 +276,7 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             MeshRenderer textRenderer = labelObj.GetComponent<MeshRenderer>();
             textRenderer.material = new Material(Shader.Find("GUI/Text Shader"));
             
-            Debug.Log($"IngredientPlacer: Created 3D text label for {ingredient.ItemName} (creates a plane)");
+            Debug.Log($"IngredientPlacer: Created 3D text label for {ingredient.ItemName}");
         }
         
         private void CreateUITextLabel(GameObject ingredientObj, Ingredient ingredient)
@@ -296,7 +312,7 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             // Position the label above the ingredient using world to screen conversion
             StartCoroutine(UpdateUILabelPosition(labelObj, ingredientObj));
             
-            Debug.Log($"IngredientPlacer: Created UI text label for {ingredient.ItemName} (no planes)");
+            Debug.Log($"IngredientPlacer: Created UI text label for {ingredient.ItemName}");
         }
         
         private void CreateLabelCanvas()
@@ -312,7 +328,7 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             
             GraphicRaycaster raycaster = canvasObj.AddComponent<GraphicRaycaster>();
             
-            Debug.Log("IngredientPlacer: Created single canvas for all ingredient labels");
+            Debug.Log("IngredientPlacer: Created canvas for ingredient labels");
         }
         
         private System.Collections.IEnumerator UpdateUILabelPosition(GameObject labelObj, GameObject ingredientObj)
@@ -335,6 +351,9 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         {
             if (placedIngredients.TryGetValue(gridPosition, out IngredientInstance instance))
             {
+                // Clear grid occupancy first
+                ClearGridCellsOccupied(instance.ingredient, gridPosition);
+                
                 // Play removal effect
                 gridVisualizer.PlayRemovalEffect(gridPosition);
                 
@@ -345,18 +364,167 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                 }
                 
                 placedIngredients.Remove(gridPosition);
-                
-                Debug.Log($"Removed ingredient from {gridPosition}");
             }
+        }
+        
+        /// <summary>
+        /// Marks grid cells as occupied by the ingredient. Handles both shape-based and rectangle ingredients.
+        /// </summary>
+        private bool MarkGridCellsOccupied(Ingredient ingredient, Vector2Int position)
+        {
+            try
+            {
+                var cellsToOccupy = GetIngredientCells(ingredient, position);
+                int successfullyMarked = 0;
+                
+                foreach (var cellPos in cellsToOccupy)
+                {
+                    var cell = gridManager.GetCell(cellPos.x, cellPos.y);
+                    if (cell != null)
+                    {
+                        if (cell.IsOccupied)
+                        {
+                            Debug.LogError($"Cell ({cellPos.x},{cellPos.y}) already occupied by {cell.OccupiedByIngredient?.ItemName}");
+                            RollbackCellMarking(cellsToOccupy, successfullyMarked);
+                            return false;
+                        }
+                        
+                        cell.SetOccupied(ingredient);
+                        successfullyMarked++;
+                    }
+                    else
+                    {
+                        Debug.LogError($"Cell ({cellPos.x},{cellPos.y}) is out of bounds");
+                        RollbackCellMarking(cellsToOccupy, successfullyMarked);
+                        return false;
+                    }
+                }
+                
+                return true;
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"Exception in MarkGridCellsOccupied: {e.Message}");
+                return false;
+            }
+        }
+        
+        /// <summary>
+        /// Clears grid cell occupancy for the ingredient
+        /// </summary>
+        private void ClearGridCellsOccupied(Ingredient ingredient, Vector2Int position)
+        {
+            var cellsToClear = GetIngredientCells(ingredient, position);
+            
+            foreach (var cellPos in cellsToClear)
+            {
+                var cell = gridManager.GetCell(cellPos.x, cellPos.y);
+                if (cell != null && cell.IsOccupied && cell.OccupiedByIngredient == ingredient)
+                {
+                    cell.Clear();
+                }
+            }
+        }
+        
+        /// <summary>
+        /// Gets all grid positions that should be occupied by the ingredient
+        /// </summary>
+        private List<Vector2Int> GetIngredientCells(Ingredient ingredient, Vector2Int position)
+        {
+            List<Vector2Int> cells = new List<Vector2Int>();
+            
+            if (ingredient.ShapeData != null)
+            {
+                // Shape-based ingredient
+                var shape = ingredient.GetShape();
+                int shapeWidth = shape.GetLength(0);
+                int shapeHeight = shape.GetLength(1);
+                
+                for (int x = 0; x < shapeWidth; x++)
+                {
+                    for (int y = 0; y < shapeHeight; y++)
+                    {
+                        if (shape[x, y])
+                        {
+                            Vector2Int cellPos = position + new Vector2Int(x, y);
+                            cells.Add(cellPos);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                // Rectangle-based ingredient
+                for (int x = 0; x < ingredient.GridWidth; x++)
+                {
+                    for (int y = 0; y < ingredient.GridHeight; y++)
+                    {
+                        Vector2Int cellPos = position + new Vector2Int(x, y);
+                        cells.Add(cellPos);
+                    }
+                }
+            }
+            
+            return cells;
+        }
+        
+        /// <summary>
+        /// Rollback cell marking if placement fails partway through
+        /// </summary>
+        private void RollbackCellMarking(List<Vector2Int> cellsToOccupy, int successfullyMarked)
+        {
+            for (int i = 0; i < successfullyMarked && i < cellsToOccupy.Count; i++)
+            {
+                var cellPos = cellsToOccupy[i];
+                var cell = gridManager.GetCell(cellPos.x, cellPos.y);
+                if (cell != null)
+                {
+                    cell.Clear();
+                }
+            }
+        }
+        
+        /// <summary>
+        /// Verifies that visual placement and grid occupancy are properly synchronized
+        /// </summary>
+        private bool VerifyPlacementIntegrity(Ingredient ingredient, Vector2Int position)
+        {
+            // Check that we have visual tracking
+            if (!placedIngredients.ContainsKey(position))
+            {
+                Debug.LogError($"No visual record found for {ingredient.ItemName} at {position}");
+                return false;
+            }
+            
+            // Check that all required grid cells are occupied
+            var expectedCells = GetIngredientCells(ingredient, position);
+            
+            foreach (var cellPos in expectedCells)
+            {
+                var cell = gridManager.GetCell(cellPos.x, cellPos.y);
+                if (cell == null || !cell.IsOccupied || cell.OccupiedByIngredient != ingredient)
+                {
+                    Debug.LogError($"Cell ({cellPos.x},{cellPos.y}) not properly occupied by {ingredient.ItemName}");
+                    return false;
+                }
+            }
+            
+            return true;
         }
         
         public void ClearAllIngredients()
         {
             foreach (var kvp in placedIngredients)
             {
-                if (kvp.Value.visualObject != null)
+                var instance = kvp.Value;
+                
+                // Clear grid occupancy
+                ClearGridCellsOccupied(instance.ingredient, instance.gridPosition);
+                
+                // Destroy visual object
+                if (instance.visualObject != null)
                 {
-                    Destroy(kvp.Value.visualObject);
+                    Destroy(instance.visualObject);
                 }
             }
             
@@ -367,10 +535,7 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             {
                 Destroy(ingredientLabelCanvas.gameObject);
                 ingredientLabelCanvas = null;
-                Debug.Log("IngredientPlacer: Cleaned up label canvas");
             }
-            
-            Debug.Log("Cleared all ingredients from grid");
         }
         
         private void CheckForReactions(Vector2Int position, Ingredient ingredient)
@@ -465,13 +630,82 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         
         public IngredientInstance GetIngredientAt(Vector2Int position)
         {
-            placedIngredients.TryGetValue(position, out IngredientInstance instance);
-            return instance;
+            // First check if there's an ingredient with this exact position as origin
+            if (placedIngredients.TryGetValue(position, out IngredientInstance instance))
+            {
+                return instance;
+            }
+            
+            // Check if this position is occupied by any ingredient
+            foreach (var kvp in placedIngredients)
+            {
+                var ingredient = kvp.Value.ingredient;
+                var originPos = kvp.Value.gridPosition;
+                
+                // Check if the position falls within this ingredient's occupied cells
+                if (ingredient.ShapeData != null)
+                {
+                    var shape = ingredient.GetShape();
+                    int shapeWidth = shape.GetLength(0);
+                    int shapeHeight = shape.GetLength(1);
+                    
+                    for (int x = 0; x < shapeWidth; x++)
+                    {
+                        for (int y = 0; y < shapeHeight; y++)
+                        {
+                            if (shape[x, y])
+                            {
+                                Vector2Int cellPos = originPos + new Vector2Int(x, y);
+                                if (cellPos == position)
+                                {
+                                    return kvp.Value;
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    // Rectangle check
+                    for (int x = 0; x < ingredient.GridWidth; x++)
+                    {
+                        for (int y = 0; y < ingredient.GridHeight; y++)
+                        {
+                            Vector2Int cellPos = originPos + new Vector2Int(x, y);
+                            if (cellPos == position)
+                            {
+                                return kvp.Value;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            return null;
         }
         
         public List<IngredientInstance> GetAllPlacedIngredients()
         {
             return new List<IngredientInstance>(placedIngredients.Values);
+        }
+        
+        /// <summary>
+        /// Public method for GridGameManager to repair occupancy issues during verification
+        /// </summary>
+        public bool RepairIngredientOccupancy(Ingredient ingredient, Vector2Int position)
+        {
+            // Clear any existing occupancy first
+            ClearGridCellsOccupied(ingredient, position);
+            
+            // Re-mark cells as occupied
+            bool success = MarkGridCellsOccupied(ingredient, position);
+            
+            if (!success)
+            {
+                Debug.LogError($"Failed to repair occupancy for {ingredient.ItemName} at {position}");
+            }
+            
+            return success;
         }
     }
     
