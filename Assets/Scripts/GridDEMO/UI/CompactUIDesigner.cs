@@ -119,6 +119,11 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             GameObject container = CreateIngredientButtonContainer(scrollArea);
             
             GridGameManager gridManager = FindFirstObjectByType<GridGameManager>();
+            if (gridManager == null)
+            {
+                gridManager = FindObjectOfType<GridGameManager>(); // Fallback
+            }
+            
             if (gridManager != null && gridManager.availableIngredients != null)
             {
                 CreateCompactIngredientButtons(container, gridManager);
@@ -282,7 +287,7 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             controlsContainer.transform.SetParent(sidebar.transform, false);
             
             RectTransform controlsRect = controlsContainer.AddComponent<RectTransform>();
-            controlsRect.sizeDelta = new Vector2(0, 80f);
+            controlsRect.sizeDelta = new Vector2(0, 120f); // Increased size for additional button
             
             VerticalLayoutGroup controlsLayout = controlsContainer.AddComponent<VerticalLayoutGroup>();
             controlsLayout.spacing = 5f;
@@ -291,9 +296,10 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             controlsLayout.childControlHeight = false;
             
             CreateCompactClearButton(controlsContainer);
+            CreateCameraRecenterButton(controlsContainer);
             
             LayoutElement controlsLayoutElement = controlsContainer.AddComponent<LayoutElement>();
-            controlsLayoutElement.preferredHeight = 80f;
+            controlsLayoutElement.preferredHeight = 120f;
             controlsLayoutElement.flexibleHeight = 0f;
         }
         
@@ -327,11 +333,34 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             buttonText.fontStyle = FontStyles.Bold;
             
             button.onClick.AddListener(() => {
+                Debug.Log("🧹 Clear Grid button clicked from CompactUIDesigner!");
+                
                 GridGameManager gridManager = FindFirstObjectByType<GridGameManager>();
+                if (gridManager == null)
+                {
+                    // Fallback for older Unity versions
+                    gridManager = FindObjectOfType<GridGameManager>();
+                }
+                
                 if (gridManager != null)
                 {
+                    Debug.Log("🧹 GridGameManager found, calling ClearGrid()");
                     gridManager.ClearGrid();
-                    Debug.Log("Grid cleared!");
+                }
+                else
+                {
+                    Debug.LogError("🚨 GridGameManager not found! Cannot clear grid.");
+                    // Try GameObject.Find as last resort
+                    GameObject gmObj = GameObject.Find("GridGameManager");
+                    if (gmObj != null)
+                    {
+                        GridGameManager fallbackGM = gmObj.GetComponent<GridGameManager>();
+                        if (fallbackGM != null)
+                        {
+                            Debug.Log("🧹 Found GridGameManager via GameObject.Find, calling ClearGrid()");
+                            fallbackGM.ClearGrid();
+                        }
+                    }
                 }
             });
             
@@ -339,9 +368,67 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             layoutElement.preferredHeight = 35f;
         }
         
+        private void CreateCameraRecenterButton(GameObject parent)
+        {
+            GameObject cameraButtonObj = new GameObject("Center Camera Button");
+            cameraButtonObj.transform.SetParent(parent.transform, false);
+            
+            RectTransform buttonRect = cameraButtonObj.AddComponent<RectTransform>();
+            buttonRect.sizeDelta = new Vector2(0, 35f);
+            
+            Image buttonImage = cameraButtonObj.AddComponent<Image>();
+            buttonImage.color = new Color(0.2f, 0.6f, 0.8f, 0.9f); // Blue color
+            
+            Button button = cameraButtonObj.AddComponent<Button>();
+            
+            GameObject textObj = new GameObject("Text");
+            textObj.transform.SetParent(cameraButtonObj.transform, false);
+            
+            RectTransform textRect = textObj.AddComponent<RectTransform>();
+            textRect.anchorMin = Vector2.zero;
+            textRect.anchorMax = Vector2.one;
+            textRect.offsetMin = Vector2.zero;
+            textRect.offsetMax = Vector2.zero;
+            
+            TextMeshProUGUI buttonText = textObj.AddComponent<TextMeshProUGUI>();
+            buttonText.text = "CENTER CAMERA";
+            buttonText.fontSize = 12f;
+            buttonText.alignment = TextAlignmentOptions.Center;
+            buttonText.color = Color.white;
+            buttonText.fontStyle = FontStyles.Bold;
+            
+            button.onClick.AddListener(() => {
+                Debug.Log("📷 Center Camera button clicked from CompactUIDesigner!");
+                
+                GridGameManager gridManager = FindFirstObjectByType<GridGameManager>();
+                if (gridManager == null)
+                {
+                    gridManager = FindObjectOfType<GridGameManager>();
+                }
+                
+                if (gridManager != null)
+                {
+                    Debug.Log("📷 GridGameManager found, centering camera on grid");
+                    gridManager.CenterCameraOnGrid();
+                    Debug.Log("✅ Camera centered successfully!");
+                }
+                else
+                {
+                    Debug.LogError("🚨 GridGameManager not found! Cannot center camera.");
+                }
+            });
+            
+            LayoutElement layoutElement = cameraButtonObj.AddComponent<LayoutElement>();
+            layoutElement.preferredHeight = 35f;
+        }
+        
         private void SetupRightPanelManager()
         {
             RightPanelManager existingManager = FindFirstObjectByType<RightPanelManager>();
+            if (existingManager == null)
+            {
+                existingManager = FindObjectOfType<RightPanelManager>(); // Fallback
+            }
             if (existingManager != null)
             {
                 Debug.Log("CompactUIDesigner_Fixed: RightPanelManager already exists");
@@ -357,6 +444,10 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         private void SetupClickDetection()
         {
             ImprovedClickDetector existingDetector = FindFirstObjectByType<ImprovedClickDetector>();
+            if (existingDetector == null)
+            {
+                existingDetector = FindObjectOfType<ImprovedClickDetector>(); // Fallback
+            }
             if (existingDetector != null)
             {
                 Debug.Log("CompactUIDesigner_Fixed: ImprovedClickDetector already exists");

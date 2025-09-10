@@ -133,15 +133,17 @@ namespace FourFatesStudios.ProjectWarden.Editor
         {
             EditorGUILayout.BeginHorizontal("Toolbar");
             GUILayout.Label("Search:", GUILayout.Width(50));
-            searchQuery = GUILayout.TextField(searchQuery, "ToolbarTextField");
             
-            if (GUILayout.Button("", "ToolbarButtonRight"))
+            // Make search field much larger horizontally
+            searchQuery = GUILayout.TextField(searchQuery, "ToolbarTextField", GUILayout.MinWidth(300), GUILayout.ExpandWidth(true));
+            
+            if (GUILayout.Button("✖", "ToolbarButton", GUILayout.Width(20)))
             {
                 searchQuery = "";
                 GUI.FocusControl(null);
             }
             
-            showOnlyModified = GUILayout.Toggle(showOnlyModified, "Modified Only", "ToolbarButton");
+            showOnlyModified = GUILayout.Toggle(showOnlyModified, "Modified Only", "ToolbarButton", GUILayout.Width(100));
             EditorGUILayout.EndHorizontal();
         }
 
@@ -1684,8 +1686,42 @@ namespace FourFatesStudios.ProjectWarden.Editor
                         }
                     }
                     
-                    // Draw cell background
-                    EditorGUI.DrawRect(cellRect, cellColor);
+                    // Enhanced visual feedback to match game appearance
+                    if (hasCellData && cellData.isRequired)
+                    {
+                        // Draw 3D-like effect for ingredient cells
+                        // Main cell background
+                        EditorGUI.DrawRect(cellRect, cellColor);
+                        
+                        // Top highlight (simulating 3D lighting)
+                        var topRect = new Rect(cellRect.x, cellRect.y, cellRect.width, cellRect.height * 0.2f);
+                        Color lightColor = Color.Lerp(cellColor, Color.white, 0.4f);
+                        EditorGUI.DrawRect(topRect, lightColor);
+                        
+                        // Bottom shadow (simulating 3D depth)
+                        var bottomRect = new Rect(cellRect.x, cellRect.y + cellRect.height * 0.8f, cellRect.width, cellRect.height * 0.2f);
+                        Color darkColor = Color.Lerp(cellColor, Color.black, 0.3f);
+                        EditorGUI.DrawRect(bottomRect, darkColor);
+                        
+                        // Inner glow for active ingredient cells
+                        var innerRect = new Rect(cellRect.x + 2, cellRect.y + 2, cellRect.width - 4, cellRect.height - 4);
+                        Color glowColor = Color.Lerp(cellColor, Color.white, 0.15f);
+                        EditorGUI.DrawRect(innerRect, glowColor);
+                        
+                        // Aspect-based emission effect
+                        if (selectedIngredient != null)
+                        {
+                            var emissionRect = new Rect(cellRect.x + 4, cellRect.y + 4, cellRect.width - 8, cellRect.height - 8);
+                            Color emissionColor = cellColor * (selectedIngredient.Potency / 5f) * 0.5f;
+                            emissionColor.a = 0.6f;
+                            EditorGUI.DrawRect(emissionRect, emissionColor);
+                        }
+                    }
+                    else
+                    {
+                        // Draw regular cell background
+                        EditorGUI.DrawRect(cellRect, cellColor);
+                    }
                     
                     // Draw cell border
                     Color borderColor = hasCellData && cellData.isRequired ? Color.black : Color.gray;
@@ -1747,6 +1783,34 @@ namespace FourFatesStudios.ProjectWarden.Editor
                 }
                 EditorGUILayout.EndVertical();
             }
+            
+            GUILayout.Space(10);
+            
+            // Visual Preview Information Panel
+            EditorGUILayout.BeginVertical("Box");
+            GUILayout.Label("🎮 Game Appearance Preview", EditorStyles.boldLabel);
+            EditorGUILayout.HelpBox(
+                "The enhanced visual above simulates how your ingredient will appear in the actual game:\n" +
+                "• 3D-style lighting and shadows\n" +
+                "• Aspect-based colors with emission effects\n" +
+                "• Individual cubes for each active cell\n" +
+                "• Potency affects glow intensity", 
+                MessageType.Info
+            );
+            
+            if (selectedIngredient != null)
+            {
+                int activeCells = gridCells.Count(kvp => kvp.Value.isRequired);
+                EditorGUILayout.LabelField($"Shape: {activeCells} active cells");
+                EditorGUILayout.LabelField($"Aspect: {selectedIngredient.IngredientAspect}");
+                EditorGUILayout.LabelField($"Potency: {selectedIngredient.Potency}/5 (affects glow)");
+                
+                if (GUILayout.Button("🔄 Refresh Preview"))
+                {
+                    Repaint();
+                }
+            }
+            EditorGUILayout.EndVertical();
             
             GUILayout.Space(10);
             
@@ -2829,7 +2893,21 @@ namespace FourFatesStudios.ProjectWarden.Editor
             int gridWidth = currentIngredientGrid.GetLength(0);
             int gridHeight = currentIngredientGrid.GetLength(1);
             
-            var rect = GUILayoutUtility.GetRect(gridWidth * CELL_SIZE, gridHeight * CELL_SIZE);
+            // Add coordinate system explanation
+            EditorGUILayout.LabelField("Grid Coordinate System:", EditorStyles.boldLabel);
+            using (new EditorGUILayout.HorizontalScope(EditorStyles.helpBox))
+            {
+                EditorGUILayout.LabelField("• X-axis (horizontal): Left to Right");
+                EditorGUILayout.LabelField("• Y-axis (vertical): Bottom to Top (matches 3D game grid)");
+            }
+            EditorGUILayout.HelpBox("This grid displays exactly as it appears in the 3D game world when viewed from above.\n(0,0) is at the bottom left corner, (Xmax,Ymax) is at the top right.", MessageType.Info);
+            //Xmax and Ymax are the same as the grid size, but they are listed as gridWidth and gridHeight.
+            EditorGUILayout.Space();
+            
+            var rect = GUILayoutUtility.GetRect(gridWidth * CELL_SIZE + 30, gridHeight * CELL_SIZE + 30);
+            
+            // Adjust rect for grid area
+            rect = new Rect(rect.x + 15, rect.y + 15, gridWidth * CELL_SIZE, gridHeight * CELL_SIZE);
             
             // Draw background
             EditorGUI.DrawRect(rect, new Color(0.3f, 0.3f, 0.3f, 1f));
@@ -2842,9 +2920,12 @@ namespace FourFatesStudios.ProjectWarden.Editor
             {
                 for (int x = 0; x < gridWidth; x++)
                 {
+                    // Flip Y coordinate to match game's coordinate system (Y=0 at bottom)
+                    int displayY = gridHeight - 1 - y;
+                    
                     var cellRect = new Rect(
                         rect.x + x * CELL_SIZE,
-                        rect.y + y * CELL_SIZE,
+                        rect.y + displayY * CELL_SIZE,
                         CELL_SIZE - 1,
                         CELL_SIZE - 1
                     );
@@ -2885,7 +2966,7 @@ namespace FourFatesStudios.ProjectWarden.Editor
                     Handles.DrawLine(corners[2], corners[3]);
                     Handles.DrawLine(corners[3], corners[0]);
                     
-                    // Draw coordinates for larger cells
+                    // Draw coordinates for larger cells (show actual game coordinates)
                     if (CELL_SIZE >= 25)
                     {
                         var style = new GUIStyle(EditorStyles.miniLabel);

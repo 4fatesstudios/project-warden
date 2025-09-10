@@ -83,10 +83,16 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             // Setup clear grid button
             if (clearGridButton != null)
             {
+                Debug.Log("✅ Clear Grid button found and connected!");
                 clearGridButton.onClick.AddListener(() => {
+                    Debug.Log("🧹 Clear Grid button clicked!");
                     gridManager.ClearGrid();
                     UpdateGridInfo();
                 });
+            }
+            else
+            {
+                Debug.LogWarning("⚠️ Clear Grid button is NULL! Adding keyboard shortcut as fallback.");
             }
             
             // Setup randomize button
@@ -354,6 +360,27 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         
         private void Update()
         {
+            // Keyboard shortcut fallback for Clear Grid (Ctrl+C)
+            if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.C))
+            {
+                Debug.Log("🧹 Clear Grid keyboard shortcut (Ctrl+C) pressed!");
+                if (gridManager != null)
+                {
+                    gridManager.ClearGrid();
+                    UpdateGridInfo();
+                }
+            }
+            
+            // Debug shortcut (Ctrl+D) to show grid state
+            if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.D))
+            {
+                Debug.Log("🔍 Debug Grid keyboard shortcut (Ctrl+D) pressed!");
+                if (gridManager != null)
+                {
+                    gridManager.DebugGridState();
+                }
+            }
+            
             // Update grid info periodically
             if (Time.frameCount % 60 == 0) // Every 60 frames
             {
