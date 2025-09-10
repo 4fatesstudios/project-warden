@@ -17,7 +17,15 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             ingredient = ing;
             ingredientName = name;
             meshRenderer = GetComponent<MeshRenderer>();
-            originalMaterial = meshRenderer.material;
+            
+            if (meshRenderer != null)
+            {
+                originalMaterial = meshRenderer.material;
+            }
+            else
+            {
+                Debug.LogWarning($"IngredientInteraction: No MeshRenderer found on {name} - interaction effects will be disabled");
+            }
         }
         
         private void OnMouseEnter()

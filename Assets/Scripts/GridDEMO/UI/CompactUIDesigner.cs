@@ -17,9 +17,9 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         [SerializeField] private bool addScrolling = true;
         
         [Header("Compact Sizes")]
-        [SerializeField] private Vector2 compactButtonSize = new Vector2(120f, 35f);
+        [SerializeField] private Vector2 compactButtonSize = new Vector2(80f, 35f); // Smaller width for 2 columns
         [SerializeField] private Vector2 compactSpacing = new Vector2(5f, 5f);
-        [SerializeField] private int buttonsPerRow = 1;
+        [SerializeField] private int buttonsPerRow = 2; // Two columns
         [SerializeField] private float sidebarWidth = 200f;
         
         [Header("Colors & Style")]
@@ -158,7 +158,7 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             scrollArea.transform.SetParent(parent.transform, false);
             
             RectTransform scrollRect = scrollArea.AddComponent<RectTransform>();
-            scrollRect.sizeDelta = new Vector2(0, 200f);
+            scrollRect.sizeDelta = new Vector2(0, 250f); // Increased height for better scrolling
             
             Image scrollBg = scrollArea.AddComponent<Image>();
             scrollBg.color = new Color(0.15f, 0.15f, 0.15f, 0.9f);
@@ -180,8 +180,8 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             RectTransform viewportRect = viewport.AddComponent<RectTransform>();
             viewportRect.anchorMin = Vector2.zero;
             viewportRect.anchorMax = Vector2.one;
-            viewportRect.offsetMin = new Vector2(5, 5);
-            viewportRect.offsetMax = new Vector2(-5, -5);
+            viewportRect.offsetMin = new Vector2(2, 2); // Smaller margins for more space
+            viewportRect.offsetMax = new Vector2(-2, -2);
             
             viewport.AddComponent<Mask>();
             
@@ -199,7 +199,7 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             scroll.content = contentRect;
             
             LayoutElement scrollLayout = scrollArea.AddComponent<LayoutElement>();
-            scrollLayout.preferredHeight = 200f;
+            scrollLayout.preferredHeight = 250f; // Match the scroll area height
             scrollLayout.flexibleHeight = 1f;
             
             return content;
@@ -220,8 +220,8 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             gridLayout.cellSize = compactButtonSize;
             gridLayout.spacing = compactSpacing;
             gridLayout.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-            gridLayout.constraintCount = buttonsPerRow;
-            gridLayout.padding = new RectOffset(10, 10, 10, 10);
+            gridLayout.constraintCount = buttonsPerRow; // 2 columns
+            gridLayout.padding = new RectOffset(5, 5, 5, 5); // Smaller padding
             gridLayout.childAlignment = TextAnchor.UpperCenter;
             
             ContentSizeFitter sizeFitter = container.AddComponent<ContentSizeFitter>();
@@ -267,7 +267,7 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             Text buttonText = textObj.AddComponent<Text>();
             buttonText.text = ingredient.ItemName;
             buttonText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            buttonText.fontSize = Mathf.RoundToInt(buttonFontSize);
+            buttonText.fontSize = Mathf.RoundToInt(buttonFontSize * 0.8f); // Smaller font for 2 columns
             buttonText.alignment = TextAnchor.MiddleCenter;
             buttonText.color = Color.black;
             buttonText.raycastTarget = false;
@@ -287,7 +287,7 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             controlsContainer.transform.SetParent(sidebar.transform, false);
             
             RectTransform controlsRect = controlsContainer.AddComponent<RectTransform>();
-            controlsRect.sizeDelta = new Vector2(0, 120f); // Increased size for additional button
+            controlsRect.sizeDelta = new Vector2(0, 80f); // Back to original size - only clear button
             
             VerticalLayoutGroup controlsLayout = controlsContainer.AddComponent<VerticalLayoutGroup>();
             controlsLayout.spacing = 5f;
@@ -296,10 +296,9 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             controlsLayout.childControlHeight = false;
             
             CreateCompactClearButton(controlsContainer);
-            CreateCameraRecenterButton(controlsContainer);
             
             LayoutElement controlsLayoutElement = controlsContainer.AddComponent<LayoutElement>();
-            controlsLayoutElement.preferredHeight = 120f;
+            controlsLayoutElement.preferredHeight = 80f;
             controlsLayoutElement.flexibleHeight = 0f;
         }
         
@@ -338,7 +337,6 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                 GridGameManager gridManager = FindFirstObjectByType<GridGameManager>();
                 if (gridManager == null)
                 {
-                    // Fallback for older Unity versions
                     gridManager = FindObjectOfType<GridGameManager>();
                 }
                 
@@ -350,7 +348,6 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                 else
                 {
                     Debug.LogError("🚨 GridGameManager not found! Cannot clear grid.");
-                    // Try GameObject.Find as last resort
                     GameObject gmObj = GameObject.Find("GridGameManager");
                     if (gmObj != null)
                     {
@@ -368,66 +365,12 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             layoutElement.preferredHeight = 35f;
         }
         
-        private void CreateCameraRecenterButton(GameObject parent)
-        {
-            GameObject cameraButtonObj = new GameObject("Center Camera Button");
-            cameraButtonObj.transform.SetParent(parent.transform, false);
-            
-            RectTransform buttonRect = cameraButtonObj.AddComponent<RectTransform>();
-            buttonRect.sizeDelta = new Vector2(0, 35f);
-            
-            Image buttonImage = cameraButtonObj.AddComponent<Image>();
-            buttonImage.color = new Color(0.2f, 0.6f, 0.8f, 0.9f); // Blue color
-            
-            Button button = cameraButtonObj.AddComponent<Button>();
-            
-            GameObject textObj = new GameObject("Text");
-            textObj.transform.SetParent(cameraButtonObj.transform, false);
-            
-            RectTransform textRect = textObj.AddComponent<RectTransform>();
-            textRect.anchorMin = Vector2.zero;
-            textRect.anchorMax = Vector2.one;
-            textRect.offsetMin = Vector2.zero;
-            textRect.offsetMax = Vector2.zero;
-            
-            TextMeshProUGUI buttonText = textObj.AddComponent<TextMeshProUGUI>();
-            buttonText.text = "CENTER CAMERA";
-            buttonText.fontSize = 12f;
-            buttonText.alignment = TextAlignmentOptions.Center;
-            buttonText.color = Color.white;
-            buttonText.fontStyle = FontStyles.Bold;
-            
-            button.onClick.AddListener(() => {
-                Debug.Log("📷 Center Camera button clicked from CompactUIDesigner!");
-                
-                GridGameManager gridManager = FindFirstObjectByType<GridGameManager>();
-                if (gridManager == null)
-                {
-                    gridManager = FindObjectOfType<GridGameManager>();
-                }
-                
-                if (gridManager != null)
-                {
-                    Debug.Log("📷 GridGameManager found, centering camera on grid");
-                    gridManager.CenterCameraOnGrid();
-                    Debug.Log("✅ Camera centered successfully!");
-                }
-                else
-                {
-                    Debug.LogError("🚨 GridGameManager not found! Cannot center camera.");
-                }
-            });
-            
-            LayoutElement layoutElement = cameraButtonObj.AddComponent<LayoutElement>();
-            layoutElement.preferredHeight = 35f;
-        }
-        
         private void SetupRightPanelManager()
         {
             RightPanelManager existingManager = FindFirstObjectByType<RightPanelManager>();
             if (existingManager == null)
             {
-                existingManager = FindObjectOfType<RightPanelManager>(); // Fallback
+                existingManager = FindObjectOfType<RightPanelManager>();
             }
             if (existingManager != null)
             {
@@ -446,7 +389,7 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             ImprovedClickDetector existingDetector = FindFirstObjectByType<ImprovedClickDetector>();
             if (existingDetector == null)
             {
-                existingDetector = FindObjectOfType<ImprovedClickDetector>(); // Fallback
+                existingDetector = FindObjectOfType<ImprovedClickDetector>();
             }
             if (existingDetector != null)
             {
@@ -460,7 +403,6 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             Debug.Log("CompactUIDesigner_Fixed: Created ImprovedClickDetector for ingredient clicks");
         }
         
-        // Legacy compatibility methods for GridDemoUIManager
         public void RefreshIngredientButtons()
         {
             GameObject container = GameObject.Find("Compact Sidebar/Ingredient Scroll/Button Container");
