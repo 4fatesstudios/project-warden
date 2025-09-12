@@ -1,6 +1,7 @@
 using FourFatesStudios.ProjectWarden.Enums;
 using FourFatesStudios.ProjectWarden.Effects;
 using FourFatesStudios.ProjectWarden.Structs;
+using FourFatesStudios.ProjectWarden.ScriptableObjects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,6 +20,9 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
         [Header("Effect System")]
         [SerializeField, Tooltip("Effects using the new Effect system.")]
         private EffectBundle effectBundle;
+        
+        [SerializeField, Tooltip("Infusions added to this potion")]
+        private InfusionBundle infusionBundle = new InfusionBundle();
         
         [Header("Crafting System Properties")]
         [SerializeField] private PotionRarity rarity = PotionRarity.Common;
@@ -64,6 +68,7 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
 
         public ItemPotionType ItemPotionType => itemPotionType;
         public EffectBundle EffectBundle => effectBundle;
+        public InfusionBundle InfusionBundle => infusionBundle;
         
         // New crafting system properties
         public PotionRarity Rarity => rarity;
@@ -244,7 +249,98 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
         
         private bool HasEffectOfType<T>() where T : IEffect
         {
-            return effectBundle?.Effects?.Any(effect => effect is T) ?? false;
+            // Check direct effect bundle
+            bool hasDirectEffect = effectBundle?.Effects?.Any(effect => effect is T) ?? false;
+            
+            // Check infusion effects
+            bool hasInfusionEffect = false;
+            if (infusionBundle?.Infusions != null)
+            {
+                var infusionEffects = infusionBundle.GetAllEffects();
+                hasInfusionEffect = infusionEffects.Any(effect => effect is T);
+            }
+            
+            return hasDirectEffect || hasInfusionEffect;
+        }
+        
+        /// <summary>
+        /// Get all effects from both direct effects and infusions
+        /// </summary>
+        public List<IEffect> GetAllEffects()
+        {
+            var allEffects = new List<IEffect>();
+            
+            // Add direct effects
+            if (effectBundle?.Effects != null)
+            {
+                allEffects.AddRange(effectBundle.Effects);
+            }
+            
+            // Add infusion effects
+            if (infusionBundle?.Infusions != null)
+            {
+                allEffects.AddRange(infusionBundle.GetAllEffects());
+            }
+            
+            return allEffects;
+        }
+        
+        /// <summary>
+        /// Get total power level from all infusions
+        /// </summary>
+        public int GetInfusionPowerLevel()
+        {
+            return infusionBundle?.GetTotalPowerLevel() ?? 0;
+        }
+        
+        /// <summary>
+        /// Check if potion has any infusions
+        /// </summary>
+        public bool HasInfusions()
+        {
+            return infusionBundle?.Infusions?.Count > 0;
+        }
+        
+        /// <summary>
+        /// Add an infusion to this potion
+        /// </summary>
+        public void AddInfusion(Infusion infusion)
+        {
+            if (infusion != null)
+            {
+                infusionBundle.AddInfusion(infusion);
+                UpdatePropertiesFromEffects(); // Refresh properties based on new effects
+            }
+        }
+        
+        /// <summary>
+        /// Remove an infusion from this potion
+        /// </summary>
+        public bool RemoveInfusion(Infusion infusion)
+        {
+            if (infusion != null && infusionBundle.RemoveInfusion(infusion))
+            {
+                UpdatePropertiesFromEffects(); // Refresh properties after removal
+                return true;
+            }
+            return false;
+        }
+        
+        /// <summary>
+        /// Get a description that includes infusion information
+        /// </summary>
+        public string GetEnhancedDescription()
+        {
+            string baseDesc = GetVisualDescription();
+            
+            if (HasInfusions())
+            {
+                var infusionNames = infusionBundle.Infusions.Select(i => i.InfusionName).Distinct();
+                baseDesc += $"\\n\\nInfused with: {string.Join(", ", infusionNames)}";
+                baseDesc += $"\\nInfusion Power: {GetInfusionPowerLevel()}";
+            }
+            
+            return baseDesc;
         }
         
         public bool CanCombineWith(AbilityInfusionTag abilityTag)
@@ -369,6 +465,15 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
             {
                 effectBundle = new EffectBundle();
             }
+            
+            // Initialize infusion bundle if it doesn't exist
+            if (infusionBundle == null)
+            {
+                infusionBundle = new InfusionBundle();
+            }
+            
+            // Update properties based on current effects
+            UpdatePropertiesFromEffects();
         }
 #endif
     }

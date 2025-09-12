@@ -364,6 +364,10 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                 if (placementSuccess)
                 {
                     Debug.Log($"✅ TryPlaceIngredient: SUCCESS - {ingredient.ItemName} placed and verified at {position}");
+                    
+                    // Clear highlights after successful placement
+                    ClearIngredientSelection();
+                    
                     visualizer.RefreshGrid();
                     DebugGridStateAfterPlacement(ingredient, position);
                     return true;
@@ -683,6 +687,26 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             {
                 Debug.Log($"🔍 Verifying grid state on ingredient selection: {ingredient?.ItemName ?? "None"}");
                 VerifyAllPlacedIngredientsQuiet();
+            }
+        }
+
+        /// <summary>
+        /// Clear current ingredient selection and any highlight previews
+        /// </summary>
+        public void ClearIngredientSelection()
+        {
+            Debug.Log("🔄 Clearing ingredient selection and highlights");
+            currentSelectedIngredient = null;
+            hoveredCell = Vector2Int.one * -1; // Reset to invalid position
+            
+            // Clear any visual highlights
+            if (visualizer != null)
+            {
+                visualizer.ClearHighlights();
+                
+                // Force refresh the entire grid to ensure all cells reset to white
+                visualizer.RefreshGrid();
+                Debug.Log("🔄 Grid refreshed - all cells should now be white (empty) or white (occupied)");
             }
         }
 
@@ -1190,6 +1214,85 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             }
         }
 
+        /// <summary>
+        /// Test method to demonstrate ingredient effect interactions
+        /// </summary>
+        [ContextMenu("Test Ingredient Effect Interactions")]
+        public void TestIngredientEffectInteractions()
+        {
+            Debug.Log("🎨 === TESTING INGREDIENT EFFECT INTERACTIONS ===");
+            
+            if (availableIngredients.Count < 2)
+            {
+                Debug.LogError("Need at least 2 ingredients to test interactions");
+                return;
+            }
+            
+            // Clear the grid first
+            ClearGrid();
+            
+            var ingredient1 = availableIngredients[0];
+            var ingredient2 = availableIngredients.Count > 1 ? availableIngredients[1] : availableIngredients[0];
+            
+            Debug.Log($"Testing with:");
+            Debug.Log($"  Ingredient 1: {ingredient1.ItemName} (Effects: {ingredient1.HasEffects()})");
+            Debug.Log($"  Ingredient 2: {ingredient2.ItemName} (Effects: {ingredient2.HasEffects()})");
+            
+            // Place ingredients next to each other
+            Vector2Int pos1 = new Vector2Int(2, 2);
+            Vector2Int pos2 = new Vector2Int(3, 2);
+            
+            Debug.Log($"Placing {ingredient1.ItemName} at {pos1}");
+            bool success1 = TryPlaceIngredient(ingredient1, pos1);
+            
+            if (success1)
+            {
+                Debug.Log($"Placing {ingredient2.ItemName} at {pos2} (adjacent to first ingredient)");
+                bool success2 = TryPlaceIngredient(ingredient2, pos2);
+                
+                if (success2)
+                {
+                    Debug.Log("✅ Both ingredients placed successfully!");
+                    
+                    if (ingredient1.HasEffects() && ingredient2.HasEffects())
+                    {
+                        var similarEffects = ingredient1.GetSimilarEffectsTo(ingredient2);
+                        if (similarEffects.Count > 0)
+                        {
+                            Debug.Log($"Effect similarity: SIMILAR ({similarEffects.Count} shared effects)");
+                            foreach (var (thisEffect, otherEffect) in similarEffects)
+                            {
+                                Debug.Log($"  - Shared: {thisEffect.GetType().Name}");
+                            }
+                        }
+                        else
+                        {
+                            Debug.Log("Effect similarity: DIFFERENT");
+                        }
+                        Debug.Log("You should see particle effects between the ingredients!");
+                    }
+                    else if (ingredient1.HasEffects() || ingredient2.HasEffects())
+                    {
+                        Debug.Log("One ingredient has effects - should see neutral interaction");
+                    }
+                    else
+                    {
+                        Debug.Log("Neither ingredient has effects - no particle effects expected");
+                    }
+                }
+                else
+                {
+                    Debug.LogError("Failed to place second ingredient");
+                }
+            }
+            else
+            {
+                Debug.LogError("Failed to place first ingredient");
+            }
+            
+            Debug.Log("🎨 === TEST COMPLETE ===");
+        }
+
         public GridCell GetCell(int x, int y)
         {
             if (x >= 0 && x < gridWidth && y >= 0 && y < gridHeight)
@@ -1227,6 +1330,176 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         {
             Debug.LogWarning("🧹 ForceClearGrid() called via context menu!");
             ClearGrid();
+        }
+        
+        /// <summary>
+        /// Debug method to check current state of all cell colors
+        /// </summary>
+        [ContextMenu("Debug All Cell Colors")]
+        public void DebugAllCellColors()
+        {
+            Debug.Log("🎨 === DEBUGGING ALL CELL COLORS ===");
+            
+            int totalCells = gridWidth * gridHeight;
+            int whiteCells = 0;
+            int occupiedCells = 0;
+            int highlightedCells = 0;
+            int unknownCells = 0;
+            
+            for (int x = 0; x < gridWidth; x++)
+            {
+                for (int y = 0; y < gridHeight; y++)
+                {
+                    var cell = gridCells[x, y];
+                    
+                    switch (cell.VisualState)
+                    {
+                        case CellVisualState.Empty:
+                            if (cell.CellColor == Color.white)
+                                whiteCells++;
+                            else
+                            {
+                                Debug.LogWarning($"🚨 Empty cell ({x},{y}) has wrong color: {cell.CellColor}");
+                                unknownCells++;
+                            }
+                            break;
+                            
+                        case CellVisualState.Occupied:
+                            occupiedCells++;
+                            if (cell.CellColor == Color.white)
+                                whiteCells++; // Occupied cells should also be white now
+                            else
+                            {
+                                Debug.LogWarning($"🚨 Occupied cell ({x},{y}) should be white but has color: {cell.CellColor}");
+                                unknownCells++;
+                            }
+                            Debug.Log($"📦 Occupied cell ({x},{y}): {cell.CellColor} by {cell.OccupiedByIngredient?.ItemName} (should be white)");
+                            break;
+                            
+                        case CellVisualState.ValidHighlight:
+                        case CellVisualState.InvalidHighlight:
+                            highlightedCells++;
+                            Debug.Log($"✨ Highlighted cell ({x},{y}): {cell.CellColor} ({cell.VisualState})");
+                            break;
+                            
+                        default:
+                            unknownCells++;
+                            Debug.LogWarning($"❓ Unknown state cell ({x},{y}): {cell.VisualState} with color {cell.CellColor}");
+                            break;
+                    }
+                }
+            }
+            
+            Debug.Log($"🎨 Cell Color Summary:");
+            Debug.Log($"  📊 Total cells: {totalCells}");
+            Debug.Log($"  ⬜ White cells (empty + occupied): {whiteCells}");
+            Debug.Log($"  📦 Occupied cells: {occupiedCells} (these should be white too)");
+            Debug.Log($"  ✨ Highlighted cells: {highlightedCells}");
+            Debug.Log($"  ❓ Wrong color cells: {unknownCells}");
+            
+            if (unknownCells > 0)
+            {
+                Debug.LogError("🚨 Some cells have unexpected colors or states!");
+            }
+            else
+            {
+                Debug.Log("✅ All cell colors match their expected states");
+            }
+        }
+        
+        /// <summary>
+        /// Force all cells to update their visual state and colors
+        /// </summary>
+        [ContextMenu("Force Update All Cell Colors")]
+        public void ForceUpdateAllCellColors()
+        {
+            Debug.Log("🔄 Force updating all cell colors...");
+            
+            for (int x = 0; x < gridWidth; x++)
+            {
+                for (int y = 0; y < gridHeight; y++)
+                {
+                    var cell = gridCells[x, y];
+                    
+                    // Force the cell to recalculate its visual state
+                    if (cell.IsOccupied)
+                    {
+                        cell.SetOccupied(cell.OccupiedByIngredient);
+                    }
+                    else if (cell.IsHighlighted)
+                    {
+                        cell.SetHighlighted(true, cell.IsValidPlacement);
+                    }
+                    else
+                    {
+                        cell.Clear();
+                    }
+                }
+            }
+            
+            // Force visual refresh
+            if (visualizer != null)
+            {
+                visualizer.RefreshGrid();
+                Debug.Log("✅ All cells forced to update their colors");
+            }
+        }
+        
+        /// <summary>
+        /// Test method to verify occupied cells remain white
+        /// </summary>
+        [ContextMenu("Test Occupied Cell Colors")]
+        public void TestOccupiedCellColors()
+        {
+            Debug.Log("🧪 === TESTING OCCUPIED CELL COLORS ===");
+            
+            if (currentSelectedIngredient == null)
+            {
+                Debug.LogError("No ingredient selected! Please select an ingredient first.");
+                return;
+            }
+            
+            Vector2Int testPos = new Vector2Int(2, 2);
+            
+            Debug.Log($"1. Placing {currentSelectedIngredient.ItemName} at {testPos}");
+            bool placed = TryPlaceIngredient(currentSelectedIngredient, testPos);
+            
+            if (placed)
+            {
+                Debug.Log("2. Checking cell colors after placement...");
+                var occupiedCells = GetIngredientCells(currentSelectedIngredient, testPos);
+                
+                bool allCellsWhite = true;
+                foreach (var cellPos in occupiedCells)
+                {
+                    var cell = GetCell(cellPos.x, cellPos.y);
+                    if (cell != null)
+                    {
+                        if (cell.CellColor != Color.white)
+                        {
+                            Debug.LogError($"❌ Cell ({cellPos.x},{cellPos.y}) is not white: {cell.CellColor}");
+                            allCellsWhite = false;
+                        }
+                        else
+                        {
+                            Debug.Log($"✅ Cell ({cellPos.x},{cellPos.y}) is correctly white");
+                        }
+                    }
+                }
+                
+                if (allCellsWhite)
+                {
+                    Debug.Log("✅ SUCCESS: All occupied cells are white! Ingredient model should provide the color.");
+                }
+                else
+                {
+                    Debug.LogError("❌ FAILURE: Some occupied cells are not white!");
+                }
+            }
+            else
+            {
+                Debug.LogError("❌ Could not place ingredient for testing");
+            }
         }
         
         /// <summary>
@@ -1312,6 +1585,16 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             Debug.Log("🧹 Grid state BEFORE clearing:");
             DebugGridState();
             
+            // Clear ingredient selection and highlights FIRST
+            ClearIngredientSelection();
+            
+            // Explicitly clear all highlights from the visualizer as well
+            if (visualizer != null)
+            {
+                visualizer.ClearHighlights();
+                Debug.Log("🧹 Explicitly cleared all grid highlights");
+            }
+            
             // Clear grid data (ingredient occupancy only)
             for (int x = 0; x < gridWidth; x++)
             {
@@ -1347,6 +1630,31 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             if (visualizer != null)
             {
                 visualizer.RefreshGrid(); // This should update the grid colors but keep the grid structure
+                
+                // Debug: Check if cells are properly reset to white
+                Debug.Log("🧹 Verifying cell colors after refresh...");
+                int nonWhiteCells = 0;
+                for (int x = 0; x < gridWidth; x++)
+                {
+                    for (int y = 0; y < gridHeight; y++)
+                    {
+                        var cell = gridCells[x, y];
+                        if (cell.CellColor != Color.white)
+                        {
+                            Debug.LogWarning($"🚨 Cell ({x},{y}) color is not white: {cell.CellColor}, VisualState: {cell.VisualState}");
+                            nonWhiteCells++;
+                        }
+                    }
+                }
+                
+                if (nonWhiteCells == 0)
+                {
+                    Debug.Log("✅ All cells properly reset to white color");
+                }
+                else
+                {
+                    Debug.LogError($"🚨 {nonWhiteCells} cells failed to reset to white color!");
+                }
             }
             else
             {
@@ -1356,7 +1664,7 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             Debug.Log("🧹 Grid state AFTER clearing:");
             DebugGridState();
             
-            Debug.Log("✅ ClearGrid() complete! Grid structure preserved, ingredients removed.");
+            Debug.Log("✅ ClearGrid() complete! Grid structure preserved, ingredients removed, highlights cleared.");
         }
 
         /// <summary>

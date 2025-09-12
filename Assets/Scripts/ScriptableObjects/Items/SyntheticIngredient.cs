@@ -195,9 +195,9 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
             // Base effects from source ingredients
             foreach (var source in sourceIngredients)
             {
-                if (source.Infusions?.Count > 0)
+                if (source.InfusionBundle?.Infusions?.Count > 0)
                 {
-                    foreach (var infusion in source.Infusions)
+                    foreach (var infusion in source.InfusionBundle.Infusions)
                     {
                         effects.Add($"Weakened {infusion.InfusionName}");
                     }

@@ -1,5 +1,7 @@
 using UnityEngine;
 using FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu;
+using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
+using FourFatesStudios.ProjectWarden.Enums;
 
 namespace FourFatesStudios.ProjectWarden.Setup
 {
@@ -63,8 +65,8 @@ namespace FourFatesStudios.ProjectWarden.Setup
             if (skillSystem == null) return;
 
             // Simulate some S-rank achievements
-            skillSystem.RecordCraftingResult(null, new System.Collections.Generic.List<FourFatesStudios.ProjectWarden.ScriptableObjects.Items.Ingredient>(), 
-                FourFatesStudios.ProjectWarden.Enums.CraftingRank.S);
+            skillSystem.RecordCraftingResult(null, new System.Collections.Generic.List<Ingredient>(), 
+                CraftingRank.S);
 
             Debug.Log("Gave test S-ranks for auto-crafting");
         }

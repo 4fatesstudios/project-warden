@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
+using FourFatesStudios.ProjectWarden.Enums;
 
 namespace FourFatesStudios.ProjectWarden.GridDemo.UI
 {
@@ -467,21 +468,21 @@ namespace FourFatesStudios.ProjectWarden.GridDemo.UI
             }
         }
         
-        private Color GetAspectColor(FourFatesStudios.ProjectWarden.Enums.Aspect aspect)
+        private Color GetAspectColor(Aspect aspect)
         {
             switch (aspect)
             {
-                case FourFatesStudios.ProjectWarden.Enums.Aspect.Scorch: 
+                case Aspect.Scorch: 
                     return new Color(1f, 0.3f, 0.3f, 1f);
-                case FourFatesStudios.ProjectWarden.Enums.Aspect.Frigid: 
+                case Aspect.Frigid: 
                     return new Color(0.3f, 0.8f, 1f, 1f);
-                case FourFatesStudios.ProjectWarden.Enums.Aspect.Arc: 
+                case Aspect.Arc: 
                     return new Color(1f, 1f, 0.3f, 1f);
-                case FourFatesStudios.ProjectWarden.Enums.Aspect.Caustic: 
+                case Aspect.Caustic: 
                     return new Color(0.8f, 0.5f, 0.2f, 1f);
-                case FourFatesStudios.ProjectWarden.Enums.Aspect.Corporeal: 
+                case Aspect.Corporeal: 
                     return new Color(0.7f, 0.7f, 0.7f, 1f);
-                case FourFatesStudios.ProjectWarden.Enums.Aspect.Divine: 
+                case Aspect.Divine: 
                     return new Color(1f, 1f, 1f, 1f);
                 default: 
                     return Color.gray;

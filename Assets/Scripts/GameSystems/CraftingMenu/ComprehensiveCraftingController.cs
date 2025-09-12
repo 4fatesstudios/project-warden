@@ -557,12 +557,12 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu
             // Combine effects from all ingredients through their infusions
             foreach (var ingredient in ingredients)
             {
-                foreach (var infusion in ingredient.Infusions)
+                foreach (var infusion in ingredient.InfusionBundle.Infusions)
                 {
                     // Add effects from infusion's effect bundle
-                    if (infusion.Effects?.Effects != null)
+                    if (infusion.EffectBundle?.Effects != null)
                     {
-                        foreach (var effect in infusion.Effects.Effects)
+                        foreach (var effect in infusion.EffectBundle.Effects)
                         {
                             effectBundle.Effects.Add(effect);
                         }
@@ -573,12 +573,12 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu
             // Add accent ingredient effects through its infusions
             if (accentIngredient != null)
             {
-                foreach (var infusion in accentIngredient.Infusions)
+                foreach (var infusion in accentIngredient.InfusionBundle.Infusions)
                 {
                     // Add effects from accent ingredient's infusion effect bundle (with reduced potency)
-                    if (infusion.Effects?.Effects != null)
+                    if (infusion.EffectBundle?.Effects != null)
                     {
-                        foreach (var effect in infusion.Effects.Effects)
+                        foreach (var effect in infusion.EffectBundle.Effects)
                         {
                             effectBundle.Effects.Add(effect);
                         }
