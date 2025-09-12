@@ -47,8 +47,9 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             IsValidPlacement = true;
             CellAspect = null;
             CellIntensity = 0f;
-            VisualState = CellVisualState.Empty;
-            UpdateCellColor();
+            
+            // Update visual state to empty (this was commented out but is needed!)
+            UpdateVisualState();
         }
         
         public void SetHighlighted(bool highlighted, bool validPlacement = true)
@@ -93,7 +94,8 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                     break;
                     
                 case CellVisualState.Occupied:
-                    CellColor = GetAspectColor();
+                    // Keep occupied cells white so only the ingredient model shows color
+                    CellColor = Color.white;
                     break;
             }
         }

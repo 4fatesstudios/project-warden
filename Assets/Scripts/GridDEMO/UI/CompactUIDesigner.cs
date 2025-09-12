@@ -2,6 +2,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using FourFatesStudios.ProjectWarden.GridDemo.UI;
+using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
+
 
 namespace FourFatesStudios.ProjectWarden.GridDemo
 {
@@ -28,7 +30,7 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         [SerializeField] private float buttonFontSize = 10f;
         
         // Events with correct signatures for GridDemoUIManager
-        public System.Action<FourFatesStudios.ProjectWarden.ScriptableObjects.Items.Ingredient> OnIngredientSelected;
+        public System.Action<Ingredient> OnIngredientSelected;
         public System.Action OnGridCleared;
         public System.Action OnGridRandomized;
         public System.Action<int> OnGridSizeChanged; // IMPORTANT: int, not Vector2Int
@@ -243,7 +245,7 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         }
         
         private void CreateCompactIngredientButton(
-            FourFatesStudios.ProjectWarden.ScriptableObjects.Items.Ingredient ingredient,
+            Ingredient ingredient,
             GameObject container,
             GridGameManager gridManager)
         {

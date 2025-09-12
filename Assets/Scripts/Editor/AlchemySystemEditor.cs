@@ -11,14 +11,16 @@ using System.Linq;
 using System.Reflection;
 using FourFatesStudios.ProjectWarden.Enums;
 using FourFatesStudios.ProjectWarden.Effects;
+using FourFatesStudios.ProjectWarden.ScriptableObjects;
 using Object = UnityEngine.Object;
+using InfusionSO = FourFatesStudios.ProjectWarden.ScriptableObjects.Infusion;
 
 namespace FourFatesStudios.ProjectWarden.Editor
 {
     public class AlchemySystemEditor : EditorWindow
     {
         private int toolbarSelection;
-        private readonly string[] toolbarOptions = { "🧪 Ingredients", "📋 Recipes", "🍯 Potions", "⚗️ Refinements", "📚 Book Pages", "🎮 Grid Designer", "📖 Book Editor", "🗄️ Database" };
+        private readonly string[] toolbarOptions = { "🧪 Ingredients", "📋 Recipes", "🍯 Potions", "🌟 Infusions", "⚗️ Refinements", "📚 Book Pages", "🎮 Grid Designer", "📖 Book Editor", "🗄️ Database" };
         
         private Vector2 scrollPosition;
         private Vector2 bookEntriesScrollPosition;
@@ -29,6 +31,7 @@ namespace FourFatesStudios.ProjectWarden.Editor
         private AlchemyRecipe selectedRecipe;
         private BaseEntry selectedBookEntry;
         private Potion selectedPotion;
+        private InfusionSO selectedInfusion;
         
         // Persistent state for grid designer
         private AlchemyRecipe gridDesignerRecipe;
@@ -47,6 +50,12 @@ namespace FourFatesStudios.ProjectWarden.Editor
         private int ingredientGridHeight = 1;
         private Vector2Int selectedIngredientCell = Vector2Int.zero;
         private bool showIngredientPreview = true;
+        
+        // Infusion editor state
+        private Vector2 infusionsScrollPosition;
+        private string infusionSearchQuery = "";
+        private EffectTypeFilter selectedEffectTypeFilter = EffectTypeFilter.All;
+        private bool showInfusionWizard;
         
         // Search and filter
         private string searchQuery = "";
@@ -85,8 +94,8 @@ namespace FourFatesStudios.ProjectWarden.Editor
             // Header
             DrawHeader();
             
-            // Toolbar
-            toolbarSelection = GUILayout.Toolbar(toolbarSelection, toolbarOptions);
+            // Auto-sizing Toolbar
+            DrawAutoSizedToolbar();
             
             // Search bar
             DrawSearchBar();
@@ -99,11 +108,12 @@ namespace FourFatesStudios.ProjectWarden.Editor
                 case 0: DrawIngredientsTab(); break;
                 case 1: DrawRecipesTab(); break;
                 case 2: DrawPotionsTab(); break;
-                case 3: DrawRefinementsTab(); break;
-                case 4: DrawBookPagesTab(); break;
-                case 5: DrawGridDesignerTab(); break;
-                case 6: DrawBookEditorTab(); break;
-                case 7: DrawDatabaseTab(); break;
+                case 3: DrawInfusionsTab(); break;
+                case 4: DrawRefinementsTab(); break;
+                case 5: DrawBookPagesTab(); break;
+                case 6: DrawGridDesignerTab(); break;
+                case 7: DrawBookEditorTab(); break;
+                case 8: DrawDatabaseTab(); break;
             }
             
             EditorGUILayout.EndScrollView();
@@ -127,6 +137,48 @@ namespace FourFatesStudios.ProjectWarden.Editor
             }
             
             EditorGUILayout.EndHorizontal();
+        }
+
+        private void DrawAutoSizedToolbar()
+        {
+            // Calculate available width and tab size
+            Rect toolbarRect = EditorGUILayout.GetControlRect(GUILayout.Height(25));
+            float availableWidth = toolbarRect.width;
+            float tabWidth = availableWidth / toolbarOptions.Length;
+            
+            // Ensure minimum tab width for readability
+            float minTabWidth = 80f;
+            float maxTabWidth = 150f;
+            
+            // Adjust tab width within reasonable bounds
+            tabWidth = Mathf.Clamp(tabWidth, minTabWidth, maxTabWidth);
+            
+            // Create tab style with fixed width
+            GUIStyle tabStyle = new GUIStyle(EditorStyles.toolbarButton);
+            
+            // Draw toolbar with custom sizing
+            EditorGUILayout.BeginHorizontal();
+            
+            for (int i = 0; i < toolbarOptions.Length; i++)
+            {
+                // Highlight selected tab
+                GUI.backgroundColor = (toolbarSelection == i) ? Color.cyan : Color.white;
+                
+                if (GUILayout.Button(toolbarOptions[i], tabStyle, GUILayout.Width(tabWidth), GUILayout.Height(25)))
+                {
+                    toolbarSelection = i;
+                }
+            }
+            
+            // Reset background color
+            GUI.backgroundColor = Color.white;
+            
+            EditorGUILayout.EndHorizontal();
+            
+            // Add visual separator
+            EditorGUILayout.Space(2);
+            var separatorRect = EditorGUILayout.GetControlRect(GUILayout.Height(1));
+            EditorGUI.DrawRect(separatorRect, new Color(0.5f, 0.5f, 0.5f, 0.5f));
         }
 
         private void DrawSearchBar()
@@ -380,9 +432,10 @@ namespace FourFatesStudios.ProjectWarden.Editor
             GUILayout.Label("🌟 Infusions & Effects", EditorStyles.boldLabel);
             EditorGUILayout.PropertyField(serializedObject.FindProperty("infusions"), true);
             
-            if (selectedIngredient.Infusions != null && selectedIngredient.Infusions.Count > 0)
+            // Check for active infusions and display count
+            if (selectedIngredient.InfusionBundle != null && selectedIngredient.InfusionBundle.Infusions.Count > 0)
             {
-                EditorGUILayout.LabelField($"Active Infusions: {selectedIngredient.Infusions.Count}", EditorStyles.miniLabel);
+                EditorGUILayout.LabelField($"Active Infusions: {selectedIngredient.InfusionBundle.Infusions.Count}", EditorStyles.miniLabel);
             }
             else
             {
@@ -1047,6 +1100,540 @@ namespace FourFatesStudios.ProjectWarden.Editor
             {
                 Debug.Log("  No effects assigned to this potion.");
             }
+        }
+
+        private void DrawInfusionsTab()
+        {
+            EditorGUILayout.BeginHorizontal();
+            
+            // Left panel - infusions list
+            EditorGUILayout.BeginVertical("Box", GUILayout.Width(350));
+            
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.Label("🌟 Infusions", EditorStyles.boldLabel);
+            GUILayout.FlexibleSpace();
+            if (GUILayout.Button("❓", GUILayout.Width(25)))
+            {
+                ShowInfusionHelp();
+            }
+            EditorGUILayout.EndHorizontal();
+            
+            if (GUILayout.Button("Create New Infusion", GUILayout.Height(30)))
+            {
+                Debug.Log("🌟 Create New Infusion button clicked!");
+                showInfusionWizard = true;
+            }
+            
+            // Search and filter controls
+            DrawInfusionFilters();
+            
+            // Infusions list
+            DrawInfusionsList();
+            
+            EditorGUILayout.EndVertical();
+            
+            // Right panel - infusion editor
+            EditorGUILayout.BeginVertical("Box");
+            if (selectedInfusion != null)
+            {
+                DrawInfusionEditor();
+            }
+            else
+            {
+                EditorGUILayout.HelpBox("Select an infusion to edit its properties", MessageType.Info);
+                
+                EditorGUILayout.Space(10);
+                EditorGUILayout.BeginVertical("HelpBox");
+                GUILayout.Label("✨ Infusion System Features:", EditorStyles.boldLabel);
+                GUILayout.Label("• 🎨 Visual color and icon customization");
+                GUILayout.Label("• ⚡ Effect bundle management with IEffect integration");
+                GUILayout.Label("• 📊 Power level and stacking configuration");
+                GUILayout.Label("• 🔍 Advanced filtering by category and effect type");
+                GUILayout.Label("• 🧪 Seamless integration with ingredients and potions");
+                EditorGUILayout.EndVertical();
+            }
+            EditorGUILayout.EndVertical();
+            
+            EditorGUILayout.EndHorizontal();
+            
+            if (showInfusionWizard)
+            {
+                DrawInfusionWizard();
+            }
+        }
+        
+        private void ShowInfusionHelp()
+        {
+            EditorUtility.DisplayDialog("Infusion System Help", 
+                "🌟 INFUSION MANAGEMENT SYSTEM\\n\\n" +
+                "Create and manage magical infusions that power your alchemy system:\\n\\n" +
+                "🎨 VISUAL DESIGN:\\n" +
+                "• Set custom colors for particle effects\\n" +
+                "• Assign icons for UI representation\\n" +
+                "• Categorize for easy organization\\n\\n" +
+                "⚡ EFFECT SYSTEM:\\n" +
+                "• Combine multiple IEffects in one infusion\\n" +
+                "• Configure power levels (1-10)\\n" +
+                "• Enable stacking with max stack limits\\n\\n" +
+                "🔍 SMART FILTERING:\\n" +
+                "• Search by infusion name\\n" +
+                "• Filter by category (Elemental, Physical, etc.)\\n" +
+                "• Filter by effect type (Damage, Healing, etc.)\\n\\n" +
+                "🧪 INTEGRATION:\\n" +
+                "• Replace old string-based infusions\\n" +
+                "• Use in ingredients and potions\\n" +
+                "• Full backward compatibility", 
+                "Got it!");
+        }
+        
+        private void DrawInfusionFilters()
+        {
+            EditorGUILayout.BeginVertical("Box");
+            GUILayout.Label("🔍 Filters", EditorStyles.boldLabel);
+            
+            // Name search
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.Label("Name:", GUILayout.Width(50));
+            infusionSearchQuery = EditorGUILayout.TextField(infusionSearchQuery);
+            if (GUILayout.Button("✖", GUILayout.Width(20)))
+            {
+                infusionSearchQuery = "";
+                GUI.FocusControl(null);
+            }
+            EditorGUILayout.EndHorizontal();
+            
+            // Effect type filter
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.Label("Effect Type:", GUILayout.Width(70));
+            selectedEffectTypeFilter = (EffectTypeFilter)EditorGUILayout.EnumPopup(selectedEffectTypeFilter, GUILayout.ExpandWidth(true));
+            if (GUILayout.Button("All", GUILayout.Width(30)))
+            {
+                selectedEffectTypeFilter = EffectTypeFilter.All;
+            }
+            EditorGUILayout.EndHorizontal();
+            
+            EditorGUILayout.EndVertical();
+        }
+        
+        private void DrawInfusionsList()
+        {
+            var infusions = FindAssetsByType<InfusionSO>();
+            var filteredInfusions = FilterInfusions(infusions);
+            
+            infusionsScrollPosition = EditorGUILayout.BeginScrollView(infusionsScrollPosition, GUILayout.Height(400));
+            
+            if (filteredInfusions.Count == 0)
+            {
+                EditorGUILayout.HelpBox("No infusions match the current filters", MessageType.Info);
+            }
+            else
+            {
+                foreach (var infusion in filteredInfusions)
+                {
+                    DrawInfusionListItem(infusion);
+                }
+            }
+            
+            EditorGUILayout.EndScrollView();
+            
+            // Show count
+            EditorGUILayout.LabelField($"Showing {filteredInfusions.Count} of {infusions.Count} infusions", EditorStyles.miniLabel);
+        }
+        
+        private void DrawInfusionListItem(InfusionSO infusion)
+        {
+            EditorGUILayout.BeginHorizontal("Box");
+            
+            // Selection toggle
+            bool isSelected = selectedInfusion == infusion;
+            if (GUILayout.Toggle(isSelected, "", GUILayout.Width(20)) && !isSelected)
+            {
+                selectedInfusion = infusion;
+            }
+            
+            // Color indicator
+            var colorRect = GUILayoutUtility.GetRect(15, 15);
+            EditorGUI.DrawRect(colorRect, infusion.InfusionColor);
+            
+            // Icon
+            if (infusion.InfusionIcon != null)
+            {
+                GUILayout.Label(infusion.InfusionIcon.texture, GUILayout.Width(20), GUILayout.Height(20));
+            }
+            else
+            {
+                GUILayout.Space(25);
+            }
+            
+            // Infusion info
+            EditorGUILayout.BeginVertical();
+            EditorGUILayout.LabelField(infusion.InfusionName, EditorStyles.boldLabel);
+            EditorGUILayout.LabelField($"{infusion.Category} • Power: {infusion.PowerLevel} • Effects: {infusion.EffectBundle?.Effects?.Count ?? 0}", EditorStyles.miniLabel);
+            EditorGUILayout.EndVertical();
+            
+            // Actions
+            if (GUILayout.Button("⚡", GUILayout.Width(25)))
+            {
+                ShowInfusionQuickActions(infusion);
+            }
+            
+            if (GUILayout.Button("🗑️", GUILayout.Width(25)))
+            {
+                if (EditorUtility.DisplayDialog("Delete Infusion", 
+                    $"Are you sure you want to delete '{infusion.InfusionName}'?", 
+                    "Delete", "Cancel"))
+                {
+                    DeleteInfusion(infusion);
+                }
+            }
+            
+            EditorGUILayout.EndHorizontal();
+        }
+        
+        private void DrawInfusionEditor()
+        {
+            if (selectedInfusion == null) return;
+            
+            // Header
+            EditorGUILayout.BeginVertical("Box");
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.Label($"🌟 Editing: {selectedInfusion.InfusionName}", EditorStyles.boldLabel);
+            GUILayout.FlexibleSpace();
+            
+            // Quick info badges
+            GUI.color = selectedInfusion.InfusionColor;
+            GUILayout.Label("●", "Button", GUILayout.Width(25));
+            GUI.color = Color.white;
+            
+            GUILayout.Label($"{selectedInfusion.Category}", "Button", GUILayout.Width(80));
+            GUILayout.Label($"⚡{selectedInfusion.PowerLevel}", "Button", GUILayout.Width(40));
+            EditorGUILayout.EndHorizontal();
+            EditorGUILayout.EndVertical();
+            
+            var serializedObject = new SerializedObject(selectedInfusion);
+            serializedObject.Update();
+            
+            // All content in one view for now (can be made tabbed later)
+            DrawInfusionBasicInfo(serializedObject);
+            DrawInfusionEffects(serializedObject);
+            DrawInfusionVisual(serializedObject);
+            DrawInfusionSettings(serializedObject);
+            
+            serializedObject.ApplyModifiedProperties();
+        }
+        
+        private void DrawInfusionBasicInfo(SerializedObject serializedObject)
+        {
+            EditorGUILayout.BeginVertical("Box");
+            GUILayout.Label("📋 Basic Information", EditorStyles.boldLabel);
+            
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("infusionName"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("description"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("category"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("rarity"));
+            
+            EditorGUILayout.EndVertical();
+        }
+        
+        private void DrawInfusionEffects(SerializedObject serializedObject)
+        {
+            EditorGUILayout.BeginVertical("Box");
+            GUILayout.Label("⚡ Effect Bundle", EditorStyles.boldLabel);
+            
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("effectBundle"), true);
+            
+            // Effect analysis
+            if (selectedInfusion.EffectBundle?.Effects != null && selectedInfusion.EffectBundle.Effects.Count > 0)
+            {
+                EditorGUILayout.Space();
+                EditorGUILayout.BeginVertical("HelpBox");
+                GUILayout.Label("Effect Analysis:", EditorStyles.boldLabel);
+                
+                var effectTypes = selectedInfusion.GetEffectTypes();
+                var effectCategories = selectedInfusion.GetEffectCategories();
+                
+                EditorGUILayout.LabelField($"Total Effects: {selectedInfusion.EffectBundle.Effects.Count}");
+                EditorGUILayout.LabelField($"Effect Types: {string.Join(", ", effectTypes.Select(t => t.Name))}");
+                EditorGUILayout.LabelField($"Categories: {string.Join(", ", effectCategories)}");
+                EditorGUILayout.EndVertical();
+            }
+            
+            EditorGUILayout.EndVertical();
+        }
+        
+        private void DrawInfusionVisual(SerializedObject serializedObject)
+        {
+            EditorGUILayout.BeginVertical("Box");
+            GUILayout.Label("🎨 Visual Properties", EditorStyles.boldLabel);
+            
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("infusionColor"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("infusionIcon"));
+            
+            // Color preview
+            EditorGUILayout.Space();
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.Label("Color Preview:", GUILayout.Width(100));
+            var colorRect = GUILayoutUtility.GetRect(50, 20);
+            EditorGUI.DrawRect(colorRect, selectedInfusion.InfusionColor);
+            EditorGUILayout.EndHorizontal();
+            
+            EditorGUILayout.EndVertical();
+        }
+        
+        private void DrawInfusionSettings(SerializedObject serializedObject)
+        {
+            EditorGUILayout.BeginVertical("Box");
+            GUILayout.Label("⚙️ Game Settings", EditorStyles.boldLabel);
+            
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("powerLevel"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("canStack"));
+            
+            if (selectedInfusion.CanStack)
+            {
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("maxStacks"));
+            }
+            
+            // Validation
+            EditorGUILayout.Space();
+            bool isValid = selectedInfusion.IsValid(out string validationMessage);
+            EditorGUILayout.BeginVertical("HelpBox");
+            GUILayout.Label("Validation:", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("Status:", isValid ? "✅ Valid" : "❌ Invalid");
+            if (!isValid)
+            {
+                EditorGUILayout.LabelField("Issue:", validationMessage);
+            }
+            EditorGUILayout.EndVertical();
+            
+            EditorGUILayout.EndVertical();
+        }
+        
+        private void DrawInfusionWizard()
+        {
+            EditorGUILayout.BeginVertical("Box");
+            GUILayout.Label("Create New Infusion", EditorStyles.boldLabel);
+            
+            // Quick creation for common infusion types
+            EditorGUILayout.BeginHorizontal();
+            if (GUILayout.Button("🔥 Fire Infusion"))
+            {
+                Debug.Log("🔥 Fire Infusion button clicked!");
+                CreateQuickInfusion("Fire Infusion", Color.red, "A burning infusion that adds fire damage effects.");
+            }
+            if (GUILayout.Button("❄️ Ice Infusion"))
+            {
+                CreateQuickInfusion("Ice Infusion", Color.cyan, "A freezing infusion that adds ice damage and slowing effects.");
+            }
+            if (GUILayout.Button("⚡ Lightning Infusion"))
+            {
+                CreateQuickInfusion("Lightning Infusion", Color.yellow, "An electric infusion that adds lightning damage and stunning effects.");
+            }
+            EditorGUILayout.EndHorizontal();
+            
+            EditorGUILayout.BeginHorizontal();
+            if (GUILayout.Button("💪 Strength Infusion"))
+            {
+                CreateQuickInfusion("Strength Infusion", new Color(1f, 0.6f, 0f), "A physical infusion that enhances strength and damage output.");
+            }
+            if (GUILayout.Button("🧠 Mind Infusion"))
+            {
+                CreateQuickInfusion("Mind Infusion", Color.magenta, "A mental infusion that boosts intelligence and magical abilities.");
+            }
+            if (GUILayout.Button("🛡️ Shield Infusion"))
+            {
+                CreateQuickInfusion("Shield Infusion", Color.blue, "A protective infusion that provides defensive barriers and damage resistance.");
+            }
+            EditorGUILayout.EndHorizontal();
+            
+            EditorGUILayout.Space();
+            
+            EditorGUILayout.BeginHorizontal();
+            if (GUILayout.Button("Create Custom Infusion"))
+            {
+                CreateCustomInfusion();
+            }
+            
+            if (GUILayout.Button("Cancel"))
+            {
+                showInfusionWizard = false;
+            }
+            EditorGUILayout.EndHorizontal();
+            
+            EditorGUILayout.EndVertical();
+        }
+        
+        // Helper methods for infusions
+        private List<InfusionSO> FilterInfusions(List<InfusionSO> infusions)
+        {
+            var filtered = infusions.AsEnumerable();
+            
+            // Name filter
+            if (!string.IsNullOrEmpty(infusionSearchQuery))
+            {
+                filtered = filtered.Where(i => i.InfusionName.ToLower().Contains(infusionSearchQuery.ToLower()));
+            }
+            
+            // Effect type filter
+            if (selectedEffectTypeFilter != EffectTypeFilter.All)
+            {
+                filtered = filtered.Where(i => MatchesEffectTypeFilter(i, selectedEffectTypeFilter));
+            }
+            
+            return filtered.ToList();
+        }
+        
+        private bool MatchesEffectTypeFilter(InfusionSO infusion, EffectTypeFilter filter)
+        {
+            if (infusion?.EffectBundle?.Effects == null || infusion.EffectBundle.Effects.Count == 0)
+            {
+                return filter == EffectTypeFilter.None;
+            }
+            
+            foreach (var effect in infusion.EffectBundle.Effects)
+            {
+                if (effect == null) continue;
+                
+                switch (filter)
+                {
+                    case EffectTypeFilter.Heal:
+                        if (effect is HealEffect) return true;
+                        break;
+                    case EffectTypeFilter.BuffHeal:
+                        if (effect is BuffHealEffect) return true;
+                        break;
+                    case EffectTypeFilter.Damage:
+                        if (effect is DamageEffect) return true;
+                        break;
+                    case EffectTypeFilter.Shield:
+                        if (effect is ShieldEffect) return true;
+                        break;
+                    case EffectTypeFilter.BuffShield:
+                        if (effect is BuffShieldEffect) return true;
+                        break;
+                    case EffectTypeFilter.BuffStat:
+                        if (effect is BuffStatEffect) return true;
+                        break;
+                    case EffectTypeFilter.DebuffStat:
+                        if (effect is DebuffStatEffect) return true;
+                        break;
+                    case EffectTypeFilter.DebuffDOT:
+                        if (effect is DebuffDOTEffect) return true;
+                        break;
+                }
+            }
+            
+            return false;
+        }
+        
+        private void ShowInfusionQuickActions(InfusionSO infusion)
+        {
+            GenericMenu menu = new GenericMenu();
+            menu.AddItem(new GUIContent("Duplicate"), false, () => DuplicateInfusion(infusion));
+            menu.AddItem(new GUIContent("Find Usage"), false, () => FindInfusionUsage(infusion));
+            menu.AddItem(new GUIContent("Test Effects"), false, () => TestInfusionEffects(infusion));
+            menu.AddItem(new GUIContent("Export Data"), false, () => ExportInfusionData(infusion));
+            menu.ShowAsContext();
+        }
+        
+        private void CreateQuickInfusion(string name, Color color, string description = null)
+        {
+            Debug.Log($"🧪 Starting creation of {name} infusion...");
+            
+            var infusion = CreateInstance<InfusionSO>();
+            
+            // Use the new InitializeInfusion method instead of reflection
+            string finalDescription = description ?? $"A magical infusion that provides {name.ToLower()} effects.";
+            infusion.InitializeInfusion(name, finalDescription, color);
+            
+            // Create asset
+            string path = "Assets/Resources/Infusions";
+            if (!AssetDatabase.IsValidFolder(path))
+            {
+                Debug.Log("📁 Creating Infusions folder...");
+                AssetDatabase.CreateFolder("Assets/Resources", "Infusions");
+            }
+            
+            string assetPath = AssetDatabase.GenerateUniqueAssetPath($"{path}/{name.Replace(" ", "")}.asset");
+            Debug.Log($"💾 Creating asset at: {assetPath}");
+            
+            AssetDatabase.CreateAsset(infusion, assetPath);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            
+            selectedInfusion = infusion;
+            showInfusionWizard = false;
+            
+            Debug.Log($"✅ Created {name} infusion: {assetPath}");
+            Debug.Log($"🔍 Infusion validation: Name='{infusion.InfusionName}', Color={infusion.InfusionColor}, Description='{infusion.Description}'");
+        }
+        
+        private void CreateCustomInfusion()
+        {
+            CreateQuickInfusion("New Infusion", Color.white, "A custom infusion with user-defined effects.");
+        }
+        
+        private void DeleteInfusion(InfusionSO infusion)
+        {
+            string path = AssetDatabase.GetAssetPath(infusion);
+            AssetDatabase.DeleteAsset(path);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            
+            if (selectedInfusion == infusion)
+                selectedInfusion = null;
+                
+            Debug.Log($"Deleted infusion: {infusion.InfusionName}");
+        }
+        
+        private void DuplicateInfusion(InfusionSO infusion)
+        {
+            var duplicate = Instantiate(infusion);
+            duplicate.name = $"{infusion.InfusionName} Copy";
+            
+            string path = AssetDatabase.GetAssetPath(infusion);
+            string directory = Path.GetDirectoryName(path);
+            string filename = Path.GetFileNameWithoutExtension(path);
+            string extension = Path.GetExtension(path);
+            string newPath = $"{directory}/{filename}_Copy{extension}";
+            
+            AssetDatabase.CreateAsset(duplicate, newPath);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            
+            selectedInfusion = duplicate;
+            Debug.Log($"Duplicated infusion: {infusion.InfusionName}");
+        }
+        
+        private void FindInfusionUsage(InfusionSO infusion)
+        {
+            Debug.Log($"🔍 Finding usage of infusion: {infusion.InfusionName}");
+            // This would search through ingredients and potions to find where this infusion is used
+            EditorUtility.DisplayDialog("Find Usage", $"Searching for usage of '{infusion.InfusionName}'...\\n\\nThis feature will scan all ingredients and potions.", "OK");
+        }
+        
+        private void TestInfusionEffects(InfusionSO infusion)
+        {
+            Debug.Log($"🧪 Testing effects for {infusion.InfusionName}:");
+            if (infusion.EffectBundle?.Effects != null && infusion.EffectBundle.Effects.Count > 0)
+            {
+                foreach (var effect in infusion.EffectBundle.Effects)
+                {
+                    if (effect != null)
+                    {
+                        Debug.Log($"  • {effect.GetType().Name}: Ready for application");
+                    }
+                }
+            }
+            else
+            {
+                Debug.Log("  No effects assigned to this infusion.");
+            }
+        }
+        
+        private void ExportInfusionData(InfusionSO infusion)
+        {
+            Debug.Log($"📤 Exporting data for infusion: {infusion.InfusionName}");
+            EditorUtility.DisplayDialog("Export Data", $"Exporting data for '{infusion.InfusionName}'...\\n\\nThis would create a JSON file with all infusion data.", "OK");
         }
 
         private void DrawRefinementsTab()

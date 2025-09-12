@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using TMPro;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
+using FourFatesStudios.ProjectWarden.Enums;
 
 namespace FourFatesStudios.ProjectWarden.GridDemo.UI
 {
@@ -289,26 +290,26 @@ namespace FourFatesStudios.ProjectWarden.GridDemo.UI
             else
             {
                 // Return to original color
-                Color originalColor = GetAspectColor(AssignedIngredient?.IngredientAspect ?? FourFatesStudios.ProjectWarden.Enums.Aspect.Corporeal);
+                Color originalColor = GetAspectColor(AssignedIngredient?.IngredientAspect ?? Aspect.Corporeal);
                 buttonImage.color = originalColor;
             }
         }
         
-        private Color GetAspectColor(FourFatesStudios.ProjectWarden.Enums.Aspect aspect)
+        private Color GetAspectColor(Aspect aspect)
         {
             switch (aspect)
             {
-                case FourFatesStudios.ProjectWarden.Enums.Aspect.Scorch: 
+                case Aspect.Scorch: 
                     return new Color(0.9f, 0.3f, 0.3f, 0.8f);
-                case FourFatesStudios.ProjectWarden.Enums.Aspect.Frigid: 
+                case Aspect.Frigid: 
                     return new Color(0.3f, 0.7f, 0.9f, 0.8f);
-                case FourFatesStudios.ProjectWarden.Enums.Aspect.Arc: 
+                case Aspect.Arc: 
                     return new Color(0.9f, 0.9f, 0.3f, 0.8f);
-                case FourFatesStudios.ProjectWarden.Enums.Aspect.Caustic: 
+                case Aspect.Caustic: 
                     return new Color(0.7f, 0.5f, 0.2f, 0.8f);
-                case FourFatesStudios.ProjectWarden.Enums.Aspect.Corporeal: 
+                case Aspect.Corporeal: 
                     return new Color(0.6f, 0.6f, 0.6f, 0.8f);
-                case FourFatesStudios.ProjectWarden.Enums.Aspect.Divine: 
+                case Aspect.Divine: 
                     return new Color(0.9f, 0.9f, 0.9f, 0.8f);
                 default: 
                     return new Color(0.2f, 0.2f, 0.2f, 0.8f);

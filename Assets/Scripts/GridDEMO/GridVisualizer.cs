@@ -163,6 +163,7 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         
         public void RefreshGrid()
         {
+            Debug.Log("🔄 GridVisualizer.RefreshGrid() - Updating all cell visuals");
             GridCell[,] cells = gridManager.GetAllCells();
             
             for (int x = 0; x < gridManager.gridWidth; x++)
@@ -172,6 +173,8 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                     UpdateCellVisual(x, y, cells[x, y]);
                 }
             }
+            
+            Debug.Log("✅ Grid refresh complete - all cells updated to match their logical state");
         }
         
         public void UpdateHighlight(Vector2Int hoveredCell, Ingredient selectedIngredient)
@@ -200,7 +203,7 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             }
         }
         
-        private void ClearHighlights()
+        public void ClearHighlights()
         {
             GridCell[,] cells = gridManager.GetAllCells();
             
@@ -224,16 +227,25 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             Material materialToUse = GetMaterialForCell(cell);
             cellRenderers[x, y].material = materialToUse;
             
-            // Update material color
+            // Update material color using MaterialPropertyBlock
             MaterialPropertyBlock mpb = new MaterialPropertyBlock();
             mpb.SetColor("_BaseColor", cell.CellColor);
             
-            // Add intensity-based emission for occupied cells
-            if (cell.IsOccupied)
+            // Only add emission for highlights, not for occupied cells
+            // This keeps occupied cells subtle while ingredient models provide the color
+            if (cell.VisualState == CellVisualState.ValidHighlight || 
+                cell.VisualState == CellVisualState.InvalidHighlight)
             {
-                Color emissionColor = cell.CellColor * cell.CellIntensity * 0.5f;
+                // Add subtle emission for highlights
+                Color emissionColor = cell.CellColor * 0.3f;
                 mpb.SetColor("_EmissionColor", emissionColor);
-                mpb.SetFloat("_EmissionIntensity", cell.CellIntensity);
+                mpb.SetFloat("_EmissionIntensity", 0.5f);
+            }
+            else
+            {
+                // Clear emission for empty and occupied cells
+                mpb.SetColor("_EmissionColor", Color.black);
+                mpb.SetFloat("_EmissionIntensity", 0f);
             }
             
             cellRenderers[x, y].SetPropertyBlock(mpb);

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using FourFatesStudios.ProjectWarden.Enums;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
 using UnityEngine.UI;
+// Temporary using to force recompilation in Unity 6
+using System;
 
 namespace FourFatesStudios.ProjectWarden.GridDemo
 {
@@ -19,6 +21,7 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
 
         private GridGameManager gridManager;
         private GridVisualizer gridVisualizer;
+        private IngredientEffectVisualizer effectVisualizer;
 
         private Dictionary<Vector2Int, IngredientInstance> placedIngredients =
             new Dictionary<Vector2Int, IngredientInstance>();
@@ -29,6 +32,14 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         {
             gridManager = GetComponent<GridGameManager>();
             gridVisualizer = GetComponent<GridVisualizer>();
+            effectVisualizer = GetComponent<IngredientEffectVisualizer>();
+            
+            // Add effect visualizer if it doesn't exist
+            if (effectVisualizer == null)
+            {
+                effectVisualizer = gameObject.AddComponent<IngredientEffectVisualizer>();
+                Debug.Log("🎨 Added IngredientEffectVisualizer component");
+            }
         }
 
         private void Start()
@@ -96,6 +107,26 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             // Effects and reactions
             gridVisualizer.PlayPlacementEffect(gridPosition, ingredient);
             CheckForReactions(gridPosition, ingredient);
+            
+            // Check for ingredient effect interactions (new sparkle/reaction system)
+            if (effectVisualizer != null)
+            {
+                effectVisualizer.CheckIngredientInteractions(gridPosition, ingredient);
+            }
+
+            // Clear ingredient selection and highlights after successful placement
+            Debug.Log("🔄 Clearing ingredient selection after successful placement");
+            if (gridManager != null)
+            {
+                gridManager.ClearIngredientSelection();
+            }
+            
+            // Force grid visual refresh to ensure cells reset to white
+            Debug.Log("🔄 Refreshing grid visuals to reset cell colors to white");
+            if (gridVisualizer != null)
+            {
+                gridVisualizer.RefreshGrid();
+            }
 
             // Final verification
             bool verificationPassed = VerifyPlacementIntegrity(ingredient, gridPosition);
@@ -574,6 +605,12 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                 DestroyImmediate(ingredientLabelCanvas.gameObject);
                 ingredientLabelCanvas = null;
             }
+            
+            // Clear all effect visualizations
+            if (effectVisualizer != null)
+            {
+                effectVisualizer.ClearAllEffects();
+            }
 
             // Additional cleanup: Find and destroy any remaining ingredient objects that might have been missed
             GameObject[] allIngredientObjects = GameObject.FindGameObjectsWithTag("Untagged");
@@ -598,11 +635,12 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         }
 
         /// <summary>
-        /// Safety method to destroy all child ingredient objects
+        /// Safety method to destroy ONLY child ingredient objects while preserving grid infrastructure
         /// </summary>
         private void ForceDestroyAllChildIngredients()
         {
             int childrenDestroyed = 0;
+            int gridObjectsPreserved = 0;
 
             // Get all immediate children of this transform
             Transform[] children = new Transform[transform.childCount];
@@ -611,20 +649,56 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                 children[i] = transform.GetChild(i);
             }
 
-            // Destroy all children (these should be ingredient visuals)
+            // Selectively destroy only ingredient objects, not grid infrastructure
             foreach (Transform child in children)
             {
                 if (child != null && child.gameObject != null)
                 {
-                    Debug.Log($"🧹 Force destroying child ingredient object: {child.name}");
-                    DestroyImmediate(child.gameObject);
-                    childrenDestroyed++;
+                    string childName = child.name;
+                    
+                    // Identify grid infrastructure objects that should be preserved
+                    bool isGridCell = childName.StartsWith("Cell_") && (childName.Contains("_") && childName.Split('_').Length == 3);
+                    bool isGridLine = childName.StartsWith("GridLine_");
+                    bool isGridInfrastructure = isGridCell || isGridLine;
+                    
+                    // Identify ingredient objects that should be destroyed
+                    bool isIngredientObject = (childName.Contains("TestIngredient") || 
+                                             childName.Contains("Ingredient") || 
+                                             childName.Contains("_")) && 
+                                             !isGridInfrastructure;
+                    
+                    // Additional check: ingredients typically have format "IngredientName_x_y"
+                    bool hasIngredientFormat = childName.Contains("_") && 
+                                              childName.Split('_').Length >= 3 && 
+                                              !childName.StartsWith("Cell_") && 
+                                              !childName.StartsWith("GridLine_");
+                    
+                    if ((isIngredientObject || hasIngredientFormat) && !isGridInfrastructure)
+                    {
+                        Debug.Log($"🧹 Force destroying child ingredient object: {childName}");
+                        DestroyImmediate(child.gameObject);
+                        childrenDestroyed++;
+                    }
+                    else if (isGridInfrastructure)
+                    {
+                        Debug.Log($"🔒 Preserving grid infrastructure: {childName}");
+                        gridObjectsPreserved++;
+                    }
+                    else
+                    {
+                        Debug.Log($"🤔 Unknown child object (preserving): {childName}");
+                        gridObjectsPreserved++;
+                    }
                 }
             }
 
-            if (childrenDestroyed > 0)
+            if (childrenDestroyed > 0 || gridObjectsPreserved > 0)
             {
-                Debug.Log($"🧹 Force destroyed {childrenDestroyed} orphaned ingredient objects");
+                Debug.Log($"🧹 Force cleanup complete! Destroyed: {childrenDestroyed} ingredient objects, Preserved: {gridObjectsPreserved} grid objects");
+            }
+            else
+            {
+                Debug.Log($"🧹 Force cleanup found no objects to destroy or preserve");
             }
         }
 
