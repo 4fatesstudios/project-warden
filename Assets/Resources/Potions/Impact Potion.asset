@@ -10,16 +10,19 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 53efbf4862b0b5b4797dee728a66223a, type: 3}
-  m_Name: NewPotion 1
+  m_Name: Impact Potion
   m_EditorClassIdentifier: 
   id: 
-  itemName: Unnamed Item
+  itemName: Impact Potion
   itemDescription: Empty Description
-  itemRarity: 0
+  itemRarity: 1
   itemIcon: {fileID: 0}
-  itemPotionType: 0
+  itemPotionType: 1
   effectBundle:
     Effects: []
+  infusionBundle:
+    infusions:
+    - {fileID: 11400000, guid: 5e9bb16af257975488d29087a6d692e0, type: 2}
   rarity: 0
   tone: 2
   bottleType: 0

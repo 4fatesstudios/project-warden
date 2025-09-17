@@ -523,8 +523,8 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu
                 _ => 1.0f
             };
             
-            // Create effects based on recipe and ingredients
-            var effectBundle = CreateEffectBundle(process.ingredients, process.accentIngredient, quality);
+            // Create infusion bundle based on recipe and ingredients
+            var infusionBundle = CreateInfusionBundle(process.ingredients, process.accentIngredient, quality);
             
             // Determine rarity based on recipe and quality
             PotionRarity rarity = DeterminePotionRarity(process.recipe, quality, result);
@@ -534,7 +534,7 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu
                 rarity,
                 process.recipe.ExpectedTone,
                 process.bottleType,
-                effectBundle,
+                infusionBundle,
                 quality,
                 "Player", // TODO: Get actual player name
                 process.ingredients
@@ -550,43 +550,31 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu
             return potion;
         }
         
-        private EffectBundle CreateEffectBundle(List<Ingredient> ingredients, Ingredient accentIngredient, float quality)
+        private FourFatesStudios.ProjectWarden.ScriptableObjects.InfusionBundle CreateInfusionBundle(List<Ingredient> ingredients, Ingredient accentIngredient, float quality)
         {
-            var effectBundle = new EffectBundle();
+            var infusionBundle = new FourFatesStudios.ProjectWarden.ScriptableObjects.InfusionBundle();
             
-            // Combine effects from all ingredients through their infusions
+            // Combine infusions from all ingredients
             foreach (var ingredient in ingredients)
             {
                 foreach (var infusion in ingredient.InfusionBundle.Infusions)
                 {
-                    // Add effects from infusion's effect bundle
-                    if (infusion.EffectBundle?.Effects != null)
-                    {
-                        foreach (var effect in infusion.EffectBundle.Effects)
-                        {
-                            effectBundle.Effects.Add(effect);
-                        }
-                    }
+                    // Add infusion directly to the bundle
+                    infusionBundle.AddInfusion(infusion);
                 }
             }
             
-            // Add accent ingredient effects through its infusions
+            // Add accent ingredient infusions
             if (accentIngredient != null)
             {
                 foreach (var infusion in accentIngredient.InfusionBundle.Infusions)
                 {
-                    // Add effects from accent ingredient's infusion effect bundle (with reduced potency)
-                    if (infusion.EffectBundle?.Effects != null)
-                    {
-                        foreach (var effect in infusion.EffectBundle.Effects)
-                        {
-                            effectBundle.Effects.Add(effect);
-                        }
-                    }
+                    // Add infusion from accent ingredient
+                    infusionBundle.AddInfusion(infusion);
                 }
             }
             
-            return effectBundle;
+            return infusionBundle;
         }
         
         private PotionRarity DeterminePotionRarity(PotionRecipe recipe, float quality, CraftingResult result)
@@ -652,8 +640,7 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu
             }
             else
             {
-                Debug.Log("❌ Tetris minigame failed. Creating synthetic ingredient instead.");
-                CreateSyntheticIngredient();
+                Debug.Log("❌ Tetris minigame failed.");
             }
         }
         
@@ -668,14 +655,6 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu
                 // Check for new recipe discoveries
                 CheckForRecipeDiscoveries();
             }
-        }
-        
-        private void CreateSyntheticIngredient()
-        {
-            var synthetic = SyntheticIngredient.CreateFromFailedCrafting(selectedIngredients, "Failed brewing attempt");
-            
-            availableIngredients.Add(synthetic);
-            Debug.Log($"🧪 Created synthetic ingredient: {synthetic.ItemName}");
         }
         
         private AlchemyRecipe ConvertToAlchemyRecipe(PotionRecipe potionRecipe)

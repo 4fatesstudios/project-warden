@@ -1,5 +1,6 @@
 using FourFatesStudios.ProjectWarden.Enums;
 using System.Collections.Generic;
+using System.Linq;
 using FourFatesStudios.ProjectWarden.Effects;
 using FourFatesStudios.ProjectWarden.Structs;
 using FourFatesStudios.ProjectWarden.ScriptableObjects;
@@ -43,6 +44,12 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
         [SerializeField, Tooltip("Additional grid spaces unlocked (if applicable).")]
         [Range(0, 8)]
         private int additionalSpaceCount = 0;
+
+        [SerializeField, Tooltip("Is this ingredient unrefined (larger, bulkier, low obstacle chance)?")]
+        private bool isUnrefined = true;
+
+        [SerializeField, Tooltip("Original ingredient this was refined from (if refined).")]
+        private Ingredient originalIngredient;
 
         [Header("Visual Shape Design")]
         [SerializeField, Tooltip("Serialized shape data for the ingredient's visual grid design.")]
@@ -95,6 +102,8 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
         public virtual int GridHeight => gridHeight;
         public virtual bool UnlocksAdditionalSpace => unlocksAdditionalSpace;
         public virtual int AdditionalSpaceCount => additionalSpaceCount;
+        public bool IsUnrefined => isUnrefined;
+        public Ingredient OriginalIngredient => originalIngredient;
         public InfusionBundle InfusionBundle => infusionBundle;
         public EffectBundle EffectBundle => effectBundle;
         public bool CanGrind => canGrind;
@@ -221,39 +230,36 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
         }
         
         /// <summary>
-        /// Check if this ingredient has similar effects to another ingredient
+        /// Check if this ingredient has infusion effects specifically (for interaction comparisons)
+        /// </summary>
+        public bool HasInfusionEffects()
+        {
+            return infusionBundle?.Infusions != null && infusionBundle.Infusions.Count > 0;
+        }
+        
+        /// <summary>
+        /// Check if this ingredient shares any infusion types with another ingredient
         /// </summary>
         public bool HasSimilarEffectsTo(Ingredient other)
         {
-            if (other == null || !HasEffects() || !other.HasEffects())
+            if (other == null)
                 return false;
             
-            // Check effectBundle effects
-            if (effectBundle?.Effects != null && other.effectBundle?.Effects != null)
-            {
-                foreach (var effect in effectBundle.Effects)
-                {
-                    foreach (var otherEffect in other.effectBundle.Effects)
-                    {
-                        if (effect.GetType() == otherEffect.GetType())
-                            return true;
-                    }
-                }
-            }
+            // Only check infusion bundle infusions, not their effects
+            if (infusionBundle?.Infusions == null || other.infusionBundle?.Infusions == null)
+                return false;
             
-            // Check infusions (by comparing effect types)
-            if (infusionBundle?.Infusions != null && other.infusionBundle?.Infusions != null)
+            if (infusionBundle.Infusions.Count == 0 || other.infusionBundle.Infusions.Count == 0)
+                return false;
+            
+            // Check for any matching infusion types directly
+            foreach (var thisInfusion in infusionBundle.Infusions)
             {
-                var thisInfusionEffects = infusionBundle.GetAllEffects();
-                var otherInfusionEffects = other.infusionBundle.GetAllEffects();
-                
-                foreach (var thisEffect in thisInfusionEffects)
+                foreach (var otherInfusion in other.infusionBundle.Infusions)
                 {
-                    foreach (var otherEffect in otherInfusionEffects)
-                    {
-                        if (thisEffect.GetType() == otherEffect.GetType())
-                            return true;
-                    }
+                    // Compare infusion types, not effect types
+                    if (thisInfusion.GetType() == otherInfusion.GetType())
+                        return true;
                 }
             }
             
@@ -261,86 +267,110 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
         }
         
         /// <summary>
-        /// Get the effects that are similar to another ingredient
-        /// Returns pairs of matching effects from both ingredients
+        /// Get all effects from both EffectBundle and InfusionBundle
         /// </summary>
-        public List<(IEffect thisEffect, IEffect otherEffect)> GetSimilarEffectsTo(Ingredient other)
+        public List<IEffect> GetAllEffects()
         {
-            var similarEffects = new List<(IEffect, IEffect)>();
-            
-            if (other == null || !HasEffects() || !other.HasEffects())
-                return similarEffects;
-            
-            // Find all matching effect types and return the effect pairs
-            foreach (var effect in effectBundle.Effects)
-            {
-                foreach (var otherEffect in other.effectBundle.Effects)
-                {
-                    if (effect.GetType() == otherEffect.GetType())
-                    {
-                        similarEffects.Add((effect, otherEffect));
-                    }
-                }
-            }
-            
-            return similarEffects;
-        }
-        
-        /// <summary>
-        /// Get just this ingredient's effects that have matching types in another ingredient
-        /// </summary>
-        public List<IEffect> GetMyEffectsSimilarTo(Ingredient other)
-        {
-            var myMatchingEffects = new List<IEffect>();
-            
-            if (other == null || !HasEffects() || !other.HasEffects())
-                return myMatchingEffects;
-            
-            var otherEffectTypes = other.GetEffectTypes();
-            
-            foreach (var effect in effectBundle.Effects)
-            {
-                foreach (var otherType in otherEffectTypes)
-                {
-                    if (effect.GetType() == otherType)
-                    {
-                        myMatchingEffects.Add(effect);
-                        break; // Don't add the same effect multiple times
-                    }
-                }
-            }
-            
-            return myMatchingEffects;
-        }
-        
-        /// <summary>
-        /// Get all effect types in this ingredient
-        /// </summary>
-        public System.Type[] GetEffectTypes()
-        {
-            var types = new List<System.Type>();
+            var allEffects = new List<IEffect>();
             
             // Add effects from the direct effect bundle
             if (effectBundle?.Effects != null)
             {
-                foreach (var effect in effectBundle.Effects)
-                {
-                    if (effect != null)
-                    {
-                        types.Add(effect.GetType());
-                    }
-                }
+                allEffects.AddRange(effectBundle.Effects);
             }
             
             // Add effects from infusions
             if (infusionBundle?.Infusions != null)
             {
                 var infusionEffects = infusionBundle.GetAllEffects();
-                foreach (var effect in infusionEffects)
+                allEffects.AddRange(infusionEffects);
+            }
+            
+            return allEffects;
+        }
+
+        /// <summary>
+        /// Get the shared infusion types between this ingredient and another
+        /// Returns pairs of matching infusions from both ingredients
+        /// </summary>
+        public List<(object thisInfusion, object otherInfusion)> GetSimilarEffectsTo(Ingredient other)
+        {
+            var similarInfusions = new List<(object, object)>();
+            
+            if (other == null)
+                return similarInfusions;
+            
+            // Only check infusion bundle infusions, not their effects
+            if (infusionBundle?.Infusions == null || other.infusionBundle?.Infusions == null)
+                return similarInfusions;
+            
+            if (infusionBundle.Infusions.Count == 0 || other.infusionBundle.Infusions.Count == 0)
+                return similarInfusions;
+            
+            // Find all matching infusion types and return the infusion pairs
+            foreach (var thisInfusion in infusionBundle.Infusions)
+            {
+                foreach (var otherInfusion in other.infusionBundle.Infusions)
                 {
-                    if (effect != null)
+                    if (thisInfusion.GetType() == otherInfusion.GetType())
                     {
-                        types.Add(effect.GetType());
+                        similarInfusions.Add((thisInfusion, otherInfusion));
+                    }
+                }
+            }
+            
+            return similarInfusions;
+        }
+        
+        /// <summary>
+        /// Get this ingredient's infusions that have matching types in another ingredient
+        /// </summary>
+        public List<object> GetMyEffectsSimilarTo(Ingredient other)
+        {
+            var myMatchingInfusions = new List<object>();
+            
+            if (other == null)
+                return myMatchingInfusions;
+            
+            // Only check infusion bundle infusions, not their effects
+            if (infusionBundle?.Infusions == null || other.infusionBundle?.Infusions == null)
+                return myMatchingInfusions;
+            
+            if (infusionBundle.Infusions.Count == 0 || other.infusionBundle.Infusions.Count == 0)
+                return myMatchingInfusions;
+            
+            var otherInfusionTypes = other.infusionBundle.Infusions.Select(i => i.GetType()).ToArray();
+            
+            foreach (var infusion in infusionBundle.Infusions)
+            {
+                foreach (var otherType in otherInfusionTypes)
+                {
+                    if (infusion.GetType() == otherType)
+                    {
+                        myMatchingInfusions.Add(infusion);
+                        break; // Don't add the same infusion multiple times
+                    }
+                }
+            }
+            
+            return myMatchingInfusions;
+        }
+        
+        /// <summary>
+        /// Get all infusion types in this ingredient
+        /// </summary>
+        public System.Type[] GetEffectTypes()
+        {
+            var types = new List<System.Type>();
+            
+            // Only get infusion types, not effect types
+            if (infusionBundle?.Infusions != null)
+            {
+                foreach (var infusion in infusionBundle.Infusions)
+                {
+                    if (infusion != null)
+                    {
+                        types.Add(infusion.GetType());
                     }
                 }
             }
@@ -349,27 +379,15 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
         }
         
         /// <summary>
-        /// Check if this ingredient has a specific effect type
+        /// Check if this ingredient has a specific infusion type
         /// </summary>
-        public bool HasEffectOfType<T>() where T : IEffect
+        public bool HasEffectOfType<T>() where T : class
         {
-            // Check direct effect bundle
-            if (effectBundle?.Effects != null)
-            {
-                foreach (var effect in effectBundle.Effects)
-                {
-                    if (effect is T)
-                        return true;
-                }
-            }
-            
-            // Check infusion effects
             if (infusionBundle?.Infusions != null)
             {
-                var infusionEffects = infusionBundle.GetAllEffects();
-                foreach (var effect in infusionEffects)
+                foreach (var infusion in infusionBundle.Infusions)
                 {
-                    if (effect is T)
+                    if (infusion is T)
                         return true;
                 }
             }

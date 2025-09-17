@@ -74,7 +74,7 @@ namespace FourFatesStudios.ProjectWarden.Examples
                 if (infusion != null)
                 {
                     bundle.AddInfusion(infusion);
-                    Debug.Log($"  ➕ Added: {infusion.InfusionName} (Category: {infusion.Category}, Power: {infusion.PowerLevel})");
+                    Debug.Log($"  ➕ Added: {infusion.InfusionName} (Power: {infusion.PowerLevel})");
                 }
             }
             

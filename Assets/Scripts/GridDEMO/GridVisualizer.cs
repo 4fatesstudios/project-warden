@@ -265,6 +265,9 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                 case CellVisualState.Occupied:
                     return occupiedMaterial ?? baseCellMaterial;
                     
+                case CellVisualState.Obstacle:
+                    return baseCellMaterial; // Use base material for obstacles, color handled by MaterialPropertyBlock
+                    
                 default:
                     return baseCellMaterial;
             }
@@ -286,6 +289,9 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                     break;
                 case CellVisualState.Occupied:
                     targetHeight = 0.15f + (cell.CellIntensity * 0.1f);
+                    break;
+                case CellVisualState.Obstacle:
+                    targetHeight = 0.12f; // Obstacles are slightly raised
                     break;
             }
             

@@ -72,10 +72,10 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             if (dragDropDemo == null)
             {
                 dragDropDemo = gameObject.AddComponent<DragDropDemo>();
-                Debug.Log("GridDemoUI: Added DragDropDemo component");
+                DebugSystemConfig.LogTesting("Added DragDropDemo component");
             }
             
-            Debug.Log("GridDemoUI: Migrated to new UI system with SmartClickDetector and Drag & Drop. Consider removing this legacy component.");
+            DebugSystemConfig.LogTesting("Migrated to new UI system with SmartClickDetector and Drag & Drop. Consider removing this legacy component.");
         }
         
         private void SetupLegacyUI()

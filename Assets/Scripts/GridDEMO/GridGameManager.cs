@@ -1,7 +1,9 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections.Generic;
+using System.Linq;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
+using FourFatesStudios.ProjectWarden.ScriptableObjects.AlchemyRecipes;
 using FourFatesStudios.ProjectWarden.Enums;
 
 namespace FourFatesStudios.ProjectWarden.GridDemo
@@ -17,6 +19,17 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         public Material highlightedCellMaterial;
         public Material occupiedCellMaterial;
 
+        [Header("Obstacle System")] public bool enableObstacles = true;
+        [Range(0f, 0.3f)] public float obstacleSpawnChance = 0.15f;
+        public List<AspectObstacle> aspectObstacles = new List<AspectObstacle>();
+
+        [Header("Debug Systems")] [SerializeField]
+        private DebugSystemConfig debugSystemConfig;
+
+        [SerializeField] private ObstacleSpawnDebugger obstacleSpawnDebugger;
+
+        [Header("Proficiency Grading")] public bool enableProficiencyGrading = true;
+        public ProficiencyWeights gradingWeights = new ProficiencyWeights();
         [Header("Gameplay")] public List<Ingredient> availableIngredients = new List<Ingredient>();
         public Transform ingredientContainer;
         public UnityEngine.Camera gameCamera;
@@ -49,8 +62,11 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
 
         private void InitializeComponents()
         {
-            Debug.Log("🔄 InitializeComponents called - this will recreate the grid!");
-            Debug.Log($"Stack trace: {System.Environment.StackTrace}");
+            DebugSystemConfig.LogGridState("InitializeComponents called - this will recreate the grid!");
+            DebugSystemConfig.LogGridState($"Stack trace: {System.Environment.StackTrace}");
+
+            // Initialize debug systems first
+            SetupDebugSystems();
 
             // Initialize grid
             gridCells = new GridCell[gridWidth, gridHeight];
@@ -73,13 +89,13 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                 ingredientPlacer = gameObject.AddComponent<IngredientPlacer>();
 
             // Add PlacementTester for runtime debugging (only in development builds)
-            #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             if (GetComponent<PlacementTester>() == null)
             {
                 gameObject.AddComponent<PlacementTester>();
-                Debug.Log("🧪 Added PlacementTester component for runtime debugging");
+                DebugSystemConfig.LogTesting("Added PlacementTester component for runtime debugging");
             }
-            #endif
+#endif
 
             // Auto-assign camera if not set
             if (gameCamera == null)
@@ -98,7 +114,7 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                 }
                 else
                 {
-                    Debug.Log($"Auto-assigned camera: {gameCamera.name}");
+                    DebugSystemConfig.LogGridState($"Auto-assigned camera: {gameCamera.name}");
                 }
             }
 
@@ -113,34 +129,74 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
 
             // Center camera on grid after initialization
             CenterCameraOnGrid();
+
+            // Initialize obstacle and grading systems
+            if (enableObstacles)
+            {
+                InitializeObstacleSystems();
+            }
+
+            if (enableProficiencyGrading)
+            {
+                InitializeProficiencySystem();
+            }
         }
-        
+
+        /// <summary>
+        /// Setup debug systems and ensure they're available
+        /// </summary>
+        private void SetupDebugSystems()
+        {
+            // Setup DebugSystemConfig
+            if (debugSystemConfig == null)
+            {
+                debugSystemConfig = GetComponent<DebugSystemConfig>();
+                if (debugSystemConfig == null)
+                {
+                    debugSystemConfig = gameObject.AddComponent<DebugSystemConfig>();
+                    DebugSystemConfig.LogTesting("Added DebugSystemConfig component");
+                }
+            }
+
+            // Setup ObstacleSpawnDebugger
+            if (obstacleSpawnDebugger == null)
+            {
+                obstacleSpawnDebugger = GetComponent<ObstacleSpawnDebugger>();
+                if (obstacleSpawnDebugger == null)
+                {
+                    obstacleSpawnDebugger = gameObject.AddComponent<ObstacleSpawnDebugger>();
+                    DebugSystemConfig.LogObstacleSpawn("Added ObstacleSpawnDebugger component");
+                }
+            }
+        }
+
         private void LoadTestIngredients()
         {
-            Debug.Log("🧪 Loading test ingredients from Resources...");
-            
+            DebugSystemConfig.LogTesting("Loading test ingredients from Resources...");
+
             // Try to load from different possible locations
-            string[] possiblePaths = {
+            string[] possiblePaths =
+            {
                 "Items/Ingredients/TestIngredient1",
                 "TestIngredients/Ice Crystal",
                 "TestIngredients/Life Bloom"
             };
-            
+
             foreach (string path in possiblePaths)
             {
                 var ingredient = Resources.Load<Ingredient>(path);
                 if (ingredient != null)
                 {
                     availableIngredients.Add(ingredient);
-                    Debug.Log($"✅ Loaded ingredient: {ingredient.ItemName}");
+                    DebugSystemConfig.LogTesting($"Loaded ingredient: {ingredient.ItemName}");
                 }
                 else
                 {
-                    Debug.LogWarning($"⚠️ Could not load ingredient from: {path}");
+                    DebugSystemConfig.LogTesting($"Could not load ingredient from: {path}");
                 }
             }
-            
-            Debug.Log($"🧪 Total ingredients loaded: {availableIngredients.Count}");
+
+            DebugSystemConfig.LogTesting($"Total ingredients loaded: {availableIngredients.Count}");
         }
 
         private void SetupInput()
@@ -173,23 +229,23 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
 
             // Calculate grid center in world space
             Vector3 gridCenter = CalculateGridCenter();
-            
+
             // Calculate optimal camera distance based on grid size - much further back
             float gridDiagonal = Mathf.Sqrt(gridWidth * gridWidth + gridHeight * gridHeight) * cellSize;
             float cameraDistance = Mathf.Max(gridDiagonal * 1.2f, 12f); // Increased distance and minimum
-            
+
             // Position camera at an angle above and behind the grid center - further back
             Vector3 cameraOffset = new Vector3(
                 gridCenter.x,
                 cameraDistance * 0.9f, // Height above grid (increased)
                 gridCenter.z - cameraDistance * 0.8f // Much further back from center
             );
-            
+
             gameCamera.transform.position = cameraOffset;
-            
+
             // Look at the grid center
             gameCamera.transform.LookAt(gridCenter);
-            
+
             Debug.Log($"Camera positioned further back - Grid center: {gridCenter}, Camera position: {cameraOffset}");
         }
 
@@ -200,13 +256,13 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         {
             Vector2Int centerGridPos = new Vector2Int(gridWidth / 2, gridHeight / 2);
             Vector3 centerWorldPos = GridToWorldPosition(centerGridPos);
-            
+
             // Adjust for even-sized grids
             if (gridWidth % 2 == 0)
                 centerWorldPos.x -= cellSize * 0.5f;
             if (gridHeight % 2 == 0)
                 centerWorldPos.z -= cellSize * 0.5f;
-                
+
             return centerWorldPos;
         }
 
@@ -287,13 +343,13 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                     {
                         hoveredCell = newHoveredCell;
                         visualizer.UpdateHighlight(hoveredCell, currentSelectedIngredient);
-                        
+
                         // Show enhanced debug info for the hovered position and ingredient shape
                         if (currentSelectedIngredient != null)
                         {
                             DebugIngredientShapeCollision(currentSelectedIngredient, hoveredCell);
                         }
-                        
+
                         // Verify grid state on mouse hover (if enabled - can be performance intensive)
                         if (verifyOnMouseHover)
                         {
@@ -347,40 +403,77 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
 
         public bool TryPlaceIngredient(Ingredient ingredient, Vector2Int position)
         {
-            Debug.Log($"🎯 === TryPlaceIngredient: {ingredient.ItemName} at {position} ===");
+            DebugSystemConfig.LogIngredientPlacement(
+                $"=== TryPlaceIngredient: {ingredient.ItemName} at {position} ===");
 
             bool canPlace = CanPlaceIngredient(ingredient, position);
-            Debug.Log($"🎯 CanPlaceIngredient result: {canPlace}");
+            DebugSystemConfig.LogIngredientPlacement($"CanPlaceIngredient result: {canPlace}");
 
             if (canPlace)
             {
-                Debug.Log($"✅ Placement approved! Delegating to IngredientPlacer for unified placement");
-                
+                // Check obstacle interactions for each cell the ingredient will occupy
+                bool obstacleCheckPassed = true;
+                var cellsToOccupy = GetIngredientCells(ingredient, position);
+
+                foreach (var cellPos in cellsToOccupy)
+                {
+                    if (!HandleObstacleInteraction(ingredient, cellPos))
+                    {
+                        obstacleCheckPassed = false;
+                        break;
+                    }
+                }
+
+                if (!obstacleCheckPassed)
+                {
+                    DebugSystemConfig.LogObstacleInteraction(
+                        $"Obstacle interaction failed for {ingredient.ItemName} at {position}");
+                    return false;
+                }
+
+                DebugSystemConfig.LogIngredientPlacement(
+                    $"Placement approved! Delegating to IngredientPlacer for unified placement");
+
                 // Let IngredientPlacer handle both visual placement AND grid occupancy as a unified operation
                 ingredientPlacer.PlaceIngredient(ingredient, position);
-                
+
                 // Simple verification that IngredientPlacer did its job correctly
                 bool placementSuccess = VerifyIngredientPlacement(ingredient, position);
                 if (placementSuccess)
                 {
-                    Debug.Log($"✅ TryPlaceIngredient: SUCCESS - {ingredient.ItemName} placed and verified at {position}");
-                    
+                    DebugSystemConfig.LogIngredientPlacement(
+                        $"SUCCESS - {ingredient.ItemName} placed and verified at {position}");
+
                     // Clear highlights after successful placement
                     ClearIngredientSelection();
-                    
+
                     visualizer.RefreshGrid();
                     DebugGridStateAfterPlacement(ingredient, position);
+
+                    // Calculate proficiency grade if enabled
+                    if (enableProficiencyGrading)
+                    {
+                        var grade = CalculateCurrentProficiency();
+                        DebugSystemConfig.LogProficiencyGrading(
+                            $"Current Grade: {grade.gradeLevel} ({grade.overallScore:F1}%)");
+                    }
+
+                    // Check for recipe matches after placing ingredient
+                    CheckForRecipeMatches();
+
                     return true;
                 }
                 else
                 {
-                    Debug.LogError($"🚨 TryPlaceIngredient: FAILED - IngredientPlacer could not complete placement for {ingredient.ItemName} at {position}");
+                    DebugSystemConfig.LogErrorRecovery(
+                        $"FAILED - IngredientPlacer could not complete placement for {ingredient.ItemName} at {position}");
                     return false;
                 }
             }
             else
             {
-                Debug.LogWarning($"❌ Cannot place {ingredient.ItemName} at {position} - collision detected!");
+                DebugSystemConfig.LogCollisionDetection(
+                    $"Cannot place {ingredient.ItemName} at {position} - collision detected!");
                 // Let's see WHY it failed
                 DebugWhyPlacementFailed(ingredient, position);
             }
@@ -473,39 +566,34 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
 
         private bool CanPlaceIngredientWithShape(Ingredient ingredient, Vector2Int position)
         {
-            if (enableCollisionDebugLogging)
-                Debug.Log($"CanPlaceIngredientWithShape: {ingredient.ItemName} at {position}");
+            DebugSystemConfig.LogCollisionDetection(
+                $"CanPlaceIngredientWithShape: {ingredient.ItemName} at {position}");
 
             var shape = ingredient.GetShape();
             int shapeWidth = shape.GetLength(0);
             int shapeHeight = shape.GetLength(1);
 
-            if (enableCollisionDebugLogging)
-                Debug.Log($"Shape dimensions: {shapeWidth}x{shapeHeight}");
+            DebugSystemConfig.LogCollisionDetection($"Shape dimensions: {shapeWidth}x{shapeHeight}");
 
             // Check bounds
             if (position.x + shapeWidth > gridWidth || position.y + shapeHeight > gridHeight)
             {
-                if (enableCollisionDebugLogging)
-                    Debug.Log(
-                        $"Out of bounds: position {position} + shape ({shapeWidth},{shapeHeight}) exceeds grid ({gridWidth},{gridHeight})");
+                DebugSystemConfig.LogCollisionDetection(
+                    $"Out of bounds: position {position} + shape ({shapeWidth},{shapeHeight}) exceeds grid ({gridWidth},{gridHeight})");
                 return false;
             }
 
             // Debug: Print shape pattern
-            if (enableCollisionDebugLogging)
+            DebugSystemConfig.LogCollisionDetection("Shape pattern:");
+            for (int y = shapeHeight - 1; y >= 0; y--)
             {
-                Debug.Log("Shape pattern:");
-                for (int y = shapeHeight - 1; y >= 0; y--)
+                string row = $"Y={y}: ";
+                for (int x = 0; x < shapeWidth; x++)
                 {
-                    string row = $"Y={y}: ";
-                    for (int x = 0; x < shapeWidth; x++)
-                    {
-                        row += shape[x, y] ? "[#]" : "[ ]";
-                    }
-
-                    Debug.Log(row);
+                    row += shape[x, y] ? "[#]" : "[ ]";
                 }
+
+                DebugSystemConfig.LogCollisionDetection(row);
             }
 
             // Check each shape cell
@@ -521,9 +609,8 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                         // Bounds check for this specific cell
                         if (cellPos.x >= gridWidth || cellPos.y >= gridHeight || cellPos.x < 0 || cellPos.y < 0)
                         {
-                            if (enableCollisionDebugLogging)
-                                Debug.Log(
-                                    $"Shape cell ({x},{y}) -> Grid cell ({cellPos.x},{cellPos.y}) is out of bounds");
+                            DebugSystemConfig.LogCollisionDetection(
+                                $"Shape cell ({x},{y}) -> Grid cell ({cellPos.x},{cellPos.y}) is out of bounds");
                             return false;
                         }
 
@@ -531,22 +618,20 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                         bool isOccupied = gridCells[cellPos.x, cellPos.y].IsOccupied;
                         string occupant = gridCells[cellPos.x, cellPos.y].OccupiedByIngredient?.ItemName ?? "None";
 
-                        if (enableCollisionDebugLogging)
-                            Debug.Log(
-                                $"Shape cell ({x},{y}) -> Grid cell ({cellPos.x},{cellPos.y}): Occupied = {isOccupied}, By = {occupant}");
+                        DebugSystemConfig.LogCollisionDetection(
+                            $"Shape cell ({x},{y}) -> Grid cell ({cellPos.x},{cellPos.y}): Occupied = {isOccupied}, By = {occupant}");
 
                         if (isOccupied)
                         {
-                            if (enableCollisionDebugLogging)
-                                Debug.Log($"COLLISION: Cell ({cellPos.x},{cellPos.y}) is occupied by {occupant}");
+                            DebugSystemConfig.LogCollisionDetection(
+                                $"COLLISION: Cell ({cellPos.x},{cellPos.y}) is occupied by {occupant}");
                             return false;
                         }
                     }
                 }
             }
 
-            if (enableCollisionDebugLogging)
-                Debug.Log("No collisions detected - placement allowed");
+            DebugSystemConfig.LogCollisionDetection("No collisions detected - placement allowed");
             return true;
         }
 
@@ -571,51 +656,46 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
 
         private void MarkCellsAsOccupied(Ingredient ingredient, Vector2Int position)
         {
-            if (enableCollisionDebugLogging)
-                Debug.Log($"MarkCellsAsOccupied: {ingredient.ItemName} at {position}");
+            DebugSystemConfig.LogIngredientPlacement($"MarkCellsAsOccupied: {ingredient.ItemName} at {position}");
 
             // Use shape data if available, fallback to rectangle
             if (ingredient.ShapeData != null)
             {
-                if (enableCollisionDebugLogging)
-                    Debug.Log($"Using shape-based marking for {ingredient.ItemName}");
+                DebugSystemConfig.LogIngredientPlacement($"Using shape-based marking for {ingredient.ItemName}");
                 MarkCellsWithShape(ingredient, position);
             }
             else
             {
-                if (enableCollisionDebugLogging)
-                    Debug.Log($"Using rectangle-based marking for {ingredient.ItemName}");
+                DebugSystemConfig.LogIngredientPlacement($"Using rectangle-based marking for {ingredient.ItemName}");
                 MarkCellsRectangle(ingredient, position);
             }
 
             // Verify that cells were actually marked
-            if (enableCollisionDebugLogging)
+            DebugSystemConfig.LogIngredientPlacement(
+                $"Verification: Checking if cells were properly marked for {ingredient.ItemName}");
+            var shape = ingredient.GetShape();
+            int shapeWidth = shape.GetLength(0);
+            int shapeHeight = shape.GetLength(1);
+
+            for (int x = 0; x < shapeWidth; x++)
             {
-                Debug.Log($"Verification: Checking if cells were properly marked for {ingredient.ItemName}");
-                var shape = ingredient.GetShape();
-                int shapeWidth = shape.GetLength(0);
-                int shapeHeight = shape.GetLength(1);
-
-                for (int x = 0; x < shapeWidth; x++)
+                for (int y = 0; y < shapeHeight; y++)
                 {
-                    for (int y = 0; y < shapeHeight; y++)
+                    if (shape[x, y])
                     {
-                        if (shape[x, y])
+                        Vector2Int cellPos = position + new Vector2Int(x, y);
+                        if (cellPos.x < gridWidth && cellPos.y < gridHeight)
                         {
-                            Vector2Int cellPos = position + new Vector2Int(x, y);
-                            if (cellPos.x < gridWidth && cellPos.y < gridHeight)
-                            {
-                                bool isOccupied = gridCells[cellPos.x, cellPos.y].IsOccupied;
-                                string occupant = gridCells[cellPos.x, cellPos.y].OccupiedByIngredient?.ItemName ??
-                                                  "None";
-                                Debug.Log(
-                                    $"  VERIFY: Cell ({cellPos.x},{cellPos.y}) -> Occupied = {isOccupied}, By = {occupant}");
+                            bool isOccupied = gridCells[cellPos.x, cellPos.y].IsOccupied;
+                            string occupant = gridCells[cellPos.x, cellPos.y].OccupiedByIngredient?.ItemName ??
+                                              "None";
+                            DebugSystemConfig.LogIngredientPlacement(
+                                $"  VERIFY: Cell ({cellPos.x},{cellPos.y}) -> Occupied = {isOccupied}, By = {occupant}");
 
-                                if (!isOccupied)
-                                {
-                                    Debug.LogError(
-                                        $"  ❌ MARKING FAILED: Cell ({cellPos.x},{cellPos.y}) should be occupied but isn't!");
-                                }
+                            if (!isOccupied)
+                            {
+                                DebugSystemConfig.LogErrorRecovery(
+                                    $"  MARKING FAILED: Cell ({cellPos.x},{cellPos.y}) should be occupied but isn't!");
                             }
                         }
                     }
@@ -623,10 +703,10 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             }
         }
 
+
         private void MarkCellsWithShape(Ingredient ingredient, Vector2Int position)
         {
-            if (enableCollisionDebugLogging)
-                Debug.Log($"MarkCellsWithShape: {ingredient.ItemName} at {position}");
+            DebugSystemConfig.LogIngredientPlacement($"MarkCellsWithShape: {ingredient.ItemName} at {position}");
 
             var shape = ingredient.GetShape();
             int shapeWidth = shape.GetLength(0);
@@ -642,15 +722,14 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                         Vector2Int cellPos = position + new Vector2Int(x, y);
                         if (cellPos.x < gridWidth && cellPos.y < gridHeight)
                         {
-                            if (enableCollisionDebugLogging)
-                                Debug.Log(
-                                    $"  Marking cell ({cellPos.x},{cellPos.y}) as occupied by {ingredient.ItemName}");
+                            DebugSystemConfig.LogIngredientPlacement(
+                                $"  Marking cell ({cellPos.x},{cellPos.y}) as occupied by {ingredient.ItemName}");
                             gridCells[cellPos.x, cellPos.y].SetOccupied(ingredient);
                         }
                         else
                         {
-                            if (enableCollisionDebugLogging)
-                                Debug.LogError($"  Trying to mark out-of-bounds cell ({cellPos.x},{cellPos.y})!");
+                            DebugSystemConfig.LogErrorRecovery(
+                                $"  Trying to mark out-of-bounds cell ({cellPos.x},{cellPos.y})!");
                         }
                     }
                 }
@@ -659,9 +738,8 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
 
         private void MarkCellsRectangle(Ingredient ingredient, Vector2Int position)
         {
-            if (enableCollisionDebugLogging)
-                Debug.Log(
-                    $"MarkCellsRectangle: {ingredient.ItemName} at {position}, size {ingredient.GridWidth}x{ingredient.GridHeight}");
+            DebugSystemConfig.LogIngredientPlacement(
+                $"MarkCellsRectangle: {ingredient.ItemName} at {position}, size {ingredient.GridWidth}x{ingredient.GridHeight}");
 
             // Fallback to original rectangle-based marking
             for (int x = 0; x < ingredient.GridWidth; x++)
@@ -669,9 +747,8 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                 for (int y = 0; y < ingredient.GridHeight; y++)
                 {
                     Vector2Int cellPos = position + new Vector2Int(x, y);
-                    if (enableCollisionDebugLogging)
-                        Debug.Log(
-                            $"  Marking rectangle cell ({cellPos.x},{cellPos.y}) as occupied by {ingredient.ItemName}");
+                    DebugSystemConfig.LogIngredientPlacement(
+                        $"  Marking rectangle cell ({cellPos.x},{cellPos.y}) as occupied by {ingredient.ItemName}");
                     gridCells[cellPos.x, cellPos.y].SetOccupied(ingredient);
                 }
             }
@@ -681,11 +758,12 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         {
             currentSelectedIngredient = ingredient;
             visualizer.UpdateHighlight(hoveredCell, currentSelectedIngredient);
-            
+
             // Verify grid state when selecting ingredients (if enabled)
             if (verifyOnIngredientSelection)
             {
-                Debug.Log($"🔍 Verifying grid state on ingredient selection: {ingredient?.ItemName ?? "None"}");
+                string ingredientName = ingredient?.ItemName ?? "None";
+                DebugSystemConfig.LogTesting($"Verifying grid state on ingredient selection: {ingredientName}");
                 VerifyAllPlacedIngredientsQuiet();
             }
         }
@@ -698,12 +776,12 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             Debug.Log("🔄 Clearing ingredient selection and highlights");
             currentSelectedIngredient = null;
             hoveredCell = Vector2Int.one * -1; // Reset to invalid position
-            
+
             // Clear any visual highlights
             if (visualizer != null)
             {
                 visualizer.ClearHighlights();
-                
+
                 // Force refresh the entire grid to ensure all cells reset to white
                 visualizer.RefreshGrid();
                 Debug.Log("🔄 Grid refreshed - all cells should now be white (empty) or white (occupied)");
@@ -719,11 +797,11 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         private bool VerifyIngredientPlacement(Ingredient ingredient, Vector2Int position)
         {
             Debug.Log($"🔍 VerifyIngredientPlacement: Checking {ingredient.ItemName} at {position}");
-            
+
             var expectedCells = GetIngredientCells(ingredient, position);
             int totalExpectedCells = expectedCells.Count;
             int properlyOccupiedCells = 0;
-            
+
             foreach (var cellPos in expectedCells)
             {
                 var cell = GetCell(cellPos.x, cellPos.y);
@@ -732,32 +810,37 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                     bool isOccupied = cell.IsOccupied;
                     string occupantName = cell.OccupiedByIngredient?.ItemName ?? "None";
                     bool occupiedByCorrectIngredient = cell.OccupiedByIngredient == ingredient;
-                    
-                    Debug.Log($"🔍 Cell ({cellPos.x},{cellPos.y}): Occupied={isOccupied}, By={occupantName}, CorrectIngredient={occupiedByCorrectIngredient}");
-                    
+
+                    Debug.Log(
+                        $"🔍 Cell ({cellPos.x},{cellPos.y}): Occupied={isOccupied}, By={occupantName}, CorrectIngredient={occupiedByCorrectIngredient}");
+
                     if (isOccupied && occupiedByCorrectIngredient)
                     {
                         properlyOccupiedCells++;
                     }
                     else if (!isOccupied)
                     {
-                        Debug.LogError($"🚨 VERIFICATION ERROR: Cell ({cellPos.x},{cellPos.y}) should be occupied by {ingredient.ItemName} but is empty!");
+                        Debug.LogError(
+                            $"🚨 VERIFICATION ERROR: Cell ({cellPos.x},{cellPos.y}) should be occupied by {ingredient.ItemName} but is empty!");
                     }
                     else if (isOccupied && !occupiedByCorrectIngredient)
                     {
-                        Debug.LogError($"🚨 VERIFICATION ERROR: Cell ({cellPos.x},{cellPos.y}) occupied by wrong ingredient: {occupantName} instead of {ingredient.ItemName}!");
+                        Debug.LogError(
+                            $"🚨 VERIFICATION ERROR: Cell ({cellPos.x},{cellPos.y}) occupied by wrong ingredient: {occupantName} instead of {ingredient.ItemName}!");
                     }
                 }
                 else
                 {
-                    Debug.LogError($"🚨 VERIFICATION ERROR: Could not get cell at ({cellPos.x},{cellPos.y}) - out of bounds?");
+                    Debug.LogError(
+                        $"🚨 VERIFICATION ERROR: Could not get cell at ({cellPos.x},{cellPos.y}) - out of bounds?");
                 }
             }
-            
+
             bool verificationPassed = (properlyOccupiedCells == totalExpectedCells);
-            
-            Debug.Log($"🔍 Verification result: {properlyOccupiedCells}/{totalExpectedCells} cells properly occupied = {(verificationPassed ? "PASS" : "FAIL")}");
-            
+
+            Debug.Log(
+                $"🔍 Verification result: {properlyOccupiedCells}/{totalExpectedCells} cells properly occupied = {(verificationPassed ? "PASS" : "FAIL")}");
+
             return verificationPassed;
         }
 
@@ -768,11 +851,11 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         public void VerifyAllPlacedIngredients()
         {
             Debug.Log("🔍 === VERIFYING ALL PLACED INGREDIENTS ===");
-            
+
             var placedIngredients = ingredientPlacer.GetAllPlacedIngredients();
             int totalIngredients = placedIngredients.Count;
             int verifiedIngredients = 0;
-            
+
             foreach (var instance in placedIngredients)
             {
                 bool verified = VerifyIngredientPlacement(instance.ingredient, instance.gridPosition);
@@ -786,9 +869,10 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                     Debug.LogError($"❌ {instance.ingredient.ItemName} at {instance.gridPosition} verification FAILED");
                 }
             }
-            
-            Debug.Log($"🔍 Verification complete: {verifiedIngredients}/{totalIngredients} ingredients properly occupy their cells");
-            
+
+            Debug.Log(
+                $"🔍 Verification complete: {verifiedIngredients}/{totalIngredients} ingredients properly occupy their cells");
+
             if (verifiedIngredients != totalIngredients)
             {
                 Debug.LogError("🚨 Some ingredients failed verification! There may be a bug in the occupancy system.");
@@ -803,22 +887,24 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             var placedIngredients = ingredientPlacer?.GetAllPlacedIngredients();
             if (placedIngredients == null || placedIngredients.Count == 0)
                 return;
-            
+
             int failedIngredients = 0;
-            
+
             foreach (var instance in placedIngredients)
             {
                 bool verified = VerifyIngredientPlacementQuiet(instance.ingredient, instance.gridPosition);
                 if (!verified)
                 {
                     failedIngredients++;
-                    Debug.LogWarning($"🔍 QUIET CHECK: {instance.ingredient.ItemName} at {instance.gridPosition} verification FAILED");
+                    Debug.LogWarning(
+                        $"🔍 QUIET CHECK: {instance.ingredient.ItemName} at {instance.gridPosition} verification FAILED");
                 }
             }
-            
+
             if (failedIngredients > 0)
             {
-                Debug.LogWarning($"🔍 QUIET CHECK: {failedIngredients}/{placedIngredients.Count} ingredients failed verification");
+                Debug.LogWarning(
+                    $"🔍 QUIET CHECK: {failedIngredients}/{placedIngredients.Count} ingredients failed verification");
             }
         }
 
@@ -830,7 +916,7 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             var expectedCells = GetIngredientCells(ingredient, position);
             int totalExpectedCells = expectedCells.Count;
             int properlyOccupiedCells = 0;
-            
+
             foreach (var cellPos in expectedCells)
             {
                 var cell = GetCell(cellPos.x, cellPos.y);
@@ -838,22 +924,24 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                 {
                     bool isOccupied = cell.IsOccupied;
                     bool occupiedByCorrectIngredient = cell.OccupiedByIngredient == ingredient;
-                    
+
                     if (isOccupied && occupiedByCorrectIngredient)
                     {
                         properlyOccupiedCells++;
                     }
                     else if (!isOccupied)
                     {
-                        Debug.LogWarning($"🔍 Cell ({cellPos.x},{cellPos.y}) should be occupied by {ingredient.ItemName} but is empty!");
+                        Debug.LogWarning(
+                            $"🔍 Cell ({cellPos.x},{cellPos.y}) should be occupied by {ingredient.ItemName} but is empty!");
                     }
                     else if (isOccupied && !occupiedByCorrectIngredient)
                     {
-                        Debug.LogWarning($"🔍 Cell ({cellPos.x},{cellPos.y}) occupied by wrong ingredient: {cell.OccupiedByIngredient?.ItemName} instead of {ingredient.ItemName}!");
+                        Debug.LogWarning(
+                            $"🔍 Cell ({cellPos.x},{cellPos.y}) occupied by wrong ingredient: {cell.OccupiedByIngredient?.ItemName} instead of {ingredient.ItemName}!");
                     }
                 }
             }
-            
+
             return (properlyOccupiedCells == totalExpectedCells);
         }
 
@@ -864,12 +952,12 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         public void FullOccupancyAudit()
         {
             Debug.Log("🔍 === FULL OCCUPANCY AUDIT ===");
-            
+
             // Count occupied vs empty cells
             int occupiedCells = 0;
             int emptyCells = 0;
             int inconsistentCells = 0;
-            
+
             for (int x = 0; x < gridWidth; x++)
             {
                 for (int y = 0; y < gridHeight; y++)
@@ -880,18 +968,19 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                         if (cell.IsOccupied)
                         {
                             occupiedCells++;
-                            
+
                             // Check if the occupying ingredient actually claims this cell
                             if (cell.OccupiedByIngredient != null)
                             {
                                 var placedIngredients = ingredientPlacer.GetAllPlacedIngredients();
                                 bool foundMatchingIngredient = false;
-                                
+
                                 foreach (var instance in placedIngredients)
                                 {
                                     if (instance.ingredient == cell.OccupiedByIngredient)
                                     {
-                                        var expectedCells = GetIngredientCells(instance.ingredient, instance.gridPosition);
+                                        var expectedCells =
+                                            GetIngredientCells(instance.ingredient, instance.gridPosition);
                                         if (expectedCells.Contains(new Vector2Int(x, y)))
                                         {
                                             foundMatchingIngredient = true;
@@ -899,17 +988,19 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                                         }
                                     }
                                 }
-                                
+
                                 if (!foundMatchingIngredient)
                                 {
                                     inconsistentCells++;
-                                    Debug.LogError($"🚨 INCONSISTENT: Cell ({x},{y}) claims to be occupied by {cell.OccupiedByIngredient.ItemName} but no matching placed ingredient found!");
+                                    Debug.LogError(
+                                        $"🚨 INCONSISTENT: Cell ({x},{y}) claims to be occupied by {cell.OccupiedByIngredient.ItemName} but no matching placed ingredient found!");
                                 }
                             }
                             else
                             {
                                 inconsistentCells++;
-                                Debug.LogError($"🚨 INCONSISTENT: Cell ({x},{y}) is marked occupied but has no OccupiedByIngredient!");
+                                Debug.LogError(
+                                    $"🚨 INCONSISTENT: Cell ({x},{y}) is marked occupied but has no OccupiedByIngredient!");
                             }
                         }
                         else
@@ -919,16 +1010,16 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                     }
                 }
             }
-            
+
             int totalCells = gridWidth * gridHeight;
             float occupancyPercent = (occupiedCells * 100f) / totalCells;
-            
+
             Debug.Log($"🔍 Audit results:");
             Debug.Log($"  📊 Total cells: {totalCells}");
             Debug.Log($"  ✅ Occupied cells: {occupiedCells} ({occupancyPercent:F1}%)");
             Debug.Log($"  ⬜ Empty cells: {emptyCells}");
             Debug.Log($"  ⚠️ Inconsistent cells: {inconsistentCells}");
-            
+
             if (inconsistentCells > 0)
             {
                 Debug.LogError("🚨 AUDIT FAILED: Found inconsistent cell states! The occupancy system has bugs.");
@@ -1060,13 +1151,12 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         }
 
         /// <summary>
-        /// Toggle debug logging on/off
+        /// Toggle collision detection debug logging on/off
         /// </summary>
-        [ContextMenu("Toggle Debug Logging")]
-        public void ToggleDebugLogging()
+        [ContextMenu("Toggle Collision Debug Logging")]
+        public void ToggleCollisionDebugLogging()
         {
-            enableCollisionDebugLogging = !enableCollisionDebugLogging;
-            Debug.Log($"Collision debug logging: {(enableCollisionDebugLogging ? "ENABLED" : "DISABLED")}");
+            DebugSystemConfig.ToggleCollisionDetectionDebug();
         }
 
         /// <summary>
@@ -1076,7 +1166,8 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         public void ToggleContinuousVerification()
         {
             enableContinuousVerification = !enableContinuousVerification;
-            Debug.Log($"Continuous verification: {(enableContinuousVerification ? "ENABLED" : "DISABLED")} (Interval: {verificationInterval}s)");
+            Debug.Log(
+                $"Continuous verification: {(enableContinuousVerification ? "ENABLED" : "DISABLED")} (Interval: {verificationInterval}s)");
         }
 
         /// <summary>
@@ -1088,7 +1179,8 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             enableContinuousVerification = true;
             verificationInterval = 0.0f;
             verifyOnMouseHover = true;
-            Debug.LogWarning("🔍 FRAME-BY-FRAME VERIFICATION ENABLED - This is very intensive! Only use for debugging.");
+            Debug.LogWarning(
+                "🔍 FRAME-BY-FRAME VERIFICATION ENABLED - This is very intensive! Only use for debugging.");
         }
 
         /// <summary>
@@ -1103,15 +1195,15 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             Debug.Log("🔍 Verification reset to normal intervals (2 seconds)");
         }
 
-        [Header("Debug Settings")]
-        private bool enableCollisionDebugLogging = true;
-        
-        [Header("Continuous Verification")]
-        [SerializeField] private bool enableContinuousVerification = true;
+        // Debug settings now handled by DebugSystemConfig
+
+        [Header("Continuous Verification")] [SerializeField]
+        private bool enableContinuousVerification = true;
+
         [SerializeField] private float verificationInterval = 2.0f; // Check every 2 seconds
         [SerializeField] private bool verifyOnIngredientSelection = true;
         [SerializeField] private bool verifyOnMouseHover = false; // Can be enabled for intensive debugging
-        
+
         private float lastVerificationTime = 0f;
 
         [ContextMenu("Test Shape Orientation")]
@@ -1221,39 +1313,39 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         public void TestIngredientEffectInteractions()
         {
             Debug.Log("🎨 === TESTING INGREDIENT EFFECT INTERACTIONS ===");
-            
+
             if (availableIngredients.Count < 2)
             {
                 Debug.LogError("Need at least 2 ingredients to test interactions");
                 return;
             }
-            
+
             // Clear the grid first
             ClearGrid();
-            
+
             var ingredient1 = availableIngredients[0];
             var ingredient2 = availableIngredients.Count > 1 ? availableIngredients[1] : availableIngredients[0];
-            
+
             Debug.Log($"Testing with:");
             Debug.Log($"  Ingredient 1: {ingredient1.ItemName} (Effects: {ingredient1.HasEffects()})");
             Debug.Log($"  Ingredient 2: {ingredient2.ItemName} (Effects: {ingredient2.HasEffects()})");
-            
+
             // Place ingredients next to each other
             Vector2Int pos1 = new Vector2Int(2, 2);
             Vector2Int pos2 = new Vector2Int(3, 2);
-            
+
             Debug.Log($"Placing {ingredient1.ItemName} at {pos1}");
             bool success1 = TryPlaceIngredient(ingredient1, pos1);
-            
+
             if (success1)
             {
                 Debug.Log($"Placing {ingredient2.ItemName} at {pos2} (adjacent to first ingredient)");
                 bool success2 = TryPlaceIngredient(ingredient2, pos2);
-                
+
                 if (success2)
                 {
                     Debug.Log("✅ Both ingredients placed successfully!");
-                    
+
                     if (ingredient1.HasEffects() && ingredient2.HasEffects())
                     {
                         var similarEffects = ingredient1.GetSimilarEffectsTo(ingredient2);
@@ -1269,6 +1361,7 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                         {
                             Debug.Log("Effect similarity: DIFFERENT");
                         }
+
                         Debug.Log("You should see particle effects between the ingredients!");
                     }
                     else if (ingredient1.HasEffects() || ingredient2.HasEffects())
@@ -1289,7 +1382,7 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             {
                 Debug.LogError("Failed to place first ingredient");
             }
-            
+
             Debug.Log("🎨 === TEST COMPLETE ===");
         }
 
@@ -1313,25 +1406,26 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                 Debug.LogError("No ingredient selected for testing!");
                 return;
             }
-            
+
             Vector2Int testPosition = new Vector2Int(2, 2);
-            Debug.Log($"🧪 FORCE PLACING {currentSelectedIngredient.ItemName} at {testPosition} (bypassing collision detection)");
-            
+            Debug.Log(
+                $"🧪 FORCE PLACING {currentSelectedIngredient.ItemName} at {testPosition} (bypassing collision detection)");
+
             // Force place ignoring collisions
             ingredientPlacer.PlaceIngredient(currentSelectedIngredient, testPosition);
             MarkCellsAsOccupied(currentSelectedIngredient, testPosition);
             visualizer.RefreshGrid();
-            
+
             Debug.Log("🧪 Force placement complete. Check if collision detection now works!");
         }
-        
+
         [ContextMenu("Force Clear Grid")]
         public void ForceClearGrid()
         {
             Debug.LogWarning("🧹 ForceClearGrid() called via context menu!");
             ClearGrid();
         }
-        
+
         /// <summary>
         /// Debug method to check current state of all cell colors
         /// </summary>
@@ -1339,19 +1433,19 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         public void DebugAllCellColors()
         {
             Debug.Log("🎨 === DEBUGGING ALL CELL COLORS ===");
-            
+
             int totalCells = gridWidth * gridHeight;
             int whiteCells = 0;
             int occupiedCells = 0;
             int highlightedCells = 0;
             int unknownCells = 0;
-            
+
             for (int x = 0; x < gridWidth; x++)
             {
                 for (int y = 0; y < gridHeight; y++)
                 {
                     var cell = gridCells[x, y];
-                    
+
                     switch (cell.VisualState)
                     {
                         case CellVisualState.Empty:
@@ -1362,41 +1456,46 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                                 Debug.LogWarning($"🚨 Empty cell ({x},{y}) has wrong color: {cell.CellColor}");
                                 unknownCells++;
                             }
+
                             break;
-                            
+
                         case CellVisualState.Occupied:
                             occupiedCells++;
                             if (cell.CellColor == Color.white)
                                 whiteCells++; // Occupied cells should also be white now
                             else
                             {
-                                Debug.LogWarning($"🚨 Occupied cell ({x},{y}) should be white but has color: {cell.CellColor}");
+                                Debug.LogWarning(
+                                    $"🚨 Occupied cell ({x},{y}) should be white but has color: {cell.CellColor}");
                                 unknownCells++;
                             }
-                            Debug.Log($"📦 Occupied cell ({x},{y}): {cell.CellColor} by {cell.OccupiedByIngredient?.ItemName} (should be white)");
+
+                            Debug.Log(
+                                $"📦 Occupied cell ({x},{y}): {cell.CellColor} by {cell.OccupiedByIngredient?.ItemName} (should be white)");
                             break;
-                            
+
                         case CellVisualState.ValidHighlight:
                         case CellVisualState.InvalidHighlight:
                             highlightedCells++;
                             Debug.Log($"✨ Highlighted cell ({x},{y}): {cell.CellColor} ({cell.VisualState})");
                             break;
-                            
+
                         default:
                             unknownCells++;
-                            Debug.LogWarning($"❓ Unknown state cell ({x},{y}): {cell.VisualState} with color {cell.CellColor}");
+                            Debug.LogWarning(
+                                $"❓ Unknown state cell ({x},{y}): {cell.VisualState} with color {cell.CellColor}");
                             break;
                     }
                 }
             }
-            
+
             Debug.Log($"🎨 Cell Color Summary:");
             Debug.Log($"  📊 Total cells: {totalCells}");
             Debug.Log($"  ⬜ White cells (empty + occupied): {whiteCells}");
             Debug.Log($"  📦 Occupied cells: {occupiedCells} (these should be white too)");
             Debug.Log($"  ✨ Highlighted cells: {highlightedCells}");
             Debug.Log($"  ❓ Wrong color cells: {unknownCells}");
-            
+
             if (unknownCells > 0)
             {
                 Debug.LogError("🚨 Some cells have unexpected colors or states!");
@@ -1406,7 +1505,7 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                 Debug.Log("✅ All cell colors match their expected states");
             }
         }
-        
+
         /// <summary>
         /// Force all cells to update their visual state and colors
         /// </summary>
@@ -1414,13 +1513,13 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         public void ForceUpdateAllCellColors()
         {
             Debug.Log("🔄 Force updating all cell colors...");
-            
+
             for (int x = 0; x < gridWidth; x++)
             {
                 for (int y = 0; y < gridHeight; y++)
                 {
                     var cell = gridCells[x, y];
-                    
+
                     // Force the cell to recalculate its visual state
                     if (cell.IsOccupied)
                     {
@@ -1436,7 +1535,7 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                     }
                 }
             }
-            
+
             // Force visual refresh
             if (visualizer != null)
             {
@@ -1444,7 +1543,7 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                 Debug.Log("✅ All cells forced to update their colors");
             }
         }
-        
+
         /// <summary>
         /// Test method to verify occupied cells remain white
         /// </summary>
@@ -1452,23 +1551,23 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         public void TestOccupiedCellColors()
         {
             Debug.Log("🧪 === TESTING OCCUPIED CELL COLORS ===");
-            
+
             if (currentSelectedIngredient == null)
             {
                 Debug.LogError("No ingredient selected! Please select an ingredient first.");
                 return;
             }
-            
+
             Vector2Int testPos = new Vector2Int(2, 2);
-            
+
             Debug.Log($"1. Placing {currentSelectedIngredient.ItemName} at {testPos}");
             bool placed = TryPlaceIngredient(currentSelectedIngredient, testPos);
-            
+
             if (placed)
             {
                 Debug.Log("2. Checking cell colors after placement...");
                 var occupiedCells = GetIngredientCells(currentSelectedIngredient, testPos);
-                
+
                 bool allCellsWhite = true;
                 foreach (var cellPos in occupiedCells)
                 {
@@ -1486,7 +1585,7 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                         }
                     }
                 }
-                
+
                 if (allCellsWhite)
                 {
                     Debug.Log("✅ SUCCESS: All occupied cells are white! Ingredient model should provide the color.");
@@ -1501,7 +1600,7 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                 Debug.LogError("❌ Could not place ingredient for testing");
             }
         }
-        
+
         /// <summary>
         /// Public method for UI buttons to call - with extra debugging
         /// </summary>
@@ -1510,24 +1609,24 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             Debug.LogWarning("🧹 OnClearGridButton() called from UI!");
             ClearGrid();
         }
-        
+
         /// <summary>
         /// Enhanced debug that shows ALL cells that would be occupied by the current ingredient's shape
         /// </summary>
         public void DebugIngredientShapeCollision(Ingredient ingredient, Vector2Int position)
         {
             if (ingredient == null) return;
-            
-            Debug.Log($"🔍 === SHAPE COLLISION DEBUG: {ingredient.ItemName} at {position} ===");
-            
+
+            DebugSystemConfig.LogShapeCollision($"=== SHAPE COLLISION DEBUG: {ingredient.ItemName} at {position} ===");
+
             var shape = ingredient.GetShape();
             int shapeWidth = shape.GetLength(0);
             int shapeHeight = shape.GetLength(1);
-            
-            Debug.Log($"📐 Shape size: {shapeWidth}x{shapeHeight}");
-            
+
+            DebugSystemConfig.LogShapeCollision($"Shape size: {shapeWidth}x{shapeHeight}");
+
             // Show the shape pattern
-            Debug.Log("📋 Shape pattern:");
+            DebugSystemConfig.LogShapeCollision("Shape pattern:");
             for (int y = shapeHeight - 1; y >= 0; y--)
             {
                 string row = $"  Y={y}: ";
@@ -1535,12 +1634,13 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                 {
                     row += shape[x, y] ? "[#]" : "[ ]";
                 }
-                Debug.Log(row);
+
+                DebugSystemConfig.LogShapeCollision(row);
             }
-            
+
             // Check each cell that would be occupied
             bool hasCollisions = false;
-            Debug.Log("🔍 Checking all shape cells:");
+            DebugSystemConfig.LogShapeCollision("Checking all shape cells:");
             for (int x = 0; x < shapeWidth; x++)
             {
                 for (int y = 0; y < shapeHeight; y++)
@@ -1548,53 +1648,57 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                     if (shape[x, y])
                     {
                         Vector2Int cellPos = position + new Vector2Int(x, y);
-                        
+
                         // Check bounds
                         if (cellPos.x < 0 || cellPos.x >= gridWidth || cellPos.y < 0 || cellPos.y >= gridHeight)
                         {
-                            Debug.Log($"  ❌ BOUNDS: Shape cell ({x},{y}) → Grid cell ({cellPos.x},{cellPos.y}) is OUT OF BOUNDS");
+                            DebugSystemConfig.LogShapeCollision(
+                                $"  ❌ BOUNDS: Shape cell ({x},{y}) → Grid cell ({cellPos.x},{cellPos.y}) is OUT OF BOUNDS");
                             hasCollisions = true;
                             continue;
                         }
-                        
+
                         // Check occupation
                         bool isOccupied = gridCells[cellPos.x, cellPos.y].IsOccupied;
                         string occupant = gridCells[cellPos.x, cellPos.y].OccupiedByIngredient?.ItemName ?? "None";
-                        
+
                         if (isOccupied)
                         {
-                            Debug.Log($"  ❌ COLLISION: Shape cell ({x},{y}) → Grid cell ({cellPos.x},{cellPos.y}) occupied by {occupant}");
+                            DebugSystemConfig.LogShapeCollision(
+                                $"  ❌ COLLISION: Shape cell ({x},{y}) → Grid cell ({cellPos.x},{cellPos.y}) occupied by {occupant}");
                             hasCollisions = true;
                         }
                         else
                         {
-                            Debug.Log($"  ✅ FREE: Shape cell ({x},{y}) → Grid cell ({cellPos.x},{cellPos.y}) is available");
+                            DebugSystemConfig.LogShapeCollision(
+                                $"  ✅ FREE: Shape cell ({x},{y}) → Grid cell ({cellPos.x},{cellPos.y}) is available");
                         }
                     }
                 }
             }
-            
+
             string result = hasCollisions ? "❌ PLACEMENT BLOCKED" : "✅ PLACEMENT ALLOWED";
-            Debug.Log($"🎯 RESULT: {result}");
+            DebugSystemConfig.LogShapeCollision($"RESULT: {result}");
         }
-        
+
         public void ClearGrid()
         {
-            Debug.LogWarning("🧹 ClearGrid() called! This will clear all placed ingredients but keep the grid visualization.");
-            
-            Debug.Log("🧹 Grid state BEFORE clearing:");
+            DebugSystemConfig.LogTesting(
+                "ClearGrid() called! This will clear all placed ingredients but keep the grid visualization.");
+
+            DebugSystemConfig.LogGridState("Grid state BEFORE clearing:");
             DebugGridState();
-            
+
             // Clear ingredient selection and highlights FIRST
             ClearIngredientSelection();
-            
+
             // Explicitly clear all highlights from the visualizer as well
             if (visualizer != null)
             {
                 visualizer.ClearHighlights();
-                Debug.Log("🧹 Explicitly cleared all grid highlights");
+                DebugSystemConfig.LogTesting("Explicitly cleared all grid highlights");
             }
-            
+
             // Clear grid data (ingredient occupancy only)
             for (int x = 0; x < gridWidth; x++)
             {
@@ -1602,37 +1706,38 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                 {
                     if (gridCells[x, y].IsOccupied)
                     {
-                        Debug.Log($"🧹 Clearing occupied cell ({x},{y}) with {gridCells[x, y].OccupiedByIngredient?.ItemName}");
+                        DebugSystemConfig.LogGridState(
+                            $"Clearing occupied cell ({x},{y}) with {gridCells[x, y].OccupiedByIngredient?.ItemName}");
                         gridCells[x, y].Clear(); // Only clear occupancy, not the visual grid cell
                     }
                 }
             }
-            
+
             // Clear visual ingredients with detailed logging (but preserve grid visualization)
-            Debug.Log("🧹 Calling IngredientPlacer.ClearAllIngredients()...");
+            DebugSystemConfig.LogTesting("Calling IngredientPlacer.ClearAllIngredients()...");
             if (ingredientPlacer != null)
             {
                 int ingredientCountBefore = ingredientPlacer.GetAllPlacedIngredients().Count;
-                Debug.Log($"🧹 Ingredients to clear: {ingredientCountBefore}");
-                
+                DebugSystemConfig.LogTesting($"Ingredients to clear: {ingredientCountBefore}");
+
                 ingredientPlacer.ClearAllIngredients();
-                
+
                 int ingredientCountAfter = ingredientPlacer.GetAllPlacedIngredients().Count;
-                Debug.Log($"🧹 Ingredients remaining after clear: {ingredientCountAfter}");
+                DebugSystemConfig.LogTesting($"Ingredients remaining after clear: {ingredientCountAfter}");
             }
             else
             {
-                Debug.LogError("🚨 IngredientPlacer is null! Cannot clear visual ingredients.");
+                DebugSystemConfig.LogErrorRecovery("IngredientPlacer is null! Cannot clear visual ingredients.");
             }
-            
+
             // Refresh grid visualization (this will update colors but preserve the grid)
-            Debug.Log("🧹 Refreshing grid visualization...");
+            DebugSystemConfig.LogTesting("Refreshing grid visualization...");
             if (visualizer != null)
             {
                 visualizer.RefreshGrid(); // This should update the grid colors but keep the grid structure
-                
+
                 // Debug: Check if cells are properly reset to white
-                Debug.Log("🧹 Verifying cell colors after refresh...");
+                DebugSystemConfig.LogGridState("Verifying cell colors after refresh...");
                 int nonWhiteCells = 0;
                 for (int x = 0; x < gridWidth; x++)
                 {
@@ -1641,30 +1746,32 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                         var cell = gridCells[x, y];
                         if (cell.CellColor != Color.white)
                         {
-                            Debug.LogWarning($"🚨 Cell ({x},{y}) color is not white: {cell.CellColor}, VisualState: {cell.VisualState}");
+                            DebugSystemConfig.LogErrorRecovery(
+                                $"Cell ({x},{y}) color is not white: {cell.CellColor}, VisualState: {cell.VisualState}");
                             nonWhiteCells++;
                         }
                     }
                 }
-                
+
                 if (nonWhiteCells == 0)
                 {
-                    Debug.Log("✅ All cells properly reset to white color");
+                    DebugSystemConfig.LogGridState("All cells properly reset to white color");
                 }
                 else
                 {
-                    Debug.LogError($"🚨 {nonWhiteCells} cells failed to reset to white color!");
+                    DebugSystemConfig.LogErrorRecovery($"{nonWhiteCells} cells failed to reset to white color!");
                 }
             }
             else
             {
-                Debug.LogError("🚨 GridVisualizer is null! Cannot refresh grid.");
+                DebugSystemConfig.LogErrorRecovery("GridVisualizer is null! Cannot refresh grid.");
             }
-            
-            Debug.Log("🧹 Grid state AFTER clearing:");
+
+            DebugSystemConfig.LogGridState("Grid state AFTER clearing:");
             DebugGridState();
-            
-            Debug.Log("✅ ClearGrid() complete! Grid structure preserved, ingredients removed, highlights cleared.");
+
+            DebugSystemConfig.LogTesting(
+                "ClearGrid() complete! Grid structure preserved, ingredients removed, highlights cleared.");
         }
 
         /// <summary>
@@ -1767,12 +1874,12 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
 
             // Quick verification - just check if any placed ingredients have lost their cell occupancy
             int inconsistentIngredients = 0;
-            
+
             foreach (var instance in placedIngredients)
             {
                 var expectedCells = GetIngredientCells(instance.ingredient, instance.gridPosition);
                 bool hasAnyUnoccupiedCell = false;
-                
+
                 foreach (var cellPos in expectedCells)
                 {
                     var cell = GetCell(cellPos.x, cellPos.y);
@@ -1782,16 +1889,18 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                         break;
                     }
                 }
-                
+
                 if (hasAnyUnoccupiedCell)
                 {
                     inconsistentIngredients++;
-                    Debug.LogWarning($"🔍 CONTINUOUS CHECK: {instance.ingredient.ItemName} at {instance.gridPosition} has lost cell occupancy!");
-                    
+                    Debug.LogWarning(
+                        $"🔍 CONTINUOUS CHECK: {instance.ingredient.ItemName} at {instance.gridPosition} has lost cell occupancy!");
+
                     // Auto-repair: use IngredientPlacer's repair method
                     Debug.Log($"🔧 Auto-repairing occupancy for {instance.ingredient.ItemName} using IngredientPlacer");
-                    
-                    bool repairSuccess = ingredientPlacer.RepairIngredientOccupancy(instance.ingredient, instance.gridPosition);
+
+                    bool repairSuccess =
+                        ingredientPlacer.RepairIngredientOccupancy(instance.ingredient, instance.gridPosition);
                     if (repairSuccess)
                     {
                         Debug.Log($"🔧 Successfully repaired grid occupancy for {instance.ingredient.ItemName}");
@@ -1802,12 +1911,686 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                     }
                 }
             }
-            
+
             if (inconsistentIngredients > 0)
             {
-                Debug.LogWarning($"🔍 CONTINUOUS CHECK: Found and repaired {inconsistentIngredients} ingredients with occupancy issues");
+                Debug.LogWarning(
+                    $"🔍 CONTINUOUS CHECK: Found and repaired {inconsistentIngredients} ingredients with occupancy issues");
                 visualizer?.RefreshGrid();
             }
         }
+
+        #region Obstacle System
+
+        /// <summary>
+        /// Initialize the obstacle system
+        /// </summary>
+        private void InitializeObstacleSystems()
+        {
+            Debug.Log("🚧 Initializing Obstacle System");
+            aspectObstacles.Clear();
+
+            // Normalize grading weights
+            if (gradingWeights != null)
+            {
+                gradingWeights.NormalizeWeights();
+            }
+        }
+
+        /// <summary>
+        /// Spawn initial obstacles when the game starts
+        /// </summary>
+        public void SpawnInitialObstacles()
+        {
+            if (!enableObstacles) return;
+
+            DebugSystemConfig.LogObstacleSpawn(
+                $"Spawning initial obstacles with {obstacleSpawnChance:P1} chance per cell");
+
+            int obstaclesSpawned = 0;
+            for (int x = 0; x < gridWidth; x++)
+            {
+                for (int y = 0; y < gridHeight; y++)
+                {
+                    // Skip center cells to give player starting room
+                    if (x >= 1 && x <= 3 && y >= 1 && y <= 3) continue;
+
+                    Vector2Int position = new Vector2Int(x, y);
+                    float randomRoll = Random.Range(0f, 1f);
+
+                    // Log the spawn chance calculation
+                    if (obstacleSpawnDebugger != null)
+                    {
+                        obstacleSpawnDebugger.LogSpawnChanceCalculation(position, obstacleSpawnChance, randomRoll);
+                    }
+
+                    if (randomRoll < obstacleSpawnChance)
+                    {
+                        var obstacleType =
+                            (ObstacleType)Random.Range(0, System.Enum.GetValues(typeof(ObstacleType)).Length);
+                        var obstacle = new AspectObstacle(obstacleType, position);
+                        aspectObstacles.Add(obstacle);
+                        obstaclesSpawned++;
+
+                        // Log the obstacle type spawned
+                        if (obstacleSpawnDebugger != null)
+                        {
+                            obstacleSpawnDebugger.LogObstacleTypeSpawned(obstacleType, position);
+                        }
+
+                        DebugSystemConfig.LogObstacleSpawn($"Spawned {obstacleType} obstacle at ({x}, {y})");
+                    }
+                }
+            }
+
+            DebugSystemConfig.LogObstacleSpawn($"Spawned {obstaclesSpawned} obstacles total");
+
+            // Update visualizer to show obstacles
+            if (visualizer != null)
+            {
+                visualizer.RefreshGrid();
+            }
+        }
+
+        /// <summary>
+        /// Check if a position has an obstacle
+        /// </summary>
+        public AspectObstacle GetObstacleAt(Vector2Int position)
+        {
+            return aspectObstacles.Find(o => o.Position == position);
+        }
+
+        /// <summary>
+        /// Handle obstacle interactions when placing ingredients
+        /// </summary>
+        private bool HandleObstacleInteraction(Ingredient ingredient, Vector2Int position)
+        {
+            var obstacle = GetObstacleAt(position);
+            if (obstacle == null) return true; // No obstacle, placement allowed
+
+            bool canPlace = obstacle.CanPlaceIngredient(ingredient);
+            if (canPlace)
+            {
+                bool placementSuccess = obstacle.TryPlaceIngredient(ingredient, this);
+                if (placementSuccess)
+                {
+                    Debug.Log($"✅ Successfully completed {obstacle.ObstacleType} obstacle at {position}");
+
+                    // Handle special obstacle effects
+                    ProcessObstacleEffects(obstacle, ingredient);
+
+                    // Check for frigid obstacles that might be melted by adjacency
+                    CheckAdjacentFrigidObstacles(position);
+                }
+
+                return placementSuccess;
+            }
+
+            Debug.Log($"❌ Cannot place {ingredient.ItemName} on {obstacle.ObstacleType} obstacle at {position}");
+            return false;
+        }
+
+        /// <summary>
+        /// Process special effects from obstacle completion
+        /// </summary>
+        private void ProcessObstacleEffects(AspectObstacle obstacle, Ingredient ingredient)
+        {
+            switch (obstacle.ObstacleType)
+            {
+                case ObstacleType.Caustic:
+                    Debug.Log($"🧪 Caustic obstacle: {ingredient.ItemName} potency reduced by 20%");
+                    break;
+
+                case ObstacleType.Divine:
+                    if (ingredient.IngredientAspect == Aspect.Divine && ingredient.IsUnrefined)
+                    {
+                        Debug.Log($"✨ Divine obstacle: {ingredient.ItemName} potency increased by 10%");
+                    }
+
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Check adjacent cells for frigid obstacles that might be melted
+        /// </summary>
+        private void CheckAdjacentFrigidObstacles(Vector2Int position)
+        {
+            Vector2Int[] directions = { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right };
+
+            foreach (var direction in directions)
+            {
+                Vector2Int adjacentPos = position + direction;
+                var obstacle = GetObstacleAt(adjacentPos);
+
+                if (obstacle != null && obstacle.ObstacleType == ObstacleType.Frigid && !obstacle.IsCompleted)
+                {
+                    bool melted = obstacle.TryMeltFrozen(this);
+                    if (melted)
+                    {
+                        Debug.Log($"❄️ Frigid obstacle at {adjacentPos} was melted by adjacency!");
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Add an obstacle at runtime (for testing or dynamic gameplay)
+        /// </summary>
+        [ContextMenu("Add Random Obstacle")]
+        public void AddRandomObstacle()
+        {
+            // Find an empty cell
+            var emptyCells = new List<Vector2Int>();
+            for (int x = 0; x < gridWidth; x++)
+            {
+                for (int y = 0; y < gridHeight; y++)
+                {
+                    var cell = GetCell(x, y);
+                    if (cell != null && !cell.IsOccupied && GetObstacleAt(new Vector2Int(x, y)) == null)
+                    {
+                        emptyCells.Add(new Vector2Int(x, y));
+                    }
+                }
+            }
+
+            if (emptyCells.Count > 0)
+            {
+                var randomPos = emptyCells[Random.Range(0, emptyCells.Count)];
+                float randomRoll = Random.Range(0f, 1f);
+
+                // Always spawn for manual testing, but still log the roll
+                if (obstacleSpawnDebugger != null)
+                {
+                    obstacleSpawnDebugger.LogSpawnChanceCalculation(randomPos, 1.0f, randomRoll);
+                }
+
+                var randomType = (ObstacleType)Random.Range(0, System.Enum.GetValues(typeof(ObstacleType)).Length);
+                var obstacle = new AspectObstacle(randomType, randomPos);
+                aspectObstacles.Add(obstacle);
+
+                // Log the obstacle type spawned
+                if (obstacleSpawnDebugger != null)
+                {
+                    obstacleSpawnDebugger.LogObstacleTypeSpawned(randomType, randomPos);
+                }
+
+                DebugSystemConfig.LogObstacleSpawn($"Added {randomType} obstacle at {randomPos}");
+
+                if (visualizer != null)
+                {
+                    visualizer.RefreshGrid();
+                }
+            }
+            else
+            {
+                Debug.LogWarning("No empty cells available for obstacle placement");
+            }
+        }
+
+        /// <summary>
+        /// Test obstacle spawn chance with current settings
+        /// </summary>
+        [ContextMenu("Test Current Obstacle Spawn Chance")]
+        public void TestCurrentObstacleSpawnChance()
+        {
+            if (obstacleSpawnDebugger != null)
+            {
+                obstacleSpawnDebugger.TestSpawnProbability();
+            }
+            else
+            {
+                Debug.LogWarning("No ObstacleSpawnDebugger available for testing");
+            }
+        }
+
+        /// <summary>
+        /// Show current obstacle spawn statistics
+        /// </summary>
+        [ContextMenu("Show Obstacle Spawn Statistics")]
+        public void ShowObstacleSpawnStatistics()
+        {
+            if (obstacleSpawnDebugger != null)
+            {
+                obstacleSpawnDebugger.GenerateSpawnAnalyticsReport();
+
+                Debug.Log("🚧 === CURRENT SPAWN SETTINGS ===");
+                Debug.Log($"🚧 Spawn Chance: {obstacleSpawnChance:P2} ({obstacleSpawnChance:F3})");
+                Debug.Log($"🚧 Obstacles Enabled: {enableObstacles}");
+                Debug.Log($"🚧 Current Obstacles on Grid: {aspectObstacles.Count}");
+                Debug.Log($"🚧 Grid Size: {gridWidth}x{gridHeight} = {gridWidth * gridHeight} cells");
+
+                int maxPossibleObstacles = (gridWidth * gridHeight) - 9; // Subtract center area
+                float expectedObstacles = maxPossibleObstacles * obstacleSpawnChance;
+                Debug.Log($"🚧 Expected Obstacles (theoretical): {expectedObstacles:F1}");
+
+                string summary = obstacleSpawnDebugger.GetSpawnStatsSummary();
+                Debug.Log($"🚧 Live Stats: {summary}");
+            }
+            else
+            {
+                Debug.LogWarning("No ObstacleSpawnDebugger available for statistics");
+            }
+        }
+
+        /// <summary>
+        /// Respawn all obstacles (for testing different spawn chances)
+        /// </summary>
+        [ContextMenu("Respawn All Obstacles")]
+        public void RespawnAllObstacles()
+        {
+            // Clear existing obstacles
+            aspectObstacles.Clear();
+
+            // Reset spawn debugger stats
+            if (obstacleSpawnDebugger != null)
+            {
+                obstacleSpawnDebugger.ResetSpawnStatistics();
+            }
+
+            Debug.Log("🚧 Cleared all obstacles, respawning with current settings...");
+
+            // Spawn new obstacles
+            SpawnInitialObstacles();
+
+            Debug.Log($"🚧 Respawn complete! New obstacle count: {aspectObstacles.Count}");
+        }
+
+        /// <summary>
+        /// Remove an obstacle at a specific position
+        /// </summary>
+        public bool RemoveObstacleAt(Vector2Int position)
+        {
+            var obstacle = GetObstacleAt(position);
+            if (obstacle != null)
+            {
+                aspectObstacles.Remove(obstacle);
+                Debug.Log($"🚧 Removed {obstacle.ObstacleType} obstacle at {position}");
+
+                if (visualizer != null)
+                {
+                    visualizer.RefreshGrid();
+                }
+
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Get obstacle visual color for the visualizer
+        /// </summary>
+        public Color GetObstacleColorAt(Vector2Int position)
+        {
+            var obstacle = GetObstacleAt(position);
+            return obstacle?.GetObstacleColor() ?? Color.clear;
+        }
+
+        /// <summary>
+        /// Check if an obstacle is completed
+        /// </summary>
+        public bool IsObstacleCompletedAt(Vector2Int position)
+        {
+            var obstacle = GetObstacleAt(position);
+            return obstacle?.IsCompleted ?? false;
+        }
+
+        #endregion
+
+        #region Proficiency Grading System
+
+        /// <summary>
+        /// Initialize the proficiency grading system
+        /// </summary>
+        private void InitializeProficiencySystem()
+        {
+            Debug.Log("📊 Initializing Proficiency Grading System");
+
+            if (gradingWeights == null)
+            {
+                gradingWeights = new ProficiencyWeights();
+            }
+
+            gradingWeights.NormalizeWeights();
+            Debug.Log(
+                $"📊 Grading weights normalized: Coverage={gradingWeights.coverageWeight:F2}, Adjacency={gradingWeights.adjacencyWeight:F2}, etc.");
+        }
+
+        /// <summary>
+        /// Calculate proficiency grade for current grid state
+        /// </summary>
+        [ContextMenu("Calculate Proficiency Grade")]
+        public ProficiencyGrade CalculateCurrentProficiency()
+        {
+            if (!enableProficiencyGrading)
+            {
+                Debug.LogWarning("Proficiency grading is disabled");
+                return new ProficiencyGrade();
+            }
+
+            // Gather placed ingredients
+            var placedIngredientsDict = new Dictionary<Vector2Int, Ingredient>();
+            var placedIngredients = ingredientPlacer?.GetAllPlacedIngredients();
+
+            if (placedIngredients != null)
+            {
+                foreach (var instance in placedIngredients)
+                {
+                    var cells = GetIngredientCells(instance.ingredient, instance.gridPosition);
+                    foreach (var cellPos in cells)
+                    {
+                        placedIngredientsDict[cellPos] = instance.ingredient;
+                    }
+                }
+            }
+
+            var grade = ProficiencyGrading.CalculateProficiency(this, placedIngredientsDict, aspectObstacles,
+                gradingWeights);
+
+            Debug.Log($"📊 === PROFICIENCY GRADE CALCULATED ===");
+            Debug.Log($"📊 Overall Score: {grade.overallScore:F1}% (Grade: {grade.gradeLevel})");
+            Debug.Log($"📊 Coverage Ratio: {grade.coverageRatio:F1}%");
+            Debug.Log($"📊 Adjacency Synergy: {grade.adjacencySynergy:F1}%");
+            Debug.Log($"📊 Expansion Utilization: {grade.expansionUtilization:F1}%");
+            Debug.Log($"📊 Shape Difficulty: {grade.shapeDifficulty:F1}%");
+            Debug.Log($"📊 Orientation Efficiency: {grade.orientationEfficiency:F1}%");
+            Debug.Log($"📊 Obstacles Completed: {grade.obstaclesCompleted:F1}%");
+            Debug.Log($"📊 Feedback: {grade.feedback}");
+
+            return grade;
+        }
+
+        /// <summary>
+        /// Create refined version of an ingredient (smaller, more potent)
+        /// </summary>
+        public Ingredient CreateRefinedIngredient(Ingredient originalIngredient)
+        {
+            if (originalIngredient == null || !originalIngredient.IsUnrefined)
+            {
+                Debug.LogWarning("Cannot refine: ingredient is null or already refined");
+                return originalIngredient;
+            }
+
+            // Create a refined copy (in a real system, this would create a new ScriptableObject instance)
+            Debug.Log($"🔬 Creating refined version of {originalIngredient.ItemName}");
+            Debug.Log(
+                $"🔬 Original: Size {originalIngredient.GridWidth}x{originalIngredient.GridHeight}, Potency {originalIngredient.Potency}, Unrefined: {originalIngredient.IsUnrefined}");
+            Debug.Log($"🔬 Refined: Size reduced by 25%, Potency increased by 50%, Obstacle chance reduced to 5%");
+
+            // In a real implementation, you would:
+            // 1. Create a new Ingredient ScriptableObject instance
+            // 2. Copy properties from original
+            // 3. Apply refinement bonuses
+            // 4. Set OriginalIngredient reference
+            // 5. Mark as refined (IsUnrefined = false)
+
+            return originalIngredient; // Placeholder return
+        }
+
+        /// <summary>
+        /// Check if refinement is available for an ingredient
+        /// </summary>
+        public bool CanRefineIngredient(Ingredient ingredient)
+        {
+            return ingredient != null && ingredient.IsUnrefined;
+        }
+
+        /// <summary>
+        /// Get all completed obstacles
+        /// </summary>
+        public List<AspectObstacle> GetCompletedObstacles()
+        {
+            return aspectObstacles.Where(o => o.IsCompleted).ToList();
+        }
+
+        /// <summary>
+        /// Get proficiency grade color for UI display
+        /// </summary>
+        public Color GetGradeColor(GradeLevel grade)
+        {
+            return ProficiencyGrading.GetGradeColor(grade);
+        }
+
+        #endregion
+
+        #region Recipe System
+
+        /// <summary>
+        /// Check for recipe matches and execute if found
+        /// </summary>
+        private void CheckForRecipeMatches()
+        {
+            Debug.Log("🧪 === CHECKING FOR RECIPE MATCHES ===");
+            
+            // Get all placed ingredients
+            var placedIngredients = ingredientPlacer?.GetAllPlacedIngredients();
+            if (placedIngredients == null || placedIngredients.Count < 2)
+            {
+                Debug.Log("🧪 Not enough ingredients placed for recipes (need at least 2)");
+                return;
+            }
+
+            // Extract unique ingredients from placed items
+            var uniqueIngredients = new HashSet<Ingredient>();
+            foreach (var instance in placedIngredients)
+            {
+                uniqueIngredients.Add(instance.ingredient);
+            }
+
+            Debug.Log($"🧪 Found {uniqueIngredients.Count} unique ingredients on grid:");
+            foreach (var ingredient in uniqueIngredients)
+            {
+                Debug.Log($"   - {ingredient.ItemName}");
+            }
+
+            // Check against all recipes in database
+            var database = AlchemyRecipeDatabase.Instance;
+            if (database == null)
+            {
+                Debug.LogError("🧪 AlchemyRecipeDatabase not found! Cannot check recipes.");
+                return;
+            }
+
+            Debug.Log($"🧪 Checking against {database.Recipes.Count} recipes in database");
+
+            // Try to find a matching recipe
+            AlchemyRecipe matchedRecipe = null;
+            foreach (var recipe in database.Recipes)
+            {
+                if (DoesRecipeMatch(recipe, uniqueIngredients))
+                {
+                    matchedRecipe = recipe;
+                    break;
+                }
+            }
+
+            if (matchedRecipe != null)
+            {
+                Debug.Log($"🧪 ✅ RECIPE MATCH FOUND: {matchedRecipe.ItemName}!");
+                ExecuteRecipe(matchedRecipe, uniqueIngredients);
+            }
+            else
+            {
+                Debug.Log("🧪 ❌ No recipe matches found for current ingredients");
+            }
+        }
+
+        /// <summary>
+        /// Check if a recipe matches the given ingredients
+        /// </summary>
+        private bool DoesRecipeMatch(AlchemyRecipe recipe, HashSet<Ingredient> placedIngredients)
+        {
+            var requiredIngredients = new List<Ingredient>();
+            
+            if (recipe.InputIngredient1 != null) requiredIngredients.Add(recipe.InputIngredient1);
+            if (recipe.InputIngredient2 != null) requiredIngredients.Add(recipe.InputIngredient2);
+            if (recipe.InputIngredient3 != null) requiredIngredients.Add(recipe.InputIngredient3);
+
+            Debug.Log($"🧪 Checking recipe '{recipe.ItemName}' requiring {requiredIngredients.Count} ingredients:");
+            foreach (var ingredient in requiredIngredients)
+            {
+                Debug.Log($"   - Required: {ingredient.ItemName}");
+            }
+
+            // Check if all required ingredients are present
+            foreach (var required in requiredIngredients)
+            {
+                bool found = placedIngredients.Any(placed => placed == required);
+                if (!found)
+                {
+                    Debug.Log($"🧪 Missing required ingredient: {required.ItemName}");
+                    return false;
+                }
+            }
+
+            // Check if we have exactly the right number of ingredients (no extra)
+            if (placedIngredients.Count != requiredIngredients.Count)
+            {
+                Debug.Log($"🧪 Wrong number of ingredients: have {placedIngredients.Count}, need {requiredIngredients.Count}");
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Execute the matched recipe
+        /// </summary>
+        private void ExecuteRecipe(AlchemyRecipe recipe, HashSet<Ingredient> usedIngredients)
+        {
+            Debug.Log($"🧪 ⚗️ EXECUTING RECIPE: {recipe.ItemName}");
+            Debug.Log($"🧪 Using ingredients: {string.Join(", ", usedIngredients.Select(i => i.ItemName))}");
+            Debug.Log($"🧪 Output: {recipe.OutputPotion?.ItemName ?? "Unknown Potion"} x{recipe.OutputQuantity}");
+
+            // Show immediate success message
+            Debug.Log($"🧪 ✅ SUCCESS! Created {recipe.OutputPotion?.ItemName ?? "Unknown Potion"}!");
+            
+            // Start the recipe completion process with visual feedback
+            StartCoroutine(RecipeCompletionSequence(recipe, usedIngredients));
+        }
+
+        /// <summary>
+        /// Handle the visual sequence of recipe completion
+        /// </summary>
+        private System.Collections.IEnumerator RecipeCompletionSequence(AlchemyRecipe recipe, HashSet<Ingredient> usedIngredients)
+        {
+            // Phase 1: Show the successful recipe for a moment
+            Debug.Log($"🧪 📋 Recipe Complete! {recipe.ItemName} -> {recipe.OutputPotion?.ItemName}");
+            Debug.Log($"🧪 🕐 Showing results for 2 seconds before clearing grid...");
+            
+            // Wait for 2 seconds to let player see the result
+            yield return new WaitForSeconds(2.0f);
+            
+            // Phase 2: Clear the grid
+            Debug.Log($"🧪 🧹 Clearing grid and finalizing recipe...");
+            ClearGrid();
+            
+            // Phase 3: Final completion message
+            Debug.Log($"🧪 🎉 Recipe execution complete! Enjoy your new {recipe.OutputPotion?.ItemName ?? "potion"}!");
+            
+            // Here you could add more functionality like:
+            // - Add the output potion to inventory
+            // - Show crafting animation
+            // - Play success sound
+            // - Award experience points
+        }
+
+        /// <summary>
+        /// Test method for recipe system
+        /// </summary>
+        [ContextMenu("Test Recipe System")]
+        public void TestRecipeSystem()
+        {
+            Debug.Log("🧪 === TESTING RECIPE SYSTEM ===");
+
+            // Get the database
+            var database = AlchemyRecipeDatabase.Instance;
+            if (database == null)
+            {
+                Debug.LogError("🧪 AlchemyRecipeDatabase not found! Cannot test recipes.");
+                return;
+            }
+
+            Debug.Log($"🧪 Database loaded successfully with {database.Recipes.Count} recipes");
+
+            // List all available recipes
+            foreach (var recipe in database.Recipes)
+            {
+                Debug.Log($"🧪 Recipe: {recipe.ItemName}");
+                Debug.Log($"   Inputs: {recipe.InputIngredient1?.ItemName} + {recipe.InputIngredient2?.ItemName}" + 
+                         (recipe.InputIngredient3 != null ? $" + {recipe.InputIngredient3.ItemName}" : ""));
+                Debug.Log($"   Output: {recipe.OutputPotion?.ItemName} x{recipe.OutputQuantity}");
+            }
+
+            // Test with currently placed ingredients
+            CheckForRecipeMatches();
+
+            Debug.Log("🧪 === RECIPE SYSTEM TEST COMPLETE ===");
+        }
+
+        /// <summary>
+        /// Test recipe with specific ingredients (for testing purposes)
+        /// </summary>
+        [ContextMenu("Test Recipe - Place FireClaw & FireTalon")]
+        public void TestRecipeWithFireIngredients()
+        {
+            Debug.Log("🧪 === TESTING RECIPE WITH FIRE INGREDIENTS ===");
+
+            // Clear grid first
+            ClearGrid();
+
+            // Find FireClaw and FireTalon in available ingredients
+            Ingredient fireClaw = null;
+            Ingredient fireTalon = null;
+
+            foreach (var ingredient in availableIngredients)
+            {
+                if (ingredient.ItemName.Contains("FireClaw"))
+                    fireClaw = ingredient;
+                else if (ingredient.ItemName.Contains("FireTalon"))
+                    fireTalon = ingredient;
+            }
+
+            if (fireClaw == null || fireTalon == null)
+            {
+                Debug.LogWarning("🧪 Required ingredients (FireClaw & FireTalon) not found in available ingredients");
+                Debug.Log("🧪 Available ingredients:");
+                foreach (var ingredient in availableIngredients)
+                {
+                    Debug.Log($"   - {ingredient.ItemName}");
+                }
+                return;
+            }
+
+            // Place the ingredients
+            Vector2Int pos1 = new Vector2Int(1, 1);
+            Vector2Int pos2 = new Vector2Int(2, 1);
+
+            Debug.Log($"🧪 Placing {fireClaw.ItemName} at {pos1}");
+            bool success1 = TryPlaceIngredient(fireClaw, pos1);
+
+            if (success1)
+            {
+                Debug.Log($"🧪 Placing {fireTalon.ItemName} at {pos2}");
+                bool success2 = TryPlaceIngredient(fireTalon, pos2);
+
+                if (success2)
+                {
+                    Debug.Log("🧪 Both ingredients placed successfully! Checking for recipes...");
+                    // The recipe checking should automatically trigger through the placement system
+                }
+                else
+                {
+                    Debug.LogError($"🧪 Failed to place {fireTalon.ItemName}");
+                }
+            }
+            else
+            {
+                Debug.LogError($"🧪 Failed to place {fireClaw.ItemName}");
+            }
+        }
+
+        #endregion
     }
 }

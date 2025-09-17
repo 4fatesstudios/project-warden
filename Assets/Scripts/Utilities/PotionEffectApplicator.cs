@@ -113,10 +113,11 @@ namespace FourFatesStudios.ProjectWarden.Utilities
         /// </summary>
         private static void ApplyEffectsToTarget(Potion potion, CombatController source, CombatController target, float qualityMultiplier)
         {
-            if (potion.EffectBundle?.Effects == null)
+            var effects = potion.GetAllEffects();
+            if (effects == null)
                 return;
 
-            foreach (var effect in potion.EffectBundle.Effects)
+            foreach (var effect in effects)
             {
                 if (effect != null)
                 {
