@@ -97,7 +97,6 @@ namespace FourFatesStudios.ProjectWarden.Editor
             {
                 Debug.Log($"🔥 Fire Infusion Test:");
                 Debug.Log($"  • Name: {fireInfusion.InfusionName}");
-                Debug.Log($"  • Category: {fireInfusion.Category}");
                 Debug.Log($"  • Color: {fireInfusion.InfusionColor}");
                 Debug.Log($"  • Power Level: {fireInfusion.PowerLevel}");
                 Debug.Log($"  • Can Stack: {fireInfusion.CanStack}");

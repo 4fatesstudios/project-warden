@@ -19,7 +19,7 @@ MonoBehaviour:
   itemIcon: {fileID: 0}
   noun: 
   adjective: 
-  ingredientArchetype: 0
+  ingredientArchetype: 3
   ingredientAspect: 0
   isCorrupted: 0
   potency: 3
@@ -27,7 +27,23 @@ MonoBehaviour:
   gridHeight: 2
   unlocksAdditionalSpace: 0
   additionalSpaceCount: 0
-  infusions: []
+  shapeData:
+    gridWidth: 2
+    gridHeight: 2
+    activeCells:
+    - {x: 0, y: 0}
+    - {x: 0, y: 1}
+    - {x: 1, y: 1}
+    template: 0
+    shapeColor: {r: 0, g: 1, b: 0, a: 1}
+    shapeSprite: {fileID: 0}
+    lastModified: 2025-09-12 09:30:19
+    dataVersion: 1
+  infusionBundle:
+    infusions:
+    - {fileID: 11400000, guid: 5e9bb16af257975488d29087a6d692e0, type: 2}
+  effectBundle:
+    Effects: []
   canGrind: 0
   grindingResult: {fileID: 0}
   canDistill: 0

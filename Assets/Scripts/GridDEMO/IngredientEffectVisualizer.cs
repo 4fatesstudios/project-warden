@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
 using FourFatesStudios.ProjectWarden.Effects;
 using FourFatesStudios.ProjectWarden.Enums;
@@ -60,6 +61,9 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         private IngredientPlacer ingredientPlacer;
         private Dictionary<Vector2Int, GameObject> activeEffects = new Dictionary<Vector2Int, GameObject>();
         
+        // Track continuous effects by border key
+        private Dictionary<string, GameObject> activeBorderEffects = new Dictionary<string, GameObject>();
+        
         private void Awake()
         {
             gridManager = GetComponent<GridGameManager>();
@@ -96,15 +100,11 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             main.startColor = color;
             main.maxParticles = 20;
             main.simulationSpace = ParticleSystemSimulationSpace.World;
+            main.loop = true; // Make particles loop continuously
             
             var emission = particles.emission;
-            emission.rateOverTime = 8f;
-            emission.SetBursts(new ParticleSystem.Burst[]
-            {
-                new ParticleSystem.Burst(0f, 15),
-                new ParticleSystem.Burst(1f, 10),
-                new ParticleSystem.Burst(2f, 5)
-            });
+            emission.rateOverTime = 8f; // Continuous emission
+            emission.SetBursts(new ParticleSystem.Burst[0]); // Remove burst for continuous effect
             
             var shape = particles.shape;
             shape.shapeType = ParticleSystemShapeType.Circle;
@@ -147,14 +147,11 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             main.startColor = color;
             main.maxParticles = 30;
             main.simulationSpace = ParticleSystemSimulationSpace.World;
+            main.loop = true; // Make particles loop continuously
             
             var emission = particles.emission;
-            emission.rateOverTime = 0f;
-            emission.SetBursts(new ParticleSystem.Burst[]
-            {
-                new ParticleSystem.Burst(0f, 20),
-                new ParticleSystem.Burst(0.5f, 10)
-            });
+            emission.rateOverTime = 12f; // Continuous emission for reactions
+            emission.SetBursts(new ParticleSystem.Burst[0]); // Remove burst for continuous effect
             
             var shape = particles.shape;
             shape.shapeType = ParticleSystemShapeType.Sphere;
@@ -192,14 +189,22 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         /// </summary>
         public void CheckIngredientInteractions(Vector2Int placedPosition, Ingredient placedIngredient)
         {
-            if (placedIngredient == null || !placedIngredient.HasEffects())
+            if (placedIngredient == null || !placedIngredient.HasInfusionEffects())
             {
-                Debug.Log($"🎨 No effects to check for {placedIngredient?.ItemName ?? "null ingredient"}");
+                Debug.Log($"🎨 No infusions to check for {placedIngredient?.ItemName ?? "null ingredient"}");
                 return;
             }
             
-            Debug.Log($"🎨 Checking interactions for {placedIngredient.ItemName} with effects (HasEffects: {placedIngredient.HasEffects()})");
-            Debug.Log($"🎨 Ingredient {placedIngredient.ItemName} - EffectBundle count: {placedIngredient.EffectBundle?.Effects?.Count ?? 0}, Infusions count: {placedIngredient.InfusionBundle?.Infusions?.Count ?? 0}");
+            Debug.Log($"🎨 Checking infusion interactions for {placedIngredient.ItemName} (HasInfusionEffects: {placedIngredient.HasInfusionEffects()})");
+            
+            if (placedIngredient.InfusionBundle?.Infusions != null)
+            {
+                Debug.Log($"🎨 Ingredient {placedIngredient.ItemName} - Infusions count: {placedIngredient.InfusionBundle.Infusions.Count}");
+                foreach (var infusion in placedIngredient.InfusionBundle.Infusions)
+                {
+                    Debug.Log($"   - Infusion: {infusion.GetType().Name}");
+                }
+            }
             
             // Get all cells occupied by the placed ingredient
             var placedCells = gridManager.GetIngredientCells(placedIngredient, placedPosition);
@@ -238,55 +243,80 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         }
         
         /// <summary>
-        /// Process the interaction between two ingredients
+        /// Process the interaction between two ingredients (comparing infusions only)
         /// </summary>
         private void ProcessIngredientInteraction(Vector2Int pos1, Ingredient ingredient1, Vector2Int pos2, Ingredient ingredient2)
         {
             if (ingredient1 == null || ingredient2 == null)
                 return;
             
-            bool ingredient1HasEffects = ingredient1.HasEffects();
-            bool ingredient2HasEffects = ingredient2.HasEffects();
+            bool ingredient1HasInfusions = ingredient1.HasInfusionEffects();
+            bool ingredient2HasInfusions = ingredient2.HasInfusionEffects();
             
-            // If neither has effects, no interaction
-            if (!ingredient1HasEffects && !ingredient2HasEffects)
+            Debug.Log($"🎨 Processing infusion interaction between {ingredient1.ItemName} and {ingredient2.ItemName}");
+            Debug.Log($"   {ingredient1.ItemName} HasInfusionEffects: {ingredient1HasInfusions}");
+            Debug.Log($"   {ingredient2.ItemName} HasInfusionEffects: {ingredient2HasInfusions}");
+            
+            // Debug: Show what infusions each ingredient has
+            if (ingredient1HasInfusions && ingredient1.InfusionBundle?.Infusions != null)
+            {
+                Debug.Log($"   {ingredient1.ItemName} infusions ({ingredient1.InfusionBundle.Infusions.Count}): {string.Join(", ", ingredient1.InfusionBundle.Infusions.Select(i => i.GetType().Name))}");
+            }
+            
+            if (ingredient2HasInfusions && ingredient2.InfusionBundle?.Infusions != null)
+            {
+                Debug.Log($"   {ingredient2.ItemName} infusions ({ingredient2.InfusionBundle.Infusions.Count}): {string.Join(", ", ingredient2.InfusionBundle.Infusions.Select(i => i.GetType().Name))}");
+            }
+            
+            // If neither has infusions, no interaction
+            if (!ingredient1HasInfusions && !ingredient2HasInfusions)
+            {
+                Debug.Log($"   🚫 No interaction: Neither ingredient has infusions");
                 return;
+            }
             
             // Find all shared borders between the two ingredients
             var sharedBorders = FindSharedBorders(pos1, ingredient1, pos2, ingredient2);
             
             if (sharedBorders.Count == 0)
-                return; // No actual adjacency
-            
-            // Determine interaction type
-            if (ingredient1HasEffects && ingredient2HasEffects)
             {
-                // Both have effects - check if they're similar and get the similar effects
-                var similarEffects = ingredient1.GetSimilarEffectsTo(ingredient2);
+                Debug.Log($"   🚫 No interaction: No shared borders found");
+                return; // No actual adjacency
+            }
+            
+            Debug.Log($"   🔗 Found {sharedBorders.Count} shared borders");
+            
+            // Determine interaction type based on infusions only
+            if (ingredient1HasInfusions && ingredient2HasInfusions)
+            {
+                // Both have infusions - check if they share any infusion types
+                var similarInfusions = ingredient1.GetSimilarEffectsTo(ingredient2);
                 
-                if (similarEffects.Count > 0)
+                Debug.Log($"   🔍 Checking for shared infusion types: {similarInfusions.Count} matches found");
+                
+                if (similarInfusions.Count > 0)
                 {
-                    Debug.Log($"✨ {similarEffects.Count} similar effects detected between {ingredient1.ItemName} and {ingredient2.ItemName} along {sharedBorders.Count} shared borders!");
+                    Debug.Log($"✨ {similarInfusions.Count} shared infusion types detected between {ingredient1.ItemName} and {ingredient2.ItemName} along {sharedBorders.Count} shared borders!");
                     
-                    // Log details about the similar effects
-                    foreach (var (thisEffect, otherEffect) in similarEffects)
+                    // Log details about the shared infusions
+                    foreach (var (thisInfusion, otherInfusion) in similarInfusions)
                     {
-                        Debug.Log($"   - Shared effect type: {thisEffect.GetType().Name}");
+                        Debug.Log($"   - Shared infusion type: {thisInfusion.GetType().Name}");
                     }
                     
-                    CreateSimilarEffectsParticleAlongBorders(sharedBorders, ingredient1, ingredient2, similarEffects);
+                    CreateSimilarEffectsParticleAlongBorders(sharedBorders, ingredient1, ingredient2, similarInfusions);
                 }
                 else
                 {
-                    Debug.Log($"💥 Different effects detected between {ingredient1.ItemName} and {ingredient2.ItemName} along {sharedBorders.Count} shared borders!");
+                    Debug.Log($"💥 Different infusion types detected between {ingredient1.ItemName} and {ingredient2.ItemName} along {sharedBorders.Count} shared borders!");
                     CreateDifferentEffectsParticleAlongBorders(sharedBorders, ingredient1, ingredient2);
                 }
             }
             else
             {
-                // Only one has effects - neutral interaction
-                Debug.Log($"🌟 Neutral interaction between {ingredient1.ItemName} and {ingredient2.ItemName} along {sharedBorders.Count} shared borders");
-                CreateNeutralInteractionParticleAlongBorders(sharedBorders, ingredient1HasEffects ? ingredient1 : ingredient2);
+                // Only one has infusions - neutral interaction
+                Debug.Log($"🌟 Neutral interaction (one has infusions) between {ingredient1.ItemName} and {ingredient2.ItemName} along {sharedBorders.Count} shared borders");
+                CreateNeutralInteractionParticleAlongBorders(sharedBorders, ingredient1HasInfusions ? ingredient1 : ingredient2);
             }
         }
         
@@ -377,120 +407,164 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         }
         
         /// <summary>
-        /// Create sparkle effects along shared borders for ingredients with similar effects
+        /// Create sparkle effects along shared borders for ingredients with similar infusions
         /// </summary>
-        private void CreateSimilarEffectsParticleAlongBorders(List<SharedBorder> sharedBorders, Ingredient ingredient1, Ingredient ingredient2, List<(IEffect thisEffect, IEffect otherEffect)> similarEffects)
+        private void CreateSimilarEffectsParticleAlongBorders(List<SharedBorder> sharedBorders, Ingredient ingredient1, Ingredient ingredient2, List<(object thisInfusion, object otherInfusion)> similarInfusions)
         {
             foreach (var border in sharedBorders)
             {
-                // Create multiple particle systems along the border for more coverage
-                int particleCount = Mathf.Max(1, Mathf.RoundToInt(Vector3.Distance(border.worldStart, border.worldEnd) / 0.3f));
+                // Create a unique key for this border
+                string borderKey = $"{border.cell1}_{border.cell2}_similar";
                 
-                for (int i = 0; i < particleCount; i++)
+                // Remove existing effect if any
+                if (activeBorderEffects.ContainsKey(borderKey))
                 {
-                    float t = particleCount > 1 ? (float)i / (particleCount - 1) : 0.5f;
-                    Vector3 position = Vector3.Lerp(border.worldStart, border.worldEnd, t);
-                    
-                    GameObject effect = Instantiate(similarEffectsParticlePrefab, position, Quaternion.identity);
-                    
-                    // Customize the effect based on the shared effect types
-                    ParticleSystem particles = effect.GetComponent<ParticleSystem>();
-                    if (particles != null)
+                    if (activeBorderEffects[borderKey] != null)
                     {
-                        var main = particles.main;
-                        
-                        // Blend colors based on ingredient aspects
-                        Color color1 = GetAspectColor(ingredient1.IngredientAspect);
-                        Color color2 = GetAspectColor(ingredient2.IngredientAspect);
-                        Color blendedColor = Color.Lerp(color1, color2, 0.5f);
-                        
-                        main.startColor = blendedColor;
-                        
-                        // Adjust particle system for border placement
-                        var shape = particles.shape;
-                        shape.shapeType = ParticleSystemShapeType.Box;
-                        
-                        // Orient the shape along the border
-                        if (border.direction == BorderDirection.Top || border.direction == BorderDirection.Bottom)
-                        {
-                            // Horizontal border
-                            shape.scale = new Vector3(0.8f, 0.1f, 0.1f);
-                        }
-                        else
-                        {
-                            // Vertical border
-                            shape.scale = new Vector3(0.1f, 0.1f, 0.8f);
-                        }
-                        
-                        // Increase intensity based on number of shared effects but reduce for multiple borders
-                        var sharedEffectCount = similarEffects.Count;
-                        var emission = particles.emission;
-                        emission.rateOverTime = (4f + sharedEffectCount) / sharedBorders.Count; // Distribute across borders
+                        Destroy(activeBorderEffects[borderKey]);
+                    }
+                    activeBorderEffects.Remove(borderKey);
+                }
+                
+                // Create new continuous effect
+                Vector3 position = border.worldCenter;
+                GameObject effect = Instantiate(similarEffectsParticlePrefab, position, Quaternion.identity);
+                
+                // Customize the effect based on the shared effect types
+                ParticleSystem particles = effect.GetComponent<ParticleSystem>();
+                if (particles != null)
+                {
+                    var main = particles.main;
+                    
+                    // Blend colors based on ingredient aspects
+                    Color color1 = GetAspectColor(ingredient1.IngredientAspect);
+                    Color color2 = GetAspectColor(ingredient2.IngredientAspect);
+                    Color blendedColor = Color.Lerp(color1, color2, 0.5f);
+                    
+                    main.startColor = blendedColor;
+                    
+                    // Adjust particle system for border placement
+                    var shape = particles.shape;
+                    shape.shapeType = ParticleSystemShapeType.Box;
+                    
+                    // Orient the shape along the border
+                    if (border.direction == BorderDirection.Top || border.direction == BorderDirection.Bottom)
+                    {
+                        // Horizontal border
+                        shape.scale = new Vector3(0.8f, 0.1f, 0.1f);
+                    }
+                    else
+                    {
+                        // Vertical border
+                        shape.scale = new Vector3(0.1f, 0.1f, 0.8f);
                     }
                     
-                    Destroy(effect, effectDuration);
+                    // Increase intensity based on number of shared infusions
+                    var sharedInfusionCount = similarInfusions.Count;
+                    var emission = particles.emission;
+                    emission.rateOverTime = 5f + (sharedInfusionCount * 3f); // Gentle continuous stream
+                    
+                    // Configure for smooth, gentle continuous effect
+                    main.loop = true;
+                    main.startLifetime = 2.0f; // Longer lifetime for gentle floating effect
+                    main.startSpeed = 0.5f; // Slow, gentle movement
+                    
+                    // Add gentle size variation over lifetime
+                    var sizeOverLifetime = particles.sizeOverLifetime;
+                    sizeOverLifetime.enabled = true;
+                    AnimationCurve sizeCurve = new AnimationCurve();
+                    sizeCurve.AddKey(0f, 0.2f); // Start small
+                    sizeCurve.AddKey(0.5f, 1f); // Grow
+                    sizeCurve.AddKey(1f, 0.1f); // Fade small
+                    sizeOverLifetime.size = new ParticleSystem.MinMaxCurve(1f, sizeCurve);
                 }
+                
+                // Track this effect for later cleanup
+                activeBorderEffects[borderKey] = effect;
             }
             
-            Debug.Log($"✨ Created sparkle effects along {sharedBorders.Count} shared borders with {similarEffects.Count} shared effects");
+            Debug.Log($"✨ Created continuous sparkle effects along {sharedBorders.Count} shared borders with {similarInfusions.Count} shared infusions");
             
-            // Log the specific effects that are similar
-            foreach (var (thisEffect, otherEffect) in similarEffects)
+            // Log the specific infusions that are similar
+            foreach (var (thisInfusion, otherInfusion) in similarInfusions)
             {
-                Debug.Log($"   🌟 Effect match: {thisEffect.GetType().Name} from {ingredient1.ItemName} ↔ {otherEffect.GetType().Name} from {ingredient2.ItemName}");
+                Debug.Log($"   🌟 Infusion match: {thisInfusion.GetType().Name} from {ingredient1.ItemName} ↔ {otherInfusion.GetType().Name} from {ingredient2.ItemName}");
             }
         }
         
         /// <summary>
-        /// Create reaction effects along shared borders for ingredients with different effects
+        /// Create periodic reaction effects along shared borders for ingredients with different infusions
         /// </summary>
         private void CreateDifferentEffectsParticleAlongBorders(List<SharedBorder> sharedBorders, Ingredient ingredient1, Ingredient ingredient2)
         {
             foreach (var border in sharedBorders)
             {
-                // For reaction effects, create fewer but more intense bursts
-                int particleCount = Mathf.Max(1, Mathf.RoundToInt(Vector3.Distance(border.worldStart, border.worldEnd) / 0.5f));
+                // Create a unique key for this border
+                string borderKey = $"{border.cell1}_{border.cell2}_different";
                 
-                for (int i = 0; i < particleCount; i++)
+                // Remove existing effect if any
+                if (activeBorderEffects.ContainsKey(borderKey))
                 {
-                    float t = particleCount > 1 ? (float)i / (particleCount - 1) : 0.5f;
-                    Vector3 position = Vector3.Lerp(border.worldStart, border.worldEnd, t);
-                    
-                    GameObject effect = Instantiate(differentEffectsParticlePrefab, position, Quaternion.identity);
-                    
-                    ParticleSystem particles = effect.GetComponent<ParticleSystem>();
-                    if (particles != null)
+                    if (activeBorderEffects[borderKey] != null)
                     {
-                        var main = particles.main;
-                        
-                        // Create contrasting colors
-                        Color color1 = GetAspectColor(ingredient1.IngredientAspect);
-                        Color color2 = GetAspectColor(ingredient2.IngredientAspect);
-                        
-                        // Use a more dramatic color that contrasts with both
-                        main.startColor = GetContrastingColor(color1, color2);
-                        
-                        // Adjust shape for border reactions
-                        var shape = particles.shape;
-                        shape.shapeType = ParticleSystemShapeType.Box;
-                        shape.scale = new Vector3(0.3f, 0.2f, 0.3f);
-                        
-                        // Reduce emission for multiple borders (Unity 6 compatible)
-                        var emission = particles.emission;
-                        ParticleSystem.Burst[] bursts = new ParticleSystem.Burst[emission.burstCount];
-                        int burstCount = emission.GetBursts(bursts);
-                        for (int b = 0; b < burstCount; b++)
-                        {
-                            bursts[b].count = new ParticleSystem.MinMaxCurve(bursts[b].count.constant / sharedBorders.Count);
-                        }
-                        emission.SetBursts(bursts);
+                        Destroy(activeBorderEffects[borderKey]);
                     }
-                    
-                    Destroy(effect, effectDuration * 0.7f);
+                    activeBorderEffects.Remove(borderKey);
                 }
+                
+                // Create new periodic reaction effect
+                Vector3 position = border.worldCenter;
+                GameObject effect = Instantiate(differentEffectsParticlePrefab, position, Quaternion.identity);
+                
+                ParticleSystem particles = effect.GetComponent<ParticleSystem>();
+                if (particles != null)
+                {
+                    var main = particles.main;
+                    
+                    // Create contrasting colors
+                    Color color1 = GetAspectColor(ingredient1.IngredientAspect);
+                    Color color2 = GetAspectColor(ingredient2.IngredientAspect);
+                    
+                    // Use a more dramatic color that contrasts with both
+                    main.startColor = GetContrastingColor(color1, color2);
+                    
+                    // Adjust shape for border reactions
+                    var shape = particles.shape;
+                    shape.shapeType = ParticleSystemShapeType.Box;
+                    shape.scale = new Vector3(0.3f, 0.2f, 0.3f);
+                    
+                    // Configure for periodic bursts instead of continuous emission
+                    var emission = particles.emission;
+                    emission.rateOverTime = 0; // No continuous emission
+                    
+                    // Set up dynamic periodic bursts with varying intensity
+                    emission.SetBursts(new ParticleSystem.Burst[]
+                    {
+                        new ParticleSystem.Burst(0.0f, 15),   // Initial burst
+                        new ParticleSystem.Burst(1.0f, 25),  // Strong reaction burst
+                        new ParticleSystem.Burst(1.8f, 10),  // Follow-up burst
+                        new ParticleSystem.Burst(3.2f, 30),  // Peak reaction burst
+                        new ParticleSystem.Burst(4.5f, 8),   // Settling burst
+                        new ParticleSystem.Burst(6.0f, 20),  // Secondary reaction
+                    });
+                    
+                    // Configure timing and appearance
+                    main.loop = true;
+                    main.startLifetime = 1.5f; // Longer particle lifetime for dramatic effect
+                    main.startSpeed = 2.0f; // Faster particles for reactions
+                    
+                    // Add velocity over lifetime for more dynamic movement
+                    var velocityOverLifetime = particles.velocityOverLifetime;
+                    velocityOverLifetime.enabled = true;
+                    velocityOverLifetime.space = ParticleSystemSimulationSpace.Local;
+                    velocityOverLifetime.radial = new ParticleSystem.MinMaxCurve(1.0f); // Expand outward
+                }
+                
+                // Track this effect for later cleanup
+                activeBorderEffects[borderKey] = effect;
             }
             
-            Debug.Log($"💥 Created reaction effects along {sharedBorders.Count} shared borders between different effects");
+            Debug.Log($"💥 Created periodic reaction effects along {sharedBorders.Count} shared borders between different infusions");
         }
         
         /// <summary>
@@ -500,9 +574,21 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         {
             foreach (var border in sharedBorders)
             {
-                // Subtle effects for neutral interactions
-                Vector3 position = border.worldCenter;
+                // Create a unique key for this border
+                string borderKey = $"{border.cell1}_{border.cell2}_neutral";
                 
+                // Remove existing effect if any
+                if (activeBorderEffects.ContainsKey(borderKey))
+                {
+                    if (activeBorderEffects[borderKey] != null)
+                    {
+                        Destroy(activeBorderEffects[borderKey]);
+                    }
+                    activeBorderEffects.Remove(borderKey);
+                }
+                
+                // Create new continuous neutral effect
+                Vector3 position = border.worldCenter;
                 GameObject effect = Instantiate(similarEffectsParticlePrefab, position, Quaternion.identity);
                 
                 ParticleSystem particles = effect.GetComponent<ParticleSystem>();
@@ -512,17 +598,18 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                     main.startColor = Color.white;
                     
                     var emission = particles.emission;
-                    emission.rateOverTime = 1f / sharedBorders.Count; // Very subtle, distributed
+                    emission.rateOverTime = 3f; // Subtle continuous emission for neutral interactions
                     
                     // Smaller, more subtle shape
                     var shape = particles.shape;
                     shape.radius = 0.1f;
                 }
                 
-                Destroy(effect, effectDuration * 0.5f);
+                // Track this effect for later cleanup
+                activeBorderEffects[borderKey] = effect;
             }
             
-            Debug.Log($"🌟 Created neutral interaction effects along {sharedBorders.Count} shared borders");
+            Debug.Log($"🌟 Created continuous neutral interaction effects along {sharedBorders.Count} shared borders");
         }
         
         /// <summary>
@@ -589,13 +676,91 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         /// </summary>
         public void ClearAllEffects()
         {
+            // Clear old legacy effects
             foreach (var effect in activeEffects.Values)
             {
                 if (effect != null)
                     Destroy(effect);
             }
             activeEffects.Clear();
+            
+            // Clear new continuous border effects
+            foreach (var effect in activeBorderEffects.Values)
+            {
+                if (effect != null)
+                    Destroy(effect);
+            }
+            activeBorderEffects.Clear();
+            
             Debug.Log("🎨 Cleared all ingredient interaction effects");
+        }
+        
+        /// <summary>
+        /// Clean up all particle effects when an ingredient is removed
+        /// </summary>
+        public void CleanupEffectsForIngredient(Vector2Int ingredientPosition, Ingredient ingredient)
+        {
+            Debug.Log($"🧹 Cleaning up particle effects for {ingredient?.ItemName ?? "unknown ingredient"} at {ingredientPosition}");
+            
+            // Get all cells occupied by the ingredient
+            var ingredientCells = gridManager.GetIngredientCells(ingredient, ingredientPosition);
+            
+            // Find and remove all effects involving these cells
+            List<string> keysToRemove = new List<string>();
+            
+            foreach (var kvp in activeBorderEffects)
+            {
+                string borderKey = kvp.Key;
+                GameObject effect = kvp.Value;
+                
+                // Parse the border key to get cell positions
+                string[] parts = borderKey.Split('_');
+                if (parts.Length >= 4) // Format: "x,y_x,y_effectType"
+                {
+                    string cell1Str = parts[0] + "_" + parts[1];
+                    string cell2Str = parts[2] + "_" + parts[3];
+                    
+                    Vector2Int cell1 = ParseCellPosition(cell1Str);
+                    Vector2Int cell2 = ParseCellPosition(cell2Str);
+                    
+                    // Check if either cell belongs to the removed ingredient
+                    if (ingredientCells.Contains(cell1) || ingredientCells.Contains(cell2))
+                    {
+                        if (effect != null)
+                        {
+                            Destroy(effect);
+                        }
+                        keysToRemove.Add(borderKey);
+                    }
+                }
+            }
+            
+            // Remove the keys from the dictionary
+            foreach (string key in keysToRemove)
+            {
+                activeBorderEffects.Remove(key);
+            }
+            
+            Debug.Log($"🧹 Removed {keysToRemove.Count} particle effects for ingredient removal");
+        }
+        
+        /// <summary>
+        /// Parse a cell position from string format "(x, y)"
+        /// </summary>
+        private Vector2Int ParseCellPosition(string cellStr)
+        {
+            // Remove parentheses and split by comma
+            cellStr = cellStr.Trim('(', ')');
+            string[] coords = cellStr.Split(',');
+            
+            if (coords.Length == 2 && 
+                int.TryParse(coords[0].Trim(), out int x) && 
+                int.TryParse(coords[1].Trim(), out int y))
+            {
+                return new Vector2Int(x, y);
+            }
+            
+            return Vector2Int.zero;
         }
         
         /// <summary>

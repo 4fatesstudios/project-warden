@@ -38,7 +38,7 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             if (effectVisualizer == null)
             {
                 effectVisualizer = gameObject.AddComponent<IngredientEffectVisualizer>();
-                Debug.Log("🎨 Added IngredientEffectVisualizer component");
+                DebugSystemConfig.LogParticleEffects("Added IngredientEffectVisualizer component");
             }
         }
 
@@ -574,6 +574,12 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                     // Clear grid occupancy
                     ClearGridCellsOccupied(instance.ingredient, instance.gridPosition);
 
+                    // Clean up particle effects for this ingredient
+                    if (effectVisualizer != null)
+                    {
+                        effectVisualizer.CleanupEffectsForIngredient(instance.gridPosition, instance.ingredient);
+                    }
+
                     // Destroy visual object
                     if (instance.visualObject != null)
                     {
@@ -597,6 +603,12 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
 
             placedIngredients.Clear();
             Debug.Log($"🧹 Cleared placedIngredients dictionary");
+            
+            // Clean up all remaining particle effects
+            if (effectVisualizer != null)
+            {
+                effectVisualizer.ClearAllEffects();
+            }
 
             // Clean up the label canvas if it exists
             if (ingredientLabelCanvas != null)

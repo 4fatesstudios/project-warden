@@ -17,8 +17,10 @@ MonoBehaviour:
   itemDescription: Empty Description
   itemRarity: 1
   itemIcon: {fileID: 814221718, guid: d4ee4ae08a3c01b4188d6c2cbb1f35ef, type: 3}
-  itemPotionType: 3
-  potionEffects: []
+  itemPotionType: 1
+  infusionBundle:
+    infusions:
+    - {fileID: 11400000, guid: cb1d239c98a377240872ece2b29e296a, type: 2}
   rarity: 0
   tone: 2
   bottleType: 0
@@ -28,11 +30,11 @@ MonoBehaviour:
   turbidity: 1
   hasGlow: 0
   hasBubbles: 0
-  hasParticles: 0
+  hasParticles: 1
   compatibleAbilities: 
   canBeUsedInCombat: 1
-  canBeUsedOutOfCombat: 1
-  canBeUsedInExploration: 1
+  canBeUsedOutOfCombat: 0
+  canBeUsedInExploration: 0
   maxStackSize: 10
   shelfLife: 7200
   degradesOverTime: 1

@@ -18,8 +18,8 @@ namespace FourFatesStudios.ProjectWarden.Utilities
             if (potion == null)
                 return false;
 
-            // Potion is valid if it has an effect bundle with at least one effect
-            return potion.EffectBundle?.Effects?.Count > 0;
+            // Potion is valid if it has effects from infusions
+            return potion.GetAllEffects()?.Count > 0;
         }
 
         /// <summary>
@@ -50,10 +50,11 @@ namespace FourFatesStudios.ProjectWarden.Utilities
 
             var summary = $"Potion: {potion.name}\n";
             
-            if (potion.EffectBundle?.Effects?.Count > 0)
+            var effects = potion.GetAllEffects();
+            if (effects?.Count > 0)
             {
-                summary += $"Effects ({potion.EffectBundle.Effects.Count}):\n";
-                foreach (var effect in potion.EffectBundle.Effects)
+                summary += $"Effects ({effects.Count}):\n";
+                foreach (var effect in effects)
                 {
                     summary += $"  - {effect.GetType().Name}\n";
                 }
@@ -73,7 +74,8 @@ namespace FourFatesStudios.ProjectWarden.Utilities
         {
             if (IsValid(potion))
             {
-                Debug.Log($"✅ Potion '{potion.name}' is valid with {potion.EffectBundle.Effects.Count} effects");
+                var effectCount = potion.GetAllEffects()?.Count ?? 0;
+                Debug.Log($"✅ Potion '{potion.name}' is valid with {effectCount} effects");
             }
             else
             {

@@ -59,7 +59,7 @@ namespace FourFatesStudios.ProjectWarden.GridDemo.UI
                 GameObject leftPanelObj = new GameObject("Left Panel");
                 leftPanelObj.transform.SetParent(transform, false);
                 leftPanel = leftPanelObj.AddComponent<CompactUIDesigner>();
-                Debug.Log("GridDemoUIManagerComplete: Created CompactUIDesigner component");
+                DebugSystemConfig.LogTesting("Created CompactUIDesigner component");
             }
             
             if (rightPanel == null)
@@ -67,10 +67,10 @@ namespace FourFatesStudios.ProjectWarden.GridDemo.UI
                 GameObject rightPanelObj = new GameObject("Right Panel");
                 rightPanelObj.transform.SetParent(transform, false);
                 rightPanel = rightPanelObj.AddComponent<RightPanelManager>();
-                Debug.Log("GridDemoUIManagerComplete: Created RightPanelManager component");
+                DebugSystemConfig.LogTesting("Created RightPanelManager component");
             }
             
-            Debug.Log($"GridDemoUIManagerComplete: Auto-found components - Grid: {gridManager != null}, Left: {leftPanel != null}, Right: {rightPanel != null}");
+            DebugSystemConfig.LogTesting($"Auto-found components - Grid: {gridManager != null}, Left: {leftPanel != null}, Right: {rightPanel != null}");
         }
         
         private void SetupConnections()
@@ -86,7 +86,7 @@ namespace FourFatesStudios.ProjectWarden.GridDemo.UI
             // Setup ingredient button hover events for info panel
             SetupIngredientButtonEvents();
             
-            Debug.Log("GridDemoUIManagerComplete: Connected all events successfully!");
+            DebugSystemConfig.LogTesting("Connected all events successfully!");
         }
         
         private void SetupIngredientButtonEvents()
@@ -249,14 +249,14 @@ namespace FourFatesStudios.ProjectWarden.GridDemo.UI
         [ContextMenu("📋 Debug UI State")]
         public void DebugUIState()
         {
-            Debug.Log("📋 GridDemoUIManagerComplete Debug State:");
-            Debug.Log($"   - GridGameManager: {gridManager != null}");
-            Debug.Log($"   - LeftPanel (CompactUIDesigner): {leftPanel != null}");
-            Debug.Log($"   - RightPanel (RightPanelManager): {rightPanel != null}");
+            DebugSystemConfig.LogTesting("GridDemoUIManagerComplete Debug State:");
+            DebugSystemConfig.LogTesting($"   - GridGameManager: {gridManager != null}");
+            DebugSystemConfig.LogTesting($"   - LeftPanel (CompactUIDesigner): {leftPanel != null}");
+            DebugSystemConfig.LogTesting($"   - RightPanel (RightPanelManager): {rightPanel != null}");
             
             if (gridManager != null && gridManager.availableIngredients != null)
             {
-                Debug.Log($"   - Available Ingredients: {gridManager.availableIngredients.Count}");
+                DebugSystemConfig.LogTesting($"   - Available Ingredients: {gridManager.availableIngredients.Count}");
             }
         }
     }

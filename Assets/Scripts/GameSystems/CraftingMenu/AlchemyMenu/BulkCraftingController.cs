@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.AlchemyRecipes;
+using InfusionBundle = FourFatesStudios.ProjectWarden.ScriptableObjects.InfusionBundle;
 using FourFatesStudios.ProjectWarden.Enums;
 using GameSystems.CraftingMenu.AlchemyBookMenu;
 
@@ -276,9 +277,9 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu
                     var potion = ScriptableObject.CreateInstance<Potion>();
                     potion.name = recipe.recipe.OutputPotion.ItemName;
 
-                    // Apply rank modifier to effects using new EffectBundle system
-                    var effectBundleField = typeof(Potion).GetField("effectBundle", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                    effectBundleField?.SetValue(potion, recipe.recipe.OutputPotion.EffectBundle);
+                    // Apply rank modifier to effects using InfusionBundle system
+                    var infusionBundleField = typeof(Potion).GetField("infusionBundle", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    infusionBundleField?.SetValue(potion, recipe.recipe.OutputPotion.InfusionBundle);
 
                     var upgradedProp = typeof(Potion).GetProperty("Upgraded");
                     upgradedProp?.SetValue(potion, recipe.recipe.OutputPotion.Upgraded);

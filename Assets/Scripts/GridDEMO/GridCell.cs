@@ -13,6 +13,11 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         public bool IsHighlighted { get; set; }
         public bool IsValidPlacement { get; set; }
         
+        // Obstacle properties
+        public bool HasObstacle { get; private set; }
+        public AspectObstacle Obstacle { get; private set; }
+        public bool completedObstacle { get; private set; }
+        
         // Visual state properties
         public CellVisualState VisualState { get; private set; }
         public Color CellColor { get; private set; }
@@ -47,6 +52,8 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             IsValidPlacement = true;
             CellAspect = null;
             CellIntensity = 0f;
+            HasObstacle = false;
+            Obstacle = null;
             
             // Update visual state to empty (this was commented out but is needed!)
             UpdateVisualState();
@@ -59,11 +66,29 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             UpdateVisualState();
         }
         
+        public void SetObstacle(AspectObstacle obstacle)
+        {
+            HasObstacle = obstacle != null;
+            Obstacle = obstacle;
+            UpdateVisualState();
+        }
+        
+        public void RemoveObstacle()
+        {
+            HasObstacle = false;
+            Obstacle = null;
+            UpdateVisualState();
+        }
+        
         private void UpdateVisualState()
         {
             if (IsOccupied)
             {
                 VisualState = CellVisualState.Occupied;
+            }
+            else if (HasObstacle)
+            {
+                VisualState = CellVisualState.Obstacle;
             }
             else if (IsHighlighted)
             {
@@ -96,6 +121,11 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                 case CellVisualState.Occupied:
                     // Keep occupied cells white so only the ingredient model shows color
                     CellColor = Color.white;
+                    break;
+                    
+                case CellVisualState.Obstacle:
+                    // Use the obstacle's designated color
+                    CellColor = Obstacle?.GetObstacleColor() ?? Color.gray;
                     break;
             }
         }
@@ -188,6 +218,7 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         Empty,
         ValidHighlight,
         InvalidHighlight,
-        Occupied
+        Occupied,
+        Obstacle
     }
 }

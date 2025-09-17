@@ -17,9 +17,6 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects
         [TextArea(3, 5)]
         private string description = "";
         
-        [SerializeField, Tooltip("Category this infusion belongs to")]
-        private InfusionCategory category = InfusionCategory.Elemental;
-        
         [SerializeField, Tooltip("Rarity of this infusion")]
         private Rarity rarity = Rarity.Common;
         
@@ -47,7 +44,6 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects
         // Public Properties
         public string InfusionName => infusionName;
         public string Description => description;
-        public InfusionCategory Category => category;
         public Rarity Rarity => rarity;
         public Color InfusionColor => infusionColor;
         public Sprite InfusionIcon => infusionIcon;
@@ -170,32 +166,16 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects
         /// <summary>
         /// Editor-only method to initialize infusion fields directly
         /// </summary>
-        public void InitializeInfusion(string newName, string newDescription, Color newColor, InfusionCategory newCategory = InfusionCategory.Elemental)
+        public void InitializeInfusion(string newName, string newDescription, Color newColor)
         {
             infusionName = newName;
             description = newDescription;
             infusionColor = newColor;
-            category = newCategory;
             if (effectBundle == null)
                 effectBundle = new EffectBundle();
             
             UnityEditor.EditorUtility.SetDirty(this);
         }
 #endif
-    }
-    
-    [System.Serializable]
-    public enum InfusionCategory
-    {
-        Elemental,      // Fire, Ice, Lightning, etc.
-        Physical,       // Strength, Speed, etc.
-        Mental,         // Intelligence, Wisdom, etc.
-        Magical,        // Mana, Spell effects, etc.
-        Defensive,      // Shields, Armor, etc.
-        Offensive,      // Damage boosters, etc.
-        Utility,        // Special effects, misc
-        Alchemical,     // Alchemy-specific effects
-        Corrupted,      // Negative or dark effects
-        Divine         // Holy or sacred effects
     }
 }

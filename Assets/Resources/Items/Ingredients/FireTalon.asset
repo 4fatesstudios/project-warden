@@ -19,18 +19,31 @@ MonoBehaviour:
   itemIcon: {fileID: 0}
   noun: 
   adjective: 
-  ingredientArchetype: 0
+  ingredientArchetype: 1
   ingredientAspect: 2
   isCorrupted: 0
   potency: 1
-  gridWidth: 1
-  gridHeight: 1
+  gridWidth: 2
+  gridHeight: 2
   unlocksAdditionalSpace: 0
   additionalSpaceCount: 0
-  infusions:
-  - infusionName: Burning
-    effects:
-      Effects: []
+  shapeData:
+    gridWidth: 2
+    gridHeight: 2
+    activeCells:
+    - {x: 0, y: 0}
+    - {x: 1, y: 0}
+    - {x: 1, y: 1}
+    template: 0
+    shapeColor: {r: 0, g: 1, b: 0, a: 1}
+    shapeSprite: {fileID: 0}
+    lastModified: 2025-09-12 09:30:32
+    dataVersion: 1
+  infusionBundle:
+    infusions:
+    - {fileID: 11400000, guid: cb1d239c98a377240872ece2b29e296a, type: 2}
+  effectBundle:
+    Effects: []
   canGrind: 0
   grindingResult: {fileID: 0}
   canDistill: 0
