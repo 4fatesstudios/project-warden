@@ -9239,6 +9239,50 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: -180, z: 0}
+--- !u!1 &221572167
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 221572169}
+  - component: {fileID: 221572168}
+  m_Layer: 0
+  m_Name: RelationshipManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &221572168
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 221572167}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f1971f0ec0d4497418e72e72ea9d00fb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &221572169
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 221572167}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.7356541, y: -1.6173605, z: -20.998495}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!43 &239744556
 Mesh:
   m_ObjectHideFlags: 0
@@ -11450,7 +11494,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 45fec559c4f6dca43839a05b25293c27, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  characterName: The NPC Guy
+  characterName: DebugNPC
 --- !u!43 &549102128
 Mesh:
   m_ObjectHideFlags: 0
@@ -20511,6 +20555,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 4171386876521173350, guid: 87bbcdf0875fe8745bf5f07c8bfea089, type: 3}
+      propertyPath: m_text
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 5118167609449540201, guid: 87bbcdf0875fe8745bf5f07c8bfea089, type: 3}
       propertyPath: m_Name
       value: DebugNPC
@@ -45736,3 +45784,4 @@ SceneRoots:
   - {fileID: 1663755605}
   - {fileID: 1007030974}
   - {fileID: 1907588425}
+  - {fileID: 221572169}
