@@ -92,6 +92,9 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         {
             GameObject prefab = new GameObject(name);
             
+            // Move the prefab off-screen to keep it out of view
+            prefab.transform.position = new Vector3(1000f, -1000f, 1000f);
+            
             ParticleSystem particles = prefab.AddComponent<ParticleSystem>();
             var main = particles.main;
             main.startLifetime = 2f;
@@ -138,6 +141,9 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         private GameObject CreateReactionEffect(string name, Color color)
         {
             GameObject prefab = new GameObject(name);
+            
+            // Move the prefab off-screen to keep it out of view
+            prefab.transform.position = new Vector3(1000f, -1000f, 1000f);
             
             ParticleSystem particles = prefab.AddComponent<ParticleSystem>();
             var main = particles.main;
