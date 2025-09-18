@@ -55,6 +55,9 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             GameObject prefab = GameObject.CreatePrimitive(PrimitiveType.Cube);
             prefab.name = "IngredientVisual";
 
+            // Move the prefab off-screen to keep it out of view
+            prefab.transform.position = new Vector3(1000f, -1000f, 1000f);
+
             // Add a slight scale to make it stand out from grid cells
             prefab.transform.localScale = Vector3.one * 0.8f;
 

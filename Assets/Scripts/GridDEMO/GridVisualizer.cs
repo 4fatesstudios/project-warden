@@ -83,6 +83,10 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         private GameObject CreateDefaultCellPrefab()
         {
             GameObject prefab = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            
+            // Move the prefab off-screen to keep it out of view
+            prefab.transform.position = new Vector3(1000f, -1000f, 1000f);
+            
             prefab.transform.localScale = new Vector3(gridManager.cellSize * 0.95f, 0.05f, gridManager.cellSize * 0.95f);
             
             // Create material if none provided
