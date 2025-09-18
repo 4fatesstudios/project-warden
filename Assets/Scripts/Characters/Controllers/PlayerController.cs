@@ -98,7 +98,7 @@ namespace FourFatesStudios.ProjectWarden.Characters.Controllers
         #endregion
     
         private void OnEnable() {
-            // _playerInput.PlayerInputMap_EXPLORATION.Enable();
+            _playerInput.PlayerInputMap_EXPLORATION.Enable();
             // _playerInput.PlayerInputMap_COMBAT_ACTIONSELECTION.Enable();
             
             // Exploration Mapping
