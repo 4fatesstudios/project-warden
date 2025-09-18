@@ -34,7 +34,7 @@ public class AreaSpacesDatabaseEditor : UnityEditor.Editor {
 
             if (spaceData == null) continue;
 
-            if (spaceData.SpaceType == SpaceType.FreeRoom)
+            if (spaceData.SpaceType == SpaceType.Room)
                 rooms.Add(spaceData);
             else if (spaceData.SpaceType == SpaceType.Hallway)
                 hallways.Add(spaceData);

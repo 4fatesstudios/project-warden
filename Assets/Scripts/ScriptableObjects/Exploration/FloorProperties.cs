@@ -60,7 +60,7 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Exploration
                     };
                 }
                 set {
-                    if (spaceType == SpaceType.FreeRoom) maxInstances = Mathf.Max(0, value);
+                    if (spaceType == SpaceType.Room) maxInstances = Mathf.Max(0, value);
                 }
             }
 
@@ -76,7 +76,7 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Exploration
         [System.Serializable]
         public class FreeRoomProperties : SpacePlacementProperties {
             public FreeRoomProperties() {
-                spaceType = SpaceType.FreeRoom;
+                spaceType = SpaceType.Room;
             }
         }
 

@@ -15,8 +15,8 @@ MonoBehaviour:
   id: 316687c8-6c86-4c3e-ae32-387daecbe3fe
   floorNumber: 1
   area: 0
-  minimumFreeRooms: 18
-  maximumFreeRooms: 25
+  minimumFreeRooms: 15
+  maximumFreeRooms: 26
   maxAttemptsPerRoom: 4
   storyRooms: []
   freeRooms:
@@ -24,17 +24,17 @@ MonoBehaviour:
     spaceData: {fileID: 11400000, guid: fa276a57c826c824ba2889b91c602c87, type: 2}
     enabled: 1
     maxInstances: 0
-    minimumDepthFromStartingRoom: 0
+    minimumDepthFromStartingRoom: 3
   - spaceType: 0
     spaceData: {fileID: 11400000, guid: de382995fa655214d9fdd6464cf30034, type: 2}
     enabled: 1
-    maxInstances: 0
+    maxInstances: 4
     minimumDepthFromStartingRoom: 0
   - spaceType: 0
     spaceData: {fileID: 11400000, guid: 52830f23a307a0949b144265d52566a9, type: 2}
     enabled: 1
-    maxInstances: 0
-    minimumDepthFromStartingRoom: 0
+    maxInstances: 1
+    minimumDepthFromStartingRoom: 3
   - spaceType: 0
     spaceData: {fileID: 11400000, guid: a589b97b724b5c443b28d0c488723d37, type: 2}
     enabled: 1
@@ -47,12 +47,12 @@ MonoBehaviour:
     minimumDepthFromStartingRoom: 0
   - spaceType: 0
     spaceData: {fileID: 11400000, guid: 45978db0b25752747bac1c296e795f2a, type: 2}
-    enabled: 1
+    enabled: 0
     maxInstances: 0
     minimumDepthFromStartingRoom: 0
   - spaceType: 0
     spaceData: {fileID: 11400000, guid: 047df98dbfcbaba4b9efee46a0cd7ed4, type: 2}
-    enabled: 1
+    enabled: 0
     maxInstances: 0
     minimumDepthFromStartingRoom: 0
   - spaceType: 0
@@ -77,7 +77,7 @@ MonoBehaviour:
     minimumDepthFromStartingRoom: 0
   - spaceType: 0
     spaceData: {fileID: 11400000, guid: a37d4b16854707846a6ef7c11f862577, type: 2}
-    enabled: 1
+    enabled: 0
     maxInstances: 0
     minimumDepthFromStartingRoom: 0
   - spaceType: 0
@@ -118,12 +118,12 @@ MonoBehaviour:
     minimumDepthFromStartingRoom: 0
   - spaceType: 1
     spaceData: {fileID: 11400000, guid: 9a78d533e509e6e429b2863fa27cdcd3, type: 2}
-    enabled: 1
+    enabled: 0
     maxInstances: 0
     minimumDepthFromStartingRoom: 0
   - spaceType: 1
     spaceData: {fileID: 11400000, guid: f21e8592daa80404fa48a592ffea19b5, type: 2}
-    enabled: 1
+    enabled: 0
     maxInstances: 0
     minimumDepthFromStartingRoom: 0
   - spaceType: 1
@@ -148,5 +148,5 @@ MonoBehaviour:
     minimumDepthFromStartingRoom: 0
   startingRoom: {fileID: 11400000, guid: da186a916b0e83e498352a17a0982e01, type: 2}
   seedRNG:
-    randomSeed: 821330102
+    randomSeed: 4523234
   globalAreasDatabase: {fileID: 11400000, guid: 8ae72178073f07546b3c4e99441a3445, type: 2}
