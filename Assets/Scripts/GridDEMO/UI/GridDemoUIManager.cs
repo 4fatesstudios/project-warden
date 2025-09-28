@@ -1,5 +1,7 @@
 using UnityEngine;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace FourFatesStudios.ProjectWarden.GridDemo.UI
 {
@@ -16,6 +18,8 @@ namespace FourFatesStudios.ProjectWarden.GridDemo.UI
         [Header("Auto-Setup")]
         [SerializeField] private bool autoFindComponents = true;
         [SerializeField] private bool createUIOnStart = true;
+        [SerializeField] private bool autoLoadIngredients = true;
+        [SerializeField] private bool debugMode = true;
         
         private GridGameManager gridManager;
         
@@ -33,19 +37,132 @@ namespace FourFatesStudios.ProjectWarden.GridDemo.UI
             
             if (createUIOnStart && leftPanel != null)
             {
+                // Add a small delay to ensure GridGameManager is fully initialized
+                StartCoroutine(DelayedUISetup());
+            }
+        }
+        
+        private System.Collections.IEnumerator DelayedUISetup()
+        {
+            yield return new WaitForEndOfFrame();
+            
+            if (debugMode)
+            {
+                Debug.Log("🎨 GridDemoUIManager: Starting delayed UI setup...");
+            }
+            
+            // Ensure ingredients are loaded before creating UI
+            if (autoLoadIngredients && gridManager != null && (gridManager.availableIngredients == null || gridManager.availableIngredients.Count == 0))
+            {
+                LoadDefaultIngredients();
+            }
+            
+            if (leftPanel != null)
+            {
+                if (debugMode)
+                {
+                    Debug.Log("🎨 GridDemoUIManager: Calling leftPanel.DesignCompactUI()...");
+                }
                 leftPanel.DesignCompactUI();
+            }
+            else
+            {
+                Debug.LogError("❌ GridDemoUIManager: leftPanel is null! Cannot create UI.");
+            }
+            
+            if (debugMode)
+            {
+                Debug.Log("✅ GridDemoUIManager: Delayed UI setup completed");
+                LogSetupStatus();
+            }
+        }
+        
+        private void LoadDefaultIngredients()
+        {
+            if (debugMode) Debug.Log("📦 GridDemoUIManager: Loading ingredients from Resources...");
+            
+            var ingredients = Resources.LoadAll<Ingredient>("Items/Ingredients");
+            
+            if (ingredients.Length == 0)
+            {
+                ingredients = Resources.LoadAll<Ingredient>("Ingredients");
+            }
+            
+            if (ingredients.Length == 0)
+            {
+                ingredients = Resources.LoadAll<Ingredient>("");
+            }
+            
+            if (ingredients.Length > 0)
+            {
+                if (gridManager.availableIngredients == null)
+                {
+                    gridManager.availableIngredients = new List<Ingredient>();
+                }
+                gridManager.availableIngredients.Clear();
+                gridManager.availableIngredients.AddRange(ingredients);
+                
+                if (debugMode)
+                {
+                    Debug.Log($"✅ GridDemoUIManager loaded {ingredients.Length} ingredients");
+                }
+            }
+            else if (debugMode)
+            {
+                Debug.LogWarning("⚠️ GridDemoUIManager: No ingredients found in Resources!");
+            }
+        }
+        
+        private void LogSetupStatus()
+        {
+            Debug.Log("📊 === GridDemoUIManager Setup Status ===");
+            Debug.Log($"Grid Manager: {gridManager != null}");
+            Debug.Log($"Left Panel: {leftPanel != null}");
+            Debug.Log($"Right Panel: {rightPanel != null}");
+            Debug.Log($"Ingredients Count: {gridManager?.availableIngredients?.Count ?? 0}");
+            
+            GameObject sidebar = GameObject.Find("Compact Sidebar");
+            Debug.Log($"Compact Sidebar exists: {sidebar != null}");
+            Debug.Log("📊 === End Setup Status ===");
+        }
+        
+        [ContextMenu("Refresh UI")]
+        public void RefreshUI()
+        {
+            if (autoLoadIngredients && gridManager != null)
+            {
+                LoadDefaultIngredients();
+            }
+            
+            if (leftPanel != null)
+            {
+                leftPanel.RefreshUI();
             }
         }
         
         private void AutoFindComponents()
         {
+            if (debugMode)
+            {
+                Debug.Log("🔧 GridDemoUIManager: Auto-finding components...");
+            }
+            
             // Find grid manager
             gridManager = FindFirstObjectByType<GridGameManager>();
             
             // Find UI components if not assigned
             if (leftPanel == null)
             {
-                leftPanel = GetComponentInChildren<CompactUIDesigner>();
+                leftPanel = GetComponent<CompactUIDesigner>();
+                if (leftPanel == null)
+                {
+                    leftPanel = GetComponentInChildren<CompactUIDesigner>();
+                }
+            }
+            
+            if (debugMode)
+            {
+                Debug.Log($"🔧 AutoFind Results: GridManager={gridManager != null}, LeftPanel={leftPanel != null}");
             }
             
             if (rightPanel == null)
@@ -192,15 +309,6 @@ namespace FourFatesStudios.ProjectWarden.GridDemo.UI
         }
         
         // Public methods for external access
-        public void RefreshUI()
-        {
-            if (leftPanel != null)
-            {
-                leftPanel.RefreshIngredientButtons();
-                leftPanel.UpdateGridInfo();
-            }
-        }
-        
         public void ShowIngredientTooltip(Ingredient ingredient, Vector2 screenPosition)
         {
             if (rightPanel != null)

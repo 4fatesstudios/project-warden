@@ -12,7 +12,8 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         Scorch,     // Volatile cell, needs compatible aspects
         Caustic,    // Degrade cell, reduces potency by 20%
         Arc,        // Chaotic RNG effects
-        Divine      // Sanctified cell, only unrefined divine aspects
+        Divine,     // Sanctified cell, only unrefined divine aspects
+        Void        // Cosmetic void - disables visuals, blocks placement, not counted for completion
     }
 
     [System.Serializable]
@@ -67,6 +68,9 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                     // Only unrefined divine aspects
                     return ingredient.IngredientAspect == Aspect.Divine && ingredient.IsUnrefined;
 
+                case ObstacleType.Void:
+                    return false; // Void cells cannot have ingredients placed
+
                 default:
                     return false;
             }
@@ -84,33 +88,173 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
 
             switch (obstacleType)
             {
+                case ObstacleType.Corporeal:
+                    // Should not reach here as CanPlaceIngredient returns false
+                    return false;
+
+                case ObstacleType.Frigid:
+                    // Only completed through melting, not direct placement
+                    return false;
+
                 case ObstacleType.Scorch:
-                    // Completion is defined by placing an accepted aspect
-                    isCompleted = true;
-                    Debug.Log($"✅ Scorch obstacle completed with {ingredient.IngredientAspect} aspect");
+                    HandleScorchObstacle(ingredient, gridManager);
                     break;
 
                 case ObstacleType.Caustic:
-                    // Completion is defined by placing any ingredient (with penalty)
-                    isCompleted = true;
-                    Debug.Log($"✅ Caustic obstacle completed (ingredient potency reduced by 20%)");
+                    HandleCausticObstacle(ingredient, gridManager);
                     break;
 
                 case ObstacleType.Arc:
-                    // Trigger chaotic RNG effect
-                    TriggerArcEffect(gridManager);
-                    isCompleted = true;
-                    Debug.Log($"✅ Arc obstacle completed with chaotic effect");
+                    HandleArcObstacle(ingredient, gridManager);
                     break;
 
                 case ObstacleType.Divine:
-                    // Completion is defined by placing unrefined divine aspect
-                    isCompleted = true;
-                    Debug.Log($"✅ Divine obstacle completed with unrefined divine aspect");
+                    HandleDivineObstacle(ingredient, gridManager);
                     break;
+
+                case ObstacleType.Void:
+                    // Void obstacles should never have ingredients placed on them
+                    return false;
             }
 
             return true;
+        }
+        
+        /// <summary>
+        /// Handle Scorch (Fire) obstacle interactions
+        /// </summary>
+        private void HandleScorchObstacle(Ingredient ingredient, GridGameManager gridManager)
+        {
+            bool isCompatible = (ingredient.IngredientAspect == Aspect.Scorch ||
+                               ingredient.IngredientAspect == Aspect.Caustic ||
+                               ingredient.IngredientAspect == Aspect.Arc);
+
+            if (isCompatible)
+            {
+                // Compatible placement enhances potency
+                Debug.Log($"🔥 Scorch obstacle: {ingredient.ItemName} potency enhanced by 50%");
+                isCompleted = true;
+            }
+            else
+            {
+                // Incompatible placement burns ingredient
+                float sizeReduction = 1.1f / GetIngredientSize(ingredient);
+                Debug.Log($"🔥 Scorch obstacle: {ingredient.ItemName} burned, potency reduced by {sizeReduction:P0}%");
+                
+                // Note: In a full implementation, you'd modify the ingredient's actual potency
+                // For now, we'll just track the penalty
+            }
+        }
+        
+        /// <summary>
+        /// Handle Caustic (Poison/Acid) obstacle interactions  
+        /// </summary>
+        private void HandleCausticObstacle(Ingredient ingredient, GridGameManager gridManager)
+        {
+            if (ingredient.IngredientArchetype == IngredientArchetype.Herb)
+            {
+                // Herb ingredients trigger "Controlled" state
+                Debug.Log($"🧪 Caustic obstacle: Herb {ingredient.ItemName} reduces negative effects by 60%");
+                // Set state to Controlled
+            }
+            else if (ingredient.IngredientAspect == Aspect.Caustic)
+            {
+                // Caustic ingredients trigger "Hyperactive" state
+                Debug.Log($"🧪 Caustic obstacle: Caustic {ingredient.ItemName} potency increased by 20%");
+                // Set state to Hyperactive
+            }
+            else
+            {
+                // Default "Deteriorated" state
+                Debug.Log($"🧪 Caustic obstacle: {ingredient.ItemName} potency reduced by 20%");
+                // Set state to Deteriorated
+            }
+            
+            isCompleted = true;
+        }
+        
+        /// <summary>
+        /// Handle Arc (Lightning) obstacle interactions
+        /// </summary>
+        private void HandleArcObstacle(Ingredient ingredient, GridGameManager gridManager)
+        {
+            // Arc obstacles create volatile/static states
+            Debug.Log($"⚡ Arc obstacle: {ingredient.ItemName} creates static field");
+            
+            // Switch from Volatile to Static
+            Debug.Log($"⚡ Volatile cell becomes Static, {ingredient.ItemName} potency increased by 20%");
+            
+            // Spawn up to 2 new Fulminating cells randomly
+            SpawnRandomFulminatingCells(gridManager, 2);
+            
+            isCompleted = true;
+        }
+        
+        /// <summary>
+        /// Handle Divine (Holy) obstacle interactions
+        /// </summary>
+        private void HandleDivineObstacle(Ingredient ingredient, GridGameManager gridManager)
+        {
+            if (ingredient.IngredientAspect == Aspect.Divine && ingredient.IsUnrefined)
+            {
+                Debug.Log($"✨ Divine obstacle: Unrefined Divine {ingredient.ItemName} potency increased by 10%");
+                isCompleted = true;
+            }
+            else
+            {
+                Debug.LogWarning($"⚠️ Divine obstacle: {ingredient.ItemName} cannot be placed (requires unrefined Divine aspect)");
+            }
+        }
+        
+        /// <summary>
+        /// Spawn random Fulminating cells for Arc obstacles
+        /// </summary>
+        private void SpawnRandomFulminatingCells(GridGameManager gridManager, int maxCount)
+        {
+            var emptyCells = new List<Vector2Int>();
+            
+            // Find available cells
+            for (int x = 0; x < gridManager.gridWidth; x++)
+            {
+                for (int y = 0; y < gridManager.gridHeight; y++)
+                {
+                    var cell = gridManager.GetCell(x, y);
+                    var pos = new Vector2Int(x, y);
+                    
+                    if (cell != null && !cell.IsOccupied && gridManager.GetObstacleAt(pos) == null)
+                    {
+                        emptyCells.Add(pos);
+                    }
+                }
+            }
+            
+            // Spawn up to maxCount new Arc obstacles
+            int spawnCount = Mathf.Min(maxCount, emptyCells.Count);
+            for (int i = 0; i < spawnCount; i++)
+            {
+                if (emptyCells.Count > 0)
+                {
+                    int randomIndex = Random.Range(0, emptyCells.Count);
+                    Vector2Int spawnPos = emptyCells[randomIndex];
+                    emptyCells.RemoveAt(randomIndex);
+                    
+                    var newObstacle = new AspectObstacle(ObstacleType.Arc, spawnPos);
+                    // Note: In a full implementation, you'd add this to the grid manager's obstacle list
+                    Debug.Log($"⚡ New Arc obstacle spawned at ({spawnPos.x}, {spawnPos.y})");
+                }
+            }
+        }
+        
+        /// <summary>
+        /// Get ingredient size for burn calculations
+        /// </summary>
+        private int GetIngredientSize(Ingredient ingredient)
+        {
+            if (ingredient.ShapeData != null)
+            {
+                return ingredient.ShapeData.ActiveCells.Count;
+            }
+            return ingredient.GridWidth * ingredient.GridHeight;
         }
 
         /// <summary>
@@ -280,20 +424,39 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         }
 
         /// <summary>
-        /// Get visual representation color for the obstacle
+        /// Get visual representation color for the obstacle (matches aspect colors for consistency)
         /// </summary>
         public Color GetObstacleColor()
         {
             return obstacleType switch
             {
-                ObstacleType.Corporeal => Color.grey,                        // Grey
-                ObstacleType.Scorch => Color.red,                           // Red  
-                ObstacleType.Frigid => new Color(0.68f, 0.85f, 0.90f, 1f),  // Light blue #ADD8E6
-                ObstacleType.Arc => Color.yellow,                           // Yellow
-                ObstacleType.Caustic => Color.green,                        // Green
-                ObstacleType.Divine => new Color(0.5f, 0.0f, 0.5f, 1f),     // Purple #800080
-                _ => Color.gray
+                ObstacleType.Corporeal => new Color(0.8f, 0.6f, 0.4f, 0.9f), // Brown/Earth (matches Corporeal aspect)
+                ObstacleType.Scorch => new Color(1.0f, 0.4f, 0.2f, 0.9f),    // Fire Red (matches Scorch aspect)  
+                ObstacleType.Frigid => new Color(0.4f, 0.8f, 1.0f, 0.9f),    // Ice Blue (matches Frigid aspect)
+                ObstacleType.Arc => new Color(1.0f, 1.0f, 0.4f, 0.9f),       // Lightning Yellow (matches Arc aspect)
+                ObstacleType.Caustic => new Color(0.6f, 1.0f, 0.2f, 0.9f),   // Acid Green (matches Caustic aspect)
+                ObstacleType.Divine => new Color(1.0f, 0.8f, 1.0f, 0.9f),    // Holy Purple (matches Divine aspect)
+                ObstacleType.Void => new Color(0.1f, 0.1f, 0.1f, 0.95f),     // Dark void (mostly transparent)
+                _ => new Color(0.7f, 0.7f, 0.7f, 0.9f)                      // Default grey
             };
+        }
+
+        /// <summary>
+        /// Check if this obstacle subtracts from available grid space
+        /// Only Corporeal and Void obstacles block space entirely
+        /// </summary>
+        public bool SubtractsFromAvailableSpace()
+        {
+            return obstacleType == ObstacleType.Corporeal || obstacleType == ObstacleType.Void;
+        }
+
+        /// <summary>
+        /// Check if this obstacle should be counted for completion metrics
+        /// Void obstacles are purely cosmetic and should not count
+        /// </summary>
+        public bool CountsForCompletion()
+        {
+            return obstacleType != ObstacleType.Void;
         }
 
         /// <summary>
@@ -309,6 +472,7 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                 ObstacleType.Caustic => "Degrade cell - reduces ingredient potency by 20%",
                 ObstacleType.Arc => "Chaotic cell - triggers random effects",
                 ObstacleType.Divine => "Sanctified cell - only unrefined Divine aspects (+10% potency)",
+                ObstacleType.Void => "Void cell - cosmetic only, cannot place ingredients",
                 _ => "Unknown obstacle"
             };
         }

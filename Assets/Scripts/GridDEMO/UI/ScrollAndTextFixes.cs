@@ -49,22 +49,37 @@ namespace FourFatesStudios.ProjectWarden.GridDemo.UI
         {
             Debug.Log("FixedScrollAndTextFixes: Fixing scroll container visibility...");
             
-            // Ensure only one compact menu exists by removing ALL existing instances
-            EnsureOnlyOneCompactMenu();
+            // Let AutomaticSidebarManager handle all sidebar creation and management (if it exists)
+            bool foundAutomaticManager = false;
             
-            CompactUIDesigner compactDesigner = FindFirstObjectByType<CompactUIDesigner>();
-            if (compactDesigner == null)
+            var gridGameManager = FindFirstObjectByType<FourFatesStudios.ProjectWarden.GridDemo.GridGameManager>();
+            if (gridGameManager != null)
             {
-                GameObject designerObj = new GameObject("Compact UI Designer");
-                compactDesigner = designerObj.AddComponent<CompactUIDesigner>();
+                var components = gridGameManager.GetComponents<MonoBehaviour>();
+                foreach (var component in components)
+                {
+                    if (component.GetType().Name == "AutomaticSidebarManager")
+                    {
+                        foundAutomaticManager = true;
+                        break;
+                    }
+                }
             }
             
-            compactDesigner.DesignCompactUI();
-            Debug.Log("✅ Scroll container fixed!");
+            if (foundAutomaticManager)
+            {
+                Debug.Log("✅ AutomaticSidebarManager found - it will handle all UI automatically");
+            }
+            else
+            {
+                Debug.Log("📝 AutomaticSidebarManager will be added by GridGameManager when it starts");
+            }
+            
+            Debug.Log("✅ Scroll container fixes completed - UI management delegated to AutomaticSidebarManager!");
         }
         
         /// <summary>
-        /// Ensures only one compact menu exists in the scene by removing all duplicates
+        /// Ensures only one compact menu exists in the scene by removing ACTUAL duplicates only
         /// </summary>
         private void EnsureOnlyOneCompactMenu()
         {
@@ -80,35 +95,46 @@ namespace FourFatesStudios.ProjectWarden.GridDemo.UI
             
             int removedCount = 0;
             
-            // Remove all compact sidebar GameObjects
-            foreach (var compactObj in allCompactObjects)
+            // Only remove compact sidebar GameObjects if there are MORE THAN ONE
+            if (allCompactObjects.Length > 1)
             {
-                if (compactObj != null)
+                Debug.Log($"FixedScrollAndTextFixes: Found {allCompactObjects.Length} compact sidebar objects, removing duplicates...");
+                
+                // Keep the first one, remove the rest
+                for (int i = 1; i < allCompactObjects.Length; i++)
                 {
-                    Debug.Log($"FixedScrollAndTextFixes: Removing duplicate compact menu: {compactObj.name}");
-                    DestroyImmediate(compactObj);
-                    removedCount++;
+                    if (allCompactObjects[i] != null)
+                    {
+                        Debug.Log($"FixedScrollAndTextFixes: Removing duplicate compact menu: {allCompactObjects[i].name}");
+                        DestroyImmediate(allCompactObjects[i]);
+                        removedCount++;
+                    }
                 }
             }
             
             // Keep only the first CompactUIDesigner, remove the rest
-            for (int i = 1; i < allDesigners.Length; i++)
+            if (allDesigners.Length > 1)
             {
-                if (allDesigners[i] != null)
+                Debug.Log($"FixedScrollAndTextFixes: Found {allDesigners.Length} CompactUIDesigner components, removing duplicates...");
+                
+                for (int i = 1; i < allDesigners.Length; i++)
                 {
-                    Debug.Log($"FixedScrollAndTextFixes: Removing duplicate CompactUIDesigner: {allDesigners[i].name}");
-                    DestroyImmediate(allDesigners[i].gameObject);
-                    removedCount++;
+                    if (allDesigners[i] != null)
+                    {
+                        Debug.Log($"FixedScrollAndTextFixes: Removing duplicate CompactUIDesigner: {allDesigners[i].name}");
+                        DestroyImmediate(allDesigners[i].gameObject);
+                        removedCount++;
+                    }
                 }
             }
             
             if (removedCount > 0)
             {
-                Debug.Log($"✅ Removed {removedCount} duplicate compact menu objects");
+                Debug.Log($"✅ Removed {removedCount} actual duplicate compact menu objects");
             }
             else
             {
-                Debug.Log("✅ No duplicate compact menus found");
+                Debug.Log("✅ No duplicate compact menus found - single sidebar preserved");
             }
         }
         

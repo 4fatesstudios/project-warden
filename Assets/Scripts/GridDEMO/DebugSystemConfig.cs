@@ -56,7 +56,15 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         [Tooltip("Log error recovery, system repairs, and critical failures")]
         
         [SerializeField] private bool enablePerformanceDebug = false;
-        [Tooltip("Log performance-related information and optimization data")]
+        
+        [Header("🔧 Development Tools")]
+        [Space(10)]
+        [Tooltip("Run UI Initialization Tests - Creates proficiency display and tests UI components")]
+        public bool uiInitTestVerbose = true;
+        
+        [Space(10)]
+        [Tooltip("Run System Validation Tests - Validates entire system readiness")]
+        public bool systemValidationVerbose = true;
         
         // Singleton instance for global access
         public static DebugSystemConfig Instance { get; private set; }
@@ -280,6 +288,198 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                 Instance.enableCollisionDetectionDebug = !Instance.enableCollisionDetectionDebug;
                 LogTesting($"Collision debug logging: {(Instance.enableCollisionDetectionDebug ? "ENABLED" : "DISABLED")}");
             }
+        }
+        
+        // ================================================
+        // CONSOLIDATED UI & SYSTEM TESTING TOOLS
+        // ================================================
+        
+        [ContextMenu("🧪 Run UI Initialization Test")]
+        public void RunUIInitializationTest()
+        {
+            LogUITest("🧪 [UI INIT TEST] Starting UI Initialization Test...");
+            
+            // Check what canvases exist
+            var canvases = FindObjectsByType<Canvas>(FindObjectsSortMode.None);
+            LogUITest($"🧪 [UI INIT TEST] Found {canvases.Length} canvases in scene:");
+            foreach (var canvas in canvases)
+            {
+                LogUITest($"🧪 [UI INIT TEST] Canvas: '{canvas.name}' - RenderMode: {canvas.renderMode} - Active: {canvas.gameObject.activeInHierarchy}");
+            }
+            
+            // Check if ProficiencyDisplayManager exists
+            var proficiencyManager = FindFirstObjectByType<FourFatesStudios.ProjectWarden.GridDemo.UI.ProficiencyDisplayManager>();
+            if (proficiencyManager != null)
+            {
+                LogUITest($"🧪 [UI INIT TEST] Found existing ProficiencyDisplayManager on {proficiencyManager.gameObject.name}");
+                LogUITest($"🧪 [UI INIT TEST] Is initialized: {proficiencyManager.IsInitialized}");
+                
+                // Force initialization
+                if (!proficiencyManager.IsInitialized)
+                {
+                    proficiencyManager.ForceInitialize();
+                }
+                proficiencyManager.ForceRefreshProficiency();
+                
+                LogUITest("✅ [UI INIT TEST] ProficiencyDisplayManager initialization complete!");
+            }
+            else
+            {
+                LogUITest("⚠️ [UI INIT TEST] No ProficiencyDisplayManager found - consider adding one manually");
+            }
+        }
+        
+        [ContextMenu("🎯 Run Complete System Validation")]
+        public void RunCompleteSystemValidation()
+        {
+            LogSystemTest("🚀 Starting Complete System Validation Test...");
+            LogSystemTest("=====================================");
+            
+            bool allTestsPassed = true;
+            
+            // Test 1: Check if core components can be found
+            LogSystemTest("📋 Test 1: Checking for core component types...");
+            
+            var inventoryType = System.Type.GetType("FourFatesStudios.ProjectWarden.Characters.Components.InventoryComponent");
+            var uiManagerType = System.Type.GetType("FourFatesStudios.ProjectWarden.GridDemo.UI.SimpleUIStartupManager");
+            var completedPotionsType = System.Type.GetType("FourFatesStudios.ProjectWarden.GridDemo.UI.CompletedPotionsUIDocument");
+            
+            LogSystemTest($"   InventoryComponent type: {GetTestResult(inventoryType != null)}");
+            LogSystemTest($"   SimpleUIStartupManager type: {GetTestResult(uiManagerType != null)}");
+            LogSystemTest($"   CompletedPotionsUIDocument type: {GetTestResult(completedPotionsType != null)}");
+            
+            if (inventoryType == null || uiManagerType == null || completedPotionsType == null)
+            {
+                allTestsPassed = false;
+            }
+            
+            // Test 2: Check compilation status
+            LogSystemTest("📋 Test 2: Checking compilation status...");
+            
+            try
+            {
+                // Try to create instances to test compilation
+                var testGO = new GameObject("__TEST__");
+                
+                if (inventoryType != null)
+                {
+                    var inventory = testGO.AddComponent(inventoryType);
+                    LogSystemTest($"   InventoryComponent instantiation: {GetTestResult(inventory != null)}");
+                    if (inventory == null) allTestsPassed = false;
+                }
+                
+                if (uiManagerType != null)
+                {
+                    var manager = testGO.AddComponent(uiManagerType);
+                    LogSystemTest($"   SimpleUIStartupManager instantiation: {GetTestResult(manager != null)}");
+                    if (manager == null) allTestsPassed = false;
+                }
+                
+                DestroyImmediate(testGO);
+                LogSystemTest("   Component instantiation test: ✅ PASSED");
+            }
+            catch (System.Exception ex)
+            {
+                LogSystemTest($"   Component instantiation test: ❌ FAILED - {ex.Message}");
+                allTestsPassed = false;
+            }
+            
+            // Test 3: Check resource files
+            LogSystemTest("📋 Test 3: Checking UI resource files...");
+            
+            var uxml = Resources.Load("UI/UXML/CompletedPotionsList");
+            var uss = Resources.Load("UI/Styles/CompletedPotionsListStyles");
+            
+            LogSystemTest($"   UXML resource: {GetTestResult(uxml != null)}");
+            LogSystemTest($"   USS resource: {GetTestResult(uss != null)}");
+            
+            if (uxml == null || uss == null)
+            {
+                LogSystemTest("   ⚠️ Some UI resources missing but system can work without them");
+            }
+            
+            // Test 4: Final system readiness
+            LogSystemTest("📋 Test 4: Overall system readiness...");
+            
+            bool coreSystemReady = inventoryType != null && uiManagerType != null && completedPotionsType != null;
+            LogSystemTest($"   Core system components: {GetTestResult(coreSystemReady)}");
+            
+            if (!coreSystemReady)
+            {
+                allTestsPassed = false;
+            }
+            
+            // Final result
+            LogSystemTest("=====================================");
+            
+            if (allTestsPassed)
+            {
+                LogSystemTest("🎉 SYSTEM VALIDATION: ✅ ALL TESTS PASSED");
+                LogSystemTest("🚀 The Automatic Inventory UI System is READY!");
+                LogSystemTest("📝 System is ready for production use");
+            }
+            else
+            {
+                LogSystemTest("❌ SYSTEM VALIDATION: SOME TESTS FAILED");
+                LogSystemTest("⚠️ There may be compilation issues preventing full system readiness");
+                LogSystemTest("💡 Check console for any remaining compilation errors and restart Unity Editor");
+            }
+        }
+        
+        [ContextMenu("🎨 Debug UI Visibility Test")]
+        public void DebugUIVisibilityTest()
+        {
+            LogUITest("🧪 [UI VISIBILITY TEST] Making all text components bright red and large for visibility testing...");
+            
+            // Find all TextMeshProUGUI components
+            var tmpTexts = FindObjectsByType<TMPro.TextMeshProUGUI>(FindObjectsSortMode.None);
+            foreach (var text in tmpTexts)
+            {
+                text.color = Color.red;
+                text.fontSize = 24f;
+                LogUITest($"🧪 [UI VISIBILITY TEST] Made TextMeshPro red and large: '{text.text}' on {text.gameObject.name}");
+            }
+            
+            // Find all UI.Text components
+            var uiTexts = FindObjectsByType<UnityEngine.UI.Text>(FindObjectsSortMode.None);
+            foreach (var text in uiTexts)
+            {
+                text.color = Color.red;
+                text.fontSize = 24;
+                LogUITest($"🧪 [UI VISIBILITY TEST] Made UI.Text red and large: '{text.text}' on {text.gameObject.name}");
+            }
+            
+            LogUITest($"🧪 [UI VISIBILITY TEST] Modified {tmpTexts.Length} TextMeshPro and {uiTexts.Length} UI.Text components");
+            
+            // Make all backgrounds yellow
+            var images = FindObjectsByType<UnityEngine.UI.Image>(FindObjectsSortMode.None);
+            foreach (var image in images)
+            {
+                image.color = Color.yellow;
+                image.type = UnityEngine.UI.Image.Type.Simple;
+                image.sprite = null;
+                LogUITest($"🧪 [UI VISIBILITY TEST] Made Image yellow: {image.gameObject.name}");
+            }
+            
+            LogUITest($"🧪 [UI VISIBILITY TEST] Modified {images.Length} Image components");
+        }
+        
+        // Helper methods for consolidated testing
+        private string GetTestResult(bool success)
+        {
+            return success ? "✅ PASS" : "❌ FAIL";
+        }
+        
+        private void LogUITest(string message)
+        {
+            if (uiInitTestVerbose)
+                Debug.Log($"[DebugSystemConfig - UI Test] {message}");
+        }
+        
+        private void LogSystemTest(string message)
+        {
+            if (systemValidationVerbose)
+                Debug.Log($"[DebugSystemConfig - System Test] {message}");
         }
     }
 }

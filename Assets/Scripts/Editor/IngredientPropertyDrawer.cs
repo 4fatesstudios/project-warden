@@ -186,64 +186,11 @@ namespace FourFatesStudios.ProjectWarden.Editor
             {
                 EditorGUILayout.BeginVertical("Box");
                 
-                // Component preview if this is an AlchemyComponent
-                if (ingredient is AlchemyComponent component)
-                {
-                    DrawComponentPreview(component);
-                }
-                
                 // Usage preview
                 DrawUsagePreview(ingredient);
                 
                 EditorGUILayout.EndVertical();
             }
-        }
-
-        private void DrawComponentPreview(AlchemyComponent component)
-        {
-            EditorGUILayout.LabelField("Component Information", EditorStyles.boldLabel);
-            
-            EditorGUILayout.BeginHorizontal();
-            
-            if (component.BaseIngredient1 != null)
-            {
-                DrawIngredientMini(component.BaseIngredient1, "Base 1");
-            }
-            
-            EditorGUILayout.LabelField("+", GUILayout.Width(20));
-            
-            if (component.BaseIngredient2 != null)
-            {
-                DrawIngredientMini(component.BaseIngredient2, "Base 2");
-            }
-            
-            EditorGUILayout.LabelField("=", GUILayout.Width(20));
-            
-            DrawIngredientMini(component, "Result");
-            
-            EditorGUILayout.EndHorizontal();
-            
-            EditorGUILayout.LabelField($"Calculated Potency: {component.Potency}");
-            EditorGUILayout.LabelField($"Calculated Size: {component.GridWidth}x{component.GridHeight}");
-        }
-
-        private void DrawIngredientMini(Ingredient ingredient, string label)
-        {
-            EditorGUILayout.BeginVertical("Box", GUILayout.Width(80));
-            EditorGUILayout.LabelField(label, EditorStyles.centeredGreyMiniLabel);
-            
-            if (ingredient.ItemIcon != null)
-            {
-                GUILayout.Label(ingredient.ItemIcon.texture, GUILayout.Width(60), GUILayout.Height(60));
-            }
-            else
-            {
-                GUILayout.Box("No Icon", GUILayout.Width(60), GUILayout.Height(60));
-            }
-            
-            EditorGUILayout.LabelField(ingredient.ItemName, EditorStyles.centeredGreyMiniLabel);
-            EditorGUILayout.LabelField($"P:{ingredient.Potency}", EditorStyles.centeredGreyMiniLabel);
-            EditorGUILayout.EndVertical();
         }
 
         private void DrawUsagePreview(Ingredient ingredient)

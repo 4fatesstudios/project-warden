@@ -41,6 +41,7 @@ namespace FourFatesStudios.ProjectWarden.GridDemo.UI
         // References
         private GridGameManager gridManager;
         private ImprovedClickDetector clickDetector;
+        private ProficiencyDisplayManager proficiencyManager;
         
         public static RightPanelManager Instance { get; private set; }
         
@@ -66,6 +67,14 @@ namespace FourFatesStudios.ProjectWarden.GridDemo.UI
             }
             
             gridManager = FindFirstObjectByType<GridGameManager>();
+            proficiencyManager = FindFirstObjectByType<ProficiencyDisplayManager>();
+            
+            // If proficiency manager doesn't exist, create it
+            if (proficiencyManager == null)
+            {
+                GameObject proficiencyObj = new GameObject("Proficiency Display Manager");
+                proficiencyManager = proficiencyObj.AddComponent<ProficiencyDisplayManager>();
+            }
         }
         
         private void Update()
@@ -479,11 +488,11 @@ namespace FourFatesStudios.ProjectWarden.GridDemo.UI
                 case Aspect.Arc: 
                     return new Color(1f, 1f, 0.3f, 1f);
                 case Aspect.Caustic: 
-                    return new Color(0.8f, 0.5f, 0.2f, 1f);
+                    return new Color(0.6f, 1.0f, 0.2f, 1f); // Acid Green
                 case Aspect.Corporeal: 
                     return new Color(0.7f, 0.7f, 0.7f, 1f);
                 case Aspect.Divine: 
-                    return new Color(1f, 1f, 1f, 1f);
+                    return new Color(1f, .7f, 1f, 1f);
                 default: 
                     return Color.gray;
             }

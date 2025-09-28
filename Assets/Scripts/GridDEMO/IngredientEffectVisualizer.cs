@@ -656,7 +656,7 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                 Aspect.Scorch => Color.red,
                 Aspect.Frigid => Color.cyan,
                 Aspect.Arc => Color.yellow,
-                Aspect.Caustic => new Color(0.5f, 0.2f, 0.8f), // Purple
+                Aspect.Caustic => new Color(0.6f, 1.0f, 0.2f, 1.0f), // Acid Green
                 Aspect.Corporeal => Color.green,
                 Aspect.Divine => Color.white,
                 _ => Color.gray

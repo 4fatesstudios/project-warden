@@ -15,6 +15,7 @@ public class CraftingNavigationController : MonoBehaviour
     private GameObject craftingMenuSystem;
     private GameObject alchemyMenuUI;
     private GameObject alchemyBookUI;
+    private GameObject craftingModeSelector;
     private GameObject gridMinigameUI;
     private GameObject bulkCraftingUI;
     private GameObject refinementUI;
@@ -40,6 +41,7 @@ public class CraftingNavigationController : MonoBehaviour
         craftingMenuSystem = GameObject.Find("CraftingMenuSystem");
         alchemyMenuUI = GameObject.Find("AlchemyMenuUI");
         alchemyBookUI = GameObject.Find("AlchemyBookUI");
+        craftingModeSelector = GameObject.Find("CraftingModeSelector");
         gridMinigameUI = GameObject.Find("GridMinigameUI");
         bulkCraftingUI = GameObject.Find("BulkCraftingUI");
         refinementUI = GameObject.Find("RefinementUI");
@@ -53,6 +55,7 @@ public class CraftingNavigationController : MonoBehaviour
             LogPanelStatus("CraftingMenuSystem", craftingMenuSystem);
             LogPanelStatus("AlchemyMenuUI", alchemyMenuUI);
             LogPanelStatus("AlchemyBookUI", alchemyBookUI);
+            LogPanelStatus("CraftingModeSelector", craftingModeSelector);
             LogPanelStatus("GridMinigameUI", gridMinigameUI);
             LogPanelStatus("BulkCraftingUI", bulkCraftingUI);
             LogPanelStatus("RefinementUI", refinementUI);
@@ -103,7 +106,7 @@ public class CraftingNavigationController : MonoBehaviour
     /// </summary>
     private void HideAllPanels()
     {
-        var allPanels = new[] { craftingMenuSystem, alchemyMenuUI, alchemyBookUI, gridMinigameUI, 
+        var allPanels = new[] { craftingMenuSystem, alchemyMenuUI, alchemyBookUI, craftingModeSelector, gridMinigameUI, 
                                bulkCraftingUI, refinementUI, roastingMinigameUI, distillingMinigameUI, grindingMinigameUI };
         
         foreach (var panel in allPanels)
@@ -123,6 +126,7 @@ public class CraftingNavigationController : MonoBehaviour
             "CraftingMenuSystem" => craftingMenuSystem,
             "AlchemyMenuUI" => alchemyMenuUI,
             "AlchemyBookUI" => alchemyBookUI,
+            "CraftingModeSelector" => craftingModeSelector,
             "GridMinigameUI" => gridMinigameUI,
             "BulkCraftingUI" => bulkCraftingUI,
             "RefinementUI" => refinementUI,
@@ -156,6 +160,7 @@ public class CraftingNavigationController : MonoBehaviour
     public void ShowMainMenu() => ShowPanel("CraftingMenuSystem");
     public void ShowAlchemyMenu() => ShowPanel("AlchemyMenuUI"); // Potion Brewing Menu
     public void ShowAlchemyBook() => ShowPanel("AlchemyBookUI"); // Potion Brewing Guide
+    public void ShowCraftingModeSelector() => ShowPanel("CraftingModeSelector"); // New crafting mode selector
     public void ShowBulkCrafting() => ShowPanel("BulkCraftingUI");
     public void ShowRefinement() => ShowPanel("RefinementUI");
     public void ShowGridMinigame() => ShowPanel("GridMinigameUI");

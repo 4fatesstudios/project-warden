@@ -180,16 +180,23 @@ public class AlchemyRecipeEditor : UnityEditor.Editor // Fixed namespace conflic
 
     private void DrawHitsAndAttempts()
     {
-        var hitsProp = serializedObject.FindProperty("requiredHits");
-        var triesProp = serializedObject.FindProperty("maxAttempts");
+        // AlchemyRecipe uses different properties than the old system
+        var difficultyProp = serializedObject.FindProperty("difficulty");
+        var efficiencyProp = serializedObject.FindProperty("minimumEfficiency");
+        
+        if (difficultyProp != null)
+            EditorGUILayout.PropertyField(difficultyProp, new GUIContent("Recipe Difficulty"));
+        else
+            EditorGUILayout.HelpBox("Difficulty property not found. This may be an old recipe format.", MessageType.Warning);
+        
+        if (efficiencyProp != null)
+            EditorGUILayout.PropertyField(efficiencyProp, new GUIContent("Minimum Efficiency"));
+        else
+            EditorGUILayout.HelpBox("Minimum Efficiency property not found. This may be an old recipe format.", MessageType.Warning);
 
-        EditorGUILayout.PropertyField(hitsProp, new GUIContent("Required Hits"));
-        EditorGUILayout.PropertyField(triesProp, new GUIContent("Max Attempts"));
-
-        if (hitsProp.intValue <= 0 || triesProp.intValue <= 0 || hitsProp.intValue > triesProp.intValue)
-        {
-            EditorGUILayout.HelpBox("Required Hits must be > 0 and <= Max Attempts.", MessageType.Error);
-        }
+        var isKeyRecipeProp = serializedObject.FindProperty("isKeyRecipe");
+        if (isKeyRecipeProp != null)
+            EditorGUILayout.PropertyField(isKeyRecipeProp, new GUIContent("Is Key Recipe"));
     }
 
     private void SortIngredientsAlphabetically()

@@ -69,6 +69,11 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu
 
         public UIDocument UIDocument => uiDocument;
 
+        // Enhanced system access properties  
+        public ItemSlotContainerHolder InventoryHolder => inventoryHolder;
+        public bool UseInventoryIngredients => useInventoryIngredients;
+        public bool AddResultsToInventory => addResultsToInventory;
+
         [Header("Inventory Integration")]
         [SerializeField, Tooltip("Reference to the player's ingredient inventory")]
         private ItemSlotContainerHolder inventoryHolder;
@@ -111,6 +116,9 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu
         private bool allowSyntheticCreation = true;
 
         [SerializeField] private Ingredient syntheticIngredientTemplate;
+
+        [Header("Enhanced Systems")] [SerializeField]
+        private EnhancedAlchemyManager enhancedManager;
 
         // UI Elements
         private VisualElement mainContainer;
@@ -1036,7 +1044,7 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu
             if (ingredient.ItemIcon != null)
             {
                 iconContainer.style.backgroundImage = new StyleBackground(ingredient.ItemIcon);
-                iconContainer.style.unityBackgroundScaleMode = ScaleMode.ScaleToFit;
+                iconContainer.style.backgroundSize = new StyleBackgroundSize(new BackgroundSize(BackgroundSizeType.Contain));
             }
             else
             {
@@ -1637,8 +1645,9 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu
             if (selectedRecipe == null) return "Select a recipe to see requirements and hints";
             
             var requiredIngredients = selectedRecipe.GetRequiredIngredients();
-            string difficultyText = selectedRecipe.Difficulty != RecipeDifficulty.Standard ? 
-                $" [{selectedRecipe.Difficulty}]" : "";
+            // Fixed enum comparison for Unity 6 compatibility
+            string difficultyText = selectedRecipe.Difficulty.Equals(RecipeDifficulty.Standard) ? 
+                "" : $" [{selectedRecipe.Difficulty}]";
 
             string infoText = $"Recipe: {selectedRecipe.ItemName}{difficultyText}\\n";
             infoText += $"Required: {string.Join(", ", requiredIngredients.Select(i => i.ItemName))}\\n";
@@ -2074,6 +2083,14 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu
                 
                 OnCraftingCompleted?.Invoke(selectedRecipe,
                     new Dictionary<Vector2Int, PlacedIngredient>(placedIngredients), true);
+                
+                // Notify enhanced alchemy manager
+                if (enhancedManager != null)
+                {
+                    enhancedManager.HandleCraftingAttempt(selectedRecipe,
+                        new Dictionary<Vector2Int, PlacedIngredient>(placedIngredients), true);
+                }
+                
                 Debug.Log($"✅ Successfully crafted {selectedRecipe.ItemName}!");
             }
             else
@@ -2092,6 +2109,14 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu
                     OnSyntheticIngredientCreated?.Invoke(syntheticIngredient);
                     OnCraftingCompleted?.Invoke(selectedRecipe,
                         new Dictionary<Vector2Int, PlacedIngredient>(placedIngredients), false);
+                    
+                    // Notify enhanced alchemy manager
+                    if (enhancedManager != null)
+                    {
+                        enhancedManager.HandleCraftingAttempt(selectedRecipe,
+                            new Dictionary<Vector2Int, PlacedIngredient>(placedIngredients), false);
+                    }
+                    
                     Debug.Log("⚗️ Created synthetic ingredient from failed crafting attempt");
                 }
                 else
@@ -2503,7 +2528,7 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu
                 Aspect.Corporeal => new Color(0.5f, 0.6f, 0.3f),
                 Aspect.Arc => new Color(0.7f, 0.7f, 0.3f),
                 Aspect.Divine => new Color(0.6f, 0.5f, 0.7f),
-                Aspect.Caustic => new Color(0.9f, 0.6f, 0.2f),
+                Aspect.Caustic => new Color(0.6f, 1.0f, 0.2f), // Acid Green
                 _ => Color.gray
             };
         }

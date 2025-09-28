@@ -351,9 +351,9 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                 case Aspect.Scorch: return Color.red;
                 case Aspect.Frigid: return Color.cyan;
                 case Aspect.Arc: return Color.yellow;
-                case Aspect.Caustic: return new Color(0.5f, 0.3f, 0.1f); // Brown
+                case Aspect.Caustic: return new Color(0.6f, 1.0f, 0.2f, 1.0f); // Acid Green
                 case Aspect.Corporeal: return Color.gray;
-                case Aspect.Divine: return Color.white;
+                case Aspect.Divine: return new Color(1f, .7f, 1f, 1.0f);;
                 default: return Color.gray;
             }
         }
