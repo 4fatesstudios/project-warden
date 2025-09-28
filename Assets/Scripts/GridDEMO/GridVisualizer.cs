@@ -340,11 +340,56 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                 case Aspect.Scorch: return Color.red;
                 case Aspect.Frigid: return Color.cyan;
                 case Aspect.Arc: return Color.yellow;
-                case Aspect.Caustic: return new Color(0.5f, 0.3f, 0.1f); // Brown
+                case Aspect.Caustic: return new Color(0.6f, 1.0f, 0.2f, 1.0f); // Acid Green
                 case Aspect.Corporeal: return Color.gray;
-                case Aspect.Divine: return Color.white;
+                case Aspect.Divine: return Color.magenta;
                 default: return Color.gray;
             }
+        }
+
+        /// <summary>
+        /// Force recreation of grid visuals to match new grid dimensions.
+        /// This should be called when the grid size changes.
+        /// </summary>
+        public void ForceRecreateGridVisuals()
+        {
+            Debug.Log($"🔄 GridVisualizer: Force recreating grid visuals for new size {gridManager.gridWidth}x{gridManager.gridHeight}");
+            
+            // First, destroy existing visuals
+            if (cellVisuals != null)
+            {
+                for (int x = 0; x < cellVisuals.GetLength(0); x++)
+                {
+                    for (int y = 0; y < cellVisuals.GetLength(1); y++)
+                    {
+                        if (cellVisuals[x, y] != null)
+                        {
+                            DestroyImmediate(cellVisuals[x, y]);
+                        }
+                    }
+                }
+            }
+            
+            // Destroy existing grid lines
+            if (gridLines != null)
+            {
+                foreach (var line in gridLines)
+                {
+                    if (line != null)
+                        DestroyImmediate(line.gameObject);
+                }
+                gridLines.Clear();
+            }
+            
+            // Reset arrays to null so CreateGridVisuals will recreate them
+            cellVisuals = null;
+            cellRenderers = null;
+            
+            // Recreate with new dimensions
+            CreateGridVisuals();
+            CreateGridLines();
+            
+            Debug.Log($"✅ GridVisualizer: Successfully recreated grid visuals for {gridManager.gridWidth}x{gridManager.gridHeight} grid");
         }
     }
 }

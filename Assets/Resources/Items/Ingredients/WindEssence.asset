@@ -9,25 +9,40 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ccec348f60f7b5c429d2fb1e20182269, type: 3}
+  m_Script: {fileID: 11500000, guid: ac12d8c1b64a441a9fd60f1ef7e48a67, type: 3}
   m_Name: WindEssence
   m_EditorClassIdentifier: 
-  id: b63739da-1287-4e04-9386-dea7328c3d63
+  id: 3ea02ec4-3f47-471a-be6f-613c50452ff1
   itemName: Wind Essence
-  itemDescription: Captured essence of Arc
-  itemRarity: 1
+  itemDescription: Empty Description
+  itemRarity: 0
   itemIcon: {fileID: 0}
   noun: 
   adjective: 
   ingredientArchetype: 0
-  ingredientAspect: 1
+  ingredientAspect: 4
   isCorrupted: 0
-  potency: 4
-  gridWidth: 3
-  gridHeight: 3
+  potency: 1
+  gridWidth: 1
+  gridHeight: 1
   unlocksAdditionalSpace: 0
   additionalSpaceCount: 0
-  infusions: []
+  isUnrefined: 1
+  originalIngredient: {fileID: 0}
+  shapeData:
+    gridWidth: 1
+    gridHeight: 1
+    activeCells:
+    - {x: 0, y: 0}
+    template: 0
+    shapeColor: {r: 0, g: 1, b: 0, a: 1}
+    shapeSprite: {fileID: 0}
+    lastModified: 2025-09-25 10:42:08
+    dataVersion: 1
+  infusionBundle:
+    infusions: []
+  effectBundle:
+    Effects: []
   canGrind: 0
   grindingResult: {fileID: 0}
   canDistill: 0

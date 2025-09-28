@@ -9,13 +9,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ccec348f60f7b5c429d2fb1e20182269, type: 3}
+  m_Script: {fileID: 11500000, guid: ac12d8c1b64a441a9fd60f1ef7e48a67, type: 3}
   m_Name: FireTalon
   m_EditorClassIdentifier: 
-  id: 3213cd74-71c9-4faa-81b7-5eb292a67c32
+  id: 91c22615-6141-4e39-b570-dab80551a860
   itemName: Fire Talon
-  itemDescription: A smaller talon with weak fire magic
-  itemRarity: 1
+  itemDescription: Empty Description
+  itemRarity: 0
   itemIcon: {fileID: 0}
   noun: 
   adjective: 
@@ -27,6 +27,8 @@ MonoBehaviour:
   gridHeight: 2
   unlocksAdditionalSpace: 0
   additionalSpaceCount: 0
+  isUnrefined: 1
+  originalIngredient: {fileID: 0}
   shapeData:
     gridWidth: 2
     gridHeight: 2
@@ -37,7 +39,7 @@ MonoBehaviour:
     template: 0
     shapeColor: {r: 0, g: 1, b: 0, a: 1}
     shapeSprite: {fileID: 0}
-    lastModified: 2025-09-12 09:30:32
+    lastModified: 2025-09-25 16:11:16
     dataVersion: 1
   infusionBundle:
     infusions:

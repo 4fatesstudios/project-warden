@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 using UnityEditor;
 using FourFatesStudios.ProjectWarden.GridDemo.UI;
@@ -16,7 +15,7 @@ public class GridDemoEnhancedIntegration : EditorWindow
         try
         {
             // Step 1: Verify scene components
-            var gridManager = FindFirstObjectByType<GridGameManager>();
+            var gridManager = FindFirstObjectByType<FourFatesStudios.ProjectWarden.GridDemo.GridGameManager>();
             var canvas = FindFirstObjectByType<Canvas>();
             
             if (gridManager == null)
@@ -39,12 +38,13 @@ public class GridDemoEnhancedIntegration : EditorWindow
             Undo.RegisterCreatedObjectUndo(enhancedSystemsRoot, "Create Enhanced Systems Root");
             
             // Step 3: Add Core Systems
-            CreateSystemComponent<AlchemySkillTree>(enhancedSystemsRoot, "Alchemy Skill Tree");
-            CreateSystemComponent<SynergySystem>(enhancedSystemsRoot, "Synergy System");
-            CreateSystemComponent<TemplateSystem>(enhancedSystemsRoot, "Template System");
-            CreateSystemComponent<FailureSystem>(enhancedSystemsRoot, "Failure System");
-            CreateSystemComponent<EnhancedGridSystem>(enhancedSystemsRoot, "Enhanced Grid System");
-            CreateSystemComponent<ExtractionMinigame>(enhancedSystemsRoot, "Extraction Minigame");
+            CreateSystemComponent<FourFatesStudios.ProjectWarden.GameSystems.SkillSystem.AlchemySkillTree>(enhancedSystemsRoot, "Alchemy Skill Tree");
+            CreateSystemComponent<FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu.SynergySystem>(enhancedSystemsRoot, "Synergy System");
+            CreateSystemComponent<FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu.TemplateSystem>(enhancedSystemsRoot, "Template System");
+            CreateSystemComponent<FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu.FailureSystem>(enhancedSystemsRoot, "Failure System");
+            CreateSystemComponent<FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu.EnhancedGridSystem>(enhancedSystemsRoot, "Enhanced Grid System");
+            CreateSystemComponent<FourFatesStudios.ProjectWarden.GridDemo.ExtractionMinigame>(enhancedSystemsRoot, "Extraction Minigame");
+            CreateSystemComponent<FourFatesStudios.ProjectWarden.GridDemo.UI.ImprovedClickDetector>(enhancedSystemsRoot, "Improved Click Detector");
             
             Debug.Log("✅ Added 7 core enhanced systems");
             
@@ -87,7 +87,7 @@ public class GridDemoEnhancedIntegration : EditorWindow
             Debug.Log("• Enhanced features are now available!");
             
         }
-        catch (Exception e)
+        catch (System.Exception e)
         {
             Debug.LogError($"❌ Integration failed: {e.Message}");
             Debug.LogException(e);

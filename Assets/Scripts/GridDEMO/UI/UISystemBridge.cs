@@ -257,10 +257,10 @@ namespace FourFatesStudios.ProjectWarden.GridDemo.UI
             }
             
             // Show in existing tooltip system if available
-            // if (existingUIManager != null)
-            // {
-            //     existingUIManager.ShowIngredientTooltip(ingredient, Input.mousePosition);
-            // }
+            if (existingUIManager != null)
+            {
+                existingUIManager.ShowIngredientTooltip(ingredient, Input.mousePosition);
+            }
             
             Debug.Log(tooltipText);
         }

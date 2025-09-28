@@ -38,6 +38,7 @@ namespace FourFatesStudios.ProjectWarden.GridDemo.UI
         private GridGameManager gridManager;
         private EnhancedAlchemyUIManager enhancedUIManager;
         private UISystemBridge uiBridge;
+        private ImprovedClickDetector improvedClickDetector;
         
         // UI Elements (will be created)
         private GameObject enhancedUIRoot;
@@ -142,6 +143,21 @@ namespace FourFatesStudios.ProjectWarden.GridDemo.UI
                 uiBridge = existingBridge;
                 Debug.Log("✅ Found existing UISystemBridge");
             }
+            
+            // Create Improved Click Detector
+            var existingClickDetector = FindFirstObjectByType<ImprovedClickDetector>();
+            if (existingClickDetector == null)
+            {
+                var clickDetectorObj = new GameObject("Improved Click Detector");
+                clickDetectorObj.transform.SetParent(transform, false);
+                improvedClickDetector = clickDetectorObj.AddComponent<ImprovedClickDetector>();
+                Debug.Log("✅ Created ImprovedClickDetector");
+            }
+            else
+            {
+                improvedClickDetector = existingClickDetector;
+                Debug.Log("✅ Found existing ImprovedClickDetector");
+            }
         }
         
         private void Step3_CreateEnhancedUI()
@@ -166,6 +182,7 @@ namespace FourFatesStudios.ProjectWarden.GridDemo.UI
             
             ConnectButtonEvents();
             SetupKeyboardShortcuts();
+            ConnectSystemEvents();
             
             Debug.Log("✅ Systems connected");
         }
@@ -363,6 +380,17 @@ namespace FourFatesStudios.ProjectWarden.GridDemo.UI
             Debug.Log("  ` - Toggle Debug Console");
         }
         
+        private void ConnectSystemEvents()
+        {
+            // Connect improved click detector events
+            if (improvedClickDetector != null)
+            {
+                improvedClickDetector.OnIngredientClicked += OnIngredientClickedHandler;
+                improvedClickDetector.OnGridCellClicked += OnGridCellClickedHandler;
+                improvedClickDetector.OnEmptySpaceClicked += OnEmptySpaceClickedHandler;
+            }
+        }
+        
         #endregion
         
         #region Event Handlers
@@ -436,6 +464,7 @@ namespace FourFatesStudios.ProjectWarden.GridDemo.UI
             if (gridManager != null) connectedSystems++;
             if (enhancedUIManager != null) connectedSystems++;
             if (uiBridge != null) connectedSystems++;
+            if (improvedClickDetector != null) connectedSystems++;
             
             Debug.Log($"🔗 Systems connected: {connectedSystems}/4");
             
@@ -451,6 +480,7 @@ namespace FourFatesStudios.ProjectWarden.GridDemo.UI
             Debug.Log("📊 === ENHANCED UI SETUP SUMMARY ===");
             Debug.Log($"✅ Enhanced UI Manager: {enhancedUIManager != null}");
             Debug.Log($"✅ UI System Bridge: {uiBridge != null}");
+            Debug.Log($"✅ Improved Click Detector: {improvedClickDetector != null}");
             Debug.Log($"✅ Quick Access Buttons: {skillTreeButton != null && synergyButton != null}");
             Debug.Log($"✅ Status Panel: {statusPanel != null}");
             Debug.Log($"✅ Debug Console: {debugConsole != null}");
@@ -603,7 +633,8 @@ namespace FourFatesStudios.ProjectWarden.GridDemo.UI
             var enhancedComponents = new System.Type[]
             {
                 typeof(EnhancedAlchemyUIManager),
-                typeof(UISystemBridge)
+                typeof(UISystemBridge),
+                typeof(ImprovedClickDetector)
             };
             
             foreach (var componentType in enhancedComponents)

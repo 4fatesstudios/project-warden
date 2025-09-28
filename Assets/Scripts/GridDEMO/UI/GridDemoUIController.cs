@@ -101,8 +101,8 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             // Step 3: Create the consolidated UI
             CreateConsolidatedUI();
             
-            // Step 4: Setup additional components #temporarily disabled
-            //SetupSupportingComponents();
+            // Step 4: Setup additional components
+            SetupSupportingComponents();
             
             if (debugMode)
             {
@@ -443,7 +443,7 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             controlsContainer.transform.SetParent(sidebar.transform, false);
             
             RectTransform controlsRect = controlsContainer.AddComponent<RectTransform>();
-            controlsRect.sizeDelta = new Vector2(0, 155f);
+            controlsRect.sizeDelta = new Vector2(0, 120f);
             
             VerticalLayoutGroup controlsLayout = controlsContainer.AddComponent<VerticalLayoutGroup>();
             controlsLayout.spacing = 5f;
@@ -453,10 +453,9 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             
             CreateCraftButton(controlsContainer);
             CreateClearButton(controlsContainer);
-            CreateBackButton(controlsContainer);
             
             LayoutElement controlsLayoutElement = controlsContainer.AddComponent<LayoutElement>();
-            controlsLayoutElement.preferredHeight = 155f;
+            controlsLayoutElement.preferredHeight = 120f;
             controlsLayoutElement.flexibleHeight = 0f;
         }
         
@@ -530,71 +529,6 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             LayoutElement layoutElement = clearButtonObj.AddComponent<LayoutElement>();
             layoutElement.preferredHeight = 35f;
         }
-
-        private void CreateBackButton(GameObject parent)
-        {
-            GameObject backButtonObj = new GameObject("Back Button");
-            backButtonObj.transform.SetParent(parent.transform, false);
-            
-            RectTransform buttonRect = backButtonObj.AddComponent<RectTransform>();
-            buttonRect.sizeDelta = new Vector2(0, 35f);
-            
-            Image buttonImage = backButtonObj.AddComponent<Image>();
-            buttonImage.color = new Color(0.4f, 0.4f, 0.4f, 0.9f);
-            
-            Button button = backButtonObj.AddComponent<Button>();
-            
-            GameObject textObj = new GameObject("Text");
-            textObj.transform.SetParent(backButtonObj.transform, false);
-            
-            RectTransform textRect = textObj.AddComponent<RectTransform>();
-            textRect.anchorMin = Vector2.zero;
-            textRect.anchorMax = Vector2.one;
-            textRect.offsetMin = Vector2.zero;
-            textRect.offsetMax = Vector2.zero;
-            
-            TextMeshProUGUI buttonText = textObj.AddComponent<TextMeshProUGUI>();
-            buttonText.text = "← BACK TO MENU";
-            buttonText.fontSize = 12f;
-            buttonText.alignment = TextAlignmentOptions.Center;
-            buttonText.color = Color.white;
-            buttonText.fontStyle = FontStyles.Bold;
-            
-            button.onClick.AddListener(() => {
-                Debug.Log("⬅️ Back button clicked!");
-
-                // Show CraftingModeSelector
-                GameObject craftingModeSelector = GameObject.Find("CraftingModeSelector");
-                if (craftingModeSelector != null)
-                {
-                    Debug.Log("✅ Showing CraftingModeSelector");
-                    var modeSelectorComponent = craftingModeSelector.GetComponent<FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu.CraftingModeSelector>();
-                    if (modeSelectorComponent != null)
-                    {
-                        modeSelectorComponent.ShowModeSelector();
-                    }
-                    else
-                    {
-                        craftingModeSelector.SetActive(true);
-                    }
-                }
-                else
-                {
-                    // Fallback to MenuSelector
-                    GameObject menuSelector = GameObject.Find("MenuSelector");
-                    if (menuSelector != null)
-                    {
-                        Debug.Log("⚠️ CraftingModeSelector not found, showing MenuSelector");
-                        menuSelector.SetActive(true);
-                    }
-                }
-                
-                Debug.Log("🎯 Back navigation completed");
-            });
-            
-            LayoutElement layoutElement = backButtonObj.AddComponent<LayoutElement>();
-            layoutElement.preferredHeight = 35f;
-        }
         
         #endregion
         
@@ -657,6 +591,14 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                 GameObject rightPanelObj = new GameObject("Right Panel Manager");
                 rightPanelObj.transform.SetParent(transform, false);
                 rightPanel = rightPanelObj.AddComponent<RightPanelManager>();
+            }
+            
+            // Setup click detector if it doesn't exist
+            ImprovedClickDetector clickDetector = FindFirstObjectByType<ImprovedClickDetector>();
+            if (clickDetector == null)
+            {
+                GameObject clickDetectorObj = new GameObject("Improved Click Detector");
+                clickDetector = clickDetectorObj.AddComponent<ImprovedClickDetector>();
             }
         }
         

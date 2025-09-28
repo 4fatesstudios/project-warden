@@ -2,9 +2,14 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.AlchemyRecipes;
+using FourFatesStudios.ProjectWarden.ScriptableObjects;
 using FourFatesStudios.ProjectWarden.Enums;
+using FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu;
+using FourFatesStudios.ProjectWarden.GameSystems.SkillSystem;
+using FourFatesStudios.ProjectWarden.GridDemo.UI;
 
 namespace FourFatesStudios.ProjectWarden.GridDemo
 {
@@ -25,9 +30,7 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
 
         [Header("Debug Systems")] [SerializeField]
         private DebugSystemConfig debugSystemConfig;
-
-        [SerializeField] private ObstacleSpawnDebugger obstacleSpawnDebugger;
-
+        
         [Header("Proficiency Grading")] public bool enableProficiencyGrading = true;
         public ProficiencyWeights gradingWeights = new ProficiencyWeights();
         [Header("Gameplay")] public List<Ingredient> availableIngredients = new List<Ingredient>();
@@ -38,9 +41,19 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         private GridVisualizer visualizer;
         private IngredientPlacer ingredientPlacer;
         private InputActions inputActions;
+        
+        // Enhanced systems
+        private EnhancedGridSystem enhancedGridSystem;
+        private SynergySystem synergySystem;
+        private FailureSystem failureSystem;
+        private AlchemySkillTree skillTree;
+        private TemplateSystem templateSystem;
 
         private Ingredient currentSelectedIngredient;
         private Vector2Int hoveredCell = Vector2Int.one * -1;
+        
+        // Crafting state management to prevent multiple simultaneous crafting
+        private bool isProcessingRecipe = false;
 
         public static GridGameManager Instance { get; private set; }
 
@@ -87,15 +100,37 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             ingredientPlacer = GetComponent<IngredientPlacer>();
             if (ingredientPlacer == null)
                 ingredientPlacer = gameObject.AddComponent<IngredientPlacer>();
-
-            // Add PlacementTester for runtime debugging (only in development builds)
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-            if (GetComponent<PlacementTester>() == null)
+                
+            // Initialize enhanced systems
+            // InitializeEnhancedSystems();
+            
+            // Add AutomaticSidebarManager to handle all sidebar issues automatically
+            var existingComponents = GetComponents<MonoBehaviour>();
+            bool hasAutomaticManager = false;
+            
+            foreach (var component in existingComponents)
             {
-                gameObject.AddComponent<PlacementTester>();
-                DebugSystemConfig.LogTesting("Added PlacementTester component for runtime debugging");
+                if (component.GetType().Name == "AutomaticSidebarManager")
+                {
+                    hasAutomaticManager = true;
+                    break;
+                }
             }
-#endif
+            
+            if (!hasAutomaticManager)
+            {
+                // Use reflection to add the component to avoid direct type reference
+                var automaticManagerType = System.Type.GetType("FourFatesStudios.ProjectWarden.GridDemo.UI.AutomaticSidebarManager");
+                if (automaticManagerType != null)
+                {
+                    gameObject.AddComponent(automaticManagerType);
+                    Debug.Log("✅ Added AutomaticSidebarManager for automatic UI management");
+                }
+                else
+                {
+                    Debug.LogWarning("⚠️ AutomaticSidebarManager type not found - UI may not work properly");
+                }
+            }
 
             // Auto-assign camera if not set
             if (gameCamera == null)
@@ -159,44 +194,82 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             }
 
             // Setup ObstacleSpawnDebugger
-            if (obstacleSpawnDebugger == null)
-            {
-                obstacleSpawnDebugger = GetComponent<ObstacleSpawnDebugger>();
-                if (obstacleSpawnDebugger == null)
-                {
-                    obstacleSpawnDebugger = gameObject.AddComponent<ObstacleSpawnDebugger>();
-                    DebugSystemConfig.LogObstacleSpawn("Added ObstacleSpawnDebugger component");
-                }
-            }
+            // Note: ObstacleSpawnDebugger temporarily disabled during migration
+            // if (obstacleSpawnDebugger == null)
+            // {
+            //     obstacleSpawnDebugger = GetComponent<ObstacleSpawnDebugger>();
+            //     if (obstacleSpawnDebugger == null)
+            //     {
+            //         obstacleSpawnDebugger = gameObject.AddComponent<ObstacleSpawnDebugger>();
+            //         DebugSystemConfig.LogObstacleSpawn("Added ObstacleSpawnDebugger component");
+            //     }
+            // }
         }
 
         private void LoadTestIngredients()
         {
-            DebugSystemConfig.LogTesting("Loading test ingredients from Resources...");
+            DebugSystemConfig.LogTesting("Loading all available ingredients from Resources...");
 
-            // Try to load from different possible locations
-            string[] possiblePaths =
+            // Load all ingredients from the Items/Ingredients folder
+            Ingredient[] allIngredients = Resources.LoadAll<Ingredient>("Items/Ingredients");
+            
+            DebugSystemConfig.LogTesting($"Found {allIngredients.Length} ingredient assets in Resources/Items/Ingredients");
+            
+            // Debug: List all found ingredients
+            for (int i = 0; i < allIngredients.Length; i++)
             {
-                "Items/Ingredients/TestIngredient1",
-                "TestIngredients/Ice Crystal",
-                "TestIngredients/Life Bloom"
-            };
-
-            foreach (string path in possiblePaths)
-            {
-                var ingredient = Resources.Load<Ingredient>(path);
-                if (ingredient != null)
+                if (allIngredients[i] != null)
                 {
-                    availableIngredients.Add(ingredient);
-                    DebugSystemConfig.LogTesting($"Loaded ingredient: {ingredient.ItemName}");
+                    DebugSystemConfig.LogTesting($"   Found ingredient {i + 1}: '{allIngredients[i].ItemName}' from asset '{allIngredients[i].name}'");
                 }
                 else
                 {
-                    DebugSystemConfig.LogTesting($"Could not load ingredient from: {path}");
+                    DebugSystemConfig.LogTesting($"   Found NULL ingredient at index {i}");
+                }
+            }
+            
+            foreach (Ingredient ingredient in allIngredients)
+            {
+                if (ingredient != null)
+                {
+                    availableIngredients.Add(ingredient);
+                    DebugSystemConfig.LogTesting($"✅ Loaded ingredient: {ingredient.ItemName}");
                 }
             }
 
-            DebugSystemConfig.LogTesting($"Total ingredients loaded: {availableIngredients.Count}");
+            // If no ingredients were found in the main folder, try fallback paths
+            if (availableIngredients.Count == 0)
+            {
+                DebugSystemConfig.LogTesting("No ingredients found in main folder, trying fallback paths...");
+                
+                string[] fallbackPaths = {
+                    "Items/Ingredients/TestIngredient1",
+                    "TestIngredients/Ice Crystal",
+                    "TestIngredients/Life Bloom"
+                };
+
+                foreach (string path in fallbackPaths)
+                {
+                    var ingredient = Resources.Load<Ingredient>(path);
+                    if (ingredient != null)
+                    {
+                        availableIngredients.Add(ingredient);
+                        DebugSystemConfig.LogTesting($"✅ Loaded fallback ingredient: {ingredient.ItemName}");
+                    }
+                    else
+                    {
+                        DebugSystemConfig.LogTesting($"❌ Could not load ingredient from: {path}");
+                    }
+                }
+            }
+
+            DebugSystemConfig.LogTesting($"🎯 Total ingredients loaded: {availableIngredients.Count}");
+            
+            // Log all loaded ingredient names for debugging
+            for (int i = 0; i < availableIngredients.Count; i++)
+            {
+                DebugSystemConfig.LogTesting($"   {i + 1}. {availableIngredients[i].ItemName}");
+            }
         }
 
         private void SetupInput()
@@ -458,8 +531,8 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                             $"Current Grade: {grade.gradeLevel} ({grade.overallScore:F1}%)");
                     }
 
-                    // Check for recipe matches after placing ingredient
-                    CheckForRecipeMatches();
+                    // Note: Recipe checking should be manual, not automatic on ingredient placement
+                    // CheckForRecipeMatches();
 
                     return true;
                 }
@@ -1681,12 +1754,23 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             DebugSystemConfig.LogShapeCollision($"RESULT: {result}");
         }
 
+        /// <summary>
+        /// Player-initiated grid clear: preserves obstacle colors, only removes ingredients
+        /// </summary>
         public void ClearGrid()
         {
+            ClearGridPreserveObstacles();
+        }
+        
+        /// <summary>
+        /// Player manual clear: Clear ingredients but preserve obstacle visual appearance
+        /// </summary>
+        public void ClearGridPreserveObstacles()
+        {
             DebugSystemConfig.LogTesting(
-                "ClearGrid() called! This will clear all placed ingredients but keep the grid visualization.");
+                "ClearGridPreserveObstacles() called! Clearing ingredients but preserving obstacle colors.");
 
-            DebugSystemConfig.LogGridState("Grid state BEFORE clearing:");
+            DebugSystemConfig.LogGridState("Grid state BEFORE clearing (preserve obstacles):");
             DebugGridState();
 
             // Clear ingredient selection and highlights FIRST
@@ -1708,7 +1792,7 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                     {
                         DebugSystemConfig.LogGridState(
                             $"Clearing occupied cell ({x},{y}) with {gridCells[x, y].OccupiedByIngredient?.ItemName}");
-                        gridCells[x, y].Clear(); // Only clear occupancy, not the visual grid cell
+                        gridCells[x, y].Clear(); // Only clear occupancy, obstacles remain
                     }
                 }
             }
@@ -1730,14 +1814,128 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                 DebugSystemConfig.LogErrorRecovery("IngredientPlacer is null! Cannot clear visual ingredients.");
             }
 
-            // Refresh grid visualization (this will update colors but preserve the grid)
-            DebugSystemConfig.LogTesting("Refreshing grid visualization...");
+            // Refresh grid visualization (this will update colors and preserve obstacle colors)
+            DebugSystemConfig.LogTesting("Refreshing grid visualization while preserving obstacles...");
             if (visualizer != null)
             {
-                visualizer.RefreshGrid(); // This should update the grid colors but keep the grid structure
+                visualizer.RefreshGrid();
 
-                // Debug: Check if cells are properly reset to white
-                DebugSystemConfig.LogGridState("Verifying cell colors after refresh...");
+                // Debug: Check cell states after refresh (obstacles should keep their colors)
+                DebugSystemConfig.LogGridState("Verifying cell colors after refresh (obstacles preserved)...");
+                int obstacleCount = 0;
+                int emptyWhiteCells = 0;
+                
+                for (int x = 0; x < gridWidth; x++)
+                {
+                    for (int y = 0; y < gridHeight; y++)
+                    {
+                        var cell = gridCells[x, y];
+                        if (cell.HasObstacle)
+                        {
+                            obstacleCount++;
+                            Color expectedColor = cell.Obstacle.GetObstacleColor();
+                            if (cell.CellColor != expectedColor)
+                            {
+                                DebugSystemConfig.LogErrorRecovery(
+                                    $"Obstacle cell ({x},{y}) has wrong color: {cell.CellColor}, expected: {expectedColor}");
+                            }
+                        }
+                        else if (cell.CellColor == Color.white)
+                        {
+                            emptyWhiteCells++;
+                        }
+                    }
+                }
+
+                DebugSystemConfig.LogGridState($"Grid cleared with {obstacleCount} obstacles preserved and {emptyWhiteCells} empty white cells");
+            }
+            else
+            {
+                DebugSystemConfig.LogErrorRecovery("GridVisualizer is null! Cannot refresh grid.");
+            }
+
+            DebugSystemConfig.LogGridState("Grid state AFTER clearing (obstacles preserved):");
+            DebugGridState();
+
+            DebugSystemConfig.LogTesting(
+                "ClearGridPreserveObstacles() complete! Ingredients removed, obstacle colors preserved.");
+        }
+        
+        /// <summary>
+        /// Game-initiated complete clear: Removes everything including obstacles and resets to white
+        /// </summary>
+        public void ClearGridComplete()
+        {
+            DebugSystemConfig.LogTesting(
+                "ClearGridComplete() called! Clearing all ingredients AND obstacles, resetting to white.");
+
+            DebugSystemConfig.LogGridState("Grid state BEFORE complete clearing:");
+            DebugGridState();
+
+            // Clear ingredient selection and highlights FIRST
+            ClearIngredientSelection();
+
+            // Explicitly clear all highlights from the visualizer as well
+            if (visualizer != null)
+            {
+                visualizer.ClearHighlights();
+                DebugSystemConfig.LogTesting("Explicitly cleared all grid highlights");
+            }
+
+            // Clear grid data (ingredient occupancy AND obstacles)
+            for (int x = 0; x < gridWidth; x++)
+            {
+                for (int y = 0; y < gridHeight; y++)
+                {
+                    var cell = gridCells[x, y];
+                    
+                    if (cell.IsOccupied)
+                    {
+                        DebugSystemConfig.LogGridState(
+                            $"Clearing occupied cell ({x},{y}) with {cell.OccupiedByIngredient?.ItemName}");
+                    }
+                    
+                    if (cell.HasObstacle)
+                    {
+                        DebugSystemConfig.LogGridState(
+                            $"Removing obstacle from cell ({x},{y}): {cell.Obstacle?.ObstacleType}");
+                        cell.RemoveObstacle();
+                    }
+                    
+                    cell.Clear(); // Clear occupancy and reset visual state
+                }
+            }
+
+            // Clear obstacle list
+            int obstacleCount = aspectObstacles.Count;
+            aspectObstacles.Clear();
+            DebugSystemConfig.LogTesting($"Cleared {obstacleCount} obstacles from obstacle list");
+
+            // Clear visual ingredients
+            DebugSystemConfig.LogTesting("Calling IngredientPlacer.ClearAllIngredients()...");
+            if (ingredientPlacer != null)
+            {
+                int ingredientCountBefore = ingredientPlacer.GetAllPlacedIngredients().Count;
+                DebugSystemConfig.LogTesting($"Ingredients to clear: {ingredientCountBefore}");
+
+                ingredientPlacer.ClearAllIngredients();
+
+                int ingredientCountAfter = ingredientPlacer.GetAllPlacedIngredients().Count;
+                DebugSystemConfig.LogTesting($"Ingredients remaining after clear: {ingredientCountAfter}");
+            }
+            else
+            {
+                DebugSystemConfig.LogErrorRecovery("IngredientPlacer is null! Cannot clear visual ingredients.");
+            }
+
+            // Refresh grid visualization (this will reset everything to white)
+            DebugSystemConfig.LogTesting("Refreshing grid visualization for complete reset...");
+            if (visualizer != null)
+            {
+                visualizer.RefreshGrid();
+
+                // Debug: Check if all cells are properly reset to white
+                DebugSystemConfig.LogGridState("Verifying all cells reset to white...");
                 int nonWhiteCells = 0;
                 for (int x = 0; x < gridWidth; x++)
                 {
@@ -1767,11 +1965,11 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                 DebugSystemConfig.LogErrorRecovery("GridVisualizer is null! Cannot refresh grid.");
             }
 
-            DebugSystemConfig.LogGridState("Grid state AFTER clearing:");
+            DebugSystemConfig.LogGridState("Grid state AFTER complete clearing:");
             DebugGridState();
 
             DebugSystemConfig.LogTesting(
-                "ClearGrid() complete! Grid structure preserved, ingredients removed, highlights cleared.");
+                "ClearGridComplete() complete! Everything cleared and reset to white.");
         }
 
         /// <summary>
@@ -1958,25 +2156,21 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                     Vector2Int position = new Vector2Int(x, y);
                     float randomRoll = Random.Range(0f, 1f);
 
-                    // Log the spawn chance calculation
-                    if (obstacleSpawnDebugger != null)
-                    {
-                        obstacleSpawnDebugger.LogSpawnChanceCalculation(position, obstacleSpawnChance, randomRoll);
-                    }
-
                     if (randomRoll < obstacleSpawnChance)
                     {
                         var obstacleType =
                             (ObstacleType)Random.Range(0, System.Enum.GetValues(typeof(ObstacleType)).Length);
                         var obstacle = new AspectObstacle(obstacleType, position);
                         aspectObstacles.Add(obstacle);
-                        obstaclesSpawned++;
-
-                        // Log the obstacle type spawned
-                        if (obstacleSpawnDebugger != null)
+                        
+                        // Also set the obstacle on the grid cell so it knows it has an obstacle
+                        var gridCell = GetCell(x, y);
+                        if (gridCell != null)
                         {
-                            obstacleSpawnDebugger.LogObstacleTypeSpawned(obstacleType, position);
+                            gridCell.SetObstacle(obstacle);
                         }
+                        
+                        obstaclesSpawned++;
 
                         DebugSystemConfig.LogObstacleSpawn($"Spawned {obstacleType} obstacle at ({x}, {y})");
                     }
@@ -1990,6 +2184,27 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             {
                 visualizer.RefreshGrid();
             }
+        }
+
+        /// <summary>
+        /// Public method to force grid recreation when size or configuration changes
+        /// </summary>
+        public void ForceRecreateGrid()
+        {
+            Debug.Log($"🔄 Force recreating grid cells for size {gridWidth}x{gridHeight}");
+            
+            // First, force the visualizer to recreate its visual arrays for the new size
+            if (visualizer != null)
+            {
+                visualizer.ForceRecreateGridVisuals();
+            }
+            else
+            {
+                Debug.LogWarning("🔄 GridVisualizer not found during grid recreation");
+            }
+            
+            // Then recreate the logical grid cells
+            RecreateGridCells();
         }
 
         /// <summary>
@@ -2099,21 +2314,9 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                 var randomPos = emptyCells[Random.Range(0, emptyCells.Count)];
                 float randomRoll = Random.Range(0f, 1f);
 
-                // Always spawn for manual testing, but still log the roll
-                if (obstacleSpawnDebugger != null)
-                {
-                    obstacleSpawnDebugger.LogSpawnChanceCalculation(randomPos, 1.0f, randomRoll);
-                }
-
                 var randomType = (ObstacleType)Random.Range(0, System.Enum.GetValues(typeof(ObstacleType)).Length);
                 var obstacle = new AspectObstacle(randomType, randomPos);
                 aspectObstacles.Add(obstacle);
-
-                // Log the obstacle type spawned
-                if (obstacleSpawnDebugger != null)
-                {
-                    obstacleSpawnDebugger.LogObstacleTypeSpawned(randomType, randomPos);
-                }
 
                 DebugSystemConfig.LogObstacleSpawn($"Added {randomType} obstacle at {randomPos}");
 
@@ -2126,74 +2329,6 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             {
                 Debug.LogWarning("No empty cells available for obstacle placement");
             }
-        }
-
-        /// <summary>
-        /// Test obstacle spawn chance with current settings
-        /// </summary>
-        [ContextMenu("Test Current Obstacle Spawn Chance")]
-        public void TestCurrentObstacleSpawnChance()
-        {
-            if (obstacleSpawnDebugger != null)
-            {
-                obstacleSpawnDebugger.TestSpawnProbability();
-            }
-            else
-            {
-                Debug.LogWarning("No ObstacleSpawnDebugger available for testing");
-            }
-        }
-
-        /// <summary>
-        /// Show current obstacle spawn statistics
-        /// </summary>
-        [ContextMenu("Show Obstacle Spawn Statistics")]
-        public void ShowObstacleSpawnStatistics()
-        {
-            if (obstacleSpawnDebugger != null)
-            {
-                obstacleSpawnDebugger.GenerateSpawnAnalyticsReport();
-
-                Debug.Log("🚧 === CURRENT SPAWN SETTINGS ===");
-                Debug.Log($"🚧 Spawn Chance: {obstacleSpawnChance:P2} ({obstacleSpawnChance:F3})");
-                Debug.Log($"🚧 Obstacles Enabled: {enableObstacles}");
-                Debug.Log($"🚧 Current Obstacles on Grid: {aspectObstacles.Count}");
-                Debug.Log($"🚧 Grid Size: {gridWidth}x{gridHeight} = {gridWidth * gridHeight} cells");
-
-                int maxPossibleObstacles = (gridWidth * gridHeight) - 9; // Subtract center area
-                float expectedObstacles = maxPossibleObstacles * obstacleSpawnChance;
-                Debug.Log($"🚧 Expected Obstacles (theoretical): {expectedObstacles:F1}");
-
-                string summary = obstacleSpawnDebugger.GetSpawnStatsSummary();
-                Debug.Log($"🚧 Live Stats: {summary}");
-            }
-            else
-            {
-                Debug.LogWarning("No ObstacleSpawnDebugger available for statistics");
-            }
-        }
-
-        /// <summary>
-        /// Respawn all obstacles (for testing different spawn chances)
-        /// </summary>
-        [ContextMenu("Respawn All Obstacles")]
-        public void RespawnAllObstacles()
-        {
-            // Clear existing obstacles
-            aspectObstacles.Clear();
-
-            // Reset spawn debugger stats
-            if (obstacleSpawnDebugger != null)
-            {
-                obstacleSpawnDebugger.ResetSpawnStatistics();
-            }
-
-            Debug.Log("🚧 Cleared all obstacles, respawning with current settings...");
-
-            // Spawn new obstacles
-            SpawnInitialObstacles();
-
-            Debug.Log($"🚧 Respawn complete! New obstacle count: {aspectObstacles.Count}");
         }
 
         /// <summary>
@@ -2286,7 +2421,7 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             }
 
             var grade = ProficiencyGrading.CalculateProficiency(this, placedIngredientsDict, aspectObstacles,
-                gradingWeights);
+                gradingWeights, IsFreeCraftingMode());
 
             Debug.Log($"📊 === PROFICIENCY GRADE CALCULATED ===");
             Debug.Log($"📊 Overall Score: {grade.overallScore:F1}% (Grade: {grade.gradeLevel})");
@@ -2354,65 +2489,474 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
 
         #endregion
 
-        #region Recipe System
+        #region Enhanced Systems Integration
+        
+        /// <summary>
+        /// Initialize all enhanced alchemy systems
+        /// </summary>
+        private void InitializeEnhancedSystems()
+        {
+            Debug.Log("🚀 Initializing Enhanced Alchemy Systems...");
+            
+            // Enhanced Grid System
+            enhancedGridSystem = GetComponent<EnhancedGridSystem>();
+            if (enhancedGridSystem == null)
+            {
+                enhancedGridSystem = gameObject.AddComponent<EnhancedGridSystem>();
+                Debug.Log("✅ Added EnhancedGridSystem");
+            }
+            
+            // Synergy System
+            synergySystem = GetComponent<SynergySystem>();
+            if (synergySystem == null)
+            {
+                synergySystem = gameObject.AddComponent<SynergySystem>();
+                Debug.Log("✅ Added SynergySystem");
+            }
+            
+            // Failure System
+            failureSystem = GetComponent<FailureSystem>();
+            if (failureSystem == null)
+            {
+                failureSystem = gameObject.AddComponent<FailureSystem>();
+                Debug.Log("✅ Added FailureSystem");
+            }
+            
+            // Skill Tree
+            skillTree = GetComponent<AlchemySkillTree>();
+            if (skillTree == null)
+            {
+                skillTree = gameObject.AddComponent<AlchemySkillTree>();
+                Debug.Log("✅ Added AlchemySkillTree");
+            }
+            
+            // Template System
+            templateSystem = GetComponent<TemplateSystem>();
+            if (templateSystem == null)
+            {
+                templateSystem = gameObject.AddComponent<TemplateSystem>();
+                Debug.Log("✅ Added TemplateSystem");
+            }
+            
+            Debug.Log("🚀 Enhanced Alchemy Systems initialized successfully!");
+        }
+        
+        /// <summary>
+        /// Enhanced ingredient placement with all new systems
+        /// </summary>
+        public bool TryPlaceIngredientEnhanced(Ingredient ingredient, Vector2Int position)
+        {
+            Debug.Log($"🧪 === ENHANCED PLACEMENT: {ingredient.ItemName} at {position} ===");
+            
+            // Check if ingredient can expand grid
+            if (ingredient.UnlocksAdditionalSpace)
+            {
+                bool expanded = enhancedGridSystem.TryExpandGrid(ingredient, ingredient.AdditionalSpaceCount);
+                if (expanded)
+                {
+                    Debug.Log($"🔄 Grid expanded by {ingredient.ItemName}!");
+                    // Recreate grid cells for new size
+                    RecreateGridCells();
+                }
+            }
+            
+            // Check for layered placement if skill is unlocked
+            bool allowOverlap = skillTree.IsSkillUnlocked("Ingredient Overlap");
+            if (allowOverlap && enhancedGridSystem.CanOverlapAt(position, ingredient))
+            {
+                Debug.Log($"📚 Layered placement enabled for {ingredient.ItemName}");
+                bool layeredSuccess = enhancedGridSystem.TryPlaceIngredientWithLayers(ingredient, position);
+                if (layeredSuccess)
+                {
+                    // Also place normally for compatibility
+                    bool normalSuccess = TryPlaceIngredient(ingredient, position);
+                    if (normalSuccess)
+                    {
+                        PostPlacementEnhancements(ingredient, position);
+                        return true;
+                    }
+                }
+            }
+            
+            // Standard placement
+            bool placementSuccess = TryPlaceIngredient(ingredient, position);
+            if (placementSuccess)
+            {
+                PostPlacementEnhancements(ingredient, position);
+                return true;
+            }
+            
+            return false;
+        }
+        
+        /// <summary>
+        /// Post-placement enhancements and checks
+        /// </summary>
+        private void PostPlacementEnhancements(Ingredient ingredient, Vector2Int position)
+        {
+            Debug.Log($"🔮 Running post-placement enhancements for {ingredient.ItemName}...");
+            
+            // Check for synergies
+            var synergyResult = synergySystem.CheckSynergiesAt(position);
+            if (synergyResult.hasActiveSynergy)
+            {
+                Debug.Log($"✨ Synergies activated! Potency multiplier: {synergyResult.totalPotencyMultiplier:F1}x");
+                foreach (var description in synergyResult.synergyDescriptions)
+                {
+                    Debug.Log($"  🔮 {description}");
+                }
+            }
+            
+            // Check template progress if active
+            if (templateSystem.CurrentTemplate != null)
+            {
+                var progress = templateSystem.CheckTemplateProgress();
+                Debug.Log($"🗺️ Template progress: {progress.completionPercentage:P0}");
+                
+                if (progress.isComplete)
+                {
+                    Debug.Log($"🏆 Template completed! Bonus: {progress.currentBonus:F1}x");
+                    // Award bonus skill points
+                    if (templateSystem.CurrentTemplate.bonusSkillPoints > 0)
+                    {
+                        skillTree.AwardSkillPoints(templateSystem.CurrentTemplate.bonusSkillPoints, "Template completion");
+                    }
+                }
+            }
+            
+            // Check for ingredient refund (skill-based)
+            if (skillTree.IsSkillUnlocked("Ingredient Conservation"))
+            {
+                float refundChance = skillTree.GetSkillValue("Ingredient Conservation");
+                if (Random.Range(0f, 1f) < refundChance)
+                {
+                    Debug.Log($"💎 Ingredient refund triggered! {ingredient.ItemName} returned to inventory");
+                    // In a full implementation, would add ingredient back to inventory
+                }
+            }
+        }
+        
+        /// <summary>
+        /// Enhanced recipe checking with failure system
+        /// </summary>
+        private void CheckForRecipeMatchesEnhanced()
+        {
+            Debug.Log("🧪 === ENHANCED RECIPE CHECKING ===");
+            
+            // Check for conflicts first
+            var failureAnalysis = failureSystem.AnalyzeCurrentGrid();
+            
+            if (failureAnalysis.hasConflicts)
+            {
+                Debug.Log("⚠️ Recipe conflicts detected!");
+                
+                bool proceedAnyway = failureSystem.ShowFailureWarning();
+                if (!proceedAnyway)
+                {
+                    Debug.Log("❌ Recipe cancelled due to conflicts");
+                    return;
+                }
+                
+                // Roll for failure
+                float roll = Random.Range(0f, 1f);
+                if (roll < failureAnalysis.totalFailureChance)
+                {
+                    Debug.Log($"💥 Recipe failed! (Roll: {roll:F2}, Failure chance: {failureAnalysis.totalFailureChance:F2})");
+                    
+                    var usedIngredients = GetCurrentPlacedIngredients();
+                    failureSystem.HandleRecipeFailure(usedIngredients);
+                    
+                    // Clear grid after failure (complete clear - removes obstacles)
+                    ClearGridComplete();
+                    return;
+                }
+                else
+                {
+                    Debug.Log($"🍀 Recipe succeeded despite conflicts! (Roll: {roll:F2})");
+                }
+            }
+            
+            // Proceed with normal recipe checking
+            CheckForRecipeMatches();
+        }
+        
+        /// <summary>
+        /// Enhanced recipe completion with skill bonuses
+        /// </summary>
+        private void CompleteRecipeEnhanced(AlchemyRecipe recipe, HashSet<Ingredient> usedIngredients)
+        {
+            Debug.Log($"🎉 === ENHANCED RECIPE COMPLETION: {recipe.ItemName} ===");
+            
+            // Calculate skill bonuses
+            float potencyBonus = 1f + skillTree.GetSkillValue("Alchemical Expertise");
+            float synergyBonus = skillTree.GetSkillValue("Synergy Master");
+            
+            // Apply template bonuses
+            float templateBonus = 1f;
+            if (templateSystem.CurrentTemplate != null)
+            {
+                var progress = templateSystem.CheckTemplateProgress();
+                if (progress.isComplete)
+                {
+                    templateBonus = progress.currentBonus;
+                }
+            }
+            
+            float totalBonus = potencyBonus * (1f + synergyBonus) * templateBonus;
+            
+            Debug.Log($"🔢 Final potency bonus: {totalBonus:F1}x");
+            Debug.Log($"  - Skill bonus: {potencyBonus:F1}x");
+            Debug.Log($"  - Synergy bonus: +{synergyBonus:P0}");
+            Debug.Log($"  - Template bonus: {templateBonus:F1}x");
+            
+            // Award skill points based on proficiency
+            if (enableProficiencyGrading)
+            {
+                var grade = CalculateCurrentProficiency();
+                skillTree.AwardPointsForProficiency(grade);
+            }
+            
+            // Award base skill points for successful crafting
+            skillTree.AwardSkillPoints(1, "Successful recipe completion");
+        }
+        
+        /// <summary>
+        /// Recreate grid cells when grid size changes
+        /// </summary>
+        private void RecreateGridCells()
+        {
+            Debug.Log($"🔄 Recreating grid cells for size {gridWidth}x{gridHeight}");
+            
+            // Save current occupied cells
+            var occupiedCells = new Dictionary<Vector2Int, Ingredient>();
+            if (gridCells != null)
+            {
+                for (int x = 0; x < gridCells.GetLength(0); x++)
+                {
+                    for (int y = 0; y < gridCells.GetLength(1); y++)
+                    {
+                        if (gridCells[x, y].IsOccupied)
+                        {
+                            occupiedCells[new Vector2Int(x, y)] = gridCells[x, y].OccupiedByIngredient;
+                        }
+                    }
+                }
+            }
+            
+            // Create new grid
+            gridCells = new GridCell[gridWidth, gridHeight];
+            for (int x = 0; x < gridWidth; x++)
+            {
+                for (int y = 0; y < gridHeight; y++)
+                {
+                    gridCells[x, y] = new GridCell(x, y);
+                    
+                    // Restore occupancy if within bounds
+                    Vector2Int pos = new Vector2Int(x, y);
+                    if (occupiedCells.ContainsKey(pos))
+                    {
+                        gridCells[x, y].SetOccupied(occupiedCells[pos]);
+                    }
+                }
+            }
+            
+            // Refresh visualization
+            if (visualizer != null)
+            {
+                visualizer.RefreshGrid();
+            }
+        }
+        
+        /// <summary>
+        /// Use purify skill to remove obstacle
+        /// </summary>
+        [ContextMenu("Use Purify Skill")]
+        public void UsePurifySkill()
+        {
+            if (!skillTree.CanUsePurify())
+            {
+                Debug.LogWarning("Purify skill not available or no charges remaining");
+                return;
+            }
+            
+            // Find first obstacle to remove (in a real game, player would click on obstacle)
+            var firstObstacle = aspectObstacles.FirstOrDefault(o => !o.IsCompleted);
+            if (firstObstacle != null)
+            {
+                bool success = skillTree.UsePurifyCharge();
+                if (success)
+                {
+                    RemoveObstacleAt(firstObstacle.Position);
+                    Debug.Log($"✨ Purified obstacle at {firstObstacle.Position}!");
+                }
+            }
+            else
+            {
+                Debug.Log("No obstacles to purify");
+            }
+        }
+        
+        /// <summary>
+        /// Test all enhanced systems
+        /// </summary>
+        [ContextMenu("Test Enhanced Systems")]
+        public void TestEnhancedSystems()
+        {
+            Debug.Log("🧪 === TESTING ALL ENHANCED SYSTEMS ===");
+            
+            // Test enhanced grid
+            if (enhancedGridSystem != null)
+            {
+                Debug.Log($"Enhanced Grid: Efficiency {enhancedGridSystem.GetGridEfficiencyScore():P0}");
+            }
+            
+            // Test synergy system
+            if (synergySystem != null)
+            {
+                synergySystem.TestSynergySystem();
+            }
+            
+            // Test failure system
+            if (failureSystem != null)
+            {
+                failureSystem.TestFailureSystem();
+            }
+            
+            // Test skill tree
+            if (skillTree != null)
+            {
+                skillTree.TestSkillTree();
+            }
+            
+            // Test template system
+            if (templateSystem != null)
+            {
+                templateSystem.TestTemplateSystem();
+            }
+        }
+
+        /// <summary>
+        /// Get current placed ingredients for failure system
+        /// </summary>
+        private List<Ingredient> GetCurrentPlacedIngredients()
+        {
+            var ingredients = new List<Ingredient>();
+            if (ingredientPlacer != null)
+            {
+                var placedIngredients = ingredientPlacer.GetAllPlacedIngredients();
+                ingredients.AddRange(placedIngredients.Select(p => p.ingredient).Distinct());
+            }
+            return ingredients;
+        }
+        
+        #endregion
 
         /// <summary>
         /// Check for recipe matches and execute if found
         /// </summary>
         private void CheckForRecipeMatches()
         {
+            // Prevent multiple simultaneous recipe processing
+            if (isProcessingRecipe)
+            {
+                Debug.Log("🧪 ⚠️ Recipe processing already in progress - ignoring additional calls");
+                return;
+            }
+            
             Debug.Log("🧪 === CHECKING FOR RECIPE MATCHES ===");
             
-            // Get all placed ingredients
-            var placedIngredients = ingredientPlacer?.GetAllPlacedIngredients();
-            if (placedIngredients == null || placedIngredients.Count < 2)
+            try
             {
-                Debug.Log("🧪 Not enough ingredients placed for recipes (need at least 2)");
-                return;
-            }
-
-            // Extract unique ingredients from placed items
-            var uniqueIngredients = new HashSet<Ingredient>();
-            foreach (var instance in placedIngredients)
-            {
-                uniqueIngredients.Add(instance.ingredient);
-            }
-
-            Debug.Log($"🧪 Found {uniqueIngredients.Count} unique ingredients on grid:");
-            foreach (var ingredient in uniqueIngredients)
-            {
-                Debug.Log($"   - {ingredient.ItemName}");
-            }
-
-            // Check against all recipes in database
-            var database = AlchemyRecipeDatabase.Instance;
-            if (database == null)
-            {
-                Debug.LogError("🧪 AlchemyRecipeDatabase not found! Cannot check recipes.");
-                return;
-            }
-
-            Debug.Log($"🧪 Checking against {database.Recipes.Count} recipes in database");
-
-            // Try to find a matching recipe
-            AlchemyRecipe matchedRecipe = null;
-            foreach (var recipe in database.Recipes)
-            {
-                if (DoesRecipeMatch(recipe, uniqueIngredients))
+                // Set processing state immediately
+                isProcessingRecipe = true;
+                
+                // DEFENSIVE COPYING: Create snapshots of current state before processing
+                var placedIngredients = ingredientPlacer?.GetAllPlacedIngredients();
+                if (placedIngredients == null || placedIngredients.Count < 2)
                 {
-                    matchedRecipe = recipe;
-                    break;
+                    Debug.Log("🧪 Not enough ingredients placed for recipes (need at least 2)");
+                    return;
+                }
+
+                // Create defensive copy of placed ingredients to prevent modification during processing
+                var placedIngredientsSnapshot = new List<IngredientInstance>(placedIngredients);
+                Debug.Log($"🧪 📸 Created snapshot of {placedIngredientsSnapshot.Count} placed ingredients");
+
+                // Extract unique ingredients from snapshot (defensive copy)
+                var uniqueIngredients = new HashSet<Ingredient>();
+                foreach (var instance in placedIngredientsSnapshot)
+                {
+                    if (instance?.ingredient != null)
+                    {
+                        uniqueIngredients.Add(instance.ingredient);
+                    }
+                }
+
+                // Create immutable copy for recipe processing
+                var uniqueIngredientsSnapshot = new HashSet<Ingredient>(uniqueIngredients);
+                
+                Debug.Log($"🧪 Found {uniqueIngredientsSnapshot.Count} unique ingredients on grid:");
+                foreach (var ingredient in uniqueIngredientsSnapshot)
+                {
+                    Debug.Log($"   - {ingredient.ItemName}");
+                }
+
+                // Check against all recipes in database
+                var database = AlchemyRecipeDatabase.Instance;
+                if (database == null)
+                {
+                    Debug.LogError("🧪 AlchemyRecipeDatabase not found! Cannot check recipes.");
+                    return;
+                }
+
+                Debug.Log($"🧪 Checking against {database.Recipes.Count} recipes in database");
+
+                // Try to find a matching recipe
+                AlchemyRecipe matchedRecipe = null;
+                foreach (var recipe in database.Recipes)
+                {
+                    if (DoesRecipeMatch(recipe, uniqueIngredientsSnapshot))
+                    {
+                        matchedRecipe = recipe;
+                        break;
+                    }
+                }
+
+                if (matchedRecipe != null)
+                {
+                    Debug.Log($"🧪 ✅ RECIPE MATCH FOUND: {matchedRecipe.ItemName}!");
+                    
+                    // ATOMIC EXECUTION: Process recipe with snapshots, don't release lock until completely done
+                    ExecuteRecipeAtomic(matchedRecipe, uniqueIngredientsSnapshot, placedIngredientsSnapshot);
+                }
+                else
+                {
+                    Debug.Log("🧪 ❌ No recipe matches found for current ingredients");
+                    
+                    // Check for dynamic infusion-based crafting
+                    var dynamicPotion = CheckForInfusionBasedCrafting(uniqueIngredientsSnapshot, placedIngredientsSnapshot);
+                    if (dynamicPotion != null)
+                    {
+                        Debug.Log($"🧪 ✨ DYNAMIC POTION CREATED: {dynamicPotion.ItemName}!");
+                        ExecuteDynamicPotionCrafting(dynamicPotion, uniqueIngredientsSnapshot, placedIngredientsSnapshot);
+                    }
+                    else
+                    {
+                        Debug.Log("🧪 💥 No valid combinations found - destroying ingredients");
+                        ExecuteIngredientDestruction(uniqueIngredientsSnapshot, placedIngredientsSnapshot);
+                    }
                 }
             }
-
-            if (matchedRecipe != null)
+            catch (System.Exception ex)
             {
-                Debug.Log($"🧪 ✅ RECIPE MATCH FOUND: {matchedRecipe.ItemName}!");
-                ExecuteRecipe(matchedRecipe, uniqueIngredients);
+                Debug.LogError($"🧪 💥 Error during recipe processing: {ex.Message}");
+                Debug.LogError($"🧪 Stack trace: {ex.StackTrace}");
             }
-            else
+            finally
             {
-                Debug.Log("🧪 ❌ No recipe matches found for current ingredients");
+                // Always reset processing state, even if an exception occurred
+                isProcessingRecipe = false;
+                Debug.Log("🧪 Recipe processing state reset");
             }
         }
 
@@ -2455,19 +2999,95 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         }
 
         /// <summary>
-        /// Execute the matched recipe
+        /// Execute the matched recipe atomically (synchronously) with defensive copying
+        /// This replaces the old ExecuteRecipe method to prevent race conditions
         /// </summary>
+        private void ExecuteRecipeAtomic(AlchemyRecipe recipe, HashSet<Ingredient> usedIngredientsSnapshot, List<IngredientInstance> placedIngredientsSnapshot)
+        {
+            Debug.Log($"🧪 ⚗️ EXECUTING RECIPE ATOMICALLY: {recipe.ItemName}");
+            Debug.Log($"🧪 Using ingredients: {string.Join(", ", usedIngredientsSnapshot.Select(i => i.ItemName))}");
+            Debug.Log($"🧪 Output: {recipe.OutputPotion?.ItemName ?? "Unknown Potion"} x{recipe.OutputQuantity}");
+            
+            try
+            {
+                // Phase 1: Immediate grid clearing (prevents further input)
+                Debug.Log($"🧪 🧹 Clearing grid immediately to prevent additional ingredient placement...");
+                ClearGridPreserveObstacles();
+                
+                // Phase 2: Add potion to inventory system (using snapshots)
+                if (recipe.OutputPotion != null)
+                {
+                    var inventory = FindFirstObjectByType<FourFatesStudios.ProjectWarden.ItemSlotContainerHolder>();
+                    if (inventory != null)
+                    {
+                        // Atomic inventory addition
+                        inventory.AddItem(recipe.OutputPotion, recipe.OutputQuantity);
+                        Debug.Log($"🎒 ✅ Added {recipe.OutputQuantity}x {recipe.OutputPotion.ItemName} to inventory!");
+                        
+                        // Phase 3: Update UI systems
+                        UpdateUISystemsAfterCrafting(recipe.OutputPotion);
+                    }
+                    else
+                    {
+                        Debug.LogWarning("🎒 ⚠️ ItemSlotContainerHolder not found - potion not added to inventory");
+                    }
+                }
+                
+                // Phase 4: Final success message
+                Debug.Log($"🧪 ✅ SUCCESS! Atomically created {recipe.OutputPotion?.ItemName ?? "Unknown Potion"}!");
+                Debug.Log($"🧪 🎉 Recipe execution complete! Enjoy your new {recipe.OutputPotion?.ItemName ?? "potion"}!");
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError($"🧪 💥 Error during atomic recipe execution: {ex.Message}");
+                Debug.LogError($"🧪 Stack trace: {ex.StackTrace}");
+                
+                // In case of error, still clear the grid to prevent stuck state
+                ClearGridPreserveObstacles();
+            }
+        }
+        
+        /// <summary>
+        /// Update UI systems after successful crafting (separated for clarity)
+        /// </summary>
+        private void UpdateUISystemsAfterCrafting(Potion craftedPotion)
+        {
+            try
+            {
+                // Notify the UI system about the new potion
+                var completedPotionsUI = FindFirstObjectByType<CompletedPotionsUIDocument>();
+                if (completedPotionsUI != null)
+                {
+                    completedPotionsUI.OnPotionCrafted(craftedPotion);
+                    Debug.Log($"📱 ✅ Updated UI with new potion: {craftedPotion.ItemName}");
+                }
+                else
+                {
+                    Debug.LogWarning("📱 ⚠️ CompletedPotionsUIDocument not found - UI may not update");
+                }
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogWarning($"📱 ⚠️ Error updating UI systems: {ex.Message}");
+                // Don't rethrow - UI update failure shouldn't break crafting
+            }
+        }
+
+        /// <summary>
+        /// DEPRECATED: Old Execute recipe method - replaced by ExecuteRecipeAtomic
+        /// Kept for reference but should not be used
+        /// </summary>
+        [System.Obsolete("Use ExecuteRecipeAtomic instead to prevent race conditions")]
         private void ExecuteRecipe(AlchemyRecipe recipe, HashSet<Ingredient> usedIngredients)
         {
-            Debug.Log($"🧪 ⚗️ EXECUTING RECIPE: {recipe.ItemName}");
-            Debug.Log($"🧪 Using ingredients: {string.Join(", ", usedIngredients.Select(i => i.ItemName))}");
-            Debug.Log($"🧪 Output: {recipe.OutputPotion?.ItemName ?? "Unknown Potion"} x{recipe.OutputQuantity}");
-
-            // Show immediate success message
-            Debug.Log($"🧪 ✅ SUCCESS! Created {recipe.OutputPotion?.ItemName ?? "Unknown Potion"}!");
+            Debug.LogWarning("🧪 ⚠️ DEPRECATED ExecuteRecipe called - use ExecuteRecipeAtomic instead!");
             
-            // Start the recipe completion process with visual feedback
-            StartCoroutine(RecipeCompletionSequence(recipe, usedIngredients));
+            // Redirect to atomic version with defensive copying
+            var ingredientsList = usedIngredients.ToList();
+            var snapshot = new HashSet<Ingredient>(usedIngredients);
+            var placedSnapshot = new List<IngredientInstance>(); // Empty - not used in deprecated path
+            
+            ExecuteRecipeAtomic(recipe, snapshot, placedSnapshot);
         }
 
         /// <summary>
@@ -2482,20 +3102,63 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             // Wait for 2 seconds to let player see the result
             yield return new WaitForSeconds(2.0f);
             
-            // Phase 2: Clear the grid
+            // Phase 2: Clear the grid (preserve obstacles for continued play)
             Debug.Log($"🧪 🧹 Clearing grid and finalizing recipe...");
-            ClearGrid();
+            ClearGridPreserveObstacles();
             
-            // Phase 3: Final completion message
+            // Phase 3: Add potion to inventory system
+            if (recipe.OutputPotion != null)
+            {
+                var inventory = FindFirstObjectByType<FourFatesStudios.ProjectWarden.ItemSlotContainerHolder>();
+                if (inventory != null)
+                {
+                    inventory.AddItem(recipe.OutputPotion, recipe.OutputQuantity);
+                    Debug.Log($"🎒 ✅ Added {recipe.OutputQuantity}x {recipe.OutputPotion.ItemName} to inventory!");
+                    
+                    // Notify the UI system about the new potion
+                    var completedPotionsUI = FindFirstObjectByType<CompletedPotionsUIDocument>();
+                    if (completedPotionsUI != null)
+                    {
+                        completedPotionsUI.OnPotionCrafted(recipe.OutputPotion);
+                        Debug.Log($"📱 ✅ Updated UI with new potion: {recipe.OutputPotion.ItemName}");
+                    }
+                    else
+                    {
+                        Debug.LogWarning("📱 ⚠️ CompletedPotionsUIDocument not found - UI may not update");
+                    }
+                }
+                else
+                {
+                    Debug.LogWarning("🎒 ⚠️ ItemSlotContainerHolder not found - potion not added to inventory");
+                }
+            }
+            
+            // Phase 4: Final completion message
             Debug.Log($"🧪 🎉 Recipe execution complete! Enjoy your new {recipe.OutputPotion?.ItemName ?? "potion"}!");
             
-            // Here you could add more functionality like:
-            // - Add the output potion to inventory
+            // Additional functionality could be added here:
             // - Show crafting animation
             // - Play success sound
             // - Award experience points
         }
 
+        /// <summary>
+        /// Public method to manually reset processing state (for emergency situations)
+        /// </summary>
+        [ContextMenu("🔧 Force Reset Processing State")]
+        public void ForceResetProcessingState()
+        {
+            bool wasProcessing = isProcessingRecipe;
+            isProcessingRecipe = false;
+            
+            Debug.Log($"🔧 Processing state manually reset. Was processing: {wasProcessing}");
+        }
+        
+        /// <summary>
+        /// Public property to check current processing state
+        /// </summary>
+        public bool IsProcessingRecipe => isProcessingRecipe;
+        
         /// <summary>
         /// Test method for recipe system
         /// </summary>
@@ -2591,6 +3254,700 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             }
         }
 
+        #region Dynamic Infusion-Based Crafting System
+
+        /// <summary>
+        /// Check if ingredients can create a dynamic potion based on shared infusions
+        /// </summary>
+        private Potion CheckForInfusionBasedCrafting(HashSet<Ingredient> uniqueIngredients, List<IngredientInstance> placedIngredients)
+        {
+            Debug.Log($"🧪 ✨ === CHECKING FOR INFUSION-BASED CRAFTING ===");
+            
+            if (uniqueIngredients.Count < 2)
+            {
+                Debug.Log("🧪 Need at least 2 ingredients for infusion-based crafting");
+                return null;
+            }
+
+            // Find shared infusions between ingredients
+            var sharedInfusions = FindSharedInfusions(uniqueIngredients);
+            
+            if (sharedInfusions.Count == 0)
+            {
+                Debug.Log("🧪 No shared infusions found between ingredients");
+                return null;
+            }
+
+            Debug.Log($"🧪 ✨ Found {sharedInfusions.Count} shared infusion types:");
+            foreach (var infusionType in sharedInfusions.Keys)
+            {
+                var infusions = sharedInfusions[infusionType];
+                Debug.Log($"   - {infusionType.Name}: {infusions.Count} instances from {infusions.Select(i => i.sourceIngredient.ItemName).Distinct().Count()} ingredients");
+            }
+
+            // Create or get dynamic potion based on shared infusions
+            return CreateDynamicPotion(sharedInfusions, uniqueIngredients);
+        }
+
+        /// <summary>
+        /// Find infusions that are shared between at least 2 different ingredients
+        /// </summary>
+        private Dictionary<System.Type, List<(object infusion, Ingredient sourceIngredient)>> FindSharedInfusions(HashSet<Ingredient> ingredients)
+        {
+            var infusionMap = new Dictionary<System.Type, List<(object infusion, Ingredient sourceIngredient)>>();
+            
+            // Collect all infusions from all ingredients
+            foreach (var ingredient in ingredients)
+            {
+                if (ingredient.InfusionBundle?.Infusions != null)
+                {
+                    foreach (var infusion in ingredient.InfusionBundle.Infusions)
+                    {
+                        if (infusion != null)
+                        {
+                            var infusionType = infusion.GetType();
+                            
+                            if (!infusionMap.ContainsKey(infusionType))
+                            {
+                                infusionMap[infusionType] = new List<(object, Ingredient)>();
+                            }
+                            
+                            infusionMap[infusionType].Add((infusion, ingredient));
+                        }
+                    }
+                }
+            }
+            
+            // Filter to only include infusions that appear in at least 2 different ingredients
+            var sharedInfusions = new Dictionary<System.Type, List<(object infusion, Ingredient sourceIngredient)>>();
+            
+            foreach (var kvp in infusionMap)
+            {
+                var infusionType = kvp.Key;
+                var infusionList = kvp.Value;
+                
+                // Count unique ingredients that have this infusion
+                var uniqueIngredients = infusionList.Select(tuple => tuple.sourceIngredient).Distinct().Count();
+                
+                if (uniqueIngredients >= 2)
+                {
+                    sharedInfusions[infusionType] = infusionList;
+                    Debug.Log($"🧪 🔗 Shared infusion detected: {infusionType.Name} (found in {uniqueIngredients} ingredients)");
+                }
+            }
+            
+            return sharedInfusions;
+        }
+
+        /// <summary>
+        /// Create a dynamic potion based on shared infusions
+        /// Options: Runtime creation vs. Asset creation
+        /// </summary>
+        private Potion CreateDynamicPotion(Dictionary<System.Type, List<(object infusion, Ingredient sourceIngredient)>> sharedInfusions, HashSet<Ingredient> sourceIngredients)
+        {
+            Debug.Log($"🧪 🎨 Creating dynamic potion from shared infusions...");
+            
+            // Generate potion name based on ingredients and infusions
+            var potionName = GenerateDynamicPotionName(sharedInfusions, sourceIngredients);
+            
+            // For now, create runtime potion (you can change this to asset creation if preferred)
+            var dynamicPotion = CreateRuntimePotion(potionName, sharedInfusions, sourceIngredients);
+            
+            return dynamicPotion;
+        }
+
+        /// <summary>
+        /// Generate a descriptive name for the dynamic potion
+        /// </summary>
+        private string GenerateDynamicPotionName(Dictionary<System.Type, List<(object infusion, Ingredient sourceIngredient)>> sharedInfusions, HashSet<Ingredient> sourceIngredients)
+        {
+            var infusionNames = sharedInfusions.Keys.Select(type => type.Name.Replace("Infusion", "")).ToList();
+            var ingredientNames = sourceIngredients.Select(i => i.Adjective ?? i.Noun ?? "Unknown").Where(s => !string.IsNullOrEmpty(s)).ToList();
+            
+            string infusionPart = string.Join(" & ", infusionNames);
+            string ingredientPart = ingredientNames.Count > 0 ? ingredientNames.First() : "Mixed";
+            
+            return $"{ingredientPart} {infusionPart} Potion";
+        }
+
+        /// <summary>
+        /// Create a runtime potion (non-persistent) with the shared infusions
+        /// </summary>
+        private Potion CreateRuntimePotion(string potionName, Dictionary<System.Type, List<(object infusion, Ingredient sourceIngredient)>> sharedInfusions, HashSet<Ingredient> sourceIngredients)
+        {
+            Debug.Log($"🧪 ⚡ Creating runtime potion: {potionName}");
+            
+            // Create a new potion instance (runtime only)
+            var dynamicPotion = ScriptableObject.CreateInstance<Potion>();
+            
+            // Set basic properties using reflection to access private fields
+            SetPotionProperty(dynamicPotion, "itemName", potionName);
+            SetPotionProperty(dynamicPotion, "itemDescription", $"A potion discovered through alchemical experimentation. Contains {string.Join(", ", sharedInfusions.Keys.Select(t => t.Name.Replace("Infusion", "")))} properties.");
+            
+            // Calculate potency based on source ingredients
+            var averagePotency = sourceIngredients.Average(i => i.Potency);
+            SetPotionProperty(dynamicPotion, "potency", Mathf.RoundToInt((float)averagePotency));
+            
+            // Set dynamic potion properties
+            SetPotionProperty(dynamicPotion, "isCustomPotion", true);
+            SetPotionProperty(dynamicPotion, "rarity", PotionRarity.Uncommon); // Dynamic potions are at least uncommon
+            
+            // Create and set infusion bundle for the potion
+            var potionInfusionBundle = new InfusionBundle();
+            
+            // Add the shared infusions to the potion
+            foreach (var sharedInfusionType in sharedInfusions.Keys)
+            {
+                var infusionList = sharedInfusions[sharedInfusionType];
+                // Take the first instance of each shared infusion type
+                var representativeInfusion = infusionList.First().infusion;
+                
+                // Add to potion's infusion bundle (casting to proper Infusion type)
+                if (representativeInfusion != null)
+                {
+                    try
+                    {
+                        // Use reflection to add infusion since we can't cast directly
+                        var addInfusionMethod = typeof(InfusionBundle).GetMethod("AddInfusion");
+                        if (addInfusionMethod != null)
+                        {
+                            addInfusionMethod.Invoke(potionInfusionBundle, new object[] { representativeInfusion });
+                        }
+                    }
+                    catch (System.Exception ex)
+                    {
+                        Debug.LogWarning($"🧪 ⚠️ Could not add infusion {representativeInfusion.GetType().Name}: {ex.Message}");
+                    }
+                }
+            }
+            
+            // Set the infusion bundle
+            SetPotionProperty(dynamicPotion, "infusionBundle", potionInfusionBundle);
+            
+            // Set source ingredients for reference
+            SetPotionProperty(dynamicPotion, "sourceIngredients", sourceIngredients.ToList());
+            
+            // Set visual properties based on infusions
+            SetDynamicPotionVisuals(dynamicPotion, sharedInfusions);
+            
+            Debug.Log($"🧪 ✨ Runtime potion created with {potionInfusionBundle.Infusions.Count} infusions");
+            
+            return dynamicPotion;
+        }
+        
+        /// <summary>
+        /// Helper method to set private potion properties using reflection
+        /// </summary>
+        private void SetPotionProperty(Potion potion, string propertyName, object value)
+        {
+            try
+            {
+                var field = typeof(Potion).GetField(propertyName, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                if (field != null)
+                {
+                    field.SetValue(potion, value);
+                }
+                else
+                {
+                    Debug.LogWarning($"🧪 ⚠️ Could not find field '{propertyName}' in Potion class");
+                }
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogWarning($"🧪 ⚠️ Error setting potion property '{propertyName}': {ex.Message}");
+            }
+        }
+        
+        /// <summary>
+        /// Set visual properties for dynamic potion based on infusion types
+        /// </summary>
+        private void SetDynamicPotionVisuals(Potion potion, Dictionary<System.Type, List<(object infusion, Ingredient sourceIngredient)>> sharedInfusions)
+        {
+            // Default visual properties
+            Color primaryColor = Color.blue;
+            Color secondaryColor = Color.white;
+            bool hasGlow = false;
+            bool hasBubbles = false;
+            bool hasParticles = false;
+            
+            // Determine visual effects based on infusion types
+            foreach (var infusionType in sharedInfusions.Keys)
+            {
+                string infusionName = infusionType.Name.ToLower();
+                
+                if (infusionName.Contains("fire"))
+                {
+                    primaryColor = Color.red;
+                    secondaryColor = new Color(1f,.4f,0f,1f);
+                    hasGlow = true;
+                    hasBubbles = true;
+                }
+                else if (infusionName.Contains("ice") || infusionName.Contains("frost"))
+                {
+                    primaryColor = Color.cyan;
+                    secondaryColor = Color.white;
+                    hasParticles = true;
+                }
+                else if (infusionName.Contains("poison") || infusionName.Contains("toxic"))
+                {
+                    primaryColor = Color.green;
+                    secondaryColor = Color.yellow;
+                    hasBubbles = true;
+                }
+                else if (infusionName.Contains("lightning") || infusionName.Contains("shock"))
+                {
+                    primaryColor = Color.magenta;
+                    secondaryColor = Color.white;
+                    hasGlow = true;
+                    hasParticles = true;
+                }
+                else if (infusionName.Contains("divine") || infusionName.Contains("holy"))
+                {
+                    primaryColor = Color.white;
+                    secondaryColor = Color.yellow;
+                    hasGlow = true;
+                    hasParticles = true;
+                }
+                else
+                {
+                    primaryColor = new Color(1f,.4f,0f,.3f);
+                    secondaryColor = Color.gray;
+                    hasGlow = true;
+                }
+            }
+            
+            // Apply visual properties
+            SetPotionProperty(potion, "primaryColor", primaryColor);
+            SetPotionProperty(potion, "secondaryColor", secondaryColor);
+            SetPotionProperty(potion, "hasGlow", hasGlow);
+            SetPotionProperty(potion, "hasBubbles", hasBubbles);
+            SetPotionProperty(potion, "hasParticles", hasParticles);
+            
+            Debug.Log($"🧪 🎨 Set dynamic potion visuals: Primary={primaryColor}, Glow={hasGlow}, Bubbles={hasBubbles}, Particles={hasParticles}");
+        }
+
+        /// <summary>
+        /// Execute dynamic potion crafting (similar to recipe execution)
+        /// </summary>
+        private void ExecuteDynamicPotionCrafting(Potion dynamicPotion, HashSet<Ingredient> usedIngredients, List<IngredientInstance> placedIngredients)
+        {
+            Debug.Log($"🧪 ✨ === EXECUTING DYNAMIC POTION CRAFTING ===");
+            Debug.Log($"🧪 Creating: {dynamicPotion.ItemName}");
+            Debug.Log($"🧪 From ingredients: {string.Join(", ", usedIngredients.Select(i => i.ItemName))}");
+            
+            try
+            {
+                // Phase 1: Clear grid immediately
+                Debug.Log($"🧪 🧹 Clearing grid...");
+                ClearGridPreserveObstacles();
+                
+                // Phase 2: Add dynamic potion to inventory
+                var inventory = FindFirstObjectByType<FourFatesStudios.ProjectWarden.ItemSlotContainerHolder>();
+                if (inventory != null)
+                {
+                    inventory.AddItem(dynamicPotion, 1);
+                    Debug.Log($"🎒 ✅ Added dynamic potion to inventory: {dynamicPotion.ItemName}");
+                    
+                    // Update UI if possible
+                    UpdateUISystemsAfterCrafting(dynamicPotion);
+                }
+                else
+                {
+                    Debug.LogWarning("🎒 ⚠️ ItemSlotContainerHolder not found - dynamic potion not added to inventory");
+                }
+                
+                // Phase 3: Show discovery message
+                Debug.Log($"🧪 🎉 DISCOVERY! You created a new potion: {dynamicPotion.ItemName}!");
+                
+                // Optional: Save discovered potion as asset for future use
+                // SaveDiscoveredPotionAsAsset(dynamicPotion, usedIngredients);
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError($"🧪 💥 Error during dynamic potion crafting: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Execute ingredient destruction when no valid combinations are found
+        /// </summary>
+        private void ExecuteIngredientDestruction(HashSet<Ingredient> usedIngredients, List<IngredientInstance> placedIngredients)
+        {
+            Debug.Log($"🧪 💥 === EXECUTING INGREDIENT DESTRUCTION ===");
+            Debug.Log($"🧪 Destroying ingredients: {string.Join(", ", usedIngredients.Select(i => i.ItemName))}");
+            
+            try
+            {
+                // Clear grid (ingredients are lost)
+                Debug.Log($"🧪 🗑️ Clearing grid - ingredients destroyed...");
+                ClearGridPreserveObstacles();
+                
+                // Show failure message
+                Debug.Log($"🧪 💀 The ingredients react violently and are destroyed! No useful potion was created.");
+                
+                // Optional: Add failure effects, sounds, particles, etc.
+                // PlayFailureEffects();
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError($"🧪 💥 Error during ingredient destruction: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Optional: Save discovered dynamic potion as an asset for future reference
+        /// This creates persistent ScriptableObject assets when new combinations are discovered
+        /// </summary>
+        private void SaveDiscoveredPotionAsAsset(Potion dynamicPotion, HashSet<Ingredient> sourceIngredients)
+        {
+#if UNITY_EDITOR
+            Debug.Log($"🧪 💾 Saving discovered potion as asset: {dynamicPotion.ItemName}");
+            
+            try
+            {
+                string assetPath = $"Assets/Resources/DiscoveredPotions/{dynamicPotion.ItemName}.asset";
+                
+                // Ensure directory exists
+                string directory = System.IO.Path.GetDirectoryName(assetPath);
+                if (!System.IO.Directory.Exists(directory))
+                {
+                    System.IO.Directory.CreateDirectory(directory);
+                }
+                
+                // Create persistent asset
+                UnityEditor.AssetDatabase.CreateAsset(dynamicPotion, assetPath);
+                UnityEditor.AssetDatabase.SaveAssets();
+                
+                Debug.Log($"🧪 ✅ Discovered potion saved as asset: {assetPath}");
+                
+                // Optional: Create a recipe asset for this discovered combination
+                // CreateRecipeAssetForDiscoveredPotion(dynamicPotion, sourceIngredients, assetPath);
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError($"🧪 💥 Error saving discovered potion as asset: {ex.Message}");
+            }
+#else
+            Debug.Log($"🧪 ⚠️ Asset creation only available in editor - discovered potion remains runtime-only");
+#endif
+        }
+
+        #endregion
+
+        /// <summary>
+        /// Test method for the new dynamic infusion-based crafting system
+        /// </summary>
+        [ContextMenu("🧪 Test Dynamic Infusion Crafting")]
+        public void TestDynamicInfusionCrafting()
+        {
+            Debug.Log("🧪 === TESTING DYNAMIC INFUSION CRAFTING SYSTEM ===");
+            
+            if (ingredientPlacer == null)
+            {
+                Debug.LogError("🧪 IngredientPlacer not found!");
+                return;
+            }
+            
+            var placedIngredients = ingredientPlacer.GetAllPlacedIngredients();
+            if (placedIngredients == null || placedIngredients.Count < 2)
+            {
+                Debug.Log("🧪 Place at least 2 ingredients on the grid first to test dynamic crafting");
+                return;
+            }
+            
+            Debug.Log($"🧪 Testing with {placedIngredients.Count} placed ingredients:");
+            foreach (var instance in placedIngredients)
+            {
+                Debug.Log($"   - {instance.ingredient.ItemName}");
+                
+                if (instance.ingredient.InfusionBundle?.Infusions != null)
+                {
+                    foreach (var infusion in instance.ingredient.InfusionBundle.Infusions)
+                    {
+                        Debug.Log($"     └ Infusion: {infusion?.GetType().Name ?? "NULL"}");
+                    }
+                }
+                else
+                {
+                    Debug.Log($"     └ No infusions found");
+                }
+            }
+            
+            // Test the shared infusion detection directly
+            var uniqueIngredients = new HashSet<Ingredient>();
+            foreach (var instance in placedIngredients)
+            {
+                if (instance?.ingredient != null)
+                {
+                    uniqueIngredients.Add(instance.ingredient);
+                }
+            }
+            
+            var sharedInfusions = FindSharedInfusions(uniqueIngredients);
+            
+            if (sharedInfusions.Count > 0)
+            {
+                Debug.Log("🧪 ✅ Shared infusions detected! This should create a dynamic potion.");
+                var dynamicPotion = CheckForInfusionBasedCrafting(uniqueIngredients, placedIngredients);
+                if (dynamicPotion != null)
+                {
+                    Debug.Log($"🧪 🎉 SUCCESS! Dynamic potion would be created: {dynamicPotion.ItemName}");
+                }
+            }
+            else
+            {
+                Debug.Log("🧪 ❌ No shared infusions found - ingredients would be destroyed");
+            }
+            
+            Debug.Log("🧪 === DYNAMIC INFUSION CRAFTING TEST COMPLETE ===");
+        }
+
+        #region Helper Methods for Testing and Enhanced Systems
+
+        /// <summary>
+        /// Get all currently placed ingredients as a dictionary
+        /// </summary>
+        public Dictionary<Vector2Int, Ingredient> GetCurrentPlacedIngredientsDict()
+        {
+            var placements = new Dictionary<Vector2Int, Ingredient>();
+            
+            if (ingredientPlacer != null)
+            {
+                var placedIngredients = ingredientPlacer.GetAllPlacedIngredients();
+                foreach (var instance in placedIngredients)
+                {
+                    var cells = GetIngredientCells(instance.ingredient, instance.gridPosition);
+                    foreach (var cellPos in cells)
+                    {
+                        placements[cellPos] = instance.ingredient;
+                    }
+                }
+            }
+            
+            return placements;
+        }
+
+        /// <summary>
+        /// Check if an ingredient has specific effects
+        /// </summary>
+        public bool HasIngredientEffects(Ingredient ingredient)
+        {
+            // Return true if ingredient has any special effects
+            // In a full implementation, this would check for special properties
+            return ingredient.IngredientAspect != Aspect.Corporeal || ingredient.Potency > 50;
+        }
+
+        /// <summary>
+        /// Get grid efficiency score from enhanced grid system
+        /// </summary>
+        public float GetGridEfficiencyScore()
+        {
+            if (enhancedGridSystem != null)
+            {
+                return enhancedGridSystem.GetGridEfficiencyScore();
+            }
+            
+            // Calculate basic efficiency as fallback
+            int occupiedCells = 0;
+            int totalCells = gridWidth * gridHeight;
+            
+            for (int x = 0; x < gridWidth; x++)
+            {
+                for (int y = 0; y < gridHeight; y++)
+                {
+                    if (gridCells[x, y].IsOccupied)
+                    {
+                        occupiedCells++;
+                    }
+                }
+            }
+            
+            return totalCells > 0 ? (float)occupiedCells / totalCells : 0f;
+        }
+
+        /// <summary>
+        /// Get ingredient placement statistics for analysis
+        /// </summary>
+        public PlacementStats GetPlacementStats()
+        {
+            var stats = new PlacementStats
+            {
+                totalIngredients = 0,
+                uniqueAspects = new HashSet<Aspect>(),
+                adjacentPairs = 0,
+                completedObstacles = 0
+            };
+
+            if (ingredientPlacer != null)
+            {
+                var placedIngredients = ingredientPlacer.GetAllPlacedIngredients();
+                stats.totalIngredients = placedIngredients.Count;
+                
+                foreach (var instance in placedIngredients)
+                {
+                    stats.uniqueAspects.Add(instance.ingredient.IngredientAspect);
+                }
+            }
+
+            stats.completedObstacles = aspectObstacles.Count(o => o.IsCompleted);
+            
+            return stats;
+        }
+
+        /// <summary>
+        /// Data structure for placement statistics
+        /// </summary>
+        [System.Serializable]
+        public struct PlacementStats
+        {
+            public int totalIngredients;
+            public HashSet<Aspect> uniqueAspects;
+            public int adjacentPairs;
+            public int completedObstacles;
+        }
+
+        /// <summary>
+        /// Check adjacent cells for specific analysis
+        /// </summary>
+        public List<Vector2Int> GetAdjacentCells(Vector2Int position, bool includeDiagonals = false)
+        {
+            var adjacentCells = new List<Vector2Int>();
+            
+            // Cardinal directions
+            var directions = new List<Vector2Int>
+            {
+                Vector2Int.up,
+                Vector2Int.down,
+                Vector2Int.left,
+                Vector2Int.right
+            };
+            
+            // Add diagonals if requested
+            if (includeDiagonals)
+            {
+                directions.AddRange(new[]
+                {
+                    new Vector2Int(1, 1),
+                    new Vector2Int(1, -1),
+                    new Vector2Int(-1, 1),
+                    new Vector2Int(-1, -1)
+                });
+            }
+            
+            foreach (var direction in directions)
+            {
+                var adjacentPos = position + direction;
+                if (adjacentPos.x >= 0 && adjacentPos.x < gridWidth &&
+                    adjacentPos.y >= 0 && adjacentPos.y < gridHeight)
+                {
+                    adjacentCells.Add(adjacentPos);
+                }
+            }
+            
+            return adjacentCells;
+        }
+        
+        /// <summary>
+        /// Enhanced placement validation with all new systems
+        /// </summary>
+        public bool CanPlaceIngredientEnhanced(Ingredient ingredient, Vector2Int position)
+        {
+            // Basic placement check
+            if (!CanPlaceIngredient(ingredient, position))
+            {
+                return false;
+            }
+            
+            // Check enhanced systems constraints (if layering is enabled)
+            if (enhancedGridSystem != null && enhancedGridSystem.CanOverlapAt(position, ingredient))
+            {
+                // Enhanced placement is allowed, continue
+            }
+            
+            // Check template constraints if active
+            if (templateSystem != null && templateSystem.IsTemplateActive)
+            {
+                // Template is active - basic placement should be allowed
+                // Template validation happens during progress updates
+            }
+            
+            return true;
+        }
+
+        /// <summary>
+        /// Debug helper to show all enhanced system states
+        /// </summary>
+        [ContextMenu("Debug Enhanced Systems State")]
+        public void DebugEnhancedSystemsState()
+        {
+            Debug.Log("🔍 === ENHANCED SYSTEMS STATE DEBUG ===");
+            
+            Debug.Log($"🔮 Synergy System: {(synergySystem != null ? "Active" : "Missing")}");
+            if (synergySystem != null)
+            {
+                Debug.Log($"   - Active synergies: {synergySystem.GetActiveSynergies().Count}");
+            }
+            
+            Debug.Log($"⚠️ Failure System: {(failureSystem != null ? "Active" : "Missing")}");
+            if (failureSystem != null)
+            {
+                Debug.Log($"   - Failure system active");
+            }
+            
+            Debug.Log($"🌳 Skill Tree: {(skillTree != null ? "Active" : "Missing")}");
+            if (skillTree != null)
+            {
+                Debug.Log($"   - Available points: {skillTree.GetAvailableSkillPoints()}");
+                Debug.Log($"   - Unlocked skills: {skillTree.GetUnlockedSkills().Count}");
+            }
+            
+            Debug.Log($"🗺️ Template System: {(templateSystem != null ? "Active" : "Missing")}");
+            if (templateSystem != null)
+            {
+                Debug.Log($"   - Active template: {(templateSystem.IsTemplateActive ? templateSystem.CurrentTemplate.templateName : "None")}");
+                Debug.Log($"   - Discovered templates: {templateSystem.GetDiscoveredTemplates().Count}");
+            }
+            
+            Debug.Log($"🔄 Enhanced Grid: {(enhancedGridSystem != null ? "Active" : "Missing")}");
+            if (enhancedGridSystem != null)
+            {
+                var stats = enhancedGridSystem.GetExpansionStats();
+                Debug.Log($"   - Current size: {stats.currentSize.x}x{stats.currentSize.y}");
+                Debug.Log($"   - Efficiency: {enhancedGridSystem.GetGridEfficiencyScore():P}");
+            }
+            
+            Debug.Log($"📊 Grid Stats:");
+            Debug.Log($"   - Size: {gridWidth}x{gridHeight}");
+            Debug.Log($"   - Obstacles: {aspectObstacles.Count}");
+            Debug.Log($"   - Efficiency: {GetGridEfficiencyScore():P}");
+        }
+
+        /// <summary>
+        /// Check if the current session is in free crafting mode
+        /// </summary>
+        private bool IsFreeCraftingMode()
+        {
+            // Check if there's a CraftingModeSelector in the scene
+            var modeSelector = FindFirstObjectByType<FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu.CraftingModeSelector>();
+            if (modeSelector != null)
+            {
+                // Check if it's in Free crafting mode
+                return modeSelector.GetCurrentMode() == FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu.CraftingModeSelector.CraftingMode.Free;
+            }
+            
+            // Fallback: Detect based on grid characteristics
+            // Free crafting typically uses a 3x3 grid with no obstacles enabled
+            bool isSmallGrid = (gridWidth == 3 && gridHeight == 3);
+            bool hasNoObstacles = !enableObstacles || aspectObstacles.Count == 0;
+            
+            if (isSmallGrid && hasNoObstacles)
+            {
+                Debug.Log("🎮 Detected free crafting mode based on grid characteristics (3x3, no obstacles)");
+                return true;
+            }
+            
+            return false;
+        }
         #endregion
     }
 }

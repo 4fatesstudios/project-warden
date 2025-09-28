@@ -16,6 +16,9 @@ namespace FourFatesStudios.ProjectWarden.GridDemo.UI
         [Header("UI References")]
         [SerializeField] private TextMeshProUGUI proficiencyNumberText;
         [SerializeField] private Image proficiencyProgressBar;
+        [SerializeField] private ScrollRect potionsScrollView;
+        [SerializeField] private Transform potionsContentParent;
+        [SerializeField] private GameObject potionEntryPrefab;
         
         [Header("UI Settings")]
         [SerializeField] private bool autoSetupOnStart = true;
@@ -148,6 +151,8 @@ namespace FourFatesStudios.ProjectWarden.GridDemo.UI
             
             Debug.Log("🧪 ProficiencyDisplayManager: Setting up proficiency display...");
             SetupProficiencyDisplay();
+            Debug.Log("🧪 ProficiencyDisplayManager: Setting up potion scroll view...");
+            SetupPotionScrollView();
             Debug.Log("🧪 ProficiencyDisplayManager: Refreshing displays...");
             RefreshProficiencyDisplay();
             
@@ -195,6 +200,203 @@ namespace FourFatesStudios.ProjectWarden.GridDemo.UI
                 proficiencyNumberText.fontStyle = FontStyles.Bold;
             }
         }
+        
+        private void SetupPotionScrollView()
+        {
+            // Find the right panel or create it
+            RightPanelManager rightPanel = FindFirstObjectByType<RightPanelManager>();
+            if (rightPanel == null)
+            {
+                Debug.LogWarning("ProficiencyDisplayManager: RightPanelManager not found, creating static potion list separately");
+                CreateStandalonePotionList();
+                return;
+            }
+            
+            // Modify the right panel to include our static potion list
+            ModifyRightPanelForPotionList(rightPanel);
+        }
+        
+        private void CreateStandalonePotionList()
+        {
+            Debug.Log("🧪 CreateStandalonePotionList: Starting...");
+            
+            Canvas canvas = FindMainCanvas();
+            if (canvas == null) 
+            {
+                Debug.LogError("🧪 CreateStandalonePotionList: FindMainCanvas returned null! Cannot create UI.");
+                return;
+            }
+            
+            Debug.Log($"🧪 CreateStandalonePotionList: Found canvas '{canvas.name}' - RenderMode: {canvas.renderMode}");
+            
+            // Create standalone potion list panel
+            GameObject potionListPanel = new GameObject("Static Potion List Panel");
+            potionListPanel.transform.SetParent(canvas.transform, false);
+            Debug.Log($"🧪 CreateStandalonePotionList: Created panel, parent set to '{canvas.name}'");
+            
+            RectTransform panelRect = potionListPanel.AddComponent<RectTransform>();
+            panelRect.anchorMin = new Vector2(1f, 0f);
+            panelRect.anchorMax = new Vector2(1f, 1f);
+            panelRect.pivot = new Vector2(1f, 0.5f);
+            panelRect.sizeDelta = new Vector2(200f, 0f);  // Increased from 125f
+            panelRect.anchoredPosition = new Vector2(-10f, 0f);
+            Debug.Log($"🧪 CreateStandalonePotionList: RectTransform configured - Size: {panelRect.sizeDelta}, Position: {panelRect.anchoredPosition}");
+            
+            // Add background
+            Image panelBackground = potionListPanel.AddComponent<Image>();
+            panelBackground.color = potionListBackgroundColor;
+            panelBackground.type = Image.Type.Simple;  // Simple solid color, no sprite needed
+            
+            Debug.Log($"🧪 CreateStandalonePotionList: Panel background configured - Color: {panelBackground.color}, Type: {panelBackground.type}");
+            
+            // Create header
+            CreatePotionListHeader(potionListPanel);
+            Debug.Log("🧪 CreateStandalonePotionList: Header created");
+            
+            // Create scroll view
+            CreatePotionScrollView(potionListPanel);
+            Debug.Log("🧪 CreateStandalonePotionList: Scroll view created");
+            
+            // Make sure panel is active
+            potionListPanel.SetActive(true);
+            Debug.Log("✅ CreateStandalonePotionList: Panel creation complete and active");
+        }
+        
+        private void ModifyRightPanelForPotionList(RightPanelManager rightPanel)
+        {
+            // This would integrate with the existing right panel
+            // For now, we'll create a separate static panel that's always visible
+            CreateStandalonePotionList();
+        }
+        
+        private void CreatePotionListHeader(GameObject parent)
+        {
+            GameObject header = new GameObject("Potion List Header");
+            header.transform.SetParent(parent.transform, false);
+            
+            RectTransform headerRect = header.AddComponent<RectTransform>();
+            headerRect.anchorMin = new Vector2(0f, 1f);
+            headerRect.anchorMax = new Vector2(1f, 1f);
+            headerRect.pivot = new Vector2(0.5f, 1f);
+            headerRect.sizeDelta = new Vector2(0f, 25f);
+            headerRect.anchoredPosition = Vector2.zero;
+            
+            Image headerBg = header.AddComponent<Image>();
+            headerBg.color = new Color(0.3f, 0.3f, 0.3f, 1f);
+            
+            // Header text
+            GameObject headerText = new GameObject("Header Text");
+            headerText.transform.SetParent(header.transform, false);
+            
+            RectTransform headerTextRect = headerText.AddComponent<RectTransform>();
+            headerTextRect.anchorMin = Vector2.zero;
+            headerTextRect.anchorMax = Vector2.one;
+            headerTextRect.offsetMin = new Vector2(5f, 0f);
+            headerTextRect.offsetMax = new Vector2(-5f, 0f);
+            
+            TextMeshProUGUI headerTextComp = headerText.AddComponent<TextMeshProUGUI>();
+            headerTextComp.text = "COMPLETED POTIONS";
+            headerTextComp.fontSize = 12f;  // Increased from 7f
+            headerTextComp.fontStyle = FontStyles.Bold;
+            headerTextComp.color = Color.white;
+            headerTextComp.alignment = TextAlignmentOptions.Center;
+            
+            // Set the font asset to ensure visibility - Unity 6 compatible
+            TMP_FontAsset defaultFont = null;
+            
+            // Try Unity 6 default font first
+            defaultFont = Resources.Load<TMP_FontAsset>("Fonts & Materials/LiberationSans SDF");
+            if (defaultFont == null)
+            {
+                // Try the built-in resource (older Unity versions)
+                defaultFont = Resources.GetBuiltinResource<TMP_FontAsset>("LiberationSans SDF");
+            }
+            if (defaultFont == null)
+            {
+                // Try to find any available TMP font
+                defaultFont = Resources.FindObjectsOfTypeAll<TMP_FontAsset>().FirstOrDefault();
+            }
+            
+            if (defaultFont != null)
+            {
+                headerTextComp.font = defaultFont;
+                Debug.Log($"🧪 Set font for header text: {defaultFont.name}");
+            }
+            else
+            {
+                Debug.LogWarning("🧪 Could not find any TextMeshPro font asset for header!");
+            }
+        }
+        
+        private void CreatePotionScrollView(GameObject parent)
+        {
+            Debug.Log("🧪 CreatePotionScrollView: Creating simple scroll view...");
+            
+            // Main scroll view container
+            GameObject scrollViewObj = new GameObject("Potion ScrollView");
+            scrollViewObj.transform.SetParent(parent.transform, false);
+            
+            RectTransform scrollRect = scrollViewObj.AddComponent<RectTransform>();
+            scrollRect.anchorMin = Vector2.zero;
+            scrollRect.anchorMax = Vector2.one;
+            scrollRect.offsetMin = new Vector2(5f, 5f);
+            scrollRect.offsetMax = new Vector2(-5f, -30f); // Leave space for header
+            
+            // Add ScrollRect component
+            potionsScrollView = scrollViewObj.AddComponent<ScrollRect>();
+            potionsScrollView.horizontal = false;
+            potionsScrollView.vertical = true;
+            
+            // Create viewport (clipping area)
+            GameObject viewport = new GameObject("Viewport");
+            viewport.transform.SetParent(scrollViewObj.transform, false);
+            
+            RectTransform viewportRect = viewport.AddComponent<RectTransform>();
+            viewportRect.anchorMin = Vector2.zero;
+            viewportRect.anchorMax = Vector2.one;
+            viewportRect.sizeDelta = Vector2.zero;
+            viewportRect.anchoredPosition = Vector2.zero;
+            
+            // Add Mask component for clipping
+            Mask viewportMask = viewport.AddComponent<Mask>();
+            viewportMask.showMaskGraphic = false;
+            
+            // Viewport needs an Image component for masking
+            Image viewportImage = viewport.AddComponent<Image>();
+            viewportImage.color = Color.clear;
+            
+            // Create content area (this will hold all the potion entries)
+            GameObject content = new GameObject("Content");
+            content.transform.SetParent(viewport.transform, false);
+            
+            RectTransform contentRect = content.AddComponent<RectTransform>();
+            contentRect.anchorMin = new Vector2(0f, 1f); // Top-left anchor
+            contentRect.anchorMax = new Vector2(1f, 1f); // Top-right anchor  
+            contentRect.pivot = new Vector2(0.5f, 1f);   // Pivot at top-center
+            contentRect.sizeDelta = new Vector2(0f, 100f); // Start with some height
+            contentRect.anchoredPosition = Vector2.zero;
+            
+            // Add vertical layout to arrange entries
+            VerticalLayoutGroup contentLayout = content.AddComponent<VerticalLayoutGroup>();
+            contentLayout.spacing = 5f;
+            contentLayout.padding = new RectOffset(5, 5, 5, 5);
+            contentLayout.childControlWidth = true;
+            contentLayout.childControlHeight = false;
+            contentLayout.childForceExpandWidth = true;
+            contentLayout.childForceExpandHeight = false;
+            
+            // Auto-resize content based on children
+            ContentSizeFitter contentFitter = content.AddComponent<ContentSizeFitter>();
+            contentFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+            
+            // Connect scroll view components
+            potionsScrollView.viewport = viewportRect;
+            potionsScrollView.content = contentRect;
+            potionsContentParent = content.transform;
+            
+            Debug.Log("✅ CreatePotionScrollView: Scroll view setup complete");
+        }
+        
         
         /// <summary>
         /// Public method to force refresh proficiency display when grid changes
