@@ -40,7 +40,6 @@ namespace FourFatesStudios.ProjectWarden.GridDemo.UI
         
         // References
         private GridGameManager gridManager;
-        private ImprovedClickDetector clickDetector;
         private ProficiencyDisplayManager proficiencyManager;
         
         public static RightPanelManager Instance { get; private set; }
@@ -63,7 +62,6 @@ namespace FourFatesStudios.ProjectWarden.GridDemo.UI
             if (autoSetupOnStart)
             {
                 SetupRightPanel();
-                SetupClickDetection();
             }
             
             gridManager = FindFirstObjectByType<GridGameManager>();
@@ -337,21 +335,6 @@ namespace FourFatesStudios.ProjectWarden.GridDemo.UI
             removeButton.onClick.AddListener(RemoveCurrentIngredient);
         }
         
-        private void SetupClickDetection()
-        {
-            // Create or get click detection manager
-            clickDetector = FindFirstObjectByType<ImprovedClickDetector>();
-            if (clickDetector == null)
-            {
-                GameObject clickDetectorObj = new GameObject("Improved Click Detector");
-                clickDetector = clickDetectorObj.AddComponent<ImprovedClickDetector>();
-            }
-            
-            // Subscribe to click events
-            clickDetector.OnIngredientClicked += ShowIngredientDetails;
-            clickDetector.OnEmptySpaceClicked += HidePanel;
-        }
-        
         public void ShowIngredientDetails(Ingredient ingredient, Vector2Int gridPosition)
         {
             currentIngredient = ingredient;
@@ -509,15 +492,6 @@ namespace FourFatesStudios.ProjectWarden.GridDemo.UI
                 }
             }
             return canvases.Length > 0 ? canvases[0] : null;
-        }
-        
-        private void OnDestroy()
-        {
-            if (clickDetector != null)
-            {
-                clickDetector.OnIngredientClicked -= ShowIngredientDetails;
-                clickDetector.OnEmptySpaceClicked -= HidePanel;
-            }
         }
     }
 }

@@ -3083,16 +3083,6 @@ namespace FourFatesStudios.ProjectWarden.Editor
                         Debug.Log($"🧱 Removed obstacle from cell ({pos.x}, {pos.y})");
                     }
                 }
-                else if (cellData.HasObstacle)
-                {
-                    // Cycle obstacle types if one already exists
-                    var obstacleTypes = Enum.GetValues(typeof(ObstacleType));
-                    int currentIndex = Array.IndexOf(obstacleTypes, cellData.obstacle.ObstacleType);
-                    ObstacleType newType = (ObstacleType)obstacleTypes.GetValue((currentIndex + 1) % obstacleTypes.Length);
-                    cellData.obstacle = new AspectObstacle(newType, pos);
-                    gridCells[pos] = cellData;
-                    Debug.Log($"🧱 Changed obstacle at ({pos.x}, {pos.y}) to {newType}");
-                }
                 else
                 {
                     // Add obstacle to existing cell
@@ -3113,22 +3103,6 @@ namespace FourFatesStudios.ProjectWarden.Editor
                     Debug.Log($"🧱 Placed {selectedObstacleType} obstacle at new cell ({pos.x}, {pos.y})");
                 }
             }
-        }
-        // HandleIngredientPlacement method removed - Grid Designer now only handles obstacles
-        
-        
-        private void SaveGridPattern(AlchemyRecipe recipe)
-        {
-            Debug.Log($"💾 Saving grid pattern for {recipe.ItemName} with {gridCells.Count} cells");
-            // This would serialize the grid data to the recipe asset
-            EditorUtility.DisplayDialog("Save Pattern", $"Grid pattern saved for {recipe.ItemName}!\n\nCells: {gridCells.Count}\nPattern Type: {patternTypes[selectedPatternType]}", "OK");
-        }
-        
-        private void LoadGridPattern(AlchemyRecipe recipe)
-        {
-            Debug.Log($"📋 Loading grid pattern for {recipe.ItemName}");
-            // This would load the grid data from the recipe asset
-            EditorUtility.DisplayDialog("Load Pattern", $"Grid pattern loaded for {recipe.ItemName}!\n\nPattern would be restored from saved data.", "OK");
         }
 
         private void CreateEntryFromTemplate(AlchemyBookEntryTemplate template) 
@@ -4765,8 +4739,8 @@ namespace FourFatesStudios.ProjectWarden.Editor
             AssetDatabase.SaveAssets();
             
             EditorUtility.DisplayDialog("Save Pattern", 
-                $"Grid pattern saved for {recipeName}!\n\nRequired Positions: {gridCells.Values.Count(c => c.isRequired)}\nTotal Cells: {gridCells.Count}", 
-                "OK");
+                $"Grid pattern saved for {recipeName}!\n\n# of Free Cells: {gridCells.Count - gridCells.Values.Count(c => c.HasObstacle)}" +
+                $"\n# of Obstacles: {gridCells.Values.Count(c => c.HasObstacle)}\nTotal Cells: {gridCells.Count}", "OK");
         }
         
         private void LoadGridPatternFromRecipe(AlchemyRecipe recipe)
@@ -5054,7 +5028,8 @@ namespace FourFatesStudios.ProjectWarden.Editor
             {
                 ObstacleType.Corporeal => new Color(0.8f, 0.6f, 0.4f, 0.9f), // Brown/Earth (matches Corporeal aspect)
                 ObstacleType.Scorch => new Color(1.0f, 0.4f, 0.2f, 0.9f),    // Fire Red (matches Scorch aspect)  
-                ObstacleType.Frigid => new Color(0.4f, 0.8f, 1.0f, 0.9f),    // Ice Blue (matches Frigid aspect)
+                ObstacleType.FrigidFrozen => new Color(0.2f, 0.4f, 1.0f, 0.9f),    // Dark Ice Blue (matches Frigid aspect)
+                ObstacleType.FrigidMelted => new Color(0.4f, 0.8f, 1.0f, 0.9f),    // Light Ice Blue (matches Frigid aspect)
                 ObstacleType.Arc => new Color(1.0f, 1.0f, 0.4f, 0.9f),       // Lightning Yellow (matches Arc aspect)
                 ObstacleType.Caustic => new Color(0.6f, 1.0f, 0.2f, 0.9f),   // Acid Green (matches Caustic aspect)
                 ObstacleType.Divine => new Color(1.0f, 0.8f, 1.0f, 0.9f),    // Holy Purple (matches Divine aspect)
@@ -5070,7 +5045,8 @@ namespace FourFatesStudios.ProjectWarden.Editor
             return obstacleType switch
             {
                 ObstacleType.Corporeal => "Blocked cell - cannot place ingredients",
-                ObstacleType.Frigid => "Frozen cell - unlock with adjacent Scorch/Corporeal",
+                ObstacleType.FrigidFrozen => "Frozen cell - unlock with adjacent Scorch/Corporeal",
+                ObstacleType.FrigidMelted => "Melted cell - unlocked with adjacent Scorch/Corporeal",
                 ObstacleType.Scorch => "Volatile cell - requires Scorch, Caustic, or Arc aspects",
                 ObstacleType.Caustic => "Degrade cell - reduces ingredient potency by 20%",
                 ObstacleType.Arc => "Chaotic cell - triggers random effects",
@@ -5087,7 +5063,8 @@ namespace FourFatesStudios.ProjectWarden.Editor
             return obstacleType switch
             {
                 ObstacleType.Corporeal => "■",  // Solid block
-                ObstacleType.Frigid => "❄",    // Snowflake
+                ObstacleType.FrigidFrozen => "❄",    // Snowflake
+                ObstacleType.FrigidMelted => "💧",    // Water drop
                 ObstacleType.Scorch => "🔥",   // Fire
                 ObstacleType.Caustic => "☣",   // Biohazard
                 ObstacleType.Arc => "⚡",      // Lightning
@@ -5112,9 +5089,14 @@ namespace FourFatesStudios.ProjectWarden.Editor
                     DrawStoneEffect(cellRect, cellColor);
                     break;
                     
-                case ObstacleType.Frigid:
+                case ObstacleType.FrigidFrozen:
                     // Frozen - draw with ice crystal effect
                     DrawIceEffect(cellRect, cellColor);
+                    break;
+                    
+                case ObstacleType.FrigidMelted:
+                    // Melted - draw with water effect
+                    DrawWaterEffect(cellRect, cellColor);
                     break;
                     
                 case ObstacleType.Scorch:
@@ -5168,6 +5150,21 @@ namespace FourFatesStudios.ProjectWarden.Editor
             var highlightRect = new Rect(cellRect.x + 2, cellRect.y + 2, cellRect.width * 0.3f, cellRect.height * 0.3f);
             Color highlightColor = Color.Lerp(baseColor, Color.white, 0.8f);
             EditorGUI.DrawRect(highlightRect, highlightColor);
+        }
+        
+        private void DrawWaterEffect(Rect cellRect, Color baseColor)
+        {
+            // Create flowing water effect with waves
+            var centerRect = new Rect(cellRect.x + 3, cellRect.y + 3, cellRect.width - 6, cellRect.height - 6);
+            Color waterColor = Color.Lerp(baseColor, new Color(0.7f, 0.9f, 1.0f), 0.4f);
+            EditorGUI.DrawRect(centerRect, waterColor);
+            
+            // Add wave-like highlights
+            var waveRect1 = new Rect(cellRect.x + 1, cellRect.y + cellRect.height * 0.3f, cellRect.width - 2, 2);
+            var waveRect2 = new Rect(cellRect.x + 1, cellRect.y + cellRect.height * 0.7f, cellRect.width - 2, 2);
+            Color waveColor = Color.Lerp(baseColor, Color.white, 0.5f);
+            EditorGUI.DrawRect(waveRect1, waveColor);
+            EditorGUI.DrawRect(waveRect2, waveColor);
         }
         
         private void DrawFlameEffect(Rect cellRect, Color baseColor)

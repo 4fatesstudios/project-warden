@@ -101,8 +101,8 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             // Step 3: Create the consolidated UI
             CreateConsolidatedUI();
             
-            // Step 4: Setup additional components
-            SetupSupportingComponents();
+            // Step 4: Setup additional components #temporarily disabled
+            //SetupSupportingComponents();
             
             if (debugMode)
             {
@@ -591,14 +591,6 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                 GameObject rightPanelObj = new GameObject("Right Panel Manager");
                 rightPanelObj.transform.SetParent(transform, false);
                 rightPanel = rightPanelObj.AddComponent<RightPanelManager>();
-            }
-            
-            // Setup click detector if it doesn't exist
-            ImprovedClickDetector clickDetector = FindFirstObjectByType<ImprovedClickDetector>();
-            if (clickDetector == null)
-            {
-                GameObject clickDetectorObj = new GameObject("Improved Click Detector");
-                clickDetector = clickDetectorObj.AddComponent<ImprovedClickDetector>();
             }
         }
         
