@@ -1366,6 +1366,75 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             
             Debug.Log("✅ Navigation to MenuSelector completed via direct GameObject manipulation");
         }
+
+        [ContextMenu("Add Back Button To Existing UI")]
+        public void AddBackButtonToExistingUI()
+        {
+            Debug.Log("🔧 Looking for existing UI to add back button...");
+
+            // Try to find any existing controls section in GridDemo UI
+            GameObject gridDemoUI = GameObject.Find("GridDemo UI");
+            if (gridDemoUI == null)
+            {
+                Debug.LogError("❌ GridDemo UI not found!");
+                return;
+            }
+
+            // Look for any existing controls container
+            Transform controlsContainer = FindControlsContainer(gridDemoUI.transform);
+            
+            if (controlsContainer == null)
+            {
+                Debug.LogError("❌ No controls container found! Your UI might not be set up yet.");
+                return;
+            }
+
+            // Check if back button already exists
+            Transform existingBackButton = controlsContainer.Find("Back Button");
+            if (existingBackButton != null)
+            {
+                Debug.Log("✅ Back button already exists!");
+                return;
+            }
+
+            // Create the back button in the existing controls section
+            Debug.Log($"🔧 Adding back button to existing controls: {controlsContainer.name}");
+            CreateCompactBackButton(controlsContainer.gameObject);
+            Debug.Log("✅ Back button added to your existing UI!");
+        }
+
+        private Transform FindControlsContainer(Transform root)
+        {
+            // Look for any GameObject with "Controls" in the name (for existing UI)
+            Transform[] allChildren = root.GetComponentsInChildren<Transform>(true);
+            
+            foreach (Transform child in allChildren)
+            {
+                if (child.name.Contains("Controls") || child.name.Contains("Container"))
+                {
+                    // Check if this container already has control buttons
+                    bool hasControlButtons = false;
+                    for (int i = 0; i < child.childCount; i++)
+                    {
+                        string childName = child.GetChild(i).name.ToLower();
+                        if (childName.Contains("craft") || childName.Contains("clear") || childName.Contains("button"))
+                        {
+                            hasControlButtons = true;
+                            break;
+                        }
+                    }
+                    
+                    if (hasControlButtons)
+                    {
+                        Debug.Log($"🎯 Found your controls container: {child.name}");
+                        return child;
+                    }
+                }
+            }
+            
+            Debug.LogWarning("⚠️ No controls container with existing buttons found");
+            return null;
+        }
         
         #endregion
     }
