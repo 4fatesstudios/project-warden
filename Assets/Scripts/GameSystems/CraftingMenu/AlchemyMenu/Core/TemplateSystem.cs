@@ -78,7 +78,7 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu
                 templateCells = new List<TemplateCellData>
                 {
                     // Center obstacle
-                    new TemplateCellData { position = new Vector2Int(1, 1), cellType = TemplateCellType.Obstacle, obstacleType = ObstacleType.Frigid },
+                    new TemplateCellData { position = new Vector2Int(1, 1), cellType = TemplateCellType.Obstacle, obstacleType = ObstacleType.FrigidFrozen },
                     // Corner requirements
                     new TemplateCellData { position = new Vector2Int(0, 0), cellType = TemplateCellType.RequiredIngredient, requiredAspect = Aspect.Scorch },
                     new TemplateCellData { position = new Vector2Int(2, 2), cellType = TemplateCellType.RequiredIngredient, requiredAspect = Aspect.Caustic }
@@ -101,7 +101,7 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu
                     // Diagonal line of obstacles
                     new TemplateCellData { position = new Vector2Int(0, 0), cellType = TemplateCellType.Obstacle, obstacleType = ObstacleType.Arc },
                     new TemplateCellData { position = new Vector2Int(1, 1), cellType = TemplateCellType.Obstacle, obstacleType = ObstacleType.Scorch },
-                    new TemplateCellData { position = new Vector2Int(2, 2), cellType = TemplateCellType.Obstacle, obstacleType = ObstacleType.Frigid },
+                    new TemplateCellData { position = new Vector2Int(2, 2), cellType = TemplateCellType.Obstacle, obstacleType = ObstacleType.FrigidFrozen },
                     new TemplateCellData { position = new Vector2Int(3, 3), cellType = TemplateCellType.Obstacle, obstacleType = ObstacleType.Divine },
                     // Required placements
                     new TemplateCellData { position = new Vector2Int(0, 3), cellType = TemplateCellType.RequiredIngredient, requiredAspect = Aspect.Arc },
@@ -126,7 +126,7 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu
                     new TemplateCellData { position = new Vector2Int(2, 0), cellType = TemplateCellType.Obstacle, obstacleType = ObstacleType.Divine },
                     new TemplateCellData { position = new Vector2Int(2, 1), cellType = TemplateCellType.Obstacle, obstacleType = ObstacleType.Scorch },
                     new TemplateCellData { position = new Vector2Int(2, 2), cellType = TemplateCellType.LockedIngredient }, // Center must be specific ingredient
-                    new TemplateCellData { position = new Vector2Int(2, 3), cellType = TemplateCellType.Obstacle, obstacleType = ObstacleType.Frigid },
+                    new TemplateCellData { position = new Vector2Int(2, 3), cellType = TemplateCellType.Obstacle, obstacleType = ObstacleType.FrigidFrozen },
                     new TemplateCellData { position = new Vector2Int(2, 4), cellType = TemplateCellType.Obstacle, obstacleType = ObstacleType.Caustic },
                     // Horizontal arm
                     new TemplateCellData { position = new Vector2Int(0, 2), cellType = TemplateCellType.Obstacle, obstacleType = ObstacleType.Arc },
@@ -159,7 +159,7 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu
                     // Chaotic arrangement of all obstacle types
                     new TemplateCellData { position = new Vector2Int(0, 0), cellType = TemplateCellType.Obstacle, obstacleType = ObstacleType.Arc },
                     new TemplateCellData { position = new Vector2Int(0, 4), cellType = TemplateCellType.Obstacle, obstacleType = ObstacleType.Scorch },
-                    new TemplateCellData { position = new Vector2Int(4, 0), cellType = TemplateCellType.Obstacle, obstacleType = ObstacleType.Frigid },
+                    new TemplateCellData { position = new Vector2Int(4, 0), cellType = TemplateCellType.Obstacle, obstacleType = ObstacleType.FrigidFrozen },
                     new TemplateCellData { position = new Vector2Int(4, 4), cellType = TemplateCellType.Obstacle, obstacleType = ObstacleType.Caustic },
                     // Ring of obstacles around center
                     new TemplateCellData { position = new Vector2Int(1, 1), cellType = TemplateCellType.Obstacle, obstacleType = ObstacleType.Divine },

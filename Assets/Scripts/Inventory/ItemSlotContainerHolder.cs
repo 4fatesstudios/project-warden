@@ -61,7 +61,7 @@ namespace FourFatesStudios.ProjectWarden
             foreach (var slot in Container.Slots)
             {
                 if (slot.Item != null) // safeguard
-                    GUILayout.Label($"{slot.Item.name} x{slot.Quantity}");
+                    GUILayout.Label($"{slot.Item.ItemName} x{slot.Quantity}");
             }
 
             GUILayout.EndArea();

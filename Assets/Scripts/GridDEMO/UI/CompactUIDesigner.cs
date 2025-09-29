@@ -143,7 +143,6 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             }
             
             SetupRightPanelManager();
-            SetupClickDetection();
             
             Debug.Log("CompactUIDesigner_Fixed: Compact UI created successfully!");
         }
@@ -1036,25 +1035,6 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             RightPanelManager rightPanelManager = rightPanelManagerObj.AddComponent<RightPanelManager>();
             
             Debug.Log("CompactUIDesigner_Fixed: Created RightPanelManager for ingredient information display");
-        }
-        
-        private void SetupClickDetection()
-        {
-            ImprovedClickDetector existingDetector = FindFirstObjectByType<ImprovedClickDetector>();
-            if (existingDetector == null)
-            {
-                existingDetector = FindFirstObjectByType<ImprovedClickDetector>();
-            }
-            if (existingDetector != null)
-            {
-                Debug.Log("CompactUIDesigner_Fixed: ImprovedClickDetector already exists");
-                return;
-            }
-            
-            GameObject clickDetectorObj = new GameObject("Improved Click Detector");
-            ImprovedClickDetector clickDetector = clickDetectorObj.AddComponent<ImprovedClickDetector>();
-            
-            Debug.Log("CompactUIDesigner_Fixed: Created ImprovedClickDetector for ingredient clicks");
         }
         
         public void RefreshIngredientButtons()

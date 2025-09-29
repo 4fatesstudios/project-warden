@@ -54,11 +54,21 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         
         // Crafting state management to prevent multiple simultaneous crafting
         private bool isProcessingRecipe = false;
+        
+        // Current recipe being used (for pattern reloading)
+        private AlchemyRecipe currentRecipe;
 
         public static GridGameManager Instance { get; private set; }
 
         // Public property to access the current selected ingredient
         public Ingredient CurrentSelectedIngredient => currentSelectedIngredient;
+        
+        // Public property to access and set the current recipe
+        public AlchemyRecipe CurrentRecipe 
+        { 
+            get => currentRecipe; 
+            set => currentRecipe = value; 
+        }
 
         private void Awake()
         {
@@ -192,18 +202,6 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                     DebugSystemConfig.LogTesting("Added DebugSystemConfig component");
                 }
             }
-
-            // Setup ObstacleSpawnDebugger
-            // Note: ObstacleSpawnDebugger temporarily disabled during migration
-            // if (obstacleSpawnDebugger == null)
-            // {
-            //     obstacleSpawnDebugger = GetComponent<ObstacleSpawnDebugger>();
-            //     if (obstacleSpawnDebugger == null)
-            //     {
-            //         obstacleSpawnDebugger = gameObject.AddComponent<ObstacleSpawnDebugger>();
-            //         DebugSystemConfig.LogObstacleSpawn("Added ObstacleSpawnDebugger component");
-            //     }
-            // }
         }
 
         private void LoadTestIngredients()
@@ -1814,6 +1812,9 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                 DebugSystemConfig.LogErrorRecovery("IngredientPlacer is null! Cannot clear visual ingredients.");
             }
 
+            // Reload recipe pattern to restore obstacles from the saved recipe layout
+            LoadRecipePattern();
+
             // Refresh grid visualization (this will update colors and preserve obstacle colors)
             DebugSystemConfig.LogTesting("Refreshing grid visualization while preserving obstacles...");
             if (visualizer != null)
@@ -1859,6 +1860,39 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
 
             DebugSystemConfig.LogTesting(
                 "ClearGridPreserveObstacles() complete! Ingredients removed, obstacle colors preserved.");
+        }
+        
+        /// <summary>
+        /// Loads obstacle pattern from the current recipe's custom grid data
+        /// </summary>
+        private void LoadRecipePattern()
+        {
+            if (currentRecipe == null || !currentRecipe.HasCustomGridData())
+            {
+                DebugSystemConfig.LogTesting("No current recipe or custom grid data available for pattern reload");
+                return;
+            }
+            
+            DebugSystemConfig.LogTesting($"Loading recipe pattern from {currentRecipe.name}");
+            
+            // Load custom grid cells from recipe and apply obstacles
+            foreach (var customCell in currentRecipe.CustomGridCells)
+            {
+                if (customCell.hasObstacle && 
+                    customCell.position.x >= 0 && customCell.position.x < gridWidth &&
+                    customCell.position.y >= 0 && customCell.position.y < gridHeight)
+                {
+                    var gridCell = gridCells[customCell.position.x, customCell.position.y];
+                    
+                    // Create and assign the obstacle
+                    var obstacle = new AspectObstacle(customCell.obstacleType, customCell.position);
+                    gridCell.SetObstacle(obstacle);
+                    
+                    DebugSystemConfig.LogTesting($"Restored obstacle at {customCell.position} with type {customCell.obstacleType}");
+                }
+            }
+            
+            DebugSystemConfig.LogTesting("Recipe pattern loaded successfully");
         }
         
         /// <summary>
@@ -2216,6 +2250,142 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         }
 
         /// <summary>
+        /// Add a void obstacle at the specified position to hide the grid cell
+        /// </summary>
+        [ContextMenu("Add Test Void Obstacle")]
+        public void AddVoidObstacle(Vector2Int position)
+        {
+            // Remove any existing obstacle at this position
+            var existingObstacle = GetObstacleAt(position);
+            if (existingObstacle != null)
+            {
+                aspectObstacles.Remove(existingObstacle);
+            }
+
+            // Create and add the void obstacle
+            var voidObstacle = new AspectObstacle(ObstacleType.Void, position);
+            aspectObstacles.Add(voidObstacle);
+
+            // Update the grid cell with the new obstacle
+            var cell = GetCell(position.x, position.y);
+            if (cell != null)
+            {
+                cell.SetObstacle(voidObstacle);
+                Debug.Log($"Added Void obstacle at position ({position.x}, {position.y}) - cell will be hidden");
+            }
+
+            // Refresh the visual representation
+            visualizer?.RefreshGrid();
+        }
+
+        /// <summary>
+        /// Add a void obstacle at the center of the grid for testing
+        /// </summary>
+        [ContextMenu("Add Test Void Obstacle at Center")]
+        public void AddTestVoidObstacleAtCenter()
+        {
+            Vector2Int centerPos = new Vector2Int(gridWidth / 2, gridHeight / 2);
+            AddVoidObstacle(centerPos);
+        }
+
+        /// <summary>
+        /// Remove a void obstacle at the specified position
+        /// </summary>
+        public void RemoveVoidObstacle(Vector2Int position)
+        {
+            var obstacle = GetObstacleAt(position);
+            if (obstacle != null && obstacle.ObstacleType == ObstacleType.Void)
+            {
+                aspectObstacles.Remove(obstacle);
+
+                // Update the grid cell
+                var cell = GetCell(position.x, position.y);
+                if (cell != null)
+                {
+                    cell.RemoveObstacle();
+                    Debug.Log($"Removed Void obstacle at position ({position.x}, {position.y}) - cell is now visible");
+                }
+
+                // Refresh the visual representation
+                visualizer?.RefreshGrid();
+            }
+        }
+
+        /// <summary>
+        /// Clear all obstacles from the grid for testing
+        /// </summary>
+        [ContextMenu("Clear All Obstacles")]
+        public void ClearAllObstacles()
+        {
+            // Clear all obstacles from the list
+            aspectObstacles.Clear();
+
+            // Update all grid cells to remove obstacles
+            for (int x = 0; x < gridWidth; x++)
+            {
+                for (int y = 0; y < gridHeight; y++)
+                {
+                    var cell = GetCell(x, y);
+                    if (cell != null)
+                    {
+                        cell.RemoveObstacle();
+                    }
+                }
+            }
+
+            Debug.Log("Cleared all obstacles from the grid");
+
+            // Refresh the visual representation
+            visualizer?.RefreshGrid();
+        }
+
+        /// <summary>
+        /// Add void obstacles in a checkerboard pattern for testing
+        /// </summary>
+        [ContextMenu("Add Checkerboard Void Pattern")]
+        public void AddCheckerboardVoidPattern()
+        {
+            ClearAllObstacles();
+
+            for (int x = 0; x < gridWidth; x++)
+            {
+                for (int y = 0; y < gridHeight; y++)
+                {
+                    // Create checkerboard pattern
+                    if ((x + y) % 2 == 0)
+                    {
+                        AddVoidObstacle(new Vector2Int(x, y));
+                    }
+                }
+            }
+
+            Debug.Log("Added checkerboard void obstacle pattern");
+        }
+
+        /// <summary>
+        /// Add void obstacles around the border of the grid
+        /// </summary>
+        [ContextMenu("Add Border Void Pattern")]
+        public void AddBorderVoidPattern()
+        {
+            ClearAllObstacles();
+
+            for (int x = 0; x < gridWidth; x++)
+            {
+                for (int y = 0; y < gridHeight; y++)
+                {
+                    // Add void obstacles on border
+                    if (x == 0 || x == gridWidth - 1 || y == 0 || y == gridHeight - 1)
+                    {
+                        AddVoidObstacle(new Vector2Int(x, y));
+                    }
+                }
+            }
+
+            Debug.Log("Added border void obstacle pattern");
+        }
+
+        /// <summary>
         /// Handle obstacle interactions when placing ingredients
         /// </summary>
         private bool HandleObstacleInteraction(Ingredient ingredient, Vector2Int position)
@@ -2278,7 +2448,7 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                 Vector2Int adjacentPos = position + direction;
                 var obstacle = GetObstacleAt(adjacentPos);
 
-                if (obstacle != null && obstacle.ObstacleType == ObstacleType.Frigid && !obstacle.IsCompleted)
+                if (obstacle != null && obstacle.ObstacleType == ObstacleType.FrigidFrozen && !obstacle.IsCompleted)
                 {
                     bool melted = obstacle.TryMeltFrozen(this);
                     if (melted)
@@ -2329,28 +2499,6 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             {
                 Debug.LogWarning("No empty cells available for obstacle placement");
             }
-        }
-
-        /// <summary>
-        /// Remove an obstacle at a specific position
-        /// </summary>
-        public bool RemoveObstacleAt(Vector2Int position)
-        {
-            var obstacle = GetObstacleAt(position);
-            if (obstacle != null)
-            {
-                aspectObstacles.Remove(obstacle);
-                Debug.Log($"🚧 Removed {obstacle.ObstacleType} obstacle at {position}");
-
-                if (visualizer != null)
-                {
-                    visualizer.RefreshGrid();
-                }
-
-                return true;
-            }
-
-            return false;
         }
 
         /// <summary>
@@ -2786,7 +2934,6 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                 bool success = skillTree.UsePurifyCharge();
                 if (success)
                 {
-                    RemoveObstacleAt(firstObstacle.Position);
                     Debug.Log($"✨ Purified obstacle at {firstObstacle.Position}!");
                 }
             }
@@ -3024,8 +3171,6 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                         inventory.AddItem(recipe.OutputPotion, recipe.OutputQuantity);
                         Debug.Log($"🎒 ✅ Added {recipe.OutputQuantity}x {recipe.OutputPotion.ItemName} to inventory!");
                         
-                        // Phase 3: Update UI systems
-                        UpdateUISystemsAfterCrafting(recipe.OutputPotion);
                     }
                     else
                     {
@@ -3045,49 +3190,6 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                 // In case of error, still clear the grid to prevent stuck state
                 ClearGridPreserveObstacles();
             }
-        }
-        
-        /// <summary>
-        /// Update UI systems after successful crafting (separated for clarity)
-        /// </summary>
-        private void UpdateUISystemsAfterCrafting(Potion craftedPotion)
-        {
-            try
-            {
-                // Notify the UI system about the new potion
-                var completedPotionsUI = FindFirstObjectByType<CompletedPotionsUIDocument>();
-                if (completedPotionsUI != null)
-                {
-                    completedPotionsUI.OnPotionCrafted(craftedPotion);
-                    Debug.Log($"📱 ✅ Updated UI with new potion: {craftedPotion.ItemName}");
-                }
-                else
-                {
-                    Debug.LogWarning("📱 ⚠️ CompletedPotionsUIDocument not found - UI may not update");
-                }
-            }
-            catch (System.Exception ex)
-            {
-                Debug.LogWarning($"📱 ⚠️ Error updating UI systems: {ex.Message}");
-                // Don't rethrow - UI update failure shouldn't break crafting
-            }
-        }
-
-        /// <summary>
-        /// DEPRECATED: Old Execute recipe method - replaced by ExecuteRecipeAtomic
-        /// Kept for reference but should not be used
-        /// </summary>
-        [System.Obsolete("Use ExecuteRecipeAtomic instead to prevent race conditions")]
-        private void ExecuteRecipe(AlchemyRecipe recipe, HashSet<Ingredient> usedIngredients)
-        {
-            Debug.LogWarning("🧪 ⚠️ DEPRECATED ExecuteRecipe called - use ExecuteRecipeAtomic instead!");
-            
-            // Redirect to atomic version with defensive copying
-            var ingredientsList = usedIngredients.ToList();
-            var snapshot = new HashSet<Ingredient>(usedIngredients);
-            var placedSnapshot = new List<IngredientInstance>(); // Empty - not used in deprecated path
-            
-            ExecuteRecipeAtomic(recipe, snapshot, placedSnapshot);
         }
 
         /// <summary>
@@ -3114,18 +3216,6 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                 {
                     inventory.AddItem(recipe.OutputPotion, recipe.OutputQuantity);
                     Debug.Log($"🎒 ✅ Added {recipe.OutputQuantity}x {recipe.OutputPotion.ItemName} to inventory!");
-                    
-                    // Notify the UI system about the new potion
-                    var completedPotionsUI = FindFirstObjectByType<CompletedPotionsUIDocument>();
-                    if (completedPotionsUI != null)
-                    {
-                        completedPotionsUI.OnPotionCrafted(recipe.OutputPotion);
-                        Debug.Log($"📱 ✅ Updated UI with new potion: {recipe.OutputPotion.ItemName}");
-                    }
-                    else
-                    {
-                        Debug.LogWarning("📱 ⚠️ CompletedPotionsUIDocument not found - UI may not update");
-                    }
                 }
                 else
                 {
@@ -3357,17 +3447,49 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         }
 
         /// <summary>
-        /// Generate a descriptive name for the dynamic potion
+        /// Generate a descriptive name for the dynamic potion using infusion names
         /// </summary>
         private string GenerateDynamicPotionName(Dictionary<System.Type, List<(object infusion, Ingredient sourceIngredient)>> sharedInfusions, HashSet<Ingredient> sourceIngredients)
         {
-            var infusionNames = sharedInfusions.Keys.Select(type => type.Name.Replace("Infusion", "")).ToList();
-            var ingredientNames = sourceIngredients.Select(i => i.Adjective ?? i.Noun ?? "Unknown").Where(s => !string.IsNullOrEmpty(s)).ToList();
+            // Get actual infusion names from the infusion objects
+            var infusionNames = new List<string>();
+            
+            foreach (var sharedType in sharedInfusions.Keys)
+            {
+                var firstInfusion = sharedInfusions[sharedType].First().infusion;
+                if (firstInfusion != null)
+                {
+                    try
+                    {
+                        // Use reflection to get the InfusionName property
+                        var nameProperty = firstInfusion.GetType().GetProperty("InfusionName");
+                        if (nameProperty != null)
+                        {
+                            var infusionName = nameProperty.GetValue(firstInfusion) as string;
+                            if (!string.IsNullOrEmpty(infusionName))
+                            {
+                                infusionNames.Add(infusionName);
+                            }
+                        }
+                    }
+                    catch (System.Exception ex)
+                    {
+                        Debug.LogWarning($"🧪 ⚠️ Could not get infusion name: {ex.Message}");
+                        // Fallback to type name
+                        infusionNames.Add(sharedType.Name.Replace("Infusion", ""));
+                    }
+                }
+            }
+            
+            // If no infusion names found, use type names as fallback
+            if (infusionNames.Count == 0)
+            {
+                infusionNames = sharedInfusions.Keys.Select(type => type.Name.Replace("Infusion", "")).ToList();
+            }
             
             string infusionPart = string.Join(" & ", infusionNames);
-            string ingredientPart = ingredientNames.Count > 0 ? ingredientNames.First() : "Mixed";
             
-            return $"{ingredientPart} {infusionPart} Potion";
+            return $"Potion of {infusionPart}";
         }
 
         /// <summary>
@@ -3381,8 +3503,25 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             var dynamicPotion = ScriptableObject.CreateInstance<Potion>();
             
             // Set basic properties using reflection to access private fields
-            SetPotionProperty(dynamicPotion, "itemName", potionName);
-            SetPotionProperty(dynamicPotion, "itemDescription", $"A potion discovered through alchemical experimentation. Contains {string.Join(", ", sharedInfusions.Keys.Select(t => t.Name.Replace("Infusion", "")))} properties.");
+            var generatedName = GenerateDynamicPotionName(sharedInfusions, sourceIngredients);
+            
+            // Generate description with ingredients in alphabetical order
+            var sortedIngredientNames = sourceIngredients.Select(i => i.ItemName).OrderBy(name => name).ToList();
+            var generatedDescription = $"A dynamic potion crafted from: {string.Join(", ", sortedIngredientNames)}";
+            
+            SetPotionProperty(dynamicPotion, "itemName", generatedName);
+            SetPotionProperty(dynamicPotion, "itemDescription", generatedDescription);
+            
+            // Also set the Unity object name for consistency
+            dynamicPotion.name = generatedName;
+            
+            // Debug: Test if the properties were set correctly
+            Debug.Log($"🧪 🔍 Testing potion properties after setting:");
+            Debug.Log($"🧪 🔍 Generated Name: {generatedName}");
+            Debug.Log($"🧪 🔍 Generated Description: {generatedDescription}");
+            Debug.Log($"🧪 🔍 Potion.ItemName: {dynamicPotion.ItemName}");
+            Debug.Log($"🧪 🔍 Potion.ItemDescription: {dynamicPotion.ItemDescription}");
+            Debug.Log($"🧪 🔍 Potion.name (Unity object name): {dynamicPotion.name}");
             
             // Calculate potency based on source ingredients
             var averagePotency = sourceIngredients.Average(i => i.Potency);
@@ -3442,14 +3581,23 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         {
             try
             {
+                // First try to find the field in the Potion class
                 var field = typeof(Potion).GetField(propertyName, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                
+                // If not found in Potion, try the base Item class
+                if (field == null)
+                {
+                    field = typeof(Item).GetField(propertyName, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                }
+                
                 if (field != null)
                 {
                     field.SetValue(potion, value);
+                    Debug.Log($"🧪 ✅ Set {propertyName} = {value}");
                 }
                 else
                 {
-                    Debug.LogWarning($"🧪 ⚠️ Could not find field '{propertyName}' in Potion class");
+                    Debug.LogWarning($"🧪 ⚠️ Could not find field '{propertyName}' in Potion or Item class");
                 }
             }
             catch (System.Exception ex)
@@ -3545,11 +3693,16 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                 var inventory = FindFirstObjectByType<FourFatesStudios.ProjectWarden.ItemSlotContainerHolder>();
                 if (inventory != null)
                 {
+                    Debug.Log($"🧪 📦 About to add potion to inventory:");
+                    Debug.Log($"🧪 📦 - Potion.ItemName: '{dynamicPotion.ItemName}'");
+                    Debug.Log($"🧪 📦 - Potion.ItemDescription: '{dynamicPotion.ItemDescription}'");
+                    Debug.Log($"🧪 📦 - Potion.name (Unity): '{dynamicPotion.name}'");
+                    
                     inventory.AddItem(dynamicPotion, 1);
                     Debug.Log($"🎒 ✅ Added dynamic potion to inventory: {dynamicPotion.ItemName}");
                     
                     // Update UI if possible
-                    UpdateUISystemsAfterCrafting(dynamicPotion);
+                    //UpdateUISystemsAfterCrafting(dynamicPotion);
                 }
                 else
                 {

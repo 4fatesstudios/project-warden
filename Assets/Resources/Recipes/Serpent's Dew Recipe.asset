@@ -80,7 +80,7 @@ MonoBehaviour:
     rarity: 1
     isRequired: 0
     isOccupied: 0
-    obstacleType: 2
+    obstacleType: 3
     hasObstacle: 1
   - position: {x: 3, y: 1}
     aspect: 4
@@ -94,7 +94,7 @@ MonoBehaviour:
     rarity: 1
     isRequired: 0
     isOccupied: 0
-    obstacleType: 0
+    obstacleType: 7
     hasObstacle: 1
   - position: {x: 4, y: 0}
     aspect: 4
@@ -108,7 +108,7 @@ MonoBehaviour:
     rarity: 1
     isRequired: 0
     isOccupied: 0
-    obstacleType: 0
+    obstacleType: 7
     hasObstacle: 1
   - position: {x: 0, y: 3}
     aspect: 0
@@ -157,14 +157,14 @@ MonoBehaviour:
     rarity: 1
     isRequired: 0
     isOccupied: 0
-    obstacleType: 0
+    obstacleType: 7
     hasObstacle: 1
   - position: {x: 4, y: 3}
     aspect: 0
     rarity: 1
     isRequired: 0
     isOccupied: 0
-    obstacleType: 0
+    obstacleType: 7
     hasObstacle: 1
   - position: {x: 1, y: 2}
     aspect: 0
@@ -185,14 +185,14 @@ MonoBehaviour:
     rarity: 1
     isRequired: 0
     isOccupied: 0
-    obstacleType: 2
+    obstacleType: 3
     hasObstacle: 1
   - position: {x: 2, y: 3}
     aspect: 0
     rarity: 1
     isRequired: 0
     isOccupied: 0
-    obstacleType: 2
+    obstacleType: 3
     hasObstacle: 1
   minimumEfficiency: 0.6
   gridRequirements:

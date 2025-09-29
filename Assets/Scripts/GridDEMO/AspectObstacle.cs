@@ -7,8 +7,9 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
 {
     public enum ObstacleType
     {
-        Corporeal,  // Blocked cell (stone/residue)
-        Frigid,     // Frozen cell, needs adjacency to unlock
+        Corporeal,  // Blocked cell (stone/residue), not counted for completion
+        FrigidFrozen,     // Frozen cell, needs adjacency to unlock
+        FrigidMelted, // Frozen cell, needs adjacency to unlock and melt
         Scorch,     // Volatile cell, needs compatible aspects
         Caustic,    // Degrade cell, reduces potency by 20%
         Arc,        // Chaotic RNG effects
@@ -49,8 +50,12 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                 case ObstacleType.Corporeal:
                     return false; // Blocked cells cannot have ingredients placed
 
-                case ObstacleType.Frigid:
+                case ObstacleType.FrigidFrozen:
                     return false; // Frozen cells need to be melted first by adjacency
+
+                case ObstacleType.FrigidMelted:
+                    // Melted cells can accept any ingredient, but with special effects
+                    return true;
 
                 case ObstacleType.Scorch:
                     // Volatile cells accept scorch, caustic, or arc aspects
@@ -92,9 +97,13 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                     // Should not reach here as CanPlaceIngredient returns false
                     return false;
 
-                case ObstacleType.Frigid:
+                case ObstacleType.FrigidFrozen:
                     // Only completed through melting, not direct placement
                     return false;
+
+                case ObstacleType.FrigidMelted:
+                    HandleFrigidMeltedObstacle(ingredient, gridManager);
+                    break;
 
                 case ObstacleType.Scorch:
                     HandleScorchObstacle(ingredient, gridManager);
@@ -207,6 +216,42 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         }
         
         /// <summary>
+        /// Handle FrigidMelted obstacle interactions
+        /// </summary>
+        private void HandleFrigidMeltedObstacle(Ingredient ingredient, GridGameManager gridManager)
+        {
+            if (ingredient.IngredientAspect == Aspect.Scorch)
+            {
+                // Scorch ingredients trigger "Evaporated" state - enhanced potency but ingredient is consumed
+                Debug.Log($"❄️ FrigidMelted obstacle: Scorch {ingredient.ItemName} evaporates, potency increased by 30%");
+                // Set state to Evaporated
+            }
+            else if (ingredient.IngredientAspect == Aspect.Frigid)
+            {
+                // Frigid ingredients trigger "Refrozen" state - revert back to FrigidFrozen
+                Debug.Log($"❄️ FrigidMelted obstacle: Frigid {ingredient.ItemName} refreezes the cell");
+                obstacleType = ObstacleType.FrigidFrozen;
+                isCompleted = false;
+                placedIngredient = null;
+                return; // Don't mark as completed since it reverted
+            }
+            else if (ingredient.IngredientAspect == Aspect.Corporeal)
+            {
+                // Corporeal ingredients trigger "Stabilized" state - normal effect with slight bonus
+                Debug.Log($"❄️ FrigidMelted obstacle: Corporeal {ingredient.ItemName} stabilizes the melted cell, potency increased by 10%");
+                // Set state to Stabilized
+            }
+            else
+            {
+                // Default "Chilled" state for other ingredients
+                Debug.Log($"❄️ FrigidMelted obstacle: {ingredient.ItemName} gets chilled, potency reduced by 10%");
+                // Set state to Chilled
+            }
+            
+            isCompleted = true;
+        }
+        
+        /// <summary>
         /// Spawn random Fulminating cells for Arc obstacles
         /// </summary>
         private void SpawnRandomFulminatingCells(GridGameManager gridManager, int maxCount)
@@ -262,7 +307,7 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         /// </summary>
         public bool TryMeltFrozen(GridGameManager gridManager)
         {
-            if (obstacleType != ObstacleType.Frigid || isCompleted)
+            if (obstacleType != ObstacleType.FrigidFrozen || isCompleted)
                 return false;
 
             // Check adjacent cells for scorch or corporeal aspects
@@ -279,14 +324,42 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                     if (adjacentIngredient.IngredientAspect == Aspect.Scorch ||
                         adjacentIngredient.IngredientAspect == Aspect.Corporeal)
                     {
-                        isCompleted = true;
-                        Debug.Log($"❄️ Frigid obstacle melted by adjacent {adjacentIngredient.IngredientAspect} aspect");
+                        // Transition from FrigidFrozen to FrigidMelted
+                        obstacleType = ObstacleType.FrigidMelted;
+                        isCompleted = false; // Reset completion status for the new state
+                        Debug.Log($"❄️ Frigid obstacle melted by adjacent {adjacentIngredient.IngredientAspect} aspect - now FrigidMelted");
                         return true;
                     }
                 }
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Check if this obstacle can be melted by a specific adjacent ingredient
+        /// Used for validation and UI feedback
+        /// </summary>
+        public bool CanBeMeltedBy(Ingredient adjacentIngredient)
+        {
+            if (obstacleType != ObstacleType.FrigidFrozen || isCompleted)
+                return false;
+
+            return adjacentIngredient.IngredientAspect == Aspect.Scorch ||
+                   adjacentIngredient.IngredientAspect == Aspect.Corporeal;
+        }
+
+        /// <summary>
+        /// Get the current state description for the frigid obstacle
+        /// </summary>
+        public string GetFrigidStateDescription()
+        {
+            return obstacleType switch
+            {
+                ObstacleType.FrigidFrozen => "Frozen - Requires adjacent Scorch/Corporeal to melt",
+                ObstacleType.FrigidMelted => "Melted - Can place ingredients with special effects",
+                _ => "Not a frigid obstacle"
+            };
         }
 
         /// <summary>
@@ -298,6 +371,15 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
 
             switch (obstacleType)
             {
+                case ObstacleType.FrigidMelted:
+                    // Varies based on ingredient aspect
+                    if (ingredient.IngredientAspect == Aspect.Scorch)
+                        return Mathf.RoundToInt(ingredient.Potency * 1.3f); // 30% increase for evaporation
+                    else if (ingredient.IngredientAspect == Aspect.Corporeal)
+                        return Mathf.RoundToInt(ingredient.Potency * 1.1f); // 10% increase for stabilization
+                    else
+                        return Mathf.RoundToInt(ingredient.Potency * 0.9f); // 10% decrease for chilled state
+                
                 case ObstacleType.Caustic:
                     // 20% reduction in potency
                     return Mathf.RoundToInt(ingredient.Potency * 0.8f);
@@ -432,7 +514,8 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             {
                 ObstacleType.Corporeal => new Color(0.8f, 0.6f, 0.4f, 0.9f), // Brown/Earth (matches Corporeal aspect)
                 ObstacleType.Scorch => new Color(1.0f, 0.4f, 0.2f, 0.9f),    // Fire Red (matches Scorch aspect)  
-                ObstacleType.Frigid => new Color(0.4f, 0.8f, 1.0f, 0.9f),    // Ice Blue (matches Frigid aspect)
+                ObstacleType.FrigidFrozen => new Color(0.2f, 0.4f, 1.0f, 0.9f),    // Dark Ice Blue (matches Frigid aspect)
+                ObstacleType.FrigidMelted => new Color(0.4f, 0.8f, 1.0f, 0.9f), // Ice Blue (matches Frigid aspect)
                 ObstacleType.Arc => new Color(1.0f, 1.0f, 0.4f, 0.9f),       // Lightning Yellow (matches Arc aspect)
                 ObstacleType.Caustic => new Color(0.6f, 1.0f, 0.2f, 0.9f),   // Acid Green (matches Caustic aspect)
                 ObstacleType.Divine => new Color(1.0f, 0.8f, 1.0f, 0.9f),    // Holy Purple (matches Divine aspect)
@@ -452,11 +535,11 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
 
         /// <summary>
         /// Check if this obstacle should be counted for completion metrics
-        /// Void obstacles are purely cosmetic and should not count
+        /// Void and Corporeal obstacles are not counted for completion
         /// </summary>
         public bool CountsForCompletion()
         {
-            return obstacleType != ObstacleType.Void;
+            return obstacleType != ObstacleType.Void && obstacleType != ObstacleType.Corporeal;
         }
 
         /// <summary>
@@ -467,7 +550,8 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             return obstacleType switch
             {
                 ObstacleType.Corporeal => "Blocked cell - cannot place ingredients",
-                ObstacleType.Frigid => "Frozen cell - unlock with adjacent Scorch/Corporeal",
+                ObstacleType.FrigidFrozen => "Frozen cell - unlock with adjacent Scorch/Corporeal",
+                ObstacleType.FrigidMelted => "Melted cell - unlocked with adjacent Scorch/Corporeal",
                 ObstacleType.Scorch => "Volatile cell - requires Scorch, Caustic, or Arc aspects",
                 ObstacleType.Caustic => "Degrade cell - reduces ingredient potency by 20%",
                 ObstacleType.Arc => "Chaotic cell - triggers random effects",

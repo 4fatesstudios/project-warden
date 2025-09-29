@@ -1253,7 +1253,7 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             // Add different obstacle types at specific positions
             var obstacles = new (ObstacleType type, Vector2Int pos)[]
             {
-                (ObstacleType.Frigid, new Vector2Int(0, 0)),
+                (ObstacleType.FrigidFrozen, new Vector2Int(0, 0)),
                 (ObstacleType.Scorch, new Vector2Int(1, 0)),
                 (ObstacleType.Divine, new Vector2Int(2, 0)),
                 (ObstacleType.Caustic, new Vector2Int(3, 0)),
