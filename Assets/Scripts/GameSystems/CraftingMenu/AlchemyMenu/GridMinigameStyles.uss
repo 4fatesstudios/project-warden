@@ -1,0 +1,395 @@
+.main-container {
+    flex-grow: 1;
+    padding: 20px;
+    background-color: rgb(40, 40, 40);
+    border-radius: 10px;
+    border-width: 2px;
+    border-color: rgb(100, 100, 100);
+}
+
+.header-container {
+    margin-bottom: 20px;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.title-label {
+    font-size: 24px;
+    color: rgb(255, 255, 255);
+    -unity-font-style: bold;
+}
+
+.instructions-label {
+    font-size: 14px;
+    color: rgb(200, 200, 200);
+    white-space: normal;
+    flex-grow: 1;
+    margin: 0 20px;
+}
+
+.back-button {
+    width: 120px;
+    height: 30px;
+    background-color: rgb(80, 80, 80);
+    border-radius: 5px;
+    border-width: 0;
+    color: rgb(255, 255, 255);
+    font-size: 12px;
+}
+
+.back-button:hover {
+    background-color: rgb(100, 100, 100);
+}
+
+.content-container {
+    flex-direction: row;
+    flex-grow: 1;
+    min-height: 500px;
+}
+
+.left-panel {
+    width: 250px;
+    background-color: rgb(50, 50, 50);
+    padding: 15px;
+    border-radius: 5px;
+    margin-right: 10px;
+}
+
+.center-panel {
+    flex-grow: 1;
+    background-color: rgb(50, 50, 50);
+    padding: 15px;
+    border-radius: 5px;
+    align-items: center;
+    margin-right: 10px;
+}
+
+.right-panel {
+    width: 250px;
+    background-color: rgb(50, 50, 50);
+    padding: 15px;
+    border-radius: 5px;
+}
+
+.section-title {
+    font-size: 16px;
+    color: rgb(255, 255, 255);
+    margin-bottom: 10px;
+    -unity-font-style: bold;
+}
+
+.ingredient-palette {
+    max-height: 200px;
+    margin-bottom: 15px;
+    background-color: rgb(40, 40, 40);
+    border-radius: 5px;
+    padding: 5px;
+}
+
+.ingredient-header {
+    flex-direction: row;
+    background-color: rgb(60, 60, 60);
+    padding: 8px;
+    border-radius: 3px;
+    margin-bottom: 5px;
+    border-width: 1px;
+    border-color: rgb(100, 100, 100);
+}
+
+.header-name {
+    flex-grow: 1;
+    color: rgb(255, 255, 255);
+    font-size: 20px;
+    -unity-font-style: bold;
+    text-align: left;
+}
+
+.header-icon {
+    width: 40px;
+    color: rgb(255, 255, 255);
+    font-size: 20px;
+    -unity-font-style: bold;
+    text-align: center;
+}
+
+.header-quantity {
+    width: 40px;
+    color: rgb(255, 255, 255);
+    font-size: 20px;
+    -unity-font-style: bold;
+    text-align: center;
+}
+
+.status-container {
+    border-top-width: 1px;
+    border-color: rgb(100, 100, 100);
+    padding-top: 15px;
+    margin-top: 15px;
+}
+
+.recipe-info-label {
+    font-size: 12px;
+    color: rgb(180, 180, 180);
+    white-space: normal;
+    margin-bottom: 10px;
+}
+
+.alchemy-book-container {
+    margin-top: 15px;
+}
+
+.alchemy-book-button {
+    width: 100%;
+    height: 35px;
+    background-color: rgb(100, 60, 140);
+    border-radius: 5px;
+    border-width: 0;
+    color: rgb(255, 255, 255);
+    font-size: 14px;
+}
+
+.alchemy-book-button:hover {
+    background-color: rgb(120, 80, 160);
+}
+
+.grid-container {
+    background-color: rgb(30, 30, 30);
+    border-width: 2px;
+    border-color: rgb(100, 100, 100);
+    border-radius: 5px;
+    padding: 15px;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 15px;
+}
+
+.grid-info-container {
+    width: 100%;
+    background-color: rgb(40, 40, 40);
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.grid-status-label, .pattern-match-label {
+    font-size: 12px;
+    color: rgb(180, 180, 180);
+    margin-bottom: 5px;
+}
+
+.recipe-selection {
+    max-height: 300px;
+    background-color: rgb(40, 40, 40);
+    border-radius: 5px;
+    padding: 5px;
+    margin-bottom: 15px;
+}
+
+.crafting-controls {
+    flex-direction: column;
+}
+
+.clear-button {
+    width: 100%;
+    height: 35px;
+    background-color: rgb(120, 60, 60);
+    border-radius: 5px;
+    border-width: 0;
+    color: rgb(255, 255, 255);
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+.clear-button:hover {
+    background-color: rgb(140, 70, 70);
+}
+
+.craft-button {
+    width: 100%;
+    height: 40px;
+    background-color: rgb(60, 120, 60);
+    border-radius: 5px;
+    border-width: 0;
+    color: rgb(255, 255, 255);
+    font-size: 14px;
+    -unity-font-style: bold;
+}
+
+.craft-button:hover {
+    background-color: rgb(70, 140, 70);
+}
+
+.craft-button:disabled {
+    background-color: rgb(80, 80, 80);
+    color: rgb(120, 120, 120);
+}
+
+/* Ingredient Item Styles */
+.ingredient-item {
+    background-color: rgb(60, 60, 60);
+    border-width: 1px;
+    border-color: rgb(100, 100, 100);
+    border-radius: 5px;
+    padding: 8px;
+    margin-bottom: 5px;
+    flex-direction: row;
+    align-items: center;
+    transition-duration: 0.2s;
+    transition-property: background-color, border-color, opacity;
+}
+
+.ingredient-item:hover {
+    background-color: rgb(80, 80, 80);
+}
+
+/* Row State Styling */
+.ingredient-item.ingredient-in-use {
+    background-color: rgba(255, 255, 0, 0.3);
+    border-color: rgba(255, 255, 0, 0.8);
+}
+
+.ingredient-item.ingredient-depleted {
+    background-color: rgba(80, 80, 80, 0.5);
+    opacity: 0.5;
+}
+
+.ingredient-item.ingredient-dragging {
+    background-color: rgba(100, 150, 255, 0.5);
+    border-color: rgba(100, 150, 255, 0.8);
+    border-width: 2px;
+}
+
+.ingredient-preview {
+    width: 30px;
+    height: 30px;
+    background-color: rgb(100, 100, 100);
+    border-radius: 3px;
+    margin-right: 10px;
+}
+
+.ingredient-label {
+    color: rgb(255, 255, 255);
+    font-size: 20px;
+    flex-grow: 1;
+    text-align: left;
+}
+
+.ingredient-icon {
+    width: 40px;
+    height: 30px;
+    background-color: rgb(80, 80, 80);
+    border-radius: 3px;
+    margin-right: 10px;
+    text-align: center;
+    font-size: 20px;
+    color: rgb(255, 255, 255);
+}
+
+.ingredient-count {
+    color: rgb(180, 180, 180);
+    font-size: 20px;
+    width: 40px;
+    text-align: center;
+}
+
+/* Recipe Item Styles */
+.recipe-item {
+    background-color: rgb(60, 60, 60);
+    border-width: 1px;
+    border-color: rgb(100, 100, 100);
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 8px;
+}
+
+.recipe-item:hover {
+    background-color: rgb(80, 80, 80);
+}
+
+.recipe-item.selected {
+    background-color: rgb(80, 120, 80);
+    border-color: rgb(120, 180, 120);
+}
+
+.recipe-name {
+    color: rgb(255, 255, 255);
+    font-size: 14px;
+    -unity-font-style: bold;
+    margin-bottom: 5px;
+}
+
+.recipe-difficulty {
+    color: rgb(200, 200, 200);
+    font-size: 10px;
+}
+
+/* Grid Cell Styles */
+.grid-cell {
+    width: 40px;
+    height: 40px;
+    border-width: 1px;
+    border-color: rgb(80, 80, 80);
+    background-color: rgb(40, 40, 40);
+    margin: 1px;
+}
+
+.grid-cell.empty {
+    background-color: rgb(40, 40, 40);
+}
+
+.grid-cell.filled {
+    background-color: rgb(100, 150, 100);
+    border-color: rgb(150, 200, 150);
+}
+
+.grid-cell.required {
+    background-color: rgb(60, 60, 100);
+    border-color: rgb(100, 100, 150);
+}
+
+.grid-cell.aspect-fire {
+    background-color: rgb(150, 60, 60);
+}
+
+.grid-cell.aspect-water {
+    background-color: rgb(60, 100, 150);
+}
+
+.grid-cell.aspect-earth {
+    background-color: rgb(100, 120, 60);
+}
+
+.grid-cell.aspect-air {
+    background-color: rgb(120, 120, 60);
+}
+
+.grid-cell.aspect-corporeal {
+    background-color: rgb(100, 80, 120);
+}
+
+.grid-cell.aspect-ethereal {
+    background-color: rgb(120, 100, 140);
+}
+
+.grid-cell.preview {
+    border-width: 3px;
+    border-color: rgb(255, 255, 0);
+}
+
+.grid-cell.invalid {
+    background-color: rgb(150, 60, 60);
+    border-color: rgb(200, 80, 80);
+}
+
+/* Grid Drop Zone Highlights */
+.grid-cell.drop-zone-valid {
+    background-color: rgba(0, 255, 0, 0.3);
+    border-color: rgba(0, 255, 0, 0.8);
+    border-width: 2px;
+}
+
+.grid-cell.drop-zone-invalid {
+    background-color: rgba(255, 0, 0, 0.3);
+    border-color: rgba(255, 0, 0, 0.8);
+    border-width: 2px;
+}

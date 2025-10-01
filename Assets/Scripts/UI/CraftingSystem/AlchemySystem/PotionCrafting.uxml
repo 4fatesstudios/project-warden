@@ -1,0 +1,28 @@
+<UXML xmlns="UnityEngine.UIElements" xmlns:ui="UnityEngine.UIElements">
+  <ui:VisualElement name="PotionCraftingRoot" style="flex-direction: column; padding: 16px; align-items: center;">
+
+    <!-- Ingredient Slots -->
+    <ui:VisualElement name="IngredientSlots" style="flex-direction: row; justify-content: center; margin-bottom: 12px;">
+      <ui:Button name="ingredientSlot1" text="+" style="width: 80px; height: 80px; margin-right: 8px;" />
+      <ui:Button name="ingredientSlot2" text="+" style="width: 80px; height: 80px; margin-right: 8px;" />
+      <ui:Button name="ingredientSlot3" text="+" style="width: 80px; height: 80px;" />
+    </ui:VisualElement>
+
+    <!-- Craft Buttons -->
+    <ui:VisualElement name="CraftButtons" style="flex-direction: row; justify-content: center; margin-top: 16px; margin-bottom: 12px;">
+      <ui:Button name="craftButton" text="Manual Craft" style="width: 120px; height: 40px; margin-right: 16px;" />
+      <ui:Button name="autoCraftButton" text="Auto Craft" style="width: 120px; height: 40px; margin-right: 16px;" />
+      <ui:Button name="bulkCraftButton" text="Bulk Craft" style="width: 120px; height: 40px;" />
+    </ui:VisualElement>
+
+    <!-- Auto-Craft Status -->
+    <ui:Label name="autoCraftStatusLabel" style="margin-top: 8px; white-space: normal; width: 400px; min-height: 40px; text-align: center; font-size: 12px;" />
+
+    <!-- Result Label -->
+    <ui:Label name="resultLabel" style="margin-top: 16px; white-space: normal; width: 400px; min-height: 60px; text-align: center;" />
+
+    <!-- Grid Minigame Slot -->
+    <ui:VisualElement name="GridMinigameSlot" style="margin-top: 20px;" />
+
+  </ui:VisualElement>
+</UXML>

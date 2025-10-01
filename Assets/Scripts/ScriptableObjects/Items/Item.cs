@@ -18,13 +18,17 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
         private string itemDescription = "Empty Description";
 
         [SerializeField] private Rarity itemRarity;
+        
+        [SerializeField, Tooltip("Icon sprite displayed in UI for this item.")]
+        private Sprite itemIcon;
 
         public string ItemName => itemName;
         public string ItemDescription => itemDescription;
         public Rarity ItemRarity => itemRarity;
+        public Sprite ItemIcon => itemIcon; // TODO: Set appropriate icons for all items in inspector
 
 #if UNITY_EDITOR
-        private void OnValidate()
+        private new void OnValidate()
         {
             base.OnValidate();
             if (string.IsNullOrEmpty(itemName)) itemName = "Unnamed Item";

@@ -1,0 +1,12 @@
+fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/Resources/Infusions.meta
+guid: 3618b8708dd2779499ab2d84a4fc8725
+========
+guid: a6684ed344017a049903f4e526f3508d
+>>>>>>>> cd130b1 (Shapes are now integrated!):Assets/Resources/Potions.meta
+folderAsset: yes
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

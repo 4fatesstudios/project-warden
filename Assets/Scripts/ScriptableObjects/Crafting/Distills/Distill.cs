@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using FourFatesStudios.ProjectWarden.Enums;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
+using ScriptableObjects.Items;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -25,7 +26,7 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Distills
         [SerializeField, Tooltip("Maximum time allowed to complete the distillation (seconds).")]
         private float totalDuration = 10f;
 
-        [SerializeField, Tooltip("Ordered progression stages (e.g., None Å® Shiny Å® Sparkling Å® ShinyAndSparkling).")]
+        [SerializeField, Tooltip("Ordered progression stages (e.g., None ÔøΩÔøΩ Shiny ÔøΩÔøΩ Sparkling ÔøΩÔøΩ ShinyAndSparkling).")]
         private List<DistillVisualState> progressionStages = new();
 
         public Ingredient InputIngredient => inputIngredient;

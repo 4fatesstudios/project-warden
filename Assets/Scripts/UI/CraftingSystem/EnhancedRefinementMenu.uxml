@@ -1,0 +1,87 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/Scripts/UI/CraftingSystem/RefinementStyles.uss" />
+    
+    <ui:VisualElement name="refinement-root" class="menu-container">
+        <!-- Header Section -->
+        <ui:VisualElement name="header-section" class="header-container">
+            <ui:Label text="Ingredient Refinement" name="title-label" class="title-text" />
+            <ui:Label text="Select an ingredient and choose a refinement method" name="subtitle-label" class="subtitle-text" />
+        </ui:VisualElement>
+        
+        <!-- Main Content Area -->
+        <ui:VisualElement name="content-section" class="content-container">
+            
+            <!-- Left Panel - Ingredient Selection -->
+            <ui:VisualElement name="left-panel" class="panel-container left-panel">
+                <ui:Label text="Available Ingredients:" name="ingredient-header" class="panel-header" />
+                
+                <!-- Ingredient List Container -->
+                <ui:VisualElement name="ingredient-list-container" class="list-container">
+                    <ui:ScrollView name="ingredientList" class="ingredient-scroll-view">
+                        <!-- Ingredient buttons will be populated here by script -->
+                    </ui:ScrollView>
+                </ui:VisualElement>
+                
+                <!-- Refresh Button -->
+                <ui:Button name="refreshButton" text="🔄 Refresh List" class="utility-button" />
+            </ui:VisualElement>
+            
+            <!-- Right Panel - Selected Ingredient Info and Actions -->
+            <ui:VisualElement name="right-panel" class="panel-container right-panel">
+                
+                <!-- Selected Ingredient Display -->
+                <ui:VisualElement name="selected-ingredient-display" class="selected-display">
+                    <ui:Label name="selectedIngredientLabel" text="No ingredient selected" class="selected-ingredient-text" />
+                    
+                    <!-- Ingredient Icon and Details -->
+                    <ui:VisualElement name="ingredient-details" class="ingredient-details-container">
+                        <ui:VisualElement name="ingredient-icon" class="ingredient-icon" />
+                        <ui:VisualElement name="ingredient-stats" class="ingredient-stats">
+                            <ui:Label name="refinementInfoLabel" text="Select an ingredient to see available refinement options." class="info-text" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                
+                <!-- Refinement Options -->
+                <ui:VisualElement name="refinement-options" class="refinement-section">
+                    <ui:Label text="Refinement Methods:" class="section-header" />
+                    
+                    <!-- Grinding -->
+                    <ui:VisualElement name="grinding-section" class="method-section">
+                        <ui:Button name="grindingButton" text="Start Grinding" class="refinement-button grinding-button" />
+                        <ui:Label text="🔨 Crushes ores and minerals into powder" class="method-description" />
+                    </ui:VisualElement>
+                    
+                    <!-- Distilling -->
+                    <ui:VisualElement name="distilling-section" class="method-section">
+                        <ui:Button name="distillingButton" text="Start Distilling" class="refinement-button distilling-button" />
+                        <ui:Label text="🧪 Extracts essences from herbs and liquids" class="method-description" />
+                    </ui:VisualElement>
+                    
+                    <!-- Roasting -->
+                    <ui:VisualElement name="roasting-section" class="method-section">
+                        <ui:Button name="roastingButton" text="Start Roasting" class="refinement-button roasting-button" />
+                        <ui:Label text="🔥 Heat-treats organic materials" class="method-description" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                
+                <!-- Success Rate Information -->
+                <ui:VisualElement name="success-info" class="success-info-container">
+                    <ui:Label text="Success Rates:" class="section-header small" />
+                    <ui:VisualElement name="success-details" class="success-details">
+                        <ui:Label name="baseSuccessLabel" text="Base Success: 70%" class="success-text" />
+                        <ui:Label name="stabilityLabel" text="Stability: 80%" class="success-text" />
+                        <ui:Label name="skillRequiredLabel" text="Skill Required: 1" class="success-text" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+        
+        <!-- Bottom Controls -->
+        <ui:VisualElement name="bottom-controls" class="controls-container">
+            <ui:Button name="backButton" text="⬅ Back to Crafting Menu" class="nav-button back-button" />
+            <ui:VisualElement name="spacer" class="spacer" />
+            <ui:Button name="helpButton" text="❓ Help" class="nav-button help-button" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

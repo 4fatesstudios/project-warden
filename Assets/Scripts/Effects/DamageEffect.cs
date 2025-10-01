@@ -19,7 +19,21 @@ namespace FourFatesStudios.ProjectWarden.Effects
         public Aspect Aspect { get => aspect; set => aspect = value; }
         
         public void Apply(CombatController source, List<CombatController> targets, float scale=1.0f) {
-            throw new System.NotImplementedException();
+            foreach (var target in targets)
+            {
+                if (target != null)
+                {
+                    int finalDamage = Mathf.RoundToInt(baseDamage * scale);
+                    int finalStagger = Mathf.RoundToInt(stagger * scale);
+                    
+                    Debug.Log($"Applying {finalDamage} {damageType} damage (Aspect: {aspect}) to {target.gameObject.name}");
+                    Debug.Log($"Stagger: {finalStagger}");
+                    
+                    // You can extend this to integrate with your damage system:
+                    // target.GetComponent<HealthComponent>()?.TakeDamage(finalDamage, damageType, aspect);
+                    // target.GetComponent<StaggerComponent>()?.AddStagger(finalStagger);
+                }
+            }
         }
     }
 }

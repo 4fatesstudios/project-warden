@@ -12,11 +12,197 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bec2dfcc48522c94f83cd7593ed604f5, type: 3}
   m_Name: Serpent's Dew Recipe
   m_EditorClassIdentifier: 
-  inputIngredient1: {fileID: 11400000, guid: d964cc334a7d4d5428817e758f4d481c, type: 2}
-  inputIngredient2: {fileID: 11400000, guid: 4b2803ab31add384e85f5fc1451fe038, type: 2}
-  inputIngredient3: {fileID: 11400000, guid: 73ab2621b0c8d034697a3eaf46c44521, type: 2}
-  requiredHits: 3
-  maxAttempts: 5
-  outputPotion: {fileID: 11400000, guid: 67b518e8a72f294418bbd78e12951f33, type: 2}
-  requiredTemperature: 5
-  totalDuration: 10
+  id: 
+  itemName: Unnamed Item
+  itemDescription: Empty Description
+  itemRarity: 0
+  itemIcon: {fileID: 0}
+  recipe1: {fileID: 0}
+  inputIngredient1: {fileID: 11400000, guid: d194b4e7033c81a489abf6db78c70009, type: 2}
+  inputIngredient2: {fileID: 11400000, guid: 6a52147714a48ff419e7b6d5c32332f4, type: 2}
+  inputIngredient3: {fileID: 11400000, guid: 9ecf8a952f7c7ff42bb4e785827d21e7, type: 2}
+  outputPotion: {fileID: 11400000, guid: fca10956a25c65344ad3eac54ef48fac, type: 2}
+  outputQuantity: 1
+  isKeyRecipe: 0
+  difficulty: 1
+  requiredPositions: []
+  bonusPatterns: []
+  aspectSynergies: []
+  plannedObstacles: []
+  hasCustomGrid: 1
+  customGridWidth: 5
+  customGridHeight: 5
+  customGridCells:
+  - position: {x: 0, y: 0}
+    aspect: 0
+    rarity: 1
+    isRequired: 0
+    isOccupied: 0
+    obstacleType: 0
+    hasObstacle: 1
+  - position: {x: 0, y: 2}
+    aspect: 2
+    rarity: 1
+    isRequired: 0
+    isOccupied: 0
+    obstacleType: 0
+    hasObstacle: 1
+  - position: {x: 0, y: 4}
+    aspect: 4
+    rarity: 1
+    isRequired: 0
+    isOccupied: 0
+    obstacleType: 0
+    hasObstacle: 1
+  - position: {x: 1, y: 1}
+    aspect: 2
+    rarity: 1
+    isRequired: 0
+    isOccupied: 0
+    obstacleType: 0
+    hasObstacle: 0
+  - position: {x: 1, y: 3}
+    aspect: 4
+    rarity: 1
+    isRequired: 0
+    isOccupied: 0
+    obstacleType: 0
+    hasObstacle: 0
+  - position: {x: 2, y: 0}
+    aspect: 2
+    rarity: 1
+    isRequired: 0
+    isOccupied: 0
+    obstacleType: 0
+    hasObstacle: 1
+  - position: {x: 2, y: 2}
+    aspect: 4
+    rarity: 1
+    isRequired: 0
+    isOccupied: 0
+    obstacleType: 3
+    hasObstacle: 1
+  - position: {x: 3, y: 1}
+    aspect: 4
+    rarity: 1
+    isRequired: 0
+    isOccupied: 0
+    obstacleType: 0
+    hasObstacle: 0
+  - position: {x: 3, y: 3}
+    aspect: 0
+    rarity: 1
+    isRequired: 0
+    isOccupied: 0
+    obstacleType: 7
+    hasObstacle: 1
+  - position: {x: 4, y: 0}
+    aspect: 4
+    rarity: 1
+    isRequired: 0
+    isOccupied: 0
+    obstacleType: 0
+    hasObstacle: 1
+  - position: {x: 4, y: 4}
+    aspect: 2
+    rarity: 1
+    isRequired: 0
+    isOccupied: 0
+    obstacleType: 7
+    hasObstacle: 1
+  - position: {x: 0, y: 3}
+    aspect: 0
+    rarity: 1
+    isRequired: 0
+    isOccupied: 0
+    obstacleType: 0
+    hasObstacle: 1
+  - position: {x: 1, y: 4}
+    aspect: 0
+    rarity: 1
+    isRequired: 0
+    isOccupied: 0
+    obstacleType: 0
+    hasObstacle: 1
+  - position: {x: 0, y: 1}
+    aspect: 0
+    rarity: 1
+    isRequired: 0
+    isOccupied: 0
+    obstacleType: 0
+    hasObstacle: 1
+  - position: {x: 1, y: 0}
+    aspect: 0
+    rarity: 1
+    isRequired: 0
+    isOccupied: 0
+    obstacleType: 0
+    hasObstacle: 1
+  - position: {x: 3, y: 0}
+    aspect: 0
+    rarity: 1
+    isRequired: 0
+    isOccupied: 0
+    obstacleType: 0
+    hasObstacle: 1
+  - position: {x: 4, y: 1}
+    aspect: 0
+    rarity: 1
+    isRequired: 0
+    isOccupied: 0
+    obstacleType: 0
+    hasObstacle: 1
+  - position: {x: 3, y: 4}
+    aspect: 0
+    rarity: 1
+    isRequired: 0
+    isOccupied: 0
+    obstacleType: 7
+    hasObstacle: 1
+  - position: {x: 4, y: 3}
+    aspect: 0
+    rarity: 1
+    isRequired: 0
+    isOccupied: 0
+    obstacleType: 7
+    hasObstacle: 1
+  - position: {x: 1, y: 2}
+    aspect: 0
+    rarity: 1
+    isRequired: 0
+    isOccupied: 0
+    obstacleType: 0
+    hasObstacle: 1
+  - position: {x: 2, y: 1}
+    aspect: 0
+    rarity: 1
+    isRequired: 0
+    isOccupied: 0
+    obstacleType: 0
+    hasObstacle: 1
+  - position: {x: 3, y: 2}
+    aspect: 0
+    rarity: 1
+    isRequired: 0
+    isOccupied: 0
+    obstacleType: 3
+    hasObstacle: 1
+  - position: {x: 2, y: 3}
+    aspect: 0
+    rarity: 1
+    isRequired: 0
+    isOccupied: 0
+    obstacleType: 3
+    hasObstacle: 1
+  minimumEfficiency: 0.6
+  gridRequirements:
+    minimumIngredientsUsed: 2
+    maximumIngredientsUsed: 10
+    requiresSymmetry: 0
+    requiresCompactness: 0
+    compactnessThreshold: 0.7
+  allowsIngredientInteractions: 1
+  forbiddenIngredients: []
+  alternativeIngredients: []
+  customSuccessEvaluator: {fileID: 0}
+  recipeHints: Arrange ingredients to create a stable reaction.

@@ -1,0 +1,31 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/Scripts/UI/CraftingSystem/AlchemySystem/GridMinigameStyles.uss?fileID=7433441132597879392&amp;guid=&amp;type=3#GridMinigameStyles" />
+    <ui:VisualElement name="MainContainer" class="main-container">
+        <ui:VisualElement name="HeaderContainer" class="header-container">
+            <ui:Label text="Alchemy Grid Crafting" name="TitleLabel" class="title-label" />
+            <ui:Label text="🖱️ Drag ingredients from the left panel onto the grid, or click an ingredient then click a grid cell. Use Ctrl+Click to remove placed ingredients. Press Escape to go back, Ctrl+C to clear grid, Enter to craft." name="InstructionsLabel" class="instructions-label" />
+        </ui:VisualElement>
+        
+        <ui:VisualElement name="ContentContainer" class="content-container">
+            <ui:VisualElement name="LeftPanel" class="left-panel">
+                <ui:Label text="Available Ingredients" class="section-title" />
+                <ui:ScrollView name="IngredientPalette" class="ingredient-palette" />
+                
+                <ui:VisualElement name="StatusContainer" class="status-container">
+                    <ui:Label text="Grid Status" class="section-title" />
+                    <ui:Label text="Grid Efficiency: 0%&#10;Total Potency: 0&#10;Valid: No" name="GridStatusLabel" class="status-label" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            
+            <ui:VisualElement name="CenterPanel" class="center-panel">
+                <ui:Label text="Crafting Grid" class="section-title" />
+                <ui:VisualElement name="GridContainer" class="grid-container" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        
+        <ui:VisualElement name="ButtonContainer" class="button-container">
+            <ui:Button text="Cancel" name="CancelButton" class="cancel-button" />
+            <ui:Button text="Confirm Crafting" name="ConfirmButton" class="confirm-button" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

@@ -1,0 +1,211 @@
+.main-container {
+    flex-grow: 1;
+    padding: 20px;
+    background-color: rgb(45, 35, 25);
+    background-image: url('project://database/Assets/UI/Textures/workshop_background.png');
+    border-radius: 10px;
+    border-width: 2px;
+    border-color: rgb(90, 70, 50);
+}
+
+.header-container {
+    margin-bottom: 20px;
+    align-items: center;
+}
+
+.title-label {
+    font-size: 36px;
+    color: rgb(240, 220, 180);
+    margin-bottom: 10px;
+    -unity-text-align: middle-center;
+    -unity-font-style: bold;
+}
+
+.instructions-label {
+    font-size: 26px;
+    color: rgb(200, 180, 140);
+    -unity-text-align: middle-center;
+    white-space: normal;
+}
+
+.work-area {
+    flex-grow: 1;
+    align-items: center;
+    justify-content: center;
+    margin: 20px 0;
+    flex-direction: row;
+}
+
+.grinding-station {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    margin-right: 40px;
+}
+
+
+.mortar {
+    width: 150px;
+    height: 100px;
+    background-color: rgb(80, 80, 80);
+    background-image: url('project://database/Assets/UI/Textures/mortar.png');
+    border-radius: 10px 10px 75px 75px;
+    border-width: 4px;
+    border-color: rgb(120, 120, 120);
+    position: absolute;
+    bottom: 0;
+    left: 25px;
+    overflow: hidden;
+    align-items: center;
+    justify-content: center;
+}
+
+.ingredient-pieces {
+    width: 80px;
+    height: 60px;
+    background-image: url('project://database/Assets/UI/Textures/ingredient_pieces.png');
+    background-size: contain;
+    position: absolute;
+    bottom: 10px;
+}
+
+.grind-particles {
+    position: absolute;
+    width: 100px;
+    height: 80px;
+    background-image: url('project://database/Assets/UI/Textures/dust_particles.png');
+    opacity: 0;
+}
+
+.pestle {
+    width: 30px;
+    height: 120px;
+    background-color: rgb(100, 80, 60);
+    background-image: url('project://database/Assets/UI/Textures/pestle.png');
+    border-radius: 15px;
+    border-width: 2px;
+    border-color: rgb(140, 120, 100);
+    position: absolute;
+    top: 10px;
+    left: 85px;
+}
+
+.rhythm-container {
+    align-items: center;
+}
+
+.rhythm-indicator {
+    width: 80px;
+    height: 80px;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 40px;
+    border-width: 4px;
+    border-color: rgb(200, 200, 200);
+}
+
+.rhythm-label {
+    font-size: 20px;
+    color: rgb(220, 200, 160);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+.controls-area {
+    background-color: rgba(55, 45, 35, 0.9);
+    padding: 20px;
+    border-radius: 10px;
+    border-width: 2px;
+    border-color: rgb(90, 70, 50);
+}
+
+.rhythm-meter-container, .progress-container {
+    position: relative;
+    margin-bottom: 15px;
+}
+
+.control-label {
+    font-size: 20px;
+    color: rgb(240, 220, 180);
+    -unity-font-style: bold;
+}
+
+.rhythm-meter {
+    height: 25px;
+    background-color: rgb(60, 60, 60);
+    border-radius: 12px;
+    border-width: 2px;
+    border-color: rgb(100, 100, 100);
+}
+
+.rhythm-meter .unity-progress-bar {
+    background-color: rgb(100, 200, 255);
+    border-radius: 10px;
+    transition-duration: 0.1s;
+}
+
+.perfect-zone {
+    position: absolute;
+    left: 85%;
+    top: 20px;
+    width: 10%;
+    height: 25px;
+    background-color: rgba(0, 255, 0, 0.4);
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-color: rgb(0, 255, 0);
+    border-radius: 3px;
+}
+
+.grinding-progress {
+    height: 20px;
+    background-color: rgb(60, 60, 60);
+    border-radius: 10px;
+    border-width: 2px;
+    border-color: rgb(100, 100, 100);
+}
+
+.grinding-progress .unity-progress-bar {
+    background-color: rgb(200, 150, 100);
+    border-radius: 8px;
+}
+
+.grind-count-label {
+    font-size: 20px;
+    color: rgb(200, 180, 140);
+    -unity-text-align: middle-right;
+    margin-top: 2px;
+}
+
+.control-buttons-container {
+    align-items: center;
+    margin-top: 10px;
+}
+
+.grind-button {
+    width: 120px;
+    height: 50px;
+    background-color: rgb(120, 80, 40);
+    border-radius: 10px;
+    margin-bottom: 15px;
+    border-width: 3px;
+    border-color: rgb(160, 120, 80);
+    color: rgb(255, 255, 255);
+    font-size: 20px;
+    -unity-font-style: bold;
+}
+
+.grind-button:hover {
+    background-color: rgb(140, 100, 60);
+    border-color: rgb(180, 140, 100);
+}
+
+.grind-button:active {
+    background-color: rgb(100, 60, 20);
+}
+
+.status-label {
+    font-size: 20px;
+    color: rgb(255, 255, 255);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}

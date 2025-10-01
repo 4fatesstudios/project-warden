@@ -1,0 +1,90 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="MainContainer" class="refining-container" style="height: 100%; padding: 15px;">
+        
+        <!-- Header -->
+        <ui:VisualElement name="Header" class="refining-header">
+            <ui:Label text="🔬 Ingredient Refining Laboratory" class="refining-title" />
+            <ui:Label name="StatusLabel" text="Idle" class="status-label" />
+        </ui:VisualElement>
+        
+        <!-- Skill Display -->
+        <ui:VisualElement name="SkillDisplay" class="skill-display">
+            <ui:VisualElement class="skill-item">
+                <ui:Label text="⚒️" class="skill-icon" />
+                <ui:Label text="Grinding" class="skill-name" />
+                <ui:Label name="GrindingSkillLevel" text="1" class="skill-level" />
+            </ui:VisualElement>
+            <ui:VisualElement class="skill-item">
+                <ui:Label text="🧪" class="skill-icon" />
+                <ui:Label text="Distilling" class="skill-name" />
+                <ui:Label name="DistillingSkillLevel" text="1" class="skill-level" />
+            </ui:VisualElement>
+            <ui:VisualElement class="skill-item">
+                <ui:Label text="🔥" class="skill-icon" />
+                <ui:Label text="Roasting" class="skill-name" />
+                <ui:Label name="RoastingSkillLevel" text="1" class="skill-level" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        
+        <!-- Equipment Bonus -->
+        <ui:VisualElement name="EquipmentBonus" class="equipment-bonus">
+            <ui:Label text="🔧" class="equipment-icon" />
+            <ui:Label text="Equipment Quality Bonus:" class="equipment-text" />
+            <ui:Label name="EquipmentBonusValue" text="+0%" class="equipment-bonus-value" />
+        </ui:VisualElement>
+        
+        <!-- Main Content Area -->
+        <ui:VisualElement name="ContentArea" style="flex-direction: row; flex-grow: 1; margin-left: 15px;">
+            
+            <!-- Left Panel: Ingredients -->
+            <ui:VisualElement name="LeftPanel" style="width: 350px;">
+                <ui:Label text="📦 Available Ingredients" class="queue-title" />
+                <ui:ScrollView name="IngredientList" class="ingredient-list" />
+            </ui:VisualElement>
+            
+            <!-- Right Panel: Processes and Queue -->
+            <ui:VisualElement name="RightPanel" style="flex-grow: 1;">
+                
+                <!-- Active Processes -->
+                <ui:VisualElement name="ActiveProcesses" class="active-processes">
+                    <ui:Label text="⚙️ Active Processes" class="queue-title" />
+                    <ui:VisualElement name="ActiveProcessList" style="min-height: 80px;">
+                        <!-- Active processes will be populated dynamically -->
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                
+                <!-- Process Queue -->
+                <ui:VisualElement name="ProcessQueue" class="process-queue">
+                    <ui:Label text="📋 Refining Queue" class="queue-title" />
+                    <ui:VisualElement name="QueueList" style="min-height: 100px;">
+                        <!-- Queue items will be populated dynamically -->
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                
+                <!-- Control Buttons -->
+                <ui:VisualElement name="ControlButtons" class="control-buttons">
+                    <ui:Button name="StartRefiningButton" text="▶️ Start Refining" class="control-button start-button" />
+                    <ui:Button name="PauseButton" text="⏸️ Pause All" class="control-button pause-button" />
+                    <ui:Button name="ClearQueueButton" text="🗑️ Clear Queue" class="control-button clear-button" />
+                </ui:VisualElement>
+                
+                <!-- Results Area -->
+                <ui:VisualElement name="ResultsArea" class="results-area">
+                    <ui:Label text="📊 Recent Results" class="queue-title" />
+                    <ui:ScrollView name="ResultsList" style="min-height: 120px;">
+                        <!-- Results will be populated dynamically -->
+                    </ui:ScrollView>
+                </ui:VisualElement>
+                
+            </ui:VisualElement>
+            
+        </ui:VisualElement>
+        
+        <!-- Footer -->
+        <ui:VisualElement name="Footer" style="flex-direction: row; align-items: center; justify-content: space-between; margin-top: 10px; padding: 8px; background-color: rgba(15, 20, 30, 0.6); border-radius: 4px;">
+            <ui:Label name="HelpText" text="💡 Select ingredients and choose refining methods. Higher skill levels improve success rates." style="font-size: 11px; color: rgba(160, 180, 200, 0.8); flex-grow: 1;" />
+            <ui:Button name="HelpButton" text="❓ Help" style="width: 60px; height: 25px; font-size: 10px; background-color: rgba(80, 120, 160, 0.7);" />
+        </ui:VisualElement>
+        
+    </ui:VisualElement>
+</ui:UXML>

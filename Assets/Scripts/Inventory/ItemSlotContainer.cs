@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
 using UnityEngine;
 
@@ -127,6 +128,54 @@ namespace FourFatesStudios.ProjectWarden.Inventory
             }
 
             return amount; // Should be 0 here, since we already checked totalQuantity
+        }
+
+        /// <summary>
+        /// Gets the total quantity of a specific item across all slots in the container.
+        /// </summary>
+        /// <param name="item">The item to count. Cannot be null.</param>
+        /// <returns>The total quantity of the item, or 0 if the item is not found.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if the provided <paramref name="item"/> is null.</exception>
+        public int GetItemCount(T item) {
+            if (item == null)
+                throw new ArgumentNullException(nameof(item), "ItemSlotContainer: item cannot be null");
+
+            int totalQuantity = 0;
+            foreach (var slot in _items) {
+                if (slot.Item.Equals(item)) {
+                    totalQuantity += slot.Quantity;
+                }
+            }
+
+            return totalQuantity;
+        }
+
+        /// <summary>
+        /// Gets all items in the container.
+        /// </summary>
+        /// <returns>An enumerable collection of all unique items in the container.</returns>
+        public IEnumerable<T> GetAllItems() {
+            var uniqueItems = new HashSet<T>();
+            foreach (var slot in _items) {
+                uniqueItems.Add(slot.Item);
+            }
+            return uniqueItems;
+        }
+
+        /// <summary>
+        /// Gets all items in the container with their total quantities.
+        /// </summary>
+        /// <returns>A dictionary mapping each item to its total quantity across all slots.</returns>
+        public Dictionary<T, int> GetAllItemsWithCounts() {
+            var itemCounts = new Dictionary<T, int>();
+            foreach (var slot in _items) {
+                if (itemCounts.ContainsKey(slot.Item)) {
+                    itemCounts[slot.Item] += slot.Quantity;
+                } else {
+                    itemCounts[slot.Item] = slot.Quantity;
+                }
+            }
+            return itemCounts;
         }
 
 
