@@ -23,7 +23,22 @@ namespace FourFatesStudios.ProjectWarden.Effects
         public EffectTimingInfo EffectTimingInfo { get => effectTimingInfo; set => effectTimingInfo = value; }
 
         public void Apply(CombatController source, List<CombatController> targets, float scale = 1) {
-            throw new System.NotImplementedException();
+            foreach (var target in targets)
+            {
+                if (target != null)
+                {
+                    int finalDamage = Mathf.RoundToInt(baseDamage * scale);
+                    int finalStagger = Mathf.RoundToInt(stagger * scale);
+                    
+                    Debug.Log($"Applying damage over time debuff to {target.gameObject.name}");
+                    Debug.Log($"DOT: {finalDamage} {damageType} damage (Aspect: {aspect}) per tick");
+                    Debug.Log($"Stagger: {finalStagger} per tick");
+                    Debug.Log($"Effect timing: {effectTimingInfo}");
+                    
+                    // You can extend this to integrate with your DOT/debuff system:
+                    // target.GetComponent<DebuffComponent>()?.ApplyDamageOverTime(finalDamage, finalStagger, damageType, aspect, effectTimingInfo);
+                }
+            }
         }
     }
 }

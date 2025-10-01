@@ -1,0 +1,91 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <ui:VisualElement name="MainContainer" class="main-container" style="flex-direction: column; height: 100%; padding: 10px; background-color: rgba(15, 20, 30, 0.95);">
+        
+        <!-- Header Area -->
+        <ui:VisualElement name="HeaderArea" class="header-area" style="flex-direction: row; align-items: center; margin-bottom: 10px; padding: 8px; background-color: rgba(25, 35, 50, 0.8); border-radius: 6px;">
+            <ui:Label text="Tetris Alchemy System" name="HeaderTitle" class="header-title" style="font-size: 18px; color: rgba(220, 230, 255, 1); -unity-font-style: bold; flex-grow: 1;" />
+            <ui:Button name="BackButton" text="✕" class="back-button" style="width: 30px; height: 30px; background-color: rgba(160, 80, 80, 0.8); border-radius: 15px; border-width: 1px; border-color: rgba(200, 120, 120, 0.8);" />
+        </ui:VisualElement>
+        
+        <!-- Recipe Selection Area -->
+        <ui:VisualElement name="RecipeArea" class="recipe-area" style="margin-bottom: 10px; padding: 8px; background-color: rgba(25, 35, 50, 0.7); border-radius: 6px; border-width: 1px; border-color: rgba(80, 120, 160, 0.5);">
+            <ui:Label text="📜 Select Recipe" name="RecipeTitle" class="section-title" style="font-size: 14px; color: rgba(200, 220, 240, 1); margin-bottom: 5px; -unity-font-style: bold;" />
+            <ui:ScrollView name="RecipeSelection" class="recipe-selection" style="max-height: 120px; min-height: 80px;" />
+        </ui:VisualElement>
+        
+        <!-- Main Crafting Area -->
+        <ui:VisualElement name="CraftingArea" class="crafting-area" style="flex-direction: row; flex-grow: 1; margin-left: 10px;">
+            
+            <!-- Left Side: Ingredient Palette -->
+            <ui:VisualElement name="PaletteArea" class="palette-area" style="width: 250px; background-color: rgba(25, 35, 50, 0.8); border-radius: 6px; border-width: 1px; border-color: rgba(80, 120, 160, 0.5); padding: 8px;">
+                <ui:Label text="🧪 Ingredients" name="PaletteTitle" class="section-title" style="font-size: 14px; color: rgba(200, 220, 240, 1); margin-bottom: 8px; -unity-font-style: bold;" />
+                <ui:ScrollView name="IngredientPalette" class="ingredient-palette" style="flex-grow: 1;" />
+                
+                <!-- Ingredient Info Panel -->
+                <ui:VisualElement name="IngredientInfo" style="margin-top: 8px; padding: 6px; background-color: rgba(15, 25, 40, 0.8); border-radius: 4px; border-width: 1px; border-color: rgba(60, 100, 140, 0.5);">
+                    <ui:Label name="SelectedIngredientName" text="Select an ingredient" style="font-size: 12px; color: rgba(180, 200, 220, 1); -unity-font-style: bold;" />
+                    <ui:Label name="SelectedIngredientDescription" text="Ingredient details will appear here" style="font-size: 10px; color: rgba(150, 170, 190, 0.8); white-space: normal; margin-top: 4px;" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            
+            <!-- Center: Grid Container -->
+            <ui:VisualElement name="GridArea" class="grid-area" style="flex-grow: 1; align-items: center; justify-content: center;">
+                <ui:Label text="🎯 Crafting Grid" name="GridTitle" class="section-title" style="font-size: 14px; color: rgba(200, 220, 240, 1); margin-bottom: 8px; -unity-font-style: bold; -unity-text-align: middle-center;" />
+                
+                <!-- Grid Container (dynamically populated) -->
+                <ui:VisualElement name="GridContainer" class="grid-container" style="align-items: center; justify-content: center;" />
+                
+                <!-- Grid Instructions -->
+                <ui:VisualElement name="GridInstructions" style="margin-top: 10px; padding: 6px; background-color: rgba(15, 25, 40, 0.6); border-radius: 4px; max-width: 300px;">
+                    <ui:Label text="💡 Instructions:" style="font-size: 11px; color: rgba(180, 200, 220, 1); -unity-font-style: bold;" />
+                    <ui:Label text="• Click ingredients to select" style="font-size: 10px; color: rgba(150, 170, 190, 0.8);" />
+                    <ui:Label text="• Click grid to place (like Tetris)" style="font-size: 10px; color: rgba(150, 170, 190, 0.8);" />
+                    <ui:Label text="• Ctrl+Click to remove" style="font-size: 10px; color: rgba(150, 170, 190, 0.8);" />
+                    <ui:Label text="• Adjacent ingredients may interact" style="font-size: 10px; color: rgba(150, 170, 190, 0.8);" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            
+            <!-- Right Side: Status and Controls -->
+            <ui:VisualElement name="StatusArea" class="status-area" style="width: 200px; background-color: rgba(25, 35, 50, 0.8); border-radius: 6px; border-width: 1px; border-color: rgba(80, 120, 160, 0.5); padding: 8px;">
+                <ui:Label text="📊 Status" name="StatusTitle" class="section-title" style="font-size: 14px; color: rgba(200, 220, 240, 1); margin-bottom: 8px; -unity-font-style: bold;" />
+                
+                <!-- Status Display -->
+                <ui:VisualElement name="StatusDisplay" style="margin-bottom: 10px;">
+                    <ui:Label name="GridStatusLabel" class="status-label" text="Grid: Empty" style="font-size: 11px; padding: 4px; background-color: rgba(15, 25, 40, 0.8); border-radius: 3px; margin-bottom: 4px;" />
+                    <ui:Label name="PatternMatchLabel" class="status-label" text="Efficiency: 0%" style="font-size: 11px; padding: 4px; background-color: rgba(15, 25, 40, 0.8); border-radius: 3px; margin-bottom: 4px;" />
+                    <ui:Label name="InteractionLabel" class="status-label" text="Interactions: None" style="font-size: 11px; padding: 4px; background-color: rgba(15, 25, 40, 0.8); border-radius: 3px; margin-bottom: 4px;" />
+                </ui:VisualElement>
+                
+                <!-- Skills Display -->
+                <ui:VisualElement name="SkillsDisplay" style="margin-bottom: 15px;">
+                    <ui:Label text="🎓 Active Skills" style="font-size: 12px; color: rgba(180, 200, 220, 1); -unity-font-style: bold; margin-bottom: 4px;" />
+                    <ui:VisualElement name="ActiveSkillsList" style="margin-bottom: 2px;">
+                        <!-- Skills will be populated dynamically -->
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                
+                <!-- Control Buttons -->
+                <ui:VisualElement name="ButtonArea" class="button-area" style="margin-bottom: 8px;">
+                    <ui:Button name="CraftButton" text="🔮 Craft Potion" class="craft-button" style="padding: 8px; font-size: 13px; -unity-font-style: bold; border-radius: 6px; margin-bottom: 8px;" />
+                    <ui:Button name="ClearButton" text="🗑️ Clear Grid" class="clear-button" style="padding: 6px; font-size: 12px; border-radius: 4px; margin-bottom: 8px;" />
+                    <ui:Button name="AlchemyBookButton" text="📖 Alchemy Book" class="book-button" style="padding: 6px; font-size: 20px; border-radius: 4px; background-color: rgba(120, 80, 160, 0.8);" />
+                </ui:VisualElement>
+                
+                <!-- Help Section -->
+                <ui:VisualElement name="HelpSection" style="margin-top: 15px; padding: 6px; background-color: rgba(15, 25, 40, 0.6); border-radius: 4px;">
+                    <ui:Label text="❓ Quick Help" style="font-size: 11px; color: rgba(180, 200, 220, 1); font-weight: bold; margin-bottom: 4px;" />
+                    <ui:Label text="Place ingredients efficiently to maximize success rate. Look for interaction opportunities!" style="font-size: 9px; color: rgba(140, 160, 180, 0.8); white-space: normal;" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            
+        </ui:VisualElement>
+        
+        <!-- Footer Area -->
+        <ui:VisualElement name="FooterArea" class="footer-area" style="flex-direction: row; align-items: center; margin-top: 10px; padding: 6px; background-color: rgba(25, 35, 50, 0.6); border-radius: 4px;">
+            <ui:Label name="RecipeInfoLabel" text="No recipe selected" style="font-size: 11px; color: rgba(160, 180, 200, 0.8); flex-grow: 1; margin-right: 10px;" />
+            <ui:Label name="KeyRecipeIndicator" text="" style="font-size: 11px; color: rgba(255, 215, 0, 1); -unity-font-style: bold; margin-right: 10px;" />
+            <ui:Label name="VersionLabel" text="Tetris Alchemy v1.0" style="font-size: 9px; color: rgba(120, 140, 160, 0.6);" />
+        </ui:VisualElement>
+        
+    </ui:VisualElement>
+</ui:UXML>

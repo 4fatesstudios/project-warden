@@ -3,12 +3,27 @@
     align-items: center;
     justify-content: center;
     padding: 40px;
+    background-color: rgb(240, 248, 255); /* Light blue background */
 }
 
 Button {
-    font-size: 18px;
-    width: 200px;
-    height: 40px;
-    unity-font-style: bold;
+    font-size: 20px;
+    width: 300px;
+    height: 60px;
+    -unity-font-style: bold;
     margin: 15px 0;
+    background-color: rgb(173, 216, 230); /* Light blue buttons */
+    border-color: rgb(135, 206, 235); /* Sky blue border */
+    border-width: 2px;
+    border-radius: 8px;
+    color: rgb(25, 25, 112); /* Midnight blue text */
+}
+
+Button:hover {
+    background-color: rgb(135, 206, 235); /* Sky blue on hover */
+    border-color: rgb(70, 130, 180); /* Steel blue border on hover */
+}
+
+Button:active {
+    background-color: rgb(100, 149, 237); /* Cornflower blue when pressed */
 }

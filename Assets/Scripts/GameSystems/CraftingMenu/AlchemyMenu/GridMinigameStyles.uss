@@ -87,6 +87,40 @@
     padding: 5px;
 }
 
+.ingredient-header {
+    flex-direction: row;
+    background-color: rgb(60, 60, 60);
+    padding: 8px;
+    border-radius: 3px;
+    margin-bottom: 5px;
+    border-width: 1px;
+    border-color: rgb(100, 100, 100);
+}
+
+.header-name {
+    flex-grow: 1;
+    color: rgb(255, 255, 255);
+    font-size: 20px;
+    -unity-font-style: bold;
+    text-align: left;
+}
+
+.header-icon {
+    width: 40px;
+    color: rgb(255, 255, 255);
+    font-size: 20px;
+    -unity-font-style: bold;
+    text-align: center;
+}
+
+.header-quantity {
+    width: 40px;
+    color: rgb(255, 255, 255);
+    font-size: 20px;
+    -unity-font-style: bold;
+    text-align: center;
+}
+
 .status-container {
     border-top-width: 1px;
     border-color: rgb(100, 100, 100);
@@ -200,10 +234,29 @@
     margin-bottom: 5px;
     flex-direction: row;
     align-items: center;
+    transition-duration: 0.2s;
+    transition-property: background-color, border-color, opacity;
 }
 
 .ingredient-item:hover {
     background-color: rgb(80, 80, 80);
+}
+
+/* Row State Styling */
+.ingredient-item.ingredient-in-use {
+    background-color: rgba(255, 255, 0, 0.3);
+    border-color: rgba(255, 255, 0, 0.8);
+}
+
+.ingredient-item.ingredient-depleted {
+    background-color: rgba(80, 80, 80, 0.5);
+    opacity: 0.5;
+}
+
+.ingredient-item.ingredient-dragging {
+    background-color: rgba(100, 150, 255, 0.5);
+    border-color: rgba(100, 150, 255, 0.8);
+    border-width: 2px;
 }
 
 .ingredient-preview {
@@ -216,13 +269,27 @@
 
 .ingredient-label {
     color: rgb(255, 255, 255);
-    font-size: 12px;
+    font-size: 20px;
     flex-grow: 1;
+    text-align: left;
+}
+
+.ingredient-icon {
+    width: 40px;
+    height: 30px;
+    background-color: rgb(80, 80, 80);
+    border-radius: 3px;
+    margin-right: 10px;
+    text-align: center;
+    font-size: 20px;
+    color: rgb(255, 255, 255);
 }
 
 .ingredient-count {
     color: rgb(180, 180, 180);
-    font-size: 10px;
+    font-size: 20px;
+    width: 40px;
+    text-align: center;
 }
 
 /* Recipe Item Styles */
@@ -312,4 +379,17 @@
 .grid-cell.invalid {
     background-color: rgb(150, 60, 60);
     border-color: rgb(200, 80, 80);
+}
+
+/* Grid Drop Zone Highlights */
+.grid-cell.drop-zone-valid {
+    background-color: rgba(0, 255, 0, 0.3);
+    border-color: rgba(0, 255, 0, 0.8);
+    border-width: 2px;
+}
+
+.grid-cell.drop-zone-invalid {
+    background-color: rgba(255, 0, 0, 0.3);
+    border-color: rgba(255, 0, 0, 0.8);
+    border-width: 2px;
 }

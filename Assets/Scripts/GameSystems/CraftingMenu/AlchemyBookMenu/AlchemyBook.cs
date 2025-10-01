@@ -46,6 +46,15 @@ namespace GameSystems.CraftingMenu.AlchemyBookMenu
 
         void Start()
         {
+            Debug.Log("📖 AlchemyBook Start() called");
+            
+            // Auto-assign UIDocument if not set
+            if (uiDocument == null)
+            {
+                uiDocument = GetComponent<UIDocument>();
+                Debug.Log($"📖 Auto-assigned UIDocument: {uiDocument != null}");
+            }
+            
             InitializeHelpEntries();
             SetupCameraPosition();
             SetupUI();
@@ -54,7 +63,22 @@ namespace GameSystems.CraftingMenu.AlchemyBookMenu
             LoadAllAlchemyRecipes();
             LoadAllIngredients();
             
+            // Load entries from Resources/AlchemyBook folder structure
+            LoadEntriesFromResources();
+            
             UpdateDisplay();
+            
+            Debug.Log($"📖 AlchemyBook initialization complete. Total entries - Bestiary: {bestiaryEntries.Count}, Recipes: {recipeEntries.Count}, Ingredients: {ingredientEntries.Count}, Help: {helpEntries.Count}");
+        }
+
+        void OnEnable()
+        {
+            Debug.Log("📖 AlchemyBook OnEnable called");
+        }
+
+        void OnDisable()
+        {
+            Debug.Log("📖 AlchemyBook OnDisable called");
         }
 
         void SetupCameraPosition()
@@ -121,11 +145,27 @@ namespace GameSystems.CraftingMenu.AlchemyBookMenu
 
         void SetupUI()
         {
+            Debug.Log("📖 SetupUI called");
+            
+            if (uiDocument == null)
+            {
+                Debug.LogError("📖 UIDocument is null! Cannot setup UI.");
+                return;
+            }
+            
             root = uiDocument.rootVisualElement;
+            Debug.Log($"📖 Root element: {root?.name}");
+
+            if (root == null)
+            {
+                Debug.LogError("📖 Root visual element is null! Check if UXML is assigned to UIDocument.");
+                return;
+            }
 
             if (bookStyleSheet)
                 root.styleSheets.Add(bookStyleSheet);
 
+            // Find main UI elements
             tabsContainer = root.Q<VisualElement>("tabs-container");
             leftPage = root.Q<VisualElement>("left-page");
             rightPage = root.Q<VisualElement>("right-page");
@@ -135,29 +175,90 @@ namespace GameSystems.CraftingMenu.AlchemyBookMenu
             prevButton = root.Q<Button>("prev-button");
             searchField = root.Q<TextField>("search-field");
             searchButton = root.Q<Button>("search-button");
+            
+            Debug.Log($"📖 UI Elements found - leftPage: {leftPage != null}, rightPage: {rightPage != null}, tabsContainer: {tabsContainer != null}, frontCover: {frontCover != null}");
+
+            // Find and setup the open book button
+            var openBookButton = root.Q<Button>("open-book-button");
+            if (openBookButton != null)
+            {
+                openBookButton.clicked += OpenBook;
+                Debug.Log("📖 Open book button found and connected");
+            }
+            else
+            {
+                Debug.LogWarning("📖 Open book button not found in UI");
+            }
+
+            // Find and setup close book button
+            var closeBookButton = root.Q<Button>("close-book-main");
+            if (closeBookButton != null)
+            {
+                closeBookButton.clicked += CloseBook;
+                Debug.Log("📖 Close book button found and connected");
+            }
 
             SetupTabButtons();
+            SetupNavigationButtons();
+            SetupSearchFunctionality();
+            
+            Debug.Log("📖 UI setup completed");
+        }
 
-            nextButton.clicked += NextPage;
-            prevButton.clicked += PrevPage;
+        void SetupNavigationButtons()
+        {
+            if (nextButton != null)
+                nextButton.clicked += NextPage;
+            if (prevButton != null)
+                prevButton.clicked += PrevPage;
+        }
 
-            searchButton.clicked += PerformSearch;
-            searchField.RegisterCallback<KeyDownEvent>(OnSearchKeyDown);
+        void SetupSearchFunctionality()
+        {
+            if (searchButton != null)
+                searchButton.clicked += PerformSearch;
+            if (searchField != null)
+                searchField.RegisterCallback<KeyDownEvent>(OnSearchKeyDown);
+        }
+
+        void OpenBook()
+        {
+            Debug.Log("📖 Opening book");
+            showingCover = false;
+            showingFrontCover = false;
+            UpdateDisplay();
+        }
+
+        public void CloseBook()
+        {
+            Debug.Log("📖 Closing book");
+            showingCover = true;
+            showingFrontCover = true;
+            UpdateDisplay();
+            gameObject.SetActive(false);
+
         }
 
         void SetupTabButtons()
         {
             var bestiaryTab = root.Q<Button>("bestiary-tab");
-            var recipeTab = root.Q<Button>("recipe-tab");
-            var ingredientTab = root.Q<Button>("ingredient-tab");
+            var recipeTab = root.Q<Button>("recipes-tab");
+            var ingredientTab = root.Q<Button>("ingredients-tab");
             var helpTab = root.Q<Button>("help-tab");
-            var bookmarkTab = root.Q<Button>("bookmark-tab");
+            var bookmarkTab = root.Q<Button>("bookmarks-tab");
 
-            bestiaryTab.clicked += () => SwitchSection(EntryType.Bestiary);
-            recipeTab.clicked += () => SwitchSection(EntryType.Recipe);
-            ingredientTab.clicked += () => SwitchSection(EntryType.Ingredient);
-            helpTab.clicked += () => SwitchSection(EntryType.Help);
-            bookmarkTab.clicked += () => SwitchSection(EntryType.Bookmarked);
+            if (bestiaryTab != null)
+                bestiaryTab.clicked += () => SwitchSection(EntryType.Bestiary);
+            if (recipeTab != null)
+                recipeTab.clicked += () => SwitchSection(EntryType.Recipe);
+            if (ingredientTab != null)
+                ingredientTab.clicked += () => SwitchSection(EntryType.Ingredient);
+            if (helpTab != null)
+                helpTab.clicked += () => SwitchSection(EntryType.Help);
+            if (bookmarkTab != null)
+                bookmarkTab.clicked += () => SwitchSection(EntryType.Bookmarked);
+            
+            Debug.Log($"📖 Tab buttons setup - Bestiary: {bestiaryTab != null}, Recipes: {recipeTab != null}, Ingredients: {ingredientTab != null}, Help: {helpTab != null}, Bookmarks: {bookmarkTab != null}");
         }
 
         void SwitchSection(EntryType section)
@@ -369,12 +470,287 @@ namespace GameSystems.CraftingMenu.AlchemyBookMenu
             }
 
             if (currentPageIndex < filteredEntries.Count)
-                leftPage.Add(filteredEntries[currentPageIndex].CreateEntryVisual());
+                leftPage.Add(CreateEntryElement(filteredEntries[currentPageIndex]));
 
             if (currentPageIndex + 1 < filteredEntries.Count)
-                rightPage.Add(filteredEntries[currentPageIndex + 1].CreateEntryVisual());
+                rightPage.Add(CreateEntryElement(filteredEntries[currentPageIndex + 1]));
 
             UpdateTabStates();
+        }
+
+        /// <summary>
+        /// Creates a visual element for an entry, using template if available
+        /// </summary>
+        private VisualElement CreateEntryElement(BaseEntry entry)
+        {
+            if (entryTemplate != null)
+            {
+                return CreateEntryFromTemplate(entry);
+            }
+            else
+            {
+                // Fallback to the entry's own CreateEntryVisual method
+                return entry.CreateEntryVisual();
+            }
+        }
+
+        /// <summary>
+        /// Creates an entry using the UXML template
+        /// </summary>
+        private VisualElement CreateEntryFromTemplate(BaseEntry entry)
+        {
+            var entryElement = entryTemplate.CloneTree();
+            var container = entryElement.Q<VisualElement>("entry-container");
+            
+            if (container == null)
+            {
+                Debug.LogWarning("Entry template missing 'entry-container' element!");
+                return entry.CreateEntryVisual(); // Fallback
+            }
+
+            // Apply entry type specific styling
+            string entryTypeClass = entry switch
+            {
+                BestiaryEntry => "bestiary-entry",
+                RecipeEntry => "recipe-entry", 
+                IngredientEntry => "ingredient-entry",
+                HelpEntry => "help-entry",
+                _ => "generic-entry"
+            };
+            container.AddToClassList(entryTypeClass);
+
+            // Populate template elements
+            PopulateTemplateElements(container, entry);
+
+            return container;
+        }
+
+        /// <summary>
+        /// Populates the template elements with entry data
+        /// </summary>
+        private void PopulateTemplateElements(VisualElement container, BaseEntry entry)
+        {
+            // Title and basic info
+            var title = container.Q<Label>("entry-title");
+            if (title != null) title.text = entry.title;
+
+            var subtitle = container.Q<Label>("entry-subtitle");
+            if (subtitle != null) 
+            {
+                // Set subtitle based on entry type
+                string subtitleText = entry switch
+                {
+                    RecipeEntry recipe => recipe.isUniquePotionRecipe ? "Unique Potion" : "Custom Infusion",
+                    IngredientEntry ingredient => ingredient.aspect.ToString(),
+                    BestiaryEntry => "Creature",
+                    HelpEntry => "Guide",
+                    _ => ""
+                };
+                subtitle.text = subtitleText;
+            }
+
+            var description = container.Q<Label>("entry-description");
+            if (description != null) description.text = entry.description ?? "";
+
+            // Bookmark functionality
+            var bookmarkButton = container.Q<Button>("bookmark-button");
+            if (bookmarkButton != null)
+            {
+                bookmarkButton.text = entry.isBookmarked ? "★" : "☆";
+                if (entry.isBookmarked)
+                    bookmarkButton.AddToClassList("bookmarked");
+                bookmarkButton.clicked += () => ToggleBookmark(entry.title, entry.GetEntryType());
+            }
+
+            // Page number
+            var pageNumber = container.Q<Label>("entry-page-number");
+            if (pageNumber != null) pageNumber.text = $"Page {entry.pageNumber}";
+
+            // Discovery status
+            var discovered = container.Q<Label>("entry-discovered");
+            if (discovered != null)
+            {
+                discovered.text = entry.isSeen ? "Discovered" : "Unknown";
+                discovered.style.color = entry.isSeen ? new Color(0.13f, 0.55f, 0.13f) : new Color(0.7f, 0.7f, 0.7f);
+            }
+
+            // Type-specific content
+            PopulateTypeSpecificContent(container, entry);
+        }
+
+        /// <summary>
+        /// Populates content specific to the entry type
+        /// </summary>
+        private void PopulateTypeSpecificContent(VisualElement container, BaseEntry entry)
+        {
+            switch (entry)
+            {
+                case RecipeEntry recipe:
+                    PopulateRecipeContent(container, recipe);
+                    break;
+                case IngredientEntry ingredient:
+                    PopulateIngredientContent(container, ingredient);
+                    break;
+                case HelpEntry help:
+                    PopulateHelpContent(container, help);
+                    break;
+                case BestiaryEntry bestiary:
+                    PopulateBestiaryContent(container, bestiary);
+                    break;
+            }
+        }
+
+        private void PopulateRecipeContent(VisualElement container, RecipeEntry recipe)
+        {
+            var ingredientsSection = container.Q<VisualElement>("entry-ingredients");
+            if (ingredientsSection != null && recipe.requiredIngredients != null && recipe.requiredIngredients.Count > 0)
+            {
+                ingredientsSection.style.display = DisplayStyle.Flex;
+                var ingredientsList = ingredientsSection.Q<VisualElement>("ingredients-list");
+                if (ingredientsList != null)
+                {
+                    foreach (var ingredient in recipe.requiredIngredients)
+                    {
+                        if (ingredient.isDiscovered)
+                        {
+                            var ingredientLabel = new Label($"• {ingredient.ingredientName} x{ingredient.quantity}");
+                            ingredientLabel.AddToClassList("ingredient-item");
+                            ingredientsList.Add(ingredientLabel);
+                        }
+                        else
+                        {
+                            var unknownLabel = new Label("• ??? x?");
+                            unknownLabel.AddToClassList("ingredient-unknown");
+                            ingredientsList.Add(unknownLabel);
+                        }
+                    }
+                }
+            }
+
+            var effectsSection = container.Q<VisualElement>("entry-effects");
+            if (effectsSection != null && recipe.discoveredInfusions != null && recipe.discoveredInfusions.Count > 0)
+            {
+                effectsSection.style.display = DisplayStyle.Flex;
+                var effectsList = effectsSection.Q<VisualElement>("effects-list");
+                if (effectsList != null)
+                {
+                    foreach (var infusion in recipe.discoveredInfusions)
+                    {
+                        var effectLabel = new Label($"• {infusion}");
+                        effectLabel.AddToClassList("effect-item");
+                        effectsList.Add(effectLabel);
+                    }
+                }
+            }
+        }
+
+        private void PopulateIngredientContent(VisualElement container, IngredientEntry ingredient)
+        {
+            var propertiesSection = container.Q<VisualElement>("entry-properties");
+            if (propertiesSection != null && ingredient.availableRefinements != null && ingredient.availableRefinements.Count > 0)
+            {
+                propertiesSection.style.display = DisplayStyle.Flex;
+                var propertiesList = propertiesSection.Q<VisualElement>("properties-list");
+                if (propertiesList != null)
+                {
+                    foreach (var refinement in ingredient.availableRefinements)
+                    {
+                        var propertyLabel = new Label($"• {refinement}");
+                        propertyLabel.AddToClassList("property-item");
+                        propertiesList.Add(propertyLabel);
+                    }
+                }
+            }
+
+            // Show drop sources in the lore section
+            var loreSection = container.Q<VisualElement>("entry-lore");
+            if (loreSection != null && ingredient.dropSources != null && ingredient.dropSources.Count > 0)
+            {
+                loreSection.style.display = DisplayStyle.Flex;
+                var loreContent = loreSection.Q<Label>("lore-content");
+                if (loreContent != null)
+                {
+                    string sourcesText = "Sources:\n";
+                    foreach (var source in ingredient.dropSources)
+                    {
+                        sourcesText += $"• {source.sourceName} ({source.sourceType})";
+                        if (!string.IsNullOrEmpty(source.location))
+                            sourcesText += $" - {source.location}";
+                        sourcesText += "\n";
+                    }
+                    loreContent.text = sourcesText;
+                }
+            }
+        }
+
+        private void PopulateHelpContent(VisualElement container, HelpEntry help)
+        {
+            var tipsSection = container.Q<VisualElement>("entry-tips");
+            if (tipsSection != null && help.tips != null && help.tips.Length > 0)
+            {
+                tipsSection.style.display = DisplayStyle.Flex;
+                var tipsList = tipsSection.Q<VisualElement>("tips-list");
+                if (tipsList != null)
+                {
+                    foreach (var tip in help.tips)
+                    {
+                        var tipLabel = new Label($"• {tip}");
+                        tipLabel.AddToClassList("tip-item");
+                        tipsList.Add(tipLabel);
+                    }
+                }
+            }
+
+            // Show steps in the properties section
+            var propertiesSection = container.Q<VisualElement>("entry-properties");
+            if (propertiesSection != null && help.steps != null && help.steps.Length > 0)
+            {
+                propertiesSection.style.display = DisplayStyle.Flex;
+                var propertiesList = propertiesSection.Q<VisualElement>("properties-list");
+                if (propertiesList != null)
+                {
+                    for (int i = 0; i < help.steps.Length; i++)
+                    {
+                        var stepLabel = new Label($"{i + 1}. {help.steps[i]}");
+                        stepLabel.AddToClassList("property-item");
+                        propertiesList.Add(stepLabel);
+                    }
+                }
+            }
+        }
+
+        private void PopulateBestiaryContent(VisualElement container, BestiaryEntry bestiary)
+        {
+            var loreSection = container.Q<VisualElement>("entry-lore");
+            if (loreSection != null && !string.IsNullOrEmpty(bestiary.behavior))
+            {
+                loreSection.style.display = DisplayStyle.Flex;
+                var loreContent = loreSection.Q<Label>("lore-content");
+                if (loreContent != null)
+                {
+                    string loreText = $"Behavior: {bestiary.behavior}";
+                    if (!string.IsNullOrEmpty(bestiary.habitat))
+                        loreText += $"\n\nHabitat: {bestiary.habitat}";
+                    loreContent.text = loreText;
+                }
+            }
+
+            // Show dropped ingredients in the properties section
+            var propertiesSection = container.Q<VisualElement>("entry-properties");
+            if (propertiesSection != null && bestiary.droppedIngredients != null && bestiary.droppedIngredients.Length > 0)
+            {
+                propertiesSection.style.display = DisplayStyle.Flex;
+                var propertiesList = propertiesSection.Q<VisualElement>("properties-list");
+                if (propertiesList != null)
+                {
+                    foreach (var ingredient in bestiary.droppedIngredients)
+                    {
+                        var ingredientLabel = new Label($"• {ingredient}");
+                        ingredientLabel.AddToClassList("property-item");
+                        propertiesList.Add(ingredientLabel);
+                    }
+                }
+            }
         }
 
         void UpdateTabStates()
@@ -512,14 +888,6 @@ namespace GameSystems.CraftingMenu.AlchemyBookMenu
         }
 
         /// <summary>
-        /// Closes the alchemy book
-        /// </summary>
-        public void CloseBook()
-        {
-            gameObject.SetActive(false);
-        }
-
-        /// <summary>
         /// Adds an alchemy recipe from the ScriptableObject system to the book
         /// </summary>
         /// <param name="alchemyRecipe">The alchemy recipe ScriptableObject</param>
@@ -643,6 +1011,68 @@ namespace GameSystems.CraftingMenu.AlchemyBookMenu
             }
 
             Debug.Log($"📚 Loaded {ingredients.Length} ingredients into the book");
+        }
+
+        /// <summary>
+        /// Load entries from Resources/AlchemyBook folder structure
+        /// </summary>
+        private void LoadEntriesFromResources()
+        {
+            // Load entries from each subfolder
+            LoadBestiaryEntries();
+            LoadRecipeEntries();
+            LoadIngredientEntries();
+            LoadHelpEntries();
+
+            Debug.Log($"📚 Loaded entries from Resources/AlchemyBook - Bestiary: {bestiaryEntries.Count}, Recipes: {recipeEntries.Count}, Ingredients: {ingredientEntries.Count}, Help: {helpEntries.Count}");
+        }
+
+        private void LoadBestiaryEntries()
+        {
+            var entries = Resources.LoadAll<BestiaryEntry>("AlchemyBook/Bestiary");
+            foreach (var entry in entries)
+            {
+                if (!bestiaryEntries.Contains(entry))
+                {
+                    bestiaryEntries.Add(entry);
+                }
+            }
+        }
+
+        private void LoadRecipeEntries()
+        {
+            var entries = Resources.LoadAll<RecipeEntry>("AlchemyBook/Recipes");
+            foreach (var entry in entries)
+            {
+                if (!recipeEntries.Contains(entry))
+                {
+                    recipeEntries.Add(entry);
+                }
+            }
+        }
+
+        private void LoadIngredientEntries()
+        {
+            var entries = Resources.LoadAll<IngredientEntry>("AlchemyBook/Ingredients");
+            foreach (var entry in entries)
+            {
+                if (!ingredientEntries.Contains(entry))
+                {
+                    ingredientEntries.Add(entry);
+                }
+            }
+        }
+
+        private void LoadHelpEntries()
+        {
+            var entries = Resources.LoadAll<HelpEntry>("AlchemyBook/Help");
+            foreach (var entry in entries)
+            {
+                if (!helpEntries.Contains(entry))
+                {
+                    helpEntries.Add(entry);
+                }
+            }
         }
     }
 }

@@ -5,7 +5,7 @@ using FourFatesStudios.ProjectWarden.Enums;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Distills;
 
 [CustomEditor(typeof(Distill))]
-public class DistillEditor : Editor
+public class DistillEditor : UnityEditor.Editor
 {
     public override void OnInspectorGUI()
     {

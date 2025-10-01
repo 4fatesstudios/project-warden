@@ -3,7 +3,7 @@ using UnityEngine;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Roasts;
 
 [CustomEditor(typeof(Roast))]
-public class RoastEditor : Editor
+public class RoastEditor : UnityEditor.Editor
 {
     public override void OnInspectorGUI()
     {

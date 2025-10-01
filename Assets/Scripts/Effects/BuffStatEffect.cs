@@ -16,7 +16,21 @@ namespace FourFatesStudios.ProjectWarden.Effects
         public EffectTimingInfo EffectTiming { get => effectTiming; set => effectTiming = value; }
         
         public void Apply(CombatController source, List<CombatController> targets, float scale = 1) {
-            throw new System.NotImplementedException();
+            foreach (var target in targets)
+            {
+                if (target != null)
+                {
+                    Debug.Log($"Applying stat buffs to {target.gameObject.name} with scale {scale:F2}");
+                    
+                    if (statModifierList != null)
+                    {
+                        // Apply stat modifications with timing
+                        Debug.Log($"Applying {statModifierList} stat modifiers");
+                        // You can extend this to integrate with your stat system:
+                        // target.GetComponent<StatComponent>()?.ApplyModifiers(statModifierList, effectTiming, scale);
+                    }
+                }
+            }
         }
     }
 }

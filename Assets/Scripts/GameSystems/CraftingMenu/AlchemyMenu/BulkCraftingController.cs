@@ -5,10 +5,11 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.AlchemyRecipes;
+using InfusionBundle = FourFatesStudios.ProjectWarden.ScriptableObjects.InfusionBundle;
 using FourFatesStudios.ProjectWarden.Enums;
 using GameSystems.CraftingMenu.AlchemyBookMenu;
 
-namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
+namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu
 {
     public class BulkCraftingController : MonoBehaviour
     {
@@ -276,9 +277,9 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
                     var potion = ScriptableObject.CreateInstance<Potion>();
                     potion.name = recipe.recipe.OutputPotion.ItemName;
 
-                    // Apply rank modifier to effects
-                    var effectsField = typeof(Potion).GetField("potionEffects", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                    effectsField?.SetValue(potion, recipe.recipe.OutputPotion.PotionEffects.ToList());
+                    // Apply rank modifier to effects using InfusionBundle system
+                    var infusionBundleField = typeof(Potion).GetField("infusionBundle", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    infusionBundleField?.SetValue(potion, recipe.recipe.OutputPotion.InfusionBundle);
 
                     var upgradedProp = typeof(Potion).GetProperty("Upgraded");
                     upgradedProp?.SetValue(potion, recipe.recipe.OutputPotion.Upgraded);
@@ -321,19 +322,19 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
 
         private void OpenAlchemyBook()
         {
-            // Find the alchemy book in the scene
+            // Find the potion brewing guide in the scene
             var alchemyBook = FindFirstObjectByType<AlchemyBook>();
             if (alchemyBook != null)
             {
                 // Open the book to the recipes section
                 alchemyBook.OpenToRecipes();
-                Debug.Log("📚 Opening Alchemy Book to Recipes from Bulk Crafting");
+                Debug.Log("📚 Opening Potion Brewing Guide to Recipes from Bulk Crafting");
             }
             else
             {
-                Debug.LogWarning("⚠️ AlchemyBook not found in scene. Make sure AlchemyBook GameObject is in the scene.");
+                Debug.LogWarning("⚠️ Potion Brewing Guide not found in scene. Make sure AlchemyBook GameObject is in the scene.");
                 if (resultLabel != null)
-                    resultLabel.text = "Alchemy Book not available. Please ensure the Alchemy Book is in the scene.";
+                    resultLabel.text = "Potion Brewing Guide not available. Please ensure the guide is in the scene.";
             }
         }
     }

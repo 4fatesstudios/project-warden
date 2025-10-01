@@ -3,7 +3,7 @@ using UnityEditor;
 
 [CanEditMultipleObjects]
 [CustomEditor(typeof(BaseDataSO), true)]
-public class BaseDataSOEditor : Editor {
+public class BaseDataSOEditor : UnityEditor.Editor {
     public override void OnInspectorGUI()
     {
         DrawDataBaseInspector();

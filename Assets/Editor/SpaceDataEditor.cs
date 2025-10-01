@@ -7,7 +7,7 @@ using FourFatesStudios.ProjectWarden.ScriptableObjects.Exploration;
 using System.Collections.Generic;
 
 [CustomEditor(typeof(SpaceData))]
-public class SpaceDataEditor : Editor
+public class SpaceDataEditor : UnityEditor.Editor
 {
     public static CardinalDirection GetDirectionFromZ(float zRot)
     {

@@ -1,0 +1,52 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/Styles/AlchemyBook.uss?fileID=7433441132597879392&amp;guid=a1b2c3d4e5f6789&amp;type=3#AlchemyBook" />
+    <ui:VisualElement name="alchemy-book-container" class="book-container">
+        <ui:VisualElement name="book-header" class="book-header">
+            <ui:Label text="Alchemy Compendium" name="book-title" class="book-title" />
+            <ui:VisualElement name="tabs-container" class="tabs-container">
+                <ui:Button text="Bestiary" name="bestiary-tab" class="tab-button active-tab" />
+                <ui:Button text="Recipes" name="recipes-tab" class="tab-button" />
+                <ui:Button text="Ingredients" name="ingredients-tab" class="tab-button" />
+                <ui:Button text="Help" name="help-tab" class="tab-button" />
+                <ui:Button text="Bookmarks" name="bookmarks-tab" class="tab-button" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        
+        <ui:VisualElement name="search-bar" class="search-container">
+            <ui:TextField name="search-field" placeholder-text="Search entries..." class="search-field" />
+            <ui:Button text="🔍" name="search-button" class="search-button" />
+            <ui:Button text="Clear" name="clear-search-button" class="clear-button" />
+        </ui:VisualElement>
+        
+        <ui:VisualElement name="book-pages" class="book-pages">
+            <ui:VisualElement name="front-cover" class="book-cover front-cover">
+                <ui:Label text="Alchemy Compendium" class="cover-title" />
+                <ui:Label text="A Complete Guide to Magical Arts" class="cover-subtitle" />
+                <ui:Button text="Open Book" name="open-book-button" class="open-button" />
+            </ui:VisualElement>
+            
+            <ui:VisualElement name="left-page" class="book-page left-page">
+                <ui:ScrollView name="left-page-content" class="page-content" />
+            </ui:VisualElement>
+            
+            <ui:VisualElement name="right-page" class="book-page right-page">
+                <ui:ScrollView name="right-page-content" class="page-content" />
+            </ui:VisualElement>
+            
+            <ui:VisualElement name="back-cover" class="book-cover back-cover">
+                <ui:Label text="End of Compendium" class="cover-title" />
+                <ui:Button text="Close Book" name="close-book-button" class="close-button" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        
+        <ui:VisualElement name="navigation" class="navigation-container">
+            <ui:Button text="◀ Previous" name="prev-button" class="nav-button prev-button" />
+            <ui:Label text="Page 1 of 10" name="page-counter" class="page-counter" />
+            <ui:Button text="Next ▶" name="next-button" class="nav-button next-button" />
+        </ui:VisualElement>
+        
+        <ui:VisualElement name="book-footer" class="book-footer">
+            <ui:Button text="Close Book" name="close-book-main" class="footer-button" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEngine;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
 
-namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
+namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu
 {
     [Serializable]
     public struct GridPosition
@@ -21,6 +21,16 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
         public static GridPosition operator +(GridPosition a, GridPosition b)
         {
             return new GridPosition(a.x + b.x, a.y + b.y);
+        }
+
+        public static bool operator ==(GridPosition a, GridPosition b)
+        {
+            return a.x == b.x && a.y == b.y;
+        }
+
+        public static bool operator !=(GridPosition a, GridPosition b)
+        {
+            return !(a == b);
         }
 
         public override bool Equals(object obj)
@@ -40,12 +50,16 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
         public Ingredient ingredient;
         public GridPosition position;
         public List<GridPosition> occupiedCells;
+        public bool isOverlapping;
+        public List<string> interactions;
 
         public PlacedIngredient(Ingredient ingredient, GridPosition position)
         {
             this.ingredient = ingredient;
             this.position = position;
             this.occupiedCells = new List<GridPosition>();
+            this.isOverlapping = false;
+            this.interactions = new List<string>();
 
             // Calculate occupied cells based on ingredient size
             for (int x = 0; x < ingredient.GridWidth; x++)

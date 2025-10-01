@@ -27,7 +27,6 @@ namespace FourFatesStudios.ProjectWarden.Utilities
             string path = GetLogPath(system, fileName);
             if (clear && File.Exists(path))
                 File.Delete(path);
-
             Log(system, "=== Log Started ===", fileName);
         }
 
@@ -49,8 +48,7 @@ namespace FourFatesStudios.ProjectWarden.Utilities
         {
             if (!IsLoggingEnabled) return;
 
-            string path = GetLogPath(system, fileName);
-            File.AppendAllText(path, $"{System.DateTime.Now:HH:mm:ss} [ERROR] {message}\n");
+            Log(system, "=== Log Started ===", fileName);
         }
 
         /// <summary>

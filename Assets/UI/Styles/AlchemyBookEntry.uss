@@ -1,0 +1,189 @@
+/* =========================== */
+/* Alchemy Book Entry Styles   */
+/* =========================== */
+
+/* Main entry container */
+.book-entry {
+    background-color: rgba(245, 240, 220, 0.95); /* Parchment color */
+    border-width: 2px;
+    border-color: rgba(139, 69, 19, 0.8); /* Brown border */
+    border-radius: 8px;
+    padding: 12px;
+    margin: 8px;
+    min-height: 200px;
+    max-width: 300px;
+}
+
+/* Entry header */
+.entry-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    padding-bottom: 4px;
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(139, 69, 19, 0.4);
+}
+
+.bookmark-button {
+    background-color: transparent;
+    border-width: 0;
+    font-size: 18px;
+    color: rgb(184, 134, 11); /* Gold color */
+    width: 30px;
+    height: 30px;
+    -unity-text-align: middle-center;
+}
+
+.bookmark-button:hover {
+    background-color: rgba(184, 134, 11, 0.2);
+    border-radius: 4px;
+}
+
+.bookmark-button.bookmarked {
+    color: rgb(255, 215, 0); /* Bright gold when bookmarked */
+}
+
+.entry-title {
+    font-size: 16px;
+    font-style: bold;
+    color: rgb(101, 67, 33); /* Dark brown */
+    flex-grow: 1;
+    -unity-text-align: middle-left;
+    margin-left: 8px;
+}
+
+/* Entry content */
+.entry-content {
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.entry-image-container {
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.entry-image {
+    width: 64px;
+    height: 64px;
+    background-color: rgba(139, 69, 19, 0.3);
+    border-radius: 4px;
+    margin-bottom: 4px;
+}
+
+.entry-subtitle {
+    font-size: 12px;
+    font-style: italic;
+    color: rgb(139, 69, 19);
+    -unity-text-align: middle-center;
+}
+
+.entry-text-container {
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.entry-description {
+    font-size: 12px;
+    color: rgb(60, 60, 60);
+    white-space: normal;
+    margin-bottom: 8px;
+    padding: 4px;
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: 4px;
+}
+
+/* Properties, ingredients, effects sections */
+.entry-properties,
+.entry-ingredients, 
+.entry-effects,
+.entry-tips,
+.entry-lore {
+    margin-bottom: 6px;
+    display: none; /* Hidden by default, shown when needed */
+}
+
+.properties-title,
+.ingredients-title,
+.effects-title,
+.tips-title,
+.lore-title {
+    font-size: 11px;
+    font-style: bold;
+    color: rgb(101, 67, 33);
+    margin-bottom: 2px;
+}
+
+.properties-list,
+.ingredients-list,
+.effects-list,
+.tips-list {
+    flex-direction: column;
+    padding-left: 8px;
+}
+
+.lore-content {
+    font-size: 10px;
+    font-style: italic;
+    color: rgb(80, 80, 80);
+    white-space: normal;
+    padding: 4px;
+    background-color: rgba(240, 235, 215, 0.7);
+    border-left-width: 3px;
+    border-left-color: rgba(184, 134, 11, 0.6);
+}
+
+/* Entry footer */
+.entry-footer {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 8px;
+    padding-top: 4px;
+    border-top-width: 1px;
+    border-top-color: rgba(139, 69, 19, 0.4);
+}
+
+.entry-page-number {
+    font-size: 10px;
+    color: rgb(139, 69, 19);
+    font-style: italic;
+}
+
+.entry-discovered {
+    font-size: 10px;
+    color: rgb(34, 139, 34); /* Green for discovered */
+    font-style: italic;
+}
+
+/* Entry type specific styles */
+.book-entry.bestiary-entry {
+    border-color: rgba(139, 0, 0, 0.8); /* Red border for bestiary */
+}
+
+.book-entry.recipe-entry {
+    border-color: rgba(0, 100, 0, 0.8); /* Green border for recipes */
+}
+
+.book-entry.ingredient-entry {
+    border-color: rgba(0, 0, 139, 0.8); /* Blue border for ingredients */
+}
+
+.book-entry.help-entry {
+    border-color: rgba(128, 0, 128, 0.8); /* Purple border for help */
+}
+
+/* Responsive adjustments */
+.book-entry.compact {
+    max-width: 250px;
+    min-height: 150px;
+    padding: 8px;
+}
+
+.book-entry.expanded {
+    max-width: 400px;
+    min-height: 300px;
+    padding: 16px;
+}
