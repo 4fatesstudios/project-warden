@@ -1,623 +1,624 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using FourFatesStudios.ProjectWarden.Enums;
-using FourFatesStudios.ProjectWarden.ScriptableObjects.Crafting;
-using FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu;
+using FourFatesStudios.ProjectWarden.GridDemo;
+using GradeLevel = FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu.GradeLevel;
+using ProficiencyGrade = FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu.ProficiencyGrade;
 
 namespace FourFatesStudios.ProjectWarden.GameSystems.SkillSystem
 {
-    [Serializable]
-    public class AlchemySkill
+    /// <summary>
+    /// Handles the alchemy skill progression system from the design document
+    /// Manages skill unlocks, overlap abilities, grid expansions, and other player progression
+    /// </summary>
+    public partial class AlchemySkillTree : MonoBehaviour
     {
-        public string skillId;
-        public string skillName;
-        public string description;
-        public int tier;
-        public int requiredLevel;
-        public List<string> prerequisites = new List<string>();
-        public bool isUnlocked = false;
-        public SkillType skillType;
-        public float bonusValue;
-        public Sprite skillIcon;
-        
-        public enum SkillType
-        {
-            BrewingSpeed,        // Reduces brewing time
-            SuccessRate,         // Increases success chance
-            QualityBonus,        // Improves potion quality
-            IngredientSaver,     // Chance to save ingredients
-            CriticalChance,      // Increases critical success rate
-            RecipeDiscovery,     // Unlocks recipe discovery methods
-            MassCrafting,        // Enables batch/mass production
-            AdvancedTechniques,  // Unlocks new brewing methods
-            SpecialIngredients,  // Access to rare ingredient types
-            EquipmentMastery,    // Better equipment efficiency
-            AssistantTraining,   // More/better assistants
-            StationUpgrade       // Better brewing stations
-        }
-    }
-    
-    public class AlchemySkillTree : MonoBehaviour
-    {
-        [Header("Skill Configuration")]
-        [SerializeField] private List<AlchemySkill> allSkills = new List<AlchemySkill>();
-        [SerializeField] private int currentAlchemyLevel = 1;
-        [SerializeField] private int currentExperience = 0;
-        [SerializeField] private int experienceToNextLevel = 100;
-        
-        [Header("Experience Rates")]
-        [SerializeField] private int successfulBrewExp = 10;
-        [SerializeField] private int criticalSuccessExp = 25;
-        [SerializeField] private int recipeDiscoveryExp = 50;
-        [SerializeField] private int recipeMasteryExp = 100;
-        [SerializeField] private int failedBrewExp = 5;
-        
         [Header("Skill Points")]
-        [SerializeField] private int availableSkillPoints = 0;
-        [SerializeField] private int skillPointsPerLevel = 1;
-        [SerializeField] private Dictionary<string, bool> unlockedSkills = new Dictionary<string, bool>();
-        
+        [SerializeField] private int currentSkillPoints = 0;
+        [SerializeField] private int totalSkillPointsEarned = 0;
+        [SerializeField] private bool enableSkillPointGain = true;
+
+        [Header("Skill Configuration")]
+        [SerializeField] private List<AlchemySkill> availableSkills = new List<AlchemySkill>();
+        [SerializeField] private List<string> unlockedSkills = new List<string>();
+
+        [Header("Overlap System")]
+        [SerializeField] private int maxOverlapTiles = 0;
+        [SerializeField] private bool canOverlapOnObstacles = false;
+
+        [Header("Grid Expansion")]
+        [SerializeField] private Vector2Int baseGridSize = new Vector2Int(3, 3);
+        [SerializeField] private Vector2Int maxGridSize = new Vector2Int(5, 5);
+        [SerializeField] private Vector2Int currentGridSize = new Vector2Int(3, 3);
+
+        [Header("Special Abilities")]
+        [SerializeField] private int purifyCharges = 0;
+        [SerializeField] private int maxPotionsHeld = 3;
+        [SerializeField] private bool enableIngredientRefund = false;
+        [SerializeField] private float refundChance = 0.0f;
+
         // Events
-        public static event Action<int, int> OnLevelChanged; // level, experience
-        public static event Action<int> OnSkillPointsChanged;
-        public static event Action<AlchemySkill> OnSkillUnlocked;
-        public static event Action<int> OnExperienceGained;
-        
+        public System.Action<AlchemySkill> OnSkillUnlocked;
+        public System.Action<int> OnSkillPointsChanged;
+        public System.Action<string> OnSkillUsed;
+
+        // Skill tracking
+        private Dictionary<string, float> skillValues = new Dictionary<string, float>();
+        private Dictionary<string, int> skillUsageCounts = new Dictionary<string, int>();
+
         private void Start()
         {
             InitializeSkillTree();
-            LoadPlayerProgress();
         }
-        
+
+        /// <summary>
+        /// Initialize the alchemy skill tree with default skills from the design document
+        /// </summary>
         private void InitializeSkillTree()
         {
-            if (allSkills.Count == 0)
+            availableSkills.Clear();
+
+            // Ingredient Overlap Skills (1/2/3 ingredients can overlap 1 tile)
+            availableSkills.Add(new AlchemySkill
             {
-                CreateDefaultSkillTree();
-            }
-            
-            // Initialize unlocked skills dictionary
-            foreach (var skill in allSkills)
+                skillId = "ingredient_overlap_1",
+                skillName = "Basic Overlap",
+                description = "Allow 1 ingredient to overlap 1 tile",
+                category = SkillCategory.Overlap,
+                cost = 2,
+                prerequisites = new List<string>(),
+                effectValue = 1f,
+                effectType = SkillEffectType.OverlapTiles
+            });
+
+            availableSkills.Add(new AlchemySkill
             {
-                if (!unlockedSkills.ContainsKey(skill.skillId))
-                {
-                    unlockedSkills[skill.skillId] = skill.isUnlocked;
-                }
-            }
-            
-            Debug.Log($"🌳 Alchemy skill tree initialized with {allSkills.Count} skills");
-        }
-        
-        private void CreateDefaultSkillTree()
-        {
-            allSkills = new List<AlchemySkill>
+                skillId = "ingredient_overlap_2",
+                skillName = "Advanced Overlap",
+                description = "Allow 2 ingredients to overlap 1 tile",
+                category = SkillCategory.Overlap,
+                cost = 4,
+                prerequisites = new List<string> { "ingredient_overlap_1" },
+                effectValue = 2f,
+                effectType = SkillEffectType.OverlapTiles
+            });
+
+            availableSkills.Add(new AlchemySkill
             {
-                // Tier 1 - Basic Skills
-                new AlchemySkill
-                {
-                    skillId = "efficient_brewing",
-                    skillName = "Efficient Brewing",
-                    description = "Reduce brewing time by 15%",
-                    tier = 1,
-                    requiredLevel = 5,
-                    skillType = AlchemySkill.SkillType.BrewingSpeed,
-                    bonusValue = 0.15f
-                },
-                new AlchemySkill
-                {
-                    skillId = "steady_hands",
-                    skillName = "Steady Hands",
-                    description = "Increase success rate by 10%",
-                    tier = 1,
-                    requiredLevel = 3,
-                    skillType = AlchemySkill.SkillType.SuccessRate,
-                    bonusValue = 0.1f
-                },
-                new AlchemySkill
-                {
-                    skillId = "ingredient_conservation",
-                    skillName = "Ingredient Conservation",
-                    description = "5% chance to retain ingredients after brewing",
-                    tier = 1,
-                    requiredLevel = 7,
-                    skillType = AlchemySkill.SkillType.IngredientSaver,
-                    bonusValue = 0.05f
-                },
-                
-                // Tier 2 - Intermediate Skills
-                new AlchemySkill
-                {
-                    skillId = "advanced_brewing",
-                    skillName = "Advanced Brewing",
-                    description = "Unlock Distillation and Sublimation brewing methods",
-                    tier = 2,
-                    requiredLevel = 15,
-                    prerequisites = new List<string> { "efficient_brewing" },
-                    skillType = AlchemySkill.SkillType.AdvancedTechniques,
-                    bonusValue = 1f
-                },
-                new AlchemySkill
-                {
-                    skillId = "quality_control",
-                    skillName = "Quality Control",
-                    description = "Increase potion quality by 20%",
-                    tier = 2,
-                    requiredLevel = 12,
-                    prerequisites = new List<string> { "steady_hands" },
-                    skillType = AlchemySkill.SkillType.QualityBonus,
-                    bonusValue = 0.2f
-                },
-                new AlchemySkill
-                {
-                    skillId = "recipe_intuition",
-                    skillName = "Recipe Intuition",
-                    description = "Discover recipes from fewer trigger ingredients",
-                    tier = 2,
-                    requiredLevel = 10,
-                    skillType = AlchemySkill.SkillType.RecipeDiscovery,
-                    bonusValue = 1f
-                },
-                new AlchemySkill
-                {
-                    skillId = "critical_brewing",
-                    skillName = "Critical Brewing",
-                    description = "Double critical success chance",
-                    tier = 2,
-                    requiredLevel = 18,
-                    prerequisites = new List<string> { "quality_control" },
-                    skillType = AlchemySkill.SkillType.CriticalChance,
-                    bonusValue = 2f
-                },
-                
-                // Tier 3 - Expert Skills
-                new AlchemySkill
-                {
-                    skillId = "mass_production",
-                    skillName = "Mass Production",
-                    description = "Enable batch brewing of mastered recipes",
-                    tier = 3,
-                    requiredLevel = 25,
-                    prerequisites = new List<string> { "advanced_brewing", "ingredient_conservation" },
-                    skillType = AlchemySkill.SkillType.MassCrafting,
-                    bonusValue = 1f
-                },
-                new AlchemySkill
-                {
-                    skillId = "exotic_ingredients",
-                    skillName = "Exotic Ingredients",
-                    description = "Access to Tainted and Divine ingredient types",
-                    tier = 3,
-                    requiredLevel = 30,
-                    prerequisites = new List<string> { "recipe_intuition" },
-                    skillType = AlchemySkill.SkillType.SpecialIngredients,
-                    bonusValue = 1f
-                },
-                new AlchemySkill
-                {
-                    skillId = "equipment_mastery",
-                    skillName = "Equipment Mastery",
-                    description = "50% better equipment bonuses",
-                    tier = 3,
-                    requiredLevel = 28,
-                    prerequisites = new List<string> { "critical_brewing" },
-                    skillType = AlchemySkill.SkillType.EquipmentMastery,
-                    bonusValue = 0.5f
-                },
-                
-                // Tier 4 - Master Skills
-                new AlchemySkill
-                {
-                    skillId = "apprentice_training",
-                    skillName = "Apprentice Training",
-                    description = "Train assistants to handle complex recipes",
-                    tier = 4,
-                    requiredLevel = 40,
-                    prerequisites = new List<string> { "mass_production" },
-                    skillType = AlchemySkill.SkillType.AssistantTraining,
-                    bonusValue = 1f
-                },
-                new AlchemySkill
-                {
-                    skillId = "legendary_techniques",
-                    skillName = "Legendary Techniques",
-                    description = "Unlock Artifact-tier potion creation",
-                    tier = 4,
-                    requiredLevel = 45,
-                    prerequisites = new List<string> { "exotic_ingredients", "equipment_mastery" },
-                    skillType = AlchemySkill.SkillType.AdvancedTechniques,
-                    bonusValue = 1f
-                },
-                new AlchemySkill
-                {
-                    skillId = "grand_laboratory",
-                    skillName = "Grand Laboratory",
-                    description = "Double brewing station capacity and efficiency",
-                    tier = 4,
-                    requiredLevel = 50,
-                    prerequisites = new List<string> { "apprentice_training", "legendary_techniques" },
-                    skillType = AlchemySkill.SkillType.StationUpgrade,
-                    bonusValue = 2f
-                }
-            };
-            
-            Debug.Log($"🔧 Created default skill tree with {allSkills.Count} skills");
-        }
-        
-        public void GainExperience(int amount, string source = "")
-        {
-            currentExperience += amount;
-            OnExperienceGained?.Invoke(amount);
-            
-            if (!string.IsNullOrEmpty(source))
+                skillId = "ingredient_overlap_3",
+                skillName = "Master Overlap",
+                description = "Allow 3 ingredients to overlap 1 tile",
+                category = SkillCategory.Overlap,
+                cost = 6,
+                prerequisites = new List<string> { "ingredient_overlap_2" },
+                effectValue = 3f,
+                effectType = SkillEffectType.OverlapTiles
+            });
+
+            // Grid Size Expansion
+            availableSkills.Add(new AlchemySkill
             {
-                Debug.Log($"📈 Gained {amount} alchemy experience from {source}");
-            }
-            
-            CheckLevelUp();
-        }
-        
-        private void CheckLevelUp()
-        {
-            while (currentExperience >= experienceToNextLevel)
+                skillId = "grid_expansion_4x4",
+                skillName = "Expanded Grid",
+                description = "Increase grid size to 4x4",
+                category = SkillCategory.GridExpansion,
+                cost = 3,
+                prerequisites = new List<string>(),
+                effectValue = 4f,
+                effectType = SkillEffectType.GridSize
+            });
+
+            availableSkills.Add(new AlchemySkill
             {
-                currentExperience -= experienceToNextLevel;
-                currentAlchemyLevel++;
-                availableSkillPoints += skillPointsPerLevel;
-                
-                // Calculate next level experience requirement
-                experienceToNextLevel = CalculateExperienceRequirement(currentAlchemyLevel);
-                
-                Debug.Log($"🎉 Level up! Alchemy level is now {currentAlchemyLevel}");
-                OnLevelChanged?.Invoke(currentAlchemyLevel, currentExperience);
-                OnSkillPointsChanged?.Invoke(availableSkillPoints);
-                
-                // Check for newly available skills
-                CheckAvailableSkills();
-            }
-        }
-        
-        private int CalculateExperienceRequirement(int level)
-        {
-            // Exponential growth: base * level^1.5
-            return Mathf.RoundToInt(100 * Mathf.Pow(level, 1.5f));
-        }
-        
-        private void CheckAvailableSkills()
-        {
-            foreach (var skill in allSkills)
+                skillId = "grid_expansion_5x5",
+                skillName = "Maximum Grid",
+                description = "Increase grid size to 5x5",
+                category = SkillCategory.GridExpansion,
+                cost = 5,
+                prerequisites = new List<string> { "grid_expansion_4x4" },
+                effectValue = 5f,
+                effectType = SkillEffectType.GridSize
+            });
+
+            // Ingredient Conservation
+            availableSkills.Add(new AlchemySkill
             {
-                if (!skill.isUnlocked && CanUnlockSkill(skill))
-                {
-                    // Skill becomes available but not automatically unlocked
-                    Debug.Log($"💡 Skill available: {skill.skillName} (Level {skill.requiredLevel})");
-                }
-            }
-        }
-        
-        public bool CanUnlockSkill(AlchemySkill skill)
-        {
-            // Check level requirement
-            if (currentAlchemyLevel < skill.requiredLevel)
-                return false;
-                
-            // Check if already unlocked
-            if (unlockedSkills.TryGetValue(skill.skillId, out bool isUnlocked) && isUnlocked)
-                return false;
-                
-            // Check prerequisites
-            foreach (var prerequisiteId in skill.prerequisites)
+                skillId = "ingredient_conservation",
+                skillName = "Ingredient Conservation",
+                description = "Random chance to refund ingredients after crafting",
+                category = SkillCategory.ResourceManagement,
+                cost = 4,
+                prerequisites = new List<string>(),
+                effectValue = 0.15f,
+                effectType = SkillEffectType.RefundChance
+            });
+
+            availableSkills.Add(new AlchemySkill
             {
-                if (!unlockedSkills.TryGetValue(prerequisiteId, out bool prereqUnlocked) || !prereqUnlocked)
-                    return false;
-            }
-            
-            return true;
-        }
-        
-        public bool UnlockSkill(string skillId)
-        {
-            var skill = allSkills.Find(s => s.skillId == skillId);
-            if (skill == null)
+                skillId = "improved_conservation",
+                skillName = "Improved Conservation",
+                description = "Increased chance for ingredient refund",
+                category = SkillCategory.ResourceManagement,
+                cost = 3,
+                prerequisites = new List<string> { "ingredient_conservation" },
+                effectValue = 0.25f,
+                effectType = SkillEffectType.RefundChance
+            });
+
+            // Potion Storage
+            availableSkills.Add(new AlchemySkill
             {
-                Debug.LogWarning($"Skill not found: {skillId}");
-                return false;
-            }
-            
-            if (!CanUnlockSkill(skill))
+                skillId = "potion_storage_1",
+                skillName = "Extra Potion Storage",
+                description = "Hold 1 additional potion",
+                category = SkillCategory.ResourceManagement,
+                cost = 2,
+                prerequisites = new List<string>(),
+                effectValue = 1f,
+                effectType = SkillEffectType.PotionStorage
+            });
+
+            availableSkills.Add(new AlchemySkill
             {
-                Debug.LogWarning($"Cannot unlock skill: {skill.skillName}");
-                return false;
-            }
-            
-            if (availableSkillPoints <= 0)
+                skillId = "potion_storage_2",
+                skillName = "Advanced Storage",
+                description = "Hold 2 additional potions",
+                category = SkillCategory.ResourceManagement,
+                cost = 3,
+                prerequisites = new List<string> { "potion_storage_1" },
+                effectValue = 2f,
+                effectType = SkillEffectType.PotionStorage
+            });
+
+            // Purify Ability
+            availableSkills.Add(new AlchemySkill
             {
-                Debug.LogWarning("No skill points available!");
-                return false;
-            }
-            
-            // Unlock the skill
-            skill.isUnlocked = true;
-            unlockedSkills[skill.skillId] = true;
-            availableSkillPoints--;
-            
-            Debug.Log($"🌟 Unlocked skill: {skill.skillName}");
-            OnSkillUnlocked?.Invoke(skill);
-            OnSkillPointsChanged?.Invoke(availableSkillPoints);
-            
-            // Apply skill effects immediately
-            ApplySkillEffects(skill);
-            
-            return true;
-        }
-        
-        private void ApplySkillEffects(AlchemySkill skill)
-        {
-            // Notify other systems about skill unlock
-            var craftingController = FindFirstObjectByType<ComprehensiveCraftingController>();
-            
-            switch (skill.skillType)
+                skillId = "purify",
+                skillName = "Purify",
+                description = "Remove an obstacle completely (1 use)",
+                category = SkillCategory.ObstacleManagement,
+                cost = 5,
+                prerequisites = new List<string>(),
+                effectValue = 1f,
+                effectType = SkillEffectType.PurifyCharges
+            });
+
+            availableSkills.Add(new AlchemySkill
             {
-                case AlchemySkill.SkillType.AssistantTraining:
-                    craftingController?.SetAssistantCount(GetAssistantCount());
-                    break;
-                    
-                case AlchemySkill.SkillType.StationUpgrade:
-                    craftingController?.SetBrewingStationCount(GetBrewingStationCount());
-                    break;
-                    
-                case AlchemySkill.SkillType.EquipmentMastery:
-                    craftingController?.SetEquipmentStatus(true);
-                    break;
-            }
-        }
-        
-        public void OnBrewingCompleted(CraftingResult result, PotionRecipe recipe)
-        {
-            int expGained = result switch
+                skillId = "improved_purify",
+                skillName = "Improved Purify",
+                description = "Gain additional purify charge",
+                category = SkillCategory.ObstacleManagement,
+                cost = 4,
+                prerequisites = new List<string> { "purify" },
+                effectValue = 1f,
+                effectType = SkillEffectType.PurifyCharges
+            });
+
+            // Combat Integration (NUMO continuity)
+            availableSkills.Add(new AlchemySkill
             {
-                CraftingResult.CriticalSuccess => criticalSuccessExp,
-                CraftingResult.Success => successfulBrewExp,
-                CraftingResult.PartialSuccess => successfulBrewExp / 2,
-                CraftingResult.Failed => failedBrewExp,
-                CraftingResult.CriticalFail => 0,
-                _ => 0
-            };
-            
-            // Bonus experience for higher tier recipes
-            expGained += (int)recipe.Rarity * 5;
-            
-            GainExperience(expGained, $"brewing {recipe.RecipeName}");
-        }
-        
-        public void OnRecipeDiscovered(PotionRecipe recipe)
-        {
-            int expGained = recipeDiscoveryExp + (int)recipe.Rarity * 10;
-            GainExperience(expGained, $"discovering {recipe.RecipeName}");
-        }
-        
-        public void OnRecipeMastered(PotionRecipe recipe)
-        {
-            int expGained = recipeMasteryExp + (int)recipe.Rarity * 20;
-            GainExperience(expGained, $"mastering {recipe.RecipeName}");
-        }
-        
-        #region Skill Bonus Calculations
-        
-        public float GetBrewingSpeedBonus()
-        {
-            float bonus = 0f;
-            foreach (var skill in GetUnlockedSkills())
+                skillId = "numo_continuity",
+                skillName = "NUMO Continuity",
+                description = "Continue using potion effects in combat with ramping cost",
+                category = SkillCategory.Combat,
+                cost = 6,
+                prerequisites = new List<string>(),
+                effectValue = 1f,
+                effectType = SkillEffectType.CombatContinuity
+            });
+
+            // Alchemical Expertise
+            availableSkills.Add(new AlchemySkill
             {
-                if (skill.skillType == AlchemySkill.SkillType.BrewingSpeed)
-                    bonus += skill.bonusValue;
-            }
-            return bonus;
-        }
-        
-        public float GetSuccessRateBonus()
-        {
-            float bonus = 0f;
-            foreach (var skill in GetUnlockedSkills())
+                skillId = "alchemical_expertise",
+                skillName = "Alchemical Expertise",
+                description = "Increase potency of all created potions by 15%",
+                category = SkillCategory.Crafting,
+                cost = 5,
+                prerequisites = new List<string>(),
+                effectValue = 0.15f,
+                effectType = SkillEffectType.PotencyBonus
+            });
+
+            availableSkills.Add(new AlchemySkill
             {
-                if (skill.skillType == AlchemySkill.SkillType.SuccessRate)
-                    bonus += skill.bonusValue;
-            }
-            return bonus;
-        }
-        
-        public float GetQualityBonus()
-        {
-            float bonus = 0f;
-            foreach (var skill in GetUnlockedSkills())
+                skillId = "master_alchemist",
+                skillName = "Master Alchemist",
+                description = "Further increase potion potency by 10%",
+                category = SkillCategory.Crafting,
+                cost = 4,
+                prerequisites = new List<string> { "alchemical_expertise" },
+                effectValue = 0.25f, // Total 25% with expertise
+                effectType = SkillEffectType.PotencyBonus
+            });
+
+            // Synergy Mastery
+            availableSkills.Add(new AlchemySkill
             {
-                if (skill.skillType == AlchemySkill.SkillType.QualityBonus)
-                    bonus += skill.bonusValue;
-            }
-            return bonus;
+                skillId = "synergy_master",
+                skillName = "Synergy Master",
+                description = "Increase effectiveness of ingredient synergies",
+                category = SkillCategory.Crafting,
+                cost = 6,
+                prerequisites = new List<string>(),
+                effectValue = 0.2f,
+                effectType = SkillEffectType.SynergyBonus
+            });
+
+            Debug.Log($"🎯 Initialized {availableSkills.Count} alchemy skills");
+            LoadPlayerProgress();
         }
-        
-        public float GetIngredientSaveChance()
-        {
-            float chance = 0f;
-            foreach (var skill in GetUnlockedSkills())
-            {
-                if (skill.skillType == AlchemySkill.SkillType.IngredientSaver)
-                    chance += skill.bonusValue;
-            }
-            return Mathf.Clamp01(chance);
-        }
-        
-        public float GetCriticalChanceMultiplier()
-        {
-            float multiplier = 1f;
-            foreach (var skill in GetUnlockedSkills())
-            {
-                if (skill.skillType == AlchemySkill.SkillType.CriticalChance)
-                    multiplier *= skill.bonusValue;
-            }
-            return multiplier;
-        }
-        
-        public bool HasMassCrafting()
-        {
-            return GetUnlockedSkills().Any(s => s.skillType == AlchemySkill.SkillType.MassCrafting);
-        }
-        
-        public bool HasExoticIngredients()
-        {
-            return GetUnlockedSkills().Any(s => s.skillType == AlchemySkill.SkillType.SpecialIngredients);
-        }
-        
-        public bool HasEquipmentMastery()
-        {
-            return GetUnlockedSkills().Any(s => s.skillType == AlchemySkill.SkillType.EquipmentMastery);
-        }
-        
-        public int GetAssistantCount()
-        {
-            int baseCount = 0;
-            foreach (var skill in GetUnlockedSkills())
-            {
-                if (skill.skillType == AlchemySkill.SkillType.AssistantTraining)
-                    baseCount += (int)skill.bonusValue;
-            }
-            return baseCount;
-        }
-        
-        public int GetBrewingStationCount()
-        {
-            int baseCount = 1;
-            foreach (var skill in GetUnlockedSkills())
-            {
-                if (skill.skillType == AlchemySkill.SkillType.StationUpgrade)
-                    baseCount *= (int)skill.bonusValue;
-            }
-            return baseCount;
-        }
-        
-        public List<BrewMethod> GetUnlockedBrewMethods()
-        {
-            var methods = new List<BrewMethod> { BrewMethod.QuickBrew, BrewMethod.StandardBrew, BrewMethod.SlowBrew };
-            
-            foreach (var skill in GetUnlockedSkills())
-            {
-                if (skill.skillType == AlchemySkill.SkillType.AdvancedTechniques)
-                {
-                    if (skill.skillId == "advanced_brewing")
-                    {
-                        methods.Add(BrewMethod.Distillation);
-                        methods.Add(BrewMethod.Sublimation);
-                    }
-                    else if (skill.skillId == "legendary_techniques")
-                    {
-                        methods.Add(BrewMethod.ColdBrew);
-                        methods.Add(BrewMethod.Fermentation);
-                    }
-                }
-            }
-            
-            return methods;
-        }
-        
-        #endregion
-        
-        #region Public API
-        
-        public List<AlchemySkill> GetAllSkills()
-        {
-            return new List<AlchemySkill>(allSkills);
-        }
-        
-        public List<AlchemySkill> GetUnlockedSkills()
-        {
-            return allSkills.Where(s => unlockedSkills.TryGetValue(s.skillId, out bool unlocked) && unlocked).ToList();
-        }
-        
-        public List<AlchemySkill> GetAvailableSkills()
-        {
-            return allSkills.Where(s => CanUnlockSkill(s)).ToList();
-        }
-        
-        public List<AlchemySkill> GetSkillsByTier(int tier)
-        {
-            return allSkills.Where(s => s.tier == tier).ToList();
-        }
-        
-        public AlchemySkill GetSkill(string skillId)
-        {
-            return allSkills.Find(s => s.skillId == skillId);
-        }
-        
-        public bool IsSkillUnlocked(string skillId)
-        {
-            return unlockedSkills.TryGetValue(skillId, out bool unlocked) && unlocked;
-        }
-        
-        public int GetCurrentLevel()
-        {
-            return currentAlchemyLevel;
-        }
-        
-        public int GetCurrentExperience()
-        {
-            return currentExperience;
-        }
-        
-        public int GetExperienceToNextLevel()
-        {
-            return experienceToNextLevel;
-        }
-        
-        public int GetAvailableSkillPoints()
-        {
-            return availableSkillPoints;
-        }
-        
-        public void AddSkillPoints(int amount)
-        {
-            availableSkillPoints += amount;
-            OnSkillPointsChanged?.Invoke(availableSkillPoints);
-        }
-        
-        #endregion
-        
-        #region Save/Load
-        
+
+        /// <summary>
+        /// Load player's skill progress from persistent storage
+        /// </summary>
         private void LoadPlayerProgress()
         {
-            // This would load from your save system
-            // For now, we'll start with default values
-        }
-        
-        public void SaveProgress()
-        {
-            // This would save to your save system
-            Debug.Log($"💾 Saved alchemy progress: Level {currentAlchemyLevel}, {availableSkillPoints} skill points");
-        }
-        
-        public void ResetSkillData()
-        {
-            currentAlchemyLevel = 1;
-            currentExperience = 0;
-            experienceToNextLevel = 100;
-            availableSkillPoints = 0;
+            // In a full implementation, this would load from PlayerPrefs or save system
+            // For now, initialize with some test values
+            currentSkillPoints = 5; // Give player some starting points for testing
+            currentGridSize = baseGridSize;
             
-            foreach (var skill in allSkills)
+            Debug.Log($"🎯 Loaded player progress: {currentSkillPoints} skill points, {unlockedSkills.Count} skills unlocked");
+        }
+
+        /// <summary>
+        /// Award skill points to the player
+        /// </summary>
+        public void AwardSkillPoints(int points, string reason = "")
+        {
+            if (!enableSkillPointGain) return;
+
+            currentSkillPoints += points;
+            totalSkillPointsEarned += points;
+
+            OnSkillPointsChanged?.Invoke(currentSkillPoints);
+
+            Debug.Log($"🎯 Awarded {points} skill points for: {reason}. Total: {currentSkillPoints}");
+        }
+
+        /// <summary>
+        /// Award skill points based on proficiency grade
+        /// </summary>
+        public void AwardPointsForProficiency(ProficiencyGrade grade)
+        {
+            int points = grade.gradeLevel switch
             {
-                skill.isUnlocked = false;
-                unlockedSkills[skill.skillId] = false;
+                GradeLevel.F => 0,
+                GradeLevel.D => 1,
+                GradeLevel.C => 2,
+                GradeLevel.B => 3,
+                GradeLevel.A => 4,
+                GradeLevel.S => 5,
+                _ => 1
+            };
+
+            if (points > 0)
+            {
+                AwardSkillPoints(points, $"Proficiency grade {grade.gradeLevel}");
+            }
+        }
+
+        /// <summary>
+        /// Check if a skill is unlocked
+        /// </summary>
+        public bool IsSkillUnlocked(string skillId)
+        {
+            return unlockedSkills.Contains(skillId);
+        }
+
+        /// <summary>
+        /// Check if a skill can be unlocked (has prerequisites and enough points)
+        /// </summary>
+        public bool CanUnlockSkill(string skillId)
+        {
+            var skill = availableSkills.FirstOrDefault(s => s.skillId == skillId);
+            if (skill == null) return false;
+
+            // Already unlocked
+            if (IsSkillUnlocked(skillId)) return false;
+
+            // Check skill points
+            if (currentSkillPoints < skill.cost) return false;
+
+            // Check prerequisites
+            foreach (var prereq in skill.prerequisites)
+            {
+                if (!IsSkillUnlocked(prereq)) return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Unlock a skill
+        /// </summary>
+        public bool TryUnlockSkill(string skillId)
+        {
+            if (!CanUnlockSkill(skillId)) return false;
+
+            var skill = availableSkills.FirstOrDefault(s => s.skillId == skillId);
+            if (skill == null) return false;
+
+            // Spend skill points
+            currentSkillPoints -= skill.cost;
+            unlockedSkills.Add(skillId);
+
+            // Apply skill effects
+            ApplySkillEffect(skill);
+
+            OnSkillUnlocked?.Invoke(skill);
+            OnSkillPointsChanged?.Invoke(currentSkillPoints);
+
+            Debug.Log($"🎯 Unlocked skill: {skill.skillName} for {skill.cost} points");
+
+            return true;
+        }
+
+        /// <summary>
+        /// Apply the effects of a newly unlocked skill
+        /// </summary>
+        private void ApplySkillEffect(AlchemySkill skill)
+        {
+            switch (skill.effectType)
+            {
+                case SkillEffectType.OverlapTiles:
+                    maxOverlapTiles = Mathf.Max(maxOverlapTiles, (int)skill.effectValue);
+                    Debug.Log($"🎯 Max overlap tiles increased to: {maxOverlapTiles}");
+                    break;
+
+                case SkillEffectType.GridSize:
+                    int newSize = (int)skill.effectValue;
+                    currentGridSize = new Vector2Int(newSize, newSize);
+                    Debug.Log($"🎯 Grid size increased to: {currentGridSize.x}x{currentGridSize.y}");
+                    
+                    // Update the actual grid in GridGameManager
+                    UpdateGridSize();
+                    break;
+
+                case SkillEffectType.RefundChance:
+                    enableIngredientRefund = true;
+                    refundChance = skill.effectValue;
+                    Debug.Log($"🎯 Ingredient refund chance set to: {refundChance:P}");
+                    break;
+
+                case SkillEffectType.PotionStorage:
+                    maxPotionsHeld += (int)skill.effectValue;
+                    Debug.Log($"🎯 Max potions held increased to: {maxPotionsHeld}");
+                    break;
+
+                case SkillEffectType.PurifyCharges:
+                    purifyCharges += (int)skill.effectValue;
+                    Debug.Log($"🎯 Purify charges increased to: {purifyCharges}");
+                    break;
+
+                case SkillEffectType.PotencyBonus:
+                case SkillEffectType.SynergyBonus:
+                case SkillEffectType.CombatContinuity:
+                    // Store value for later retrieval
+                    skillValues[skill.skillId] = skill.effectValue;
+                    Debug.Log($"🎯 Skill value stored: {skill.skillId} = {skill.effectValue}");
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Update the grid size in GridGameManager
+        /// </summary>
+        private void UpdateGridSize()
+        {
+            var gridManager = GridGameManager.Instance;
+            if (gridManager != null)
+            {
+                gridManager.gridWidth = currentGridSize.x;
+                gridManager.gridHeight = currentGridSize.y;
+                
+                // Trigger grid recreation - this would need to be implemented in GridGameManager
+                Debug.Log($"🎯 Updated GridGameManager size to {currentGridSize.x}x{currentGridSize.y}");
+            }
+        }
+
+        /// <summary>
+        /// Get the current value of a skill effect
+        /// </summary>
+        public float GetSkillValue(string skillId)
+        {
+            return skillValues.ContainsKey(skillId) ? skillValues[skillId] : 0f;
+        }
+
+        /// <summary>
+        /// Use a purify charge
+        /// </summary>
+        public bool UsePurifyCharge()
+        {
+            if (purifyCharges <= 0) return false;
+
+            purifyCharges--;
+            OnSkillUsed?.Invoke("Purify");
+
+            Debug.Log($"🎯 Used purify charge. Remaining: {purifyCharges}");
+            return true;
+        }
+
+        /// <summary>
+        /// Check if purify can be used
+        /// </summary>
+        public bool CanUsePurify()
+        {
+            return IsSkillUnlocked("purify") && purifyCharges > 0;
+        }
+
+        /// <summary>
+        /// Get all available skills in a category
+        /// </summary>
+        public List<AlchemySkill> GetSkillsByCategory(SkillCategory category)
+        {
+            return availableSkills.Where(s => s.category == category).ToList();
+        }
+
+        /// <summary>
+        /// Get all unlocked skills
+        /// </summary>
+        public List<AlchemySkill> GetUnlockedSkills()
+        {
+            return availableSkills.Where(s => IsSkillUnlocked(s.skillId)).ToList();
+        }
+
+        /// <summary>
+        /// Get skill tree statistics
+        /// </summary>
+        public SkillTreeStats GetStats()
+        {
+            return new SkillTreeStats
+            {
+                currentSkillPoints = currentSkillPoints,
+                totalSkillPointsEarned = totalSkillPointsEarned,
+                unlockedSkillCount = unlockedSkills.Count,
+                totalSkillCount = availableSkills.Count,
+                maxOverlapTiles = maxOverlapTiles,
+                currentGridSize = currentGridSize,
+                purifyCharges = purifyCharges,
+                maxPotionsHeld = maxPotionsHeld
+            };
+        }
+
+        #region Public API
+
+        // Public getters for external access
+        public int GetAvailableSkillPoints() => currentSkillPoints;
+        public List<AlchemySkill> GetAllSkills() => new List<AlchemySkill>(availableSkills);
+        public bool UnlockSkill(string skillId) => TryUnlockSkill(skillId);
+
+        /// <summary>
+        /// Test the skill tree system
+        /// </summary>
+        [ContextMenu("Test Skill Tree")]
+        public void TestSkillTree()
+        {
+            Debug.Log("🎯 === TESTING SKILL TREE ===");
+            Debug.Log($"🎯 Current Skill Points: {currentSkillPoints}");
+            Debug.Log($"🎯 Total Earned: {totalSkillPointsEarned}");
+            Debug.Log($"🎯 Skills Unlocked: {unlockedSkills.Count}/{availableSkills.Count}");
+            Debug.Log($"🎯 Grid Size: {currentGridSize.x}x{currentGridSize.y}");
+            Debug.Log($"🎯 Max Overlap: {maxOverlapTiles}");
+            Debug.Log($"🎯 Purify Charges: {purifyCharges}");
+            
+            Debug.Log("🎯 Available Skills:");
+            foreach (var skill in availableSkills)
+            {
+                string status = IsSkillUnlocked(skill.skillId) ? "✅" : 
+                               CanUnlockSkill(skill.skillId) ? "🔓" : "🔒";
+                Debug.Log($"   {status} {skill.skillName} ({skill.cost} pts) - {skill.description}");
             }
             
-            Debug.Log("🔄 Reset all alchemy skill data");
+            Debug.Log("🎯 === SKILL TREE TEST COMPLETE ===");
         }
-        
-        #endregion
-        
-        private void OnDestroy()
+
+        /// <summary>
+        /// Unlock all skills for testing
+        /// </summary>
+        [ContextMenu("Unlock All Skills (Testing)")]
+        public void UnlockAllSkillsForTesting()
         {
-            SaveProgress();
+            currentSkillPoints = 1000; // Give enough points
+            
+            foreach (var skill in availableSkills)
+            {
+                if (!IsSkillUnlocked(skill.skillId))
+                {
+                    TryUnlockSkill(skill.skillId);
+                }
+            }
+            
+            Debug.Log("🎯 All skills unlocked for testing!");
         }
+
+        /// <summary>
+        /// Reset skill tree for testing
+        /// </summary>
+        [ContextMenu("Reset Skill Tree")]
+        public void ResetSkillTree()
+        {
+            unlockedSkills.Clear();
+            currentSkillPoints = 5;
+            totalSkillPointsEarned = 5;
+            skillValues.Clear();
+            skillUsageCounts.Clear();
+            
+            // Reset values to defaults
+            maxOverlapTiles = 0;
+            currentGridSize = baseGridSize;
+            purifyCharges = 0;
+            maxPotionsHeld = 3;
+            enableIngredientRefund = false;
+            refundChance = 0f;
+            
+            Debug.Log("🎯 Skill tree reset to default state");
+        }
+
+        #endregion
     }
+
+    #region Data Structures
+
+    [System.Serializable]
+    public class AlchemySkill
+    {
+        [Header("Basic Info")]
+        public string skillId;
+        public string skillName;
+        [TextArea(2, 3)]
+        public string description;
+        public SkillCategory category;
+
+        [Header("Requirements")]
+        public int cost = 1;
+        public List<string> prerequisites = new List<string>();
+
+        [Header("Effects")]
+        public float effectValue;
+        public SkillEffectType effectType;
+        public bool isPassive = true;
+        
+        // Compatibility property for extension methods
+        public float bonusValue => effectValue;
+    }
+
+    [System.Serializable]
+    public class SkillTreeStats
+    {
+        public int currentSkillPoints;
+        public int totalSkillPointsEarned;
+        public int unlockedSkillCount;
+        public int totalSkillCount;
+        public int maxOverlapTiles;
+        public Vector2Int currentGridSize;
+        public int purifyCharges;
+        public int maxPotionsHeld;
+    }
+
+    public enum SkillCategory
+    {
+        Overlap,
+        GridExpansion,
+        ResourceManagement,
+        ObstacleManagement,
+        Combat,
+        Crafting
+    }
+
+    public enum SkillEffectType
+    {
+        OverlapTiles,
+        GridSize,
+        RefundChance,
+        PotionStorage,
+        PurifyCharges,
+        CombatContinuity,
+        PotencyBonus,
+        SynergyBonus
+    }
+
+    #endregion
 }

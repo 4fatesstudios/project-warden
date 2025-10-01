@@ -9,35 +9,36 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ccec348f60f7b5c429d2fb1e20182269, type: 3}
+  m_Script: {fileID: 11500000, guid: ac12d8c1b64a441a9fd60f1ef7e48a67, type: 3}
   m_Name: EarthShard
   m_EditorClassIdentifier: 
-  id: 63b6024e-4c7e-4083-8857-437994a40e03
+  id: 364a4543-5348-486c-9384-fe549c8be32a
   itemName: Earth Shard
-  itemDescription: A crystallized piece of earth
-  itemRarity: 1
+  itemDescription: Empty Description
+  itemRarity: 0
   itemIcon: {fileID: 0}
   noun: 
   adjective: 
-  ingredientArchetype: 3
+  ingredientArchetype: 0
   ingredientAspect: 0
   isCorrupted: 0
-  potency: 3
-  gridWidth: 2
+  potency: 1
+  gridWidth: 1
   gridHeight: 2
   unlocksAdditionalSpace: 0
   additionalSpaceCount: 0
+  isUnrefined: 1
+  originalIngredient: {fileID: 0}
   shapeData:
-    gridWidth: 2
+    gridWidth: 1
     gridHeight: 2
     activeCells:
     - {x: 0, y: 0}
     - {x: 0, y: 1}
-    - {x: 1, y: 1}
     template: 0
     shapeColor: {r: 0, g: 1, b: 0, a: 1}
     shapeSprite: {fileID: 0}
-    lastModified: 2025-09-12 09:30:19
+    lastModified: 2025-09-25 16:11:16
     dataVersion: 1
   infusionBundle:
     infusions:

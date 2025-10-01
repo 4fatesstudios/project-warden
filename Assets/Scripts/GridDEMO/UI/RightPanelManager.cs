@@ -40,7 +40,7 @@ namespace FourFatesStudios.ProjectWarden.GridDemo.UI
         
         // References
         private GridGameManager gridManager;
-        private ImprovedClickDetector clickDetector;
+        private ProficiencyDisplayManager proficiencyManager;
         
         public static RightPanelManager Instance { get; private set; }
         
@@ -62,10 +62,17 @@ namespace FourFatesStudios.ProjectWarden.GridDemo.UI
             if (autoSetupOnStart)
             {
                 SetupRightPanel();
-                SetupClickDetection();
             }
             
             gridManager = FindFirstObjectByType<GridGameManager>();
+            proficiencyManager = FindFirstObjectByType<ProficiencyDisplayManager>();
+            
+            // If proficiency manager doesn't exist, create it
+            if (proficiencyManager == null)
+            {
+                GameObject proficiencyObj = new GameObject("Proficiency Display Manager");
+                proficiencyManager = proficiencyObj.AddComponent<ProficiencyDisplayManager>();
+            }
         }
         
         private void Update()
@@ -328,21 +335,6 @@ namespace FourFatesStudios.ProjectWarden.GridDemo.UI
             removeButton.onClick.AddListener(RemoveCurrentIngredient);
         }
         
-        private void SetupClickDetection()
-        {
-            // Create or get click detection manager
-            clickDetector = FindFirstObjectByType<ImprovedClickDetector>();
-            if (clickDetector == null)
-            {
-                GameObject clickDetectorObj = new GameObject("Improved Click Detector");
-                clickDetector = clickDetectorObj.AddComponent<ImprovedClickDetector>();
-            }
-            
-            // Subscribe to click events
-            clickDetector.OnIngredientClicked += ShowIngredientDetails;
-            clickDetector.OnEmptySpaceClicked += HidePanel;
-        }
-        
         public void ShowIngredientDetails(Ingredient ingredient, Vector2Int gridPosition)
         {
             currentIngredient = ingredient;
@@ -479,11 +471,11 @@ namespace FourFatesStudios.ProjectWarden.GridDemo.UI
                 case Aspect.Arc: 
                     return new Color(1f, 1f, 0.3f, 1f);
                 case Aspect.Caustic: 
-                    return new Color(0.8f, 0.5f, 0.2f, 1f);
+                    return new Color(0.6f, 1.0f, 0.2f, 1f); // Acid Green
                 case Aspect.Corporeal: 
                     return new Color(0.7f, 0.7f, 0.7f, 1f);
                 case Aspect.Divine: 
-                    return new Color(1f, 1f, 1f, 1f);
+                    return new Color(1f, .7f, 1f, 1f);
                 default: 
                     return Color.gray;
             }
@@ -500,15 +492,6 @@ namespace FourFatesStudios.ProjectWarden.GridDemo.UI
                 }
             }
             return canvases.Length > 0 ? canvases[0] : null;
-        }
-        
-        private void OnDestroy()
-        {
-            if (clickDetector != null)
-            {
-                clickDetector.OnIngredientClicked -= ShowIngredientDetails;
-                clickDetector.OnEmptySpaceClicked -= HidePanel;
-            }
         }
     }
 }

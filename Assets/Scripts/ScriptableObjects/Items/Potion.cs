@@ -17,6 +17,9 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
         [SerializeField, Tooltip("Potion item type.")]
         private ItemPotionType itemPotionType;
 
+        [Header("Potion Potency")]
+        [SerializeField] private int potency = 100;
+        
         [Header("Infusion System")]
         [SerializeField, Tooltip("Infusions added to this potion")]
         private InfusionBundle infusionBundle = new InfusionBundle();
@@ -65,6 +68,7 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
 
         public ItemPotionType ItemPotionType => itemPotionType;
         public InfusionBundle InfusionBundle => infusionBundle;
+        public int Potency => potency;
         
         // New crafting system properties
         public PotionRarity Rarity => rarity;
@@ -106,7 +110,7 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
         }
 
         public void InitializeFromCrafting(PotionRarity potionRarity, PotionTone potionTone, BottleType bottle, 
-            InfusionBundle infusions, float quality, string crafter, List<Ingredient> ingredients)
+            InfusionBundle infusions, float quality, string crafter, List<Ingredient> ingredients, int basePotency = 100)
         {
             rarity = potionRarity;
             tone = potionTone;
@@ -114,6 +118,7 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
             infusionBundle = infusions ?? new InfusionBundle();
             craftQuality = quality;
             crafterName = crafter;
+            potency = basePotency;
             if (ingredients != null) sourceIngredients = new List<Ingredient>(ingredients);
             
             UpdateAppearanceFromIngredients(ingredients);
@@ -207,7 +212,7 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
                 Aspect.Frigid => new Color(0.2f, 0.6f, 0.9f), // Ice blue
                 Aspect.Arc => new Color(0.9f, 0.9f, 0.2f),    // Electric yellow
                 Aspect.Divine => new Color(0.9f, 0.8f, 0.2f), // Golden
-                Aspect.Caustic => new Color(0.5f, 0.2f, 0.8f), // Purple
+                Aspect.Caustic => new Color(0.6f, 1.0f, 0.2f, 1.0f), // Acid Green
                 Aspect.Corporeal => new Color(0.4f, 0.7f, 0.3f), // Green
                 _ => new Color(0.5f, 0.5f, 0.8f) // Default blue
             };

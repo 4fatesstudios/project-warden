@@ -86,13 +86,13 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             {
                 VisualState = CellVisualState.Occupied;
             }
-            else if (HasObstacle)
-            {
-                VisualState = CellVisualState.Obstacle;
-            }
             else if (IsHighlighted)
             {
                 VisualState = IsValidPlacement ? CellVisualState.ValidHighlight : CellVisualState.InvalidHighlight;
+            }
+            else if (HasObstacle)
+            {
+                VisualState = CellVisualState.Obstacle;
             }
             else
             {

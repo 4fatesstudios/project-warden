@@ -21,7 +21,7 @@ namespace FourFatesStudios.ProjectWarden.GridDemo.UI
         [SerializeField] private bool autoUpdate = true;
         
         private GridGameManager gridManager;
-        private ObstacleSpawnDebugger obstacleDebugger;
+        // private ObstacleSpawnDebugger obstacleDebugger; // TODO: Implement ObstacleSpawnDebugger class
         private float lastUpdateTime;
         
         private void Start()
@@ -33,7 +33,7 @@ namespace FourFatesStudios.ProjectWarden.GridDemo.UI
         private void InitializeReferences()
         {
             // Find GridGameManager
-            gridManager = FindObjectOfType<GridGameManager>();
+            gridManager = FindFirstObjectByType<GridGameManager>();
             if (gridManager == null)
             {
                 Debug.LogWarning("DebugStatusDisplay: No GridGameManager found in scene");
@@ -41,11 +41,11 @@ namespace FourFatesStudios.ProjectWarden.GridDemo.UI
             }
             
             // Find ObstacleSpawnDebugger
-            obstacleDebugger = gridManager.GetComponent<ObstacleSpawnDebugger>();
-            if (obstacleDebugger == null)
-            {
-                Debug.LogWarning("DebugStatusDisplay: No ObstacleSpawnDebugger found on GridGameManager");
-            }
+            // obstacleDebugger = gridManager.GetComponent<ObstacleSpawnDebugger>();
+            // if (obstacleDebugger == null)
+            // {
+            //     Debug.LogWarning("DebugStatusDisplay: No ObstacleSpawnDebugger found on GridGameManager");
+            // }
         }
         
         private void SetupUI()
@@ -170,15 +170,15 @@ namespace FourFatesStudios.ProjectWarden.GridDemo.UI
             statsText += $"Current Obstacles: {gridManager.aspectObstacles.Count}\n";
             
             // Spawn debugger stats
-            if (obstacleDebugger != null)
-            {
-                string summary = obstacleDebugger.GetSpawnStatsSummary();
-                statsText += $"Spawn Stats: {summary}\n";
-            }
-            else
-            {
-                statsText += "Spawn Debugger: Not Available\n";
-            }
+            // if (obstacleDebugger != null)
+            // {
+            //     string summary = obstacleDebugger.GetSpawnStatsSummary();
+            //     statsText += $"Spawn Stats: {summary}\n";
+            // }
+            // else
+            // {
+            statsText += "Spawn Debugger: Not Available\n";
+            // }
             
             // Grid info
             int totalCells = gridManager.gridWidth * gridManager.gridHeight;

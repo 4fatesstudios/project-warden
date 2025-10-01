@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using FourFatesStudios.ProjectWarden.Enums;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
 using UnityEngine.UI;
-// Temporary using to force recompilation in Unity 6
+// Temporary using to force recompilation in Unity 6000.0
 using System;
 
 namespace FourFatesStudios.ProjectWarden.GridDemo
@@ -137,6 +137,9 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             {
                 Debug.LogError($"Placement verification failed for {ingredient.ItemName} at {gridPosition}");
             }
+            
+            // Notify proficiency system about ingredient placement
+            NotifyProficiencySystemOfIngredientPlacement();
         }
 
         private GameObject CreateIngredientVisual(Ingredient ingredient, Vector2Int gridPosition, Vector3 worldPosition)
@@ -401,6 +404,9 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                 }
 
                 placedIngredients.Remove(gridPosition);
+                
+                // Notify proficiency system about ingredient removal
+                NotifyProficiencySystemOfIngredientPlacement();
             }
         }
 
@@ -647,6 +653,9 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
 
             // Final safety cleanup: destroy any remaining child objects
             ForceDestroyAllChildIngredients();
+            
+            // Notify proficiency system about grid reset
+            NotifyProficiencySystemOfGridClear();
         }
 
         /// <summary>
@@ -802,9 +811,9 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                 case Aspect.Scorch: return Color.red;
                 case Aspect.Frigid: return Color.cyan;
                 case Aspect.Arc: return Color.yellow;
-                case Aspect.Caustic: return new Color(0.5f, 0.3f, 0.1f); // Brown
+                case Aspect.Caustic: return new Color(0.6f, 1.0f, 0.2f, 1.0f); // Acid Green
                 case Aspect.Corporeal: return Color.gray;
-                case Aspect.Divine: return Color.white;
+                case Aspect.Divine: return new Color(1f, .7f, 1f, 1.0f);
                 default: return Color.gray;
             }
         }
@@ -887,6 +896,34 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             }
 
             return success;
+        }
+        
+        /// <summary>
+        /// Notify the proficiency display system that the grid has been cleared
+        /// </summary>
+        private void NotifyProficiencySystemOfGridClear()
+        {
+            // Find and notify proficiency display manager
+            var proficiencyManager = FindFirstObjectByType<FourFatesStudios.ProjectWarden.GridDemo.UI.ProficiencyDisplayManager>();
+            if (proficiencyManager != null)
+            {
+                proficiencyManager.OnGridCleared();
+                Debug.Log("📊 Notified proficiency system of grid clear");
+            }
+        }
+        
+        /// <summary>
+        /// Notify the proficiency display system that an ingredient was placed
+        /// </summary>
+        private void NotifyProficiencySystemOfIngredientPlacement()
+        {
+            // Find and notify proficiency display manager
+            var proficiencyManager = FindFirstObjectByType<FourFatesStudios.ProjectWarden.GridDemo.UI.ProficiencyDisplayManager>();
+            if (proficiencyManager != null)
+            {
+                proficiencyManager.RefreshProficiencyDisplay();
+                Debug.Log("📊 Notified proficiency system of ingredient placement");
+            }
         }
     }
 

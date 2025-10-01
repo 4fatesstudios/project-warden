@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
 using FourFatesStudios.ProjectWarden.Enums;
+using FourFatesStudios.ProjectWarden.GridDemo;
 
 namespace FourFatesStudios.ProjectWarden.ScriptableObjects.AlchemyRecipes
 {
@@ -61,6 +62,54 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.AlchemyRecipes
         [SerializeField] public float compactnessThreshold = 0.7f;
     }
 
+    [Serializable]
+    public class PlannedObstacle
+    {
+        [SerializeField] public Vector2Int position;
+        [SerializeField] public ObstacleType obstacleType;
+        [SerializeField, TextArea(1, 2)] public string description = "";
+        
+        public PlannedObstacle(Vector2Int pos, ObstacleType type, string desc = "")
+        {
+            position = pos;
+            obstacleType = type;
+            description = desc;
+        }
+    }
+
+    [Serializable]
+    public class CustomGridCell
+    {
+        [SerializeField] public Vector2Int position;
+        [SerializeField] public Aspect aspect = Aspect.Corporeal;
+        [SerializeField] public Rarity rarity = Rarity.Common;
+        [SerializeField] public bool isRequired = false;
+        [SerializeField] public bool isOccupied = false;
+        [SerializeField] public ObstacleType obstacleType = ObstacleType.Corporeal;
+        [SerializeField] public bool hasObstacle = false;
+        
+        public CustomGridCell(Vector2Int pos)
+        {
+            position = pos;
+        }
+        
+        public CustomGridCell(Vector2Int pos, Aspect cellAspect, Rarity cellRarity, bool required, bool occupied)
+        {
+            position = pos;
+            aspect = cellAspect;
+            rarity = cellRarity;
+            isRequired = required;
+            isOccupied = occupied;
+        }
+        
+        public CustomGridCell(Vector2Int pos, ObstacleType obstacleType)
+        {
+            position = pos;
+            this.obstacleType = obstacleType;
+            hasObstacle = true;
+        }
+    }
+
     [CreateAssetMenu(fileName = "NewAlchemyRecipe", menuName = "AlchemyRecipes/Grid Recipe")]
     public class AlchemyRecipe : Recipe
     {
@@ -95,6 +144,22 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.AlchemyRecipes
         
         [SerializeField, Tooltip("Aspect synergies that provide bonuses.")]
         private List<AspectSynergy> aspectSynergies = new List<AspectSynergy>();
+        
+        [SerializeField, Tooltip("Pre-planned obstacles that will be placed when this recipe is loaded.")]
+        private List<PlannedObstacle> plannedObstacles = new List<PlannedObstacle>();
+        
+        [Header("Custom Grid Layout")]
+        [SerializeField, Tooltip("Has a custom grid layout designed in the Grid Designer.")]
+        private bool hasCustomGrid = false;
+        
+        [SerializeField, Tooltip("Grid width for the custom layout.")]
+        private int customGridWidth = 5;
+        
+        [SerializeField, Tooltip("Grid height for the custom layout.")]
+        private int customGridHeight = 5;
+        
+        [SerializeField, Tooltip("Custom grid cells containing obstacles and ingredient positions.")]
+        private List<CustomGridCell> customGridCells = new List<CustomGridCell>();
         
         [Header("Success Criteria")]
         [SerializeField, Tooltip("Minimum space efficiency required for success (0-1).")]
@@ -137,9 +202,16 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.AlchemyRecipes
         public IReadOnlyList<RequiredIngredientPosition> RequiredPositions => requiredPositions;
         public IReadOnlyList<RequiredIngredientPattern> BonusPatterns => bonusPatterns;
         public IReadOnlyList<AspectSynergy> AspectSynergies => aspectSynergies;
+        public IReadOnlyList<PlannedObstacle> PlannedObstacles => plannedObstacles;
         public GridRequirement GridRequirements => gridRequirements;
         public IReadOnlyList<Ingredient> ForbiddenIngredients => forbiddenIngredients;
         public IReadOnlyList<Ingredient> AlternativeIngredients => alternativeIngredients;
+        
+        // Custom Grid Properties
+        public bool HasCustomGrid => hasCustomGrid;
+        public int CustomGridWidth => customGridWidth;
+        public int CustomGridHeight => customGridHeight;
+        public IReadOnlyList<CustomGridCell> CustomGridCells => customGridCells;
 
         /// <summary>
         /// Get all required ingredients for this recipe (excluding null entries)
@@ -269,6 +341,98 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.AlchemyRecipes
             }
 
             return true; // Synergy exists without adjacency requirement
+        }
+
+        /// <summary>
+        /// Save custom grid layout from the Grid Designer
+        /// </summary>
+        public void SaveCustomGridLayout(int gridWidth, int gridHeight)
+        {
+            customGridCells.Clear();
+            customGridWidth = gridWidth;
+            customGridHeight = gridHeight;
+            hasCustomGrid = true;
+            
+            Debug.Log($"💾 Initialized custom grid layout ({gridWidth}x{gridHeight}) for recipe '{name}' - use SaveCustomGridCell to add cells");
+        }
+        
+        /// <summary>
+        /// Add a custom grid cell (called from Grid Designer)
+        /// </summary>
+        public void SaveCustomGridCell(Vector2Int position, Aspect aspect, Rarity rarity, bool isRequired, bool isOccupied, ObstacleType obstacleType, bool hasObstacle)
+        {
+            // Remove existing cell at this position
+            customGridCells.RemoveAll(c => c.position == position);
+            
+            // Only save if there's meaningful data (not default values)
+            if (hasObstacle || aspect != Aspect.Corporeal || rarity != Rarity.Common || isRequired)
+            {
+                var gridCell = new CustomGridCell(position);
+                gridCell.aspect = aspect;
+                gridCell.rarity = rarity;
+                gridCell.isRequired = isRequired;
+                gridCell.isOccupied = isOccupied;
+                gridCell.obstacleType = obstacleType;
+                gridCell.hasObstacle = hasObstacle;
+                
+                customGridCells.Add(gridCell);
+            }
+        }
+        
+        /// <summary>
+        /// Get custom grid data for a specific position
+        /// </summary>
+        public CustomGridCell GetCustomGridCell(Vector2Int position)
+        {
+            return customGridCells.FirstOrDefault(c => c.position == position);
+        }
+        
+        /// <summary>
+        /// Check if this recipe has custom grid data available
+        /// </summary>
+        public bool HasCustomGridData()
+        {
+            return hasCustomGrid && customGridCells.Count > 0;
+        }
+        
+        /// <summary>
+        /// Get grid information for the crafting mode selector
+        /// </summary>
+        public (int gridWidth, int gridHeight, int obstacleCount) GetGridInfo()
+        {
+            int obstacleCount = customGridCells.Count(cell => cell.hasObstacle);
+            return (customGridWidth, customGridHeight, obstacleCount);
+        }
+        
+        /// <summary>
+        /// Clear the custom grid layout
+        /// </summary>
+        public void ClearCustomGridLayout()
+        {
+            hasCustomGrid = false;
+            customGridCells.Clear();
+            Debug.Log($"🗑️ Cleared custom grid layout for recipe '{name}'");
+        }
+        
+        /// <summary>
+        /// Check if player has access to this recipe's custom grid
+        /// This should be called when the player tries to use a custom grid layout
+        /// </summary>
+        public bool CanPlayerUseCustomGrid()
+        {
+            // TODO: Implement inventory system check
+            // For now, return true since inventory system is not implemented
+            // When inventory is implemented, check if player has this recipe page in inventory
+            
+            /* FUTURE IMPLEMENTATION:
+             * if (InventoryManager.Instance != null)
+             * {
+             *     return InventoryManager.Instance.HasRecipePage(this);
+             * }
+             */
+            
+            Debug.Log($"🔍 Checking custom grid access for recipe '{name}' - returning true (inventory not implemented)");
+            return true; // Placeholder - always allow access until inventory is implemented
         }
 
 #if UNITY_EDITOR

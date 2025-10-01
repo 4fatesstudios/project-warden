@@ -319,9 +319,9 @@ namespace FourFatesStudios.ProjectWarden.GridDemo.UI
                 case Aspect.Scorch: return new Color(1f, 0.3f, 0.3f, 1f);
                 case Aspect.Frigid: return new Color(0.3f, 0.8f, 1f, 1f);
                 case Aspect.Arc: return new Color(1f, 1f, 0.3f, 1f);
-                case Aspect.Caustic: return new Color(0.8f, 0.5f, 0.2f, 1f);
+                case Aspect.Caustic: return new Color(0.6f, 1.0f, 0.2f, 1f); // Acid Green
                 case Aspect.Corporeal: return new Color(0.7f, 0.7f, 0.7f, 1f);
-                case Aspect.Divine: return new Color(1f, 1f, 1f, 1f);
+                case Aspect.Divine: return new Color(.95f, .65f, .95f, 1f);
                 default: return new Color(0.6f, 0.6f, 0.6f, 1f);
             }
         }

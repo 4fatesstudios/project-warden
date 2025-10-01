@@ -13,11 +13,6 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         public Material highlightMaterial;
         public Material occupiedMaterial;
         
-        [Header("Grid Lines")]
-        public bool showGridLines = true;
-        public Color gridLineColor = Color.gray;
-        public float gridLineWidth = 0.02f;
-        
         [Header("Particle Effects")]
         public GameObject placementEffectPrefab;
         public GameObject removalEffectPrefab;
@@ -26,7 +21,6 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         private GridGameManager gridManager;
         private GameObject[,] cellVisuals;
         private MeshRenderer[,] cellRenderers;
-        private List<LineRenderer> gridLines = new List<LineRenderer>();
         private ParticleSystem[] particleSystems;
         
         private void Awake()
@@ -37,7 +31,6 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         private void Start()
         {
             CreateGridVisuals();
-            CreateGridLines();
             SetupParticleEffects();
         }
         
@@ -100,66 +93,6 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             return prefab;
         }
         
-        private void CreateGridLines()
-        {
-            if (!showGridLines) return;
-            
-            // Prevent duplicate grid line creation
-            if (gridLines.Count > 0)
-            {
-                Debug.Log("🔄 GridVisualizer: Grid lines already exist, preserving them.");
-                return;
-            }
-            
-            // Vertical lines
-            for (int x = 0; x <= gridManager.gridWidth; x++)
-            {
-                GameObject lineObj = new GameObject($"GridLine_V_{x}");
-                lineObj.transform.parent = transform;
-                
-                LineRenderer lr = lineObj.AddComponent<LineRenderer>();
-                SetupLineRenderer(lr);
-                
-                Vector3 start = gridManager.gridStartPosition + new Vector3(x * gridManager.cellSize, 0.01f, 0);
-                Vector3 end = gridManager.gridStartPosition + new Vector3(x * gridManager.cellSize, 0.01f, gridManager.gridHeight * gridManager.cellSize);
-                
-                lr.positionCount = 2;
-                lr.SetPosition(0, start);
-                lr.SetPosition(1, end);
-                
-                gridLines.Add(lr);
-            }
-            
-            // Horizontal lines
-            for (int y = 0; y <= gridManager.gridHeight; y++)
-            {
-                GameObject lineObj = new GameObject($"GridLine_H_{y}");
-                lineObj.transform.parent = transform;
-                
-                LineRenderer lr = lineObj.AddComponent<LineRenderer>();
-                SetupLineRenderer(lr);
-                
-                Vector3 start = gridManager.gridStartPosition + new Vector3(0, 0.01f, y * gridManager.cellSize);
-                Vector3 end = gridManager.gridStartPosition + new Vector3(gridManager.gridWidth * gridManager.cellSize, 0.01f, y * gridManager.cellSize);
-                
-                lr.positionCount = 2;
-                lr.SetPosition(0, start);
-                lr.SetPosition(1, end);
-                
-                gridLines.Add(lr);
-            }
-        }
-        
-        private void SetupLineRenderer(LineRenderer lr)
-        {
-            lr.material = new Material(Shader.Find("Sprites/Default"));
-            lr.material.color = gridLineColor;
-            lr.startWidth = gridLineWidth;
-            lr.endWidth = gridLineWidth;
-            lr.useWorldSpace = true;
-            lr.sortingOrder = 1;
-        }
-        
         private void SetupParticleEffects()
         {
             particleSystems = GetComponentsInChildren<ParticleSystem>();
@@ -179,6 +112,25 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             }
             
             Debug.Log("✅ Grid refresh complete - all cells updated to match their logical state");
+        }
+
+        /// <summary>
+        /// Refresh grid with special handling for void obstacles
+        /// </summary>
+        public void RefreshGridWithVoidHandling()
+        {
+            Debug.Log("🔄 GridVisualizer.RefreshGridWithVoidHandling() - Updating all cell visuals with void obstacle support");
+            GridCell[,] cells = gridManager.GetAllCells();
+            
+            for (int x = 0; x < gridManager.gridWidth; x++)
+            {
+                for (int y = 0; y < gridManager.gridHeight; y++)
+                {
+                    UpdateCellVisual(x, y, cells[x, y]);
+                }
+            }
+            
+            Debug.Log("✅ Grid refresh with void handling complete - cells with void obstacles are now hidden");
         }
         
         public void UpdateHighlight(Vector2Int hoveredCell, Ingredient selectedIngredient)
@@ -227,6 +179,17 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         private void UpdateCellVisual(int x, int y, GridCell cell)
         {
             if (cellRenderers[x, y] == null) return;
+            
+            // Handle Void obstacles by hiding the cell completely
+            if (cell.HasObstacle && cell.Obstacle?.ObstacleType == ObstacleType.Void)
+            {
+                // Make the cell completely invisible for void obstacles
+                cellRenderers[x, y].enabled = false;
+                return;
+            }
+            
+            // Ensure the renderer is enabled for non-void obstacles
+            cellRenderers[x, y].enabled = true;
             
             Material materialToUse = GetMaterialForCell(cell);
             cellRenderers[x, y].material = materialToUse;
@@ -340,11 +303,44 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                 case Aspect.Scorch: return Color.red;
                 case Aspect.Frigid: return Color.cyan;
                 case Aspect.Arc: return Color.yellow;
-                case Aspect.Caustic: return new Color(0.5f, 0.3f, 0.1f); // Brown
+                case Aspect.Caustic: return new Color(0.6f, 1.0f, 0.2f, 1.0f); // Acid Green
                 case Aspect.Corporeal: return Color.gray;
-                case Aspect.Divine: return Color.white;
+                case Aspect.Divine: return Color.magenta;
                 default: return Color.gray;
             }
+        }
+
+        /// <summary>
+        /// Force recreation of grid visuals to match new grid dimensions.
+        /// This should be called when the grid size changes.
+        /// </summary>
+        public void ForceRecreateGridVisuals()
+        {
+            Debug.Log($"🔄 GridVisualizer: Force recreating grid visuals for new size {gridManager.gridWidth}x{gridManager.gridHeight}");
+            
+            // First, destroy existing visuals
+            if (cellVisuals != null)
+            {
+                for (int x = 0; x < cellVisuals.GetLength(0); x++)
+                {
+                    for (int y = 0; y < cellVisuals.GetLength(1); y++)
+                    {
+                        if (cellVisuals[x, y] != null)
+                        {
+                            DestroyImmediate(cellVisuals[x, y]);
+                        }
+                    }
+                }
+            }
+            
+            // Reset arrays to null so CreateGridVisuals will recreate them
+            cellVisuals = null;
+            cellRenderers = null;
+            
+            // Recreate with new dimensions
+            CreateGridVisuals();
+            
+            Debug.Log($"✅ GridVisualizer: Successfully recreated grid visuals for {gridManager.gridWidth}x{gridManager.gridHeight} grid");
         }
     }
 }

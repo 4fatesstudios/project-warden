@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/Scenes/GridDemo.unity.meta
 guid: c1ed7ffd555bb5646bddc56b774dc26b
+========
+guid: 3d1dacca76dfcdf4586f95b1bdf56a2e
+>>>>>>>> cd130b1 (Shapes are now integrated!):Assets/Scenes/CraftingSystemComplete.unity.meta
 DefaultImporter:
   externalObjects: {}
   userData: 

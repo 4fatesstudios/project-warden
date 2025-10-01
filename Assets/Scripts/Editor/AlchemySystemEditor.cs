@@ -11,6 +11,7 @@ using System.Linq;
 using System.Reflection;
 using FourFatesStudios.ProjectWarden.Enums;
 using FourFatesStudios.ProjectWarden.Effects;
+using FourFatesStudios.ProjectWarden.GridDemo;
 using Object = UnityEngine.Object;
 using InfusionSO = FourFatesStudios.ProjectWarden.ScriptableObjects.Infusion;
 
@@ -26,7 +27,9 @@ namespace FourFatesStudios.ProjectWarden.Editor
         private Vector2 ingredientsScrollPosition;
         private Vector2 recipesScrollPosition;
         private Vector2 potionsScrollPosition;
+        // Ingredient editor selection
         private Ingredient selectedIngredient;
+        private int selectedIngredientTab = 0;
         private AlchemyRecipe selectedRecipe;
         private BaseEntry selectedBookEntry;
         private Potion selectedPotion;
@@ -34,21 +37,18 @@ namespace FourFatesStudios.ProjectWarden.Editor
         
         // Persistent state for grid designer
         private AlchemyRecipe gridDesignerRecipe;
-        private int gridWidth = 6;
-        private int gridHeight = 6;
+        private int gridWidth = 5;
+        private int gridHeight = 5;
         private int selectedPatternType;
         private Dictionary<Vector2Int, CellData> gridCells = new Dictionary<Vector2Int, CellData>();
         private Vector2Int selectedCell = Vector2Int.zero;
         private bool showCellPreview = true;
         private readonly string[] patternTypes = { "Free Placement", "Required Pattern", "Aspect Locked", "Shape Specific", "Cross Pattern", "L-Shape", "Diamond" };
         
-        // Ingredient visual design state
-        private int selectedIngredientTab;
-        private Dictionary<Vector2Int, bool> ingredientVisualGrid = new Dictionary<Vector2Int, bool>();
-        private int ingredientGridWidth = 1;
-        private int ingredientGridHeight = 1;
-        private Vector2Int selectedIngredientCell = Vector2Int.zero;
-        private bool showIngredientPreview = true;
+        // Obstacle placement system - obstacles only
+        private ObstacleType selectedObstacleType = ObstacleType.Corporeal;
+        
+        // Grid Designer cell selection and state
         
         // Infusion editor state
         private Vector2 infusionsScrollPosition;
@@ -82,10 +82,22 @@ namespace FourFatesStudios.ProjectWarden.Editor
         private bool[,] currentIngredientGrid;
         private bool hasUnsavedGridChanges;
         
+        // Ingredient visual design editor state
+        private int ingredientGridWidth = 3;
+        private int ingredientGridHeight = 3;
+        private Dictionary<Vector2Int, bool> ingredientVisualGrid = new Dictionary<Vector2Int, bool>();
+        private Vector2Int selectedIngredientCell = Vector2Int.zero;
+        
         [MenuItem("Tools/Alchemy System Editor")]
         public static void ShowWindow()
         {
             GetWindow<AlchemySystemEditor>("Alchemy System Editor");
+        }
+
+        private void OnEnable()
+        {
+            // Grid Designer initialization - obstacles only
+            Debug.Log("🔄 AlchemySystemEditor OnEnable: Grid Designer ready for obstacle placement");
         }
 
         private void OnGUI()
@@ -130,6 +142,13 @@ namespace FourFatesStudios.ProjectWarden.Editor
                         case 8: DrawDatabaseTab(); break;
                     }
                 }
+                catch (ExitGUIException)
+                {
+                    // Unity's internal GUI exception - rethrow after cleanup
+                    EditorGUILayout.EndScrollView();
+                    EditorGUILayout.EndVertical();
+                    throw;
+                }
                 catch (System.Exception e)
                 {
                     EditorGUILayout.HelpBox($"Error drawing tab content: {e.Message}", MessageType.Error);
@@ -139,6 +158,11 @@ namespace FourFatesStudios.ProjectWarden.Editor
                 {
                     EditorGUILayout.EndScrollView();
                 }
+            }
+            catch (ExitGUIException)
+            {
+                // Unity's internal GUI exception - safe to rethrow
+                throw;
             }
             catch (System.Exception e)
             {
@@ -322,6 +346,9 @@ namespace FourFatesStudios.ProjectWarden.Editor
                 if (GUILayout.Toggle(isSelected, "", GUILayout.Width(20)) && !isSelected)
                 {
                     selectedIngredient = ingredient;
+                    // Update visual design tab when switching ingredients
+                    LoadIngredientShape(ingredient);
+                    Debug.Log($"🔄 Switched to ingredient: {ingredient.ItemName}, visual design updated");
                 }
                 
                 EditorGUILayout.ObjectField(ingredient, typeof(Ingredient), false);
@@ -379,6 +406,13 @@ namespace FourFatesStudios.ProjectWarden.Editor
             if (selectedTab != selectedIngredientTab)
             {
                 selectedIngredientTab = selectedTab;
+                
+                // Update visual design when switching to Visual Design tab
+                if (selectedIngredientTab == 2 && selectedIngredient != null)
+                {
+                    LoadIngredientShape(selectedIngredient);
+                    Debug.Log($"🔄 Switched to Visual Design tab for {selectedIngredient.ItemName}, grid updated");
+                }
             }
             
             EditorGUILayout.Space(10);
@@ -436,15 +470,30 @@ namespace FourFatesStudios.ProjectWarden.Editor
             GUILayout.Label("Core Properties", EditorStyles.boldLabel);
             EditorGUILayout.PropertyField(serializedObject.FindProperty("potency"));
             
-            // Grid size with automatic shape detection
+            // Grid size with automatic shape detection and change tracking
             EditorGUILayout.BeginHorizontal();
+            
+            EditorGUI.BeginChangeCheck();
             EditorGUILayout.PropertyField(serializedObject.FindProperty("gridWidth"), GUILayout.Width(200));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("gridHeight"), GUILayout.Width(200));
+            bool gridDimensionsChanged = EditorGUI.EndChangeCheck();
+            
+            // If grid dimensions changed, mark that we need to update the visual grid
+            if (gridDimensionsChanged)
+            {
+                serializedObject.ApplyModifiedProperties();
+                Debug.Log($"🔄 Grid dimensions changed for {selectedIngredient.ItemName}, visual grid will update automatically");
+                // The visual grid will be updated automatically in DrawGridVisual() on next frame
+            }
+            
             EditorGUILayout.EndHorizontal();
             
-            // Show calculated area
-            int totalArea = selectedIngredient.GridWidth * selectedIngredient.GridHeight;
-            EditorGUILayout.LabelField($"Grid Area: {totalArea} cells", EditorStyles.miniLabel);
+            // Show calculated area with real-time updates
+            int currentWidth = serializedObject.FindProperty("gridWidth").intValue;
+            int currentHeight = serializedObject.FindProperty("gridHeight").intValue;
+            int totalArea = currentWidth * currentHeight;
+            
+            EditorGUILayout.LabelField($"Grid Area: {totalArea} cells ({currentWidth}x{currentHeight})", EditorStyles.miniLabel);
             
             EditorGUILayout.PropertyField(serializedObject.FindProperty("unlocksAdditionalSpace"));
             if (selectedIngredient.UnlocksAdditionalSpace)
@@ -508,6 +557,15 @@ namespace FourFatesStudios.ProjectWarden.Editor
         
         private void DrawIngredientVisualDesign(SerializedObject serializedObject)
         {
+            // Ensure visual design grid is loaded for the current ingredient
+            if (selectedIngredient != null && (currentIngredientGrid == null || 
+                currentIngredientGrid.GetLength(0) != selectedIngredient.GridWidth || 
+                currentIngredientGrid.GetLength(1) != selectedIngredient.GridHeight))
+            {
+                LoadIngredientShape(selectedIngredient);
+                Debug.Log($"🔄 Visual Design tab: Auto-loaded grid for {selectedIngredient.ItemName}");
+            }
+            
             EditorGUILayout.BeginVertical("Box");
             GUILayout.Label("🎨 Visual Grid Designer", EditorStyles.boldLabel);
             EditorGUILayout.HelpBox("Design how this ingredient appears and fits in the alchemy grid. Similar to Tetris pieces, ingredients can have custom shapes.", MessageType.Info);
@@ -748,6 +806,20 @@ namespace FourFatesStudios.ProjectWarden.Editor
                 
                 EditorGUILayout.ObjectField(recipe, typeof(AlchemyRecipe), false);
                 
+                // Show custom grid status
+                if (recipe.HasCustomGridData())
+                {
+                    bool playerCanUse = recipe.CanPlayerUseCustomGrid();
+                    string gridIcon = playerCanUse ? "🟢" : "🔒";
+                    string gridTooltip = playerCanUse ? "Custom grid available" : "Custom grid locked (need recipe page)";
+                    GUIContent gridContent = new GUIContent(gridIcon, gridTooltip);
+                    GUILayout.Label(gridContent, GUILayout.Width(20));
+                }
+                else
+                {
+                    GUILayout.Label("⚪", GUILayout.Width(20)); // No custom grid
+                }
+                
                 if (GUILayout.Button("📝", GUILayout.Width(25)))
                 {
                     // Defer the rename operation to avoid GUI layout conflicts
@@ -776,6 +848,28 @@ namespace FourFatesStudios.ProjectWarden.Editor
             try
             {
                 GUILayout.Label($"Editing Recipe: {selectedRecipe.name}", EditorStyles.boldLabel);
+                
+                // Show custom grid information
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.LabelField("Custom Grid Status:", GUILayout.Width(120));
+                if (selectedRecipe.HasCustomGridData())
+                {
+                    bool playerCanUse = selectedRecipe.CanPlayerUseCustomGrid();
+                    string status = playerCanUse ? "✅ Available" : "🔒 Locked (need recipe page)";
+                    GUIStyle statusStyle = new GUIStyle(EditorStyles.label);
+                    statusStyle.normal.textColor = playerCanUse ? Color.green : Color.red;
+                    EditorGUILayout.LabelField(status, statusStyle);
+                    
+                    EditorGUILayout.LabelField($"Grid Size: {selectedRecipe.CustomGridWidth}x{selectedRecipe.CustomGridHeight}", GUILayout.Width(100));
+                    EditorGUILayout.LabelField($"Cells: {selectedRecipe.CustomGridCells.Count}", GUILayout.Width(60));
+                }
+                else
+                {
+                    EditorGUILayout.LabelField("⚪ No custom grid", EditorStyles.label);
+                }
+                EditorGUILayout.EndHorizontal();
+                
+                GUILayout.Space(5);
                 
                 var serializedObject = new SerializedObject(selectedRecipe);
                 serializedObject.Update();
@@ -2203,90 +2297,334 @@ namespace FourFatesStudios.ProjectWarden.Editor
 
         private void DrawGridDesignerTab()
         {
-            GUILayout.Label("🎮 Grid Pattern Designer", EditorStyles.boldLabel);
-            EditorGUILayout.HelpBox("Design grid patterns for alchemy recipes using a visual editor", MessageType.Info);
-            
-            GUILayout.Space(10);
-            
-            // Recipe selection for grid designer with improved state management
-            EditorGUILayout.BeginHorizontal();
-            GUILayout.Label("Recipe for Grid Design:", GUILayout.Width(150));
-            
-            EditorGUI.BeginChangeCheck();
-            var newGridRecipe = (AlchemyRecipe)EditorGUILayout.ObjectField(gridDesignerRecipe, typeof(AlchemyRecipe), false);
-            
-            if (EditorGUI.EndChangeCheck())
+            try
             {
-                if (newGridRecipe != gridDesignerRecipe)
-                {
-                    gridDesignerRecipe = newGridRecipe;
-                    if (gridDesignerRecipe != null)
-                    {
-                        Debug.Log($"Grid Designer: Selected recipe '{gridDesignerRecipe.ItemName}' for pattern editing");
-                    }
-                }
-            }
-            
-            // Add button to use currently selected recipe from Recipes tab
-            if (selectedRecipe != null && selectedRecipe != gridDesignerRecipe)
-            {
-                string selectedRecipeName = !string.IsNullOrEmpty(selectedRecipe.ItemName) && selectedRecipe.ItemName != "Unnamed Item" 
-                    ? selectedRecipe.ItemName 
-                    : selectedRecipe.name;
-                    
-                if (GUILayout.Button($"Use '{selectedRecipeName}'", GUILayout.Width(120)))
-                {
-                    gridDesignerRecipe = selectedRecipe;
-                }
-            }
-            
-            EditorGUILayout.EndHorizontal();
-            
-            GUILayout.Space(10);
-            
-            if (gridDesignerRecipe != null)
-            {
-                string recipeName = !string.IsNullOrEmpty(gridDesignerRecipe.ItemName) && gridDesignerRecipe.ItemName != "Unnamed Item" 
-                    ? gridDesignerRecipe.ItemName 
-                    : gridDesignerRecipe.name;
-                    
-                GUILayout.Label($"Editing Pattern for: {recipeName}", EditorStyles.boldLabel);
-                
-                EditorGUILayout.BeginVertical("Box");
-                GUILayout.Label("Recipe Grid Pattern", EditorStyles.boldLabel);
-                
-                var serializedObject = new SerializedObject(gridDesignerRecipe);
-                serializedObject.Update();
-                
-                // Show recipe ingredients
-                EditorGUILayout.Space();
-                GUILayout.Label("Required Ingredients:", EditorStyles.boldLabel);
-                
-                EditorGUILayout.BeginHorizontal();
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("inputIngredient1"), new GUIContent("Ingredient 1"));
-                EditorGUILayout.EndHorizontal();
-                
-                EditorGUILayout.BeginHorizontal();
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("inputIngredient2"), new GUIContent("Ingredient 2"));
-                EditorGUILayout.EndHorizontal();
-                
-                EditorGUILayout.BeginHorizontal();
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("inputIngredient3"), new GUIContent("Ingredient 3"));
-                EditorGUILayout.EndHorizontal();
-                
-                // Recipe properties
-                EditorGUILayout.Space();
-                GUILayout.Label("Recipe Properties:", EditorStyles.boldLabel);
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("requiredHits"));
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("maxAttempts"));
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("requiredTemperature"));
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("totalDuration"));
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("outputPotion"));
-                
-                serializedObject.ApplyModifiedProperties();
+                GUILayout.Label("🎮 Grid Pattern Designer", EditorStyles.boldLabel);
+                EditorGUILayout.HelpBox("Design grid patterns for alchemy recipes using a visual editor", MessageType.Info);
                 
                 GUILayout.Space(10);
                 
+                // Recipe selection for grid designer with improved state management
+                EditorGUILayout.BeginHorizontal();
+                GUILayout.Label("Recipe for Grid Design:", GUILayout.Width(150));
+                
+                try
+                {
+                    EditorGUI.BeginChangeCheck();
+                    var newGridRecipe = (AlchemyRecipe)EditorGUILayout.ObjectField(gridDesignerRecipe, typeof(AlchemyRecipe), false);
+                    
+                    if (EditorGUI.EndChangeCheck())
+                    {
+                        if (newGridRecipe != gridDesignerRecipe)
+                        {
+                            gridDesignerRecipe = newGridRecipe;
+                            if (gridDesignerRecipe != null)
+                            {
+                                Debug.Log($"Grid Designer: Selected recipe '{gridDesignerRecipe.ItemName}' for pattern editing");
+                                
+                                // Auto-load custom grid data if available
+                                if (gridDesignerRecipe.HasCustomGridData())
+                                {
+                                    AutoLoadCustomGridForRecipe(gridDesignerRecipe);
+                                }
+                                else
+                                {
+                                    // Clear the grid if no custom data
+                                    ClearGridForNewRecipe();
+                                }
+                            }
+                            else
+                            {
+                                // Clear grid when no recipe selected
+                                ClearGridForNewRecipe();
+                            }
+                        }
+                    }
+                }
+                catch (ExitGUIException)
+                {
+                    // Unity GUI exception, safe to ignore
+                    EditorGUILayout.EndHorizontal();
+                    return;
+                }
+                catch (System.Exception e)
+                {
+                    Debug.LogError($"Error in grid recipe selection: {e.Message}");
+                    EditorGUILayout.EndHorizontal();
+                    return;
+                }
+                
+                // Add button to use currently selected recipe from Recipes tab
+                if (selectedRecipe != null && selectedRecipe != gridDesignerRecipe)
+                {
+                    string selectedRecipeName = !string.IsNullOrEmpty(selectedRecipe.ItemName) && selectedRecipe.ItemName != "Unnamed Item" 
+                        ? selectedRecipe.ItemName 
+                        : selectedRecipe.name;
+                        
+                    if (GUILayout.Button($"Use '{selectedRecipeName}'", GUILayout.Width(120)))
+                    {
+                        gridDesignerRecipe = selectedRecipe;
+                        
+                        // Auto-load custom grid data if available
+                        if (gridDesignerRecipe.HasCustomGridData())
+                        {
+                            AutoLoadCustomGridForRecipe(gridDesignerRecipe);
+                        }
+                        else
+                        {
+                            // Clear the grid if no custom data
+                            ClearGridForNewRecipe();
+                        }
+                    }
+                }
+                
+                EditorGUILayout.EndHorizontal();
+                
+                GUILayout.Space(10);
+                
+                if (gridDesignerRecipe != null)
+                {
+                    try
+                    {
+                        DrawGridDesignerRecipeDetails();
+                    }
+                    catch (ExitGUIException)
+                    {
+                        // Unity GUI exception, safe to ignore
+                        return;
+                    }
+                    catch (System.Exception e)
+                    {
+                        Debug.LogError($"Error drawing grid designer recipe details: {e.Message}");
+                        EditorGUILayout.HelpBox($"Error displaying recipe details: {e.Message}", MessageType.Error);
+                    }
+                }
+                else
+                {
+                    EditorGUILayout.HelpBox("Select an Alchemy Recipe to design its grid pattern", MessageType.Info);
+                }
+            }
+            catch (ExitGUIException)
+            {
+                // Unity GUI exception, safe to ignore
+                throw;
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"Error in DrawGridDesignerTab: {e.Message}");
+                EditorGUILayout.HelpBox($"Grid Designer Error: {e.Message}", MessageType.Error);
+            }
+        }
+        
+        private void DrawGridDesignerRecipeDetails()
+        {
+            if (gridDesignerRecipe == null)
+            {
+                EditorGUILayout.HelpBox("No recipe selected for grid design.", MessageType.Warning);
+                return;
+            }
+
+            string recipeName = !string.IsNullOrEmpty(gridDesignerRecipe.ItemName) && gridDesignerRecipe.ItemName != "Unnamed Item" 
+                ? gridDesignerRecipe.ItemName 
+                : gridDesignerRecipe.name;
+                
+            GUILayout.Label($"Editing Pattern for: {recipeName}", EditorStyles.boldLabel);
+            
+            // Show custom grid status information
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField("Custom Grid Status:", GUILayout.Width(120));
+            if (gridDesignerRecipe.HasCustomGridData())
+            {
+                bool playerCanUse = gridDesignerRecipe.CanPlayerUseCustomGrid();
+                string status = playerCanUse ? "✅ Loaded" : "🔒 Locked";
+                GUIStyle statusStyle = new GUIStyle(EditorStyles.label);
+                statusStyle.normal.textColor = playerCanUse ? Color.green : Color.red;
+                EditorGUILayout.LabelField(status, statusStyle);
+                
+                EditorGUILayout.LabelField($"Size: {gridDesignerRecipe.CustomGridWidth}x{gridDesignerRecipe.CustomGridHeight}", GUILayout.Width(80));
+                EditorGUILayout.LabelField($"Cells: {gridDesignerRecipe.CustomGridCells.Count}", GUILayout.Width(60));
+            }
+            else
+            {
+                EditorGUILayout.LabelField("⚪ Not saved", EditorStyles.label);
+            }
+            EditorGUILayout.EndHorizontal();
+            
+            // Show current designer grid status
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField("Designer Grid:", GUILayout.Width(120));
+            EditorGUILayout.LabelField($"Size: {gridWidth}x{gridHeight}", GUILayout.Width(80));
+            EditorGUILayout.LabelField($"Cells: {gridCells.Count}", GUILayout.Width(60));
+            EditorGUILayout.EndHorizontal();
+            
+            GUILayout.Space(5);
+            
+            // Quick action buttons
+            EditorGUILayout.BeginHorizontal();
+            if (gridDesignerRecipe.HasCustomGridData())
+            {
+                if (GUILayout.Button("🔄 Reload Custom Grid", GUILayout.Width(150)))
+                {
+                    AutoLoadCustomGridForRecipe(gridDesignerRecipe);
+                    EditorUtility.DisplayDialog("Grid Reloaded", "Custom grid has been reloaded from recipe data.", "OK");
+                }
+                
+                if (GUILayout.Button("🧹 Clear Grid", GUILayout.Width(100)))
+                {
+                    if (EditorUtility.DisplayDialog("Clear Grid", "Are you sure you want to clear the current grid?", "Clear", "Cancel"))
+                    {
+                        ClearGridForNewRecipe();
+                    }
+                }
+            }
+            else
+            {
+                if (GUILayout.Button("🧹 Clear Grid", GUILayout.Width(100)))
+                {
+                    if (EditorUtility.DisplayDialog("Clear Grid", "Are you sure you want to clear the current grid?", "Clear", "Cancel"))
+                    {
+                        ClearGridForNewRecipe();
+                    }
+                }
+            }
+            EditorGUILayout.EndHorizontal();
+            
+            GUILayout.Space(5);
+            
+            EditorGUILayout.BeginVertical("Box");
+            GUILayout.Label("Recipe Grid Pattern", EditorStyles.boldLabel);
+
+            try
+            {
+                var serializedObject = new SerializedObject(gridDesignerRecipe);
+                serializedObject.Update();
+
+                // Show recipe ingredients with safety checks
+                EditorGUILayout.Space();
+                GUILayout.Label("Required Ingredients:", EditorStyles.boldLabel);
+
+                EditorGUILayout.BeginHorizontal();
+                try
+                {
+                    var ingredient1Prop = serializedObject.FindProperty("inputIngredient1");
+                    if (ingredient1Prop != null)
+                        EditorGUILayout.PropertyField(ingredient1Prop, new GUIContent("Ingredient 1"));
+                    else
+                        EditorGUILayout.LabelField("Ingredient 1: Property not found");
+                }
+                catch (System.Exception e)
+                {
+                    EditorGUILayout.LabelField($"Ingredient 1: Error - {e.Message}");
+                }
+
+                EditorGUILayout.EndHorizontal();
+
+                EditorGUILayout.BeginHorizontal();
+                try
+                {
+                    var ingredient2Prop = serializedObject.FindProperty("inputIngredient2");
+                    if (ingredient2Prop != null)
+                        EditorGUILayout.PropertyField(ingredient2Prop, new GUIContent("Ingredient 2"));
+                    else
+                        EditorGUILayout.LabelField("Ingredient 2: Property not found");
+                }
+                catch (System.Exception e)
+                {
+                    EditorGUILayout.LabelField($"Ingredient 2: Error - {e.Message}");
+                }
+
+                EditorGUILayout.EndHorizontal();
+
+                EditorGUILayout.BeginHorizontal();
+                try
+                {
+                    var ingredient3Prop = serializedObject.FindProperty("inputIngredient3");
+                    if (ingredient3Prop != null)
+                        EditorGUILayout.PropertyField(ingredient3Prop, new GUIContent("Ingredient 3"));
+                    else
+                        EditorGUILayout.LabelField("Ingredient 3: Property not found");
+                }
+                catch (System.Exception e)
+                {
+                    EditorGUILayout.LabelField($"Ingredient 3: Error - {e.Message}");
+                }
+
+                EditorGUILayout.EndHorizontal();
+
+                // Recipe properties
+                EditorGUILayout.Space();
+                GUILayout.Label("Recipe Properties:", EditorStyles.boldLabel);
+
+                // Use properties that actually exist in AlchemyRecipe with safe calls
+                try
+                {
+                    var difficultyProp = serializedObject.FindProperty("difficulty");
+                    if (difficultyProp != null)
+                        EditorGUILayout.PropertyField(difficultyProp);
+                    else
+                        EditorGUILayout.LabelField("Difficulty: Property not found");
+                }
+                catch (System.Exception e)
+                {
+                    EditorGUILayout.LabelField($"Difficulty: Error - {e.Message}");
+                }
+
+                try
+                {
+                    var minimumEfficiencyProp = serializedObject.FindProperty("minimumEfficiency");
+                    if (minimumEfficiencyProp != null)
+                        EditorGUILayout.PropertyField(minimumEfficiencyProp);
+                    else
+                        EditorGUILayout.LabelField("Minimum Efficiency: Property not found");
+                }
+                catch (System.Exception e)
+                {
+                    EditorGUILayout.LabelField($"Minimum Efficiency: Error - {e.Message}");
+                }
+
+                try
+                {
+                    var outputQuantityProp = serializedObject.FindProperty("outputQuantity");
+                    if (outputQuantityProp != null)
+                        EditorGUILayout.PropertyField(outputQuantityProp);
+                    else
+                        EditorGUILayout.LabelField("Output Quantity: Property not found");
+                }
+                catch (System.Exception e)
+                {
+                    EditorGUILayout.LabelField($"Output Quantity: Error - {e.Message}");
+                }
+
+                try
+                {
+                    var outputPotionProp = serializedObject.FindProperty("outputPotion");
+                    if (outputPotionProp != null)
+                        EditorGUILayout.PropertyField(outputPotionProp);
+                    else
+                        EditorGUILayout.LabelField("Output Potion: Property not found");
+                }
+                catch (System.Exception e)
+                {
+                    EditorGUILayout.LabelField($"Output Potion: Error - {e.Message}");
+                }
+
+                try
+                {
+                    var isKeyRecipeProp = serializedObject.FindProperty("isKeyRecipe");
+                    if (isKeyRecipeProp != null)
+                        EditorGUILayout.PropertyField(isKeyRecipeProp);
+                    else
+                        EditorGUILayout.LabelField("Is Key Recipe: Property not found");
+                }
+                catch (System.Exception e)
+                {
+                    EditorGUILayout.LabelField($"Is Key Recipe: Error - {e.Message}");
+                }
+
+                serializedObject.ApplyModifiedProperties();
+
+                GUILayout.Space(10);
+
                 // Grid designer for recipe pattern
                 try
                 {
@@ -2294,73 +2632,42 @@ namespace FourFatesStudios.ProjectWarden.Editor
                 }
                 catch (Exception e)
                 {
-                    EditorGUILayout.HelpBox($"Grid designer error: {e.Message}\nThis may be because the recipe doesn't have grid properties.", MessageType.Warning);
-                    
+                    EditorGUILayout.HelpBox(
+                        $"Grid designer error: {e.Message}\nThis may be because the recipe doesn't have grid properties.",
+                        MessageType.Warning);
+
                     // Offer to add grid properties to the recipe
                     if (GUILayout.Button("Add Grid Properties to Recipe"))
                     {
                         AddGridPropertiesToRecipe(gridDesignerRecipe);
                     }
                 }
-                
+
                 GUILayout.Space(10);
-                
+
                 EditorGUILayout.BeginHorizontal();
                 if (GUILayout.Button("Validate Recipe"))
                 {
                     ValidateRecipe(gridDesignerRecipe);
                 }
-                
+
                 if (GUILayout.Button("Clear Selection"))
                 {
                     gridDesignerRecipe = null;
                 }
+
                 EditorGUILayout.EndHorizontal();
-                
+
                 EditorGUILayout.EndVertical();
             }
-            else
+            catch (System.Exception e)
             {
-                EditorGUILayout.HelpBox("Select a recipe to design its grid pattern", MessageType.Info);
-                
-                EditorGUILayout.BeginHorizontal();
-                if (GUILayout.Button("Go to Recipes Tab"))
-                {
-                    toolbarSelection = 1; // Recipes tab
-                }
-                
-                if (GUILayout.Button("Select from Recipes"))
-                {
-                    ShowRecipeSelector();
-                }
-                EditorGUILayout.EndHorizontal();
+                Debug.LogError($"Error in DrawGridDesignerRecipeDetails: {e.Message}");
+                EditorGUILayout.HelpBox($"Error displaying recipe details: {e.Message}", MessageType.Error);
+                EditorGUILayout.EndVertical(); // Ensure we close the vertical group
             }
-            
+
             GUILayout.Space(20);
-            
-            EditorGUILayout.BeginVertical("Box");
-            GUILayout.Label("Pattern Templates", EditorStyles.boldLabel);
-            
-            EditorGUILayout.BeginHorizontal();
-            if (GUILayout.Button("Cross Pattern"))
-            {
-                CreateCrossPatternInGrid();
-            }
-            if (GUILayout.Button("L-Shape Pattern"))
-            {
-                CreateLShapePatternInGrid();
-            }
-            if (GUILayout.Button("Diamond Pattern"))
-            {
-                CreateDiamondPatternInGrid();
-            }
-            if (GUILayout.Button("Clear Grid"))
-            {
-                gridCells.Clear();
-            }
-            EditorGUILayout.EndHorizontal();
-            
-            EditorGUILayout.EndVertical();
         }
         
         private void DrawBookEditorTab()
@@ -2433,11 +2740,34 @@ namespace FourFatesStudios.ProjectWarden.Editor
         {
             GUILayout.Label("🎨 Enhanced Grid Pattern Designer", EditorStyles.boldLabel);
             
+            // Show current recipe custom grid status
+            if (recipe != null)
+            {
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.LabelField($"Recipe: {recipe.name}", EditorStyles.miniLabel, GUILayout.Width(200));
+                
+                if (recipe.HasCustomGridData())
+                {
+                    bool playerCanUse = recipe.CanPlayerUseCustomGrid();
+                    string status = playerCanUse ? "✅ Has Custom Grid" : "🔒 Custom Grid Locked";
+                    GUIStyle statusStyle = new GUIStyle(EditorStyles.miniLabel);
+                    statusStyle.normal.textColor = playerCanUse ? Color.green : Color.red;
+                    EditorGUILayout.LabelField(status, statusStyle);
+                }
+                else
+                {
+                    EditorGUILayout.LabelField("⚪ No custom grid saved", EditorStyles.miniLabel);
+                }
+                EditorGUILayout.EndHorizontal();
+                
+                GUILayout.Space(5);
+            }
+            
             EditorGUILayout.BeginVertical("Box");
             
             // Grid size controls
+            EditorGUILayout.LabelField("Grid Size:", EditorStyles.boldLabel);
             EditorGUILayout.BeginHorizontal();
-            GUILayout.Label("Grid Size:", GUILayout.Width(80));
             EditorGUI.BeginChangeCheck();
             gridWidth = EditorGUILayout.IntSlider("Width", gridWidth, 3, 8);
             gridHeight = EditorGUILayout.IntSlider("Height", gridHeight, 3, 8);
@@ -2449,18 +2779,30 @@ namespace FourFatesStudios.ProjectWarden.Editor
             
             GUILayout.Space(10);
             
-            // Pattern type selector with preview
-            EditorGUILayout.BeginHorizontal();
-            GUILayout.Label("Pattern Type:", GUILayout.Width(100));
-            EditorGUI.BeginChangeCheck();
-            selectedPatternType = EditorGUILayout.Popup(selectedPatternType, patternTypes);
-            if (EditorGUI.EndChangeCheck())
-            {
-                PreviewPatternType(selectedPatternType);
-            }
+            // Obstacle Placement Controls
+            EditorGUILayout.BeginVertical("HelpBox");
+            GUILayout.Label("🧱 Obstacle Placement", EditorStyles.boldLabel);
+            GUILayout.Space(5);
             
-            showCellPreview = EditorGUILayout.Toggle("Show Preview", showCellPreview, GUILayout.Width(120));
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.Label("Obstacle Type:", GUILayout.Width(100));
+            selectedObstacleType = (ObstacleType)EditorGUILayout.EnumPopup(selectedObstacleType, GUILayout.MinWidth(120));
+            
+            // Show obstacle color preview
+            Color obstacleColor = GetObstacleColor(selectedObstacleType);
+            var oldColor = GUI.color;
+            GUI.color = obstacleColor;
+            GUILayout.Label("■", GUILayout.Width(20));
+            GUI.color = oldColor;
+            
             EditorGUILayout.EndHorizontal();
+            
+            // Show obstacle description
+            string obstacleDesc = GetObstacleDescription(selectedObstacleType);
+            EditorGUILayout.LabelField(obstacleDesc, EditorStyles.wordWrappedMiniLabel);
+            
+            GUILayout.Space(5);
+            EditorGUILayout.EndVertical();
             
             if (showCellPreview && gridCells.Count == 0)
             {
@@ -2469,19 +2811,13 @@ namespace FourFatesStudios.ProjectWarden.Editor
             
             GUILayout.Space(10);
             
-            // Pattern info
-            EditorGUILayout.BeginVertical("HelpBox");
-            GUILayout.Label("Pattern Info:", EditorStyles.boldLabel);
-            string patternDescription = GetPatternDescription(selectedPatternType);
-            EditorGUILayout.LabelField(patternDescription, EditorStyles.wordWrappedLabel);
-            EditorGUILayout.EndVertical();
             
             GUILayout.Space(10);
             
-            // Visual grid designer with enhanced cells
+            // Visual grid designer with obstacle support
             EditorGUILayout.LabelField("🎯 Visual Grid Designer:");
-            EditorGUILayout.LabelField("• Click cells to toggle states", EditorStyles.miniLabel);
-            EditorGUILayout.LabelField("• Colors represent aspects, letters show rarity", EditorStyles.miniLabel);
+            EditorGUILayout.LabelField("• Click cells to place/remove obstacles", EditorStyles.miniLabel);
+            EditorGUILayout.LabelField("• Right-click to remove obstacles", EditorStyles.miniLabel);
             
             Rect gridRect = GUILayoutUtility.GetRect(gridWidth * 35, gridHeight * 35);
             float cellSize = 35f;
@@ -2507,13 +2843,17 @@ namespace FourFatesStudios.ProjectWarden.Editor
                     
                     if (hasCellData)
                     {
-                        cellColor = GetAspectColor(cellData.aspect);
-                        cellText = GetRarityLetter(cellData.rarity);
-                        
-                        // Add visual indicators
-                        if (cellData.isRequired)
+                        // Check if cell has an obstacle
+                        if (cellData.HasObstacle)
                         {
-                            cellColor = Color.Lerp(cellColor, Color.white, 0.3f); // Brighten required cells
+                            // Use obstacle color and display obstacle symbol
+                            cellColor = GetObstacleColor(cellData.obstacle.ObstacleType);
+                            cellText = GetObstacleSymbol(cellData.obstacle.ObstacleType);
+                        }
+                        else
+                        {
+                            // Empty cell with data (shouldn't happen in obstacle-only mode)
+                            cellColor = new Color(0.7f, 0.7f, 0.7f, 0.5f);
                         }
                         
                         if (selectedCell == pos)
@@ -2531,36 +2871,11 @@ namespace FourFatesStudios.ProjectWarden.Editor
                         }
                     }
                     
-                    // Enhanced visual feedback to match game appearance
-                    if (hasCellData && cellData.isRequired)
+                    // Enhanced visual feedback for obstacles
+                    if (hasCellData && cellData.HasObstacle)
                     {
-                        // Draw 3D-like effect for ingredient cells
-                        // Main cell background
-                        EditorGUI.DrawRect(cellRect, cellColor);
-                        
-                        // Top highlight (simulating 3D lighting)
-                        var topRect = new Rect(cellRect.x, cellRect.y, cellRect.width, cellRect.height * 0.2f);
-                        Color lightColor = Color.Lerp(cellColor, Color.white, 0.4f);
-                        EditorGUI.DrawRect(topRect, lightColor);
-                        
-                        // Bottom shadow (simulating 3D depth)
-                        var bottomRect = new Rect(cellRect.x, cellRect.y + cellRect.height * 0.8f, cellRect.width, cellRect.height * 0.2f);
-                        Color darkColor = Color.Lerp(cellColor, Color.black, 0.3f);
-                        EditorGUI.DrawRect(bottomRect, darkColor);
-                        
-                        // Inner glow for active ingredient cells
-                        var innerRect = new Rect(cellRect.x + 2, cellRect.y + 2, cellRect.width - 4, cellRect.height - 4);
-                        Color glowColor = Color.Lerp(cellColor, Color.white, 0.15f);
-                        EditorGUI.DrawRect(innerRect, glowColor);
-                        
-                        // Aspect-based emission effect
-                        if (selectedIngredient != null)
-                        {
-                            var emissionRect = new Rect(cellRect.x + 4, cellRect.y + 4, cellRect.width - 8, cellRect.height - 8);
-                            Color emissionColor = cellColor * (selectedIngredient.Potency / 5f) * 0.5f;
-                            emissionColor.a = 0.6f;
-                            EditorGUI.DrawRect(emissionRect, emissionColor);
-                        }
+                        // Draw obstacle with special effects
+                        DrawObstacleCell(cellRect, cellData.obstacle, cellColor);
                     }
                     else
                     {
@@ -2569,7 +2884,7 @@ namespace FourFatesStudios.ProjectWarden.Editor
                     }
                     
                     // Draw cell border
-                    Color borderColor = hasCellData && cellData.isRequired ? Color.black : Color.gray;
+                    Color borderColor = hasCellData && cellData.HasObstacle ? Color.black : Color.gray;
                     EditorGUI.DrawRect(new Rect(cellRect.x, cellRect.y, cellRect.width, 1), borderColor);
                     EditorGUI.DrawRect(new Rect(cellRect.x, cellRect.y, 1, cellRect.height), borderColor);
                     EditorGUI.DrawRect(new Rect(cellRect.x + cellRect.width - 1, cellRect.y, 1, cellRect.height), borderColor);
@@ -2578,10 +2893,10 @@ namespace FourFatesStudios.ProjectWarden.Editor
                     // Draw cell text (rarity letter)
                     if (!string.IsNullOrEmpty(cellText))
                     {
-                        var oldColor = GUI.color;
+                        var cellTextColor = GUI.color;
                         GUI.color = Color.black;
                         GUI.Label(cellRect, cellText, EditorStyles.boldLabel);
-                        GUI.color = oldColor;
+                        GUI.color = cellTextColor;
                     }
                     
                     // Handle cell clicking
@@ -2594,20 +2909,29 @@ namespace FourFatesStudios.ProjectWarden.Editor
             
             GUILayout.Space(10);
             
-            // Cell information panel
+            // Cell information panel - obstacles only
             if (gridCells.TryGetValue(selectedCell, out CellData selectedCellData))
             {
                 EditorGUILayout.BeginVertical("Box");
                 GUILayout.Label($"Selected Cell: ({selectedCell.x}, {selectedCell.y})", EditorStyles.boldLabel);
                 
-                EditorGUI.BeginChangeCheck();
-                selectedCellData.aspect = (Aspect)EditorGUILayout.EnumPopup("Aspect:", selectedCellData.aspect);
-                selectedCellData.rarity = (Rarity)EditorGUILayout.EnumPopup("Rarity:", selectedCellData.rarity);
-                selectedCellData.isRequired = EditorGUILayout.Toggle("Required:", selectedCellData.isRequired);
-                
-                if (EditorGUI.EndChangeCheck())
+                // Show obstacle information if present
+                if (selectedCellData.HasObstacle)
                 {
-                    gridCells[selectedCell] = selectedCellData;
+                    GUILayout.Label("🧱 Obstacle Information:", EditorStyles.boldLabel);
+                    EditorGUILayout.LabelField("Type:", selectedCellData.obstacle.ObstacleType.ToString());
+                    EditorGUILayout.LabelField("Description:", GetObstacleDescription(selectedCellData.obstacle.ObstacleType), EditorStyles.wordWrappedLabel);
+                    
+                    if (GUILayout.Button("Remove Obstacle"))
+                    {
+                        gridCells.Remove(selectedCell);
+                        Debug.Log($"🧱 Removed obstacle from cell ({selectedCell.x}, {selectedCell.y})");
+                    }
+                }
+                else
+                {
+                    GUILayout.Label("ℹ️ Empty Cell", EditorStyles.boldLabel);
+                    EditorGUILayout.LabelField("No obstacle placed");
                 }
                 
                 EditorGUILayout.EndVertical();
@@ -2617,23 +2941,21 @@ namespace FourFatesStudios.ProjectWarden.Editor
                 EditorGUILayout.BeginVertical("Box");
                 GUILayout.Label($"Empty Cell: ({selectedCell.x}, {selectedCell.y})", EditorStyles.boldLabel);
                 
-                if (GUILayout.Button("Add Cell Data"))
+                if (GUILayout.Button("Add Obstacle"))
                 {
                     gridCells[selectedCell] = new CellData
                     {
-                        aspect = Aspect.Corporeal,
-                        rarity = Rarity.Common,
-                        isRequired = false
+                        obstacle = new AspectObstacle(selectedObstacleType, selectedCell)
                     };
+                    Debug.Log($"🧱 Placed {selectedObstacleType} obstacle at ({selectedCell.x}, {selectedCell.y})");
                 }
+                
                 EditorGUILayout.EndVertical();
             }
             
             GUILayout.Space(10);
             
-            // Visual Preview Information Panel
-            EditorGUILayout.BeginVertical("Box");
-            GUILayout.Label("🎮 Game Appearance Preview", EditorStyles.boldLabel);
+            // Grid management tools - obstacles only
             EditorGUILayout.HelpBox(
                 "The enhanced visual above simulates how your ingredient will appear in the actual game:\n" +
                 "• 3D-style lighting and shadows\n" +
@@ -2655,6 +2977,58 @@ namespace FourFatesStudios.ProjectWarden.Editor
                     Repaint();
                 }
             }
+            EditorGUILayout.EndVertical();
+            
+            GUILayout.Space(10);
+            
+            // Obstacle management tools
+            EditorGUILayout.BeginVertical("Box");
+            GUILayout.Label("🛠️ Grid Management Tools", EditorStyles.boldLabel);
+            
+            EditorGUILayout.BeginHorizontal();
+            if (GUILayout.Button("Clear All Obstacles"))
+            {
+                if (EditorUtility.DisplayDialog("Clear Obstacles", "Remove all obstacles from the grid?", "Yes", "Cancel"))
+                {
+                    foreach (var kvp in gridCells.ToList())
+                    {
+                        if (kvp.Value.HasObstacle)
+                        {
+                            var cellData = kvp.Value;
+                            cellData.obstacle = null;
+                            gridCells[kvp.Key] = cellData;
+                        }
+                    }
+                    Debug.Log("🧱 Cleared all obstacles from grid");
+                }
+            }
+            EditorGUILayout.EndHorizontal();
+            
+            if (GUILayout.Button("Fill Border with Walls"))
+            {
+                for (int x = 0; x < gridWidth; x++)
+                {
+                    for (int y = 0; y < gridHeight; y++)
+                    {
+                        if (x == 0 || x == gridWidth - 1 || y == 0 || y == gridHeight - 1)
+                        {
+                            var pos = new Vector2Int(x, y);
+                            if (!gridCells.TryGetValue(pos, out var cellData))
+                            {
+                                cellData = new CellData();
+                            }
+                            cellData.obstacle = new AspectObstacle(ObstacleType.Corporeal, pos);
+                            gridCells[pos] = cellData;
+                        }
+                    }
+                }
+                Debug.Log("🧱 Added wall border to grid");
+            }
+            
+            // Grid statistics - Obstacle counts only
+            int obstacleCount = gridCells.Values.Count(c => c.HasObstacle);
+            
+            EditorGUILayout.LabelField($"Obstacles Placed: {obstacleCount}", EditorStyles.miniLabel);
             EditorGUILayout.EndVertical();
             
             GUILayout.Space(10);
@@ -2686,74 +3060,49 @@ namespace FourFatesStudios.ProjectWarden.Editor
             EditorGUILayout.EndVertical();
         }
         
-        private string GetPatternDescription(int patternType)
-        {
-            return patternType switch
-            {
-                0 => "Free Placement: Ingredients can be placed anywhere on the grid with no restrictions.",
-                1 => "Required Pattern: Specific cells must be filled for the recipe to work. Shows plus pattern.",
-                2 => "Aspect Locked: Corners are locked to specific aspects. Demonstrates aspect-based restrictions.",
-                3 => "Shape Specific: Must form a specific shape (T-pattern shown). Recipe requires exact formation.",
-                4 => "Cross Pattern: Classic cross formation with divine aspect. Higher rarity requirements.",
-                5 => "L-Shape: L-shaped arrangement in corner. Good for corner-based ingredient placement.",
-                6 => "Diamond: Diamond formation with dual-layer complexity. Advanced pattern example.",
-                _ => "Unknown pattern type."
-            };
-        }
         
         private void OnCellClicked(Vector2Int pos)
         {
             selectedCell = pos;
+            HandleObstaclePlacement(pos);
+        }
+        
+        private void HandleObstaclePlacement(Vector2Int pos)
+        {
+            bool rightClick = Event.current.button == 1;
             
-            // Toggle cell state if it exists
             if (gridCells.TryGetValue(pos, out CellData cellData))
             {
-                if (Event.current.shift)
+                if (rightClick || Event.current.shift)
                 {
-                    // Shift+click to remove
-                    gridCells.Remove(pos);
-                }
-                else if (Event.current.control)
-                {
-                    // Ctrl+click to toggle required
-                    cellData.isRequired = !cellData.isRequired;
-                    gridCells[pos] = cellData;
+                    // Right-click or Shift+click to remove obstacle
+                    if (cellData.HasObstacle)
+                    {
+                        cellData.obstacle = null;
+                        gridCells[pos] = cellData;
+                        Debug.Log($"🧱 Removed obstacle from cell ({pos.x}, {pos.y})");
+                    }
                 }
                 else
                 {
-                    // Regular click cycles aspect
-                    var aspects = Enum.GetValues(typeof(Aspect));
-                    int currentIndex = Array.IndexOf(aspects, cellData.aspect);
-                    cellData.aspect = (Aspect)aspects.GetValue((currentIndex + 1) % aspects.Length);
+                    // Add obstacle to existing cell
+                    cellData.obstacle = new AspectObstacle(selectedObstacleType, pos);
                     gridCells[pos] = cellData;
+                    Debug.Log($"🧱 Added {selectedObstacleType} obstacle to cell ({pos.x}, {pos.y})");
                 }
             }
             else
             {
-                // Create new cell data
-                gridCells[pos] = new CellData
+                if (!rightClick)
                 {
-                    aspect = Aspect.Corporeal,
-                    rarity = Rarity.Common,
-                    isRequired = true
-                };
+                    // Create new cell with obstacle
+                    gridCells[pos] = new CellData
+                    {
+                        obstacle = new AspectObstacle(selectedObstacleType, pos)
+                    };
+                    Debug.Log($"🧱 Placed {selectedObstacleType} obstacle at new cell ({pos.x}, {pos.y})");
+                }
             }
-            
-            Debug.Log($"🎯 Cell clicked: ({pos.x}, {pos.y}) - Shift: Remove, Ctrl: Toggle Required, Click: Cycle Aspect");
-        }
-        
-        private void SaveGridPattern(AlchemyRecipe recipe)
-        {
-            Debug.Log($"💾 Saving grid pattern for {recipe.ItemName} with {gridCells.Count} cells");
-            // This would serialize the grid data to the recipe asset
-            EditorUtility.DisplayDialog("Save Pattern", $"Grid pattern saved for {recipe.ItemName}!\n\nCells: {gridCells.Count}\nPattern Type: {patternTypes[selectedPatternType]}", "OK");
-        }
-        
-        private void LoadGridPattern(AlchemyRecipe recipe)
-        {
-            Debug.Log($"📋 Loading grid pattern for {recipe.ItemName}");
-            // This would load the grid data from the recipe asset
-            EditorUtility.DisplayDialog("Load Pattern", $"Grid pattern loaded for {recipe.ItemName}!\n\nPattern would be restored from saved data.", "OK");
         }
 
         private void CreateEntryFromTemplate(AlchemyBookEntryTemplate template) 
@@ -3014,35 +3363,8 @@ namespace FourFatesStudios.ProjectWarden.Editor
             Debug.Log($"Previewing book entry: {entry.title}");
         }
         
-        // Color coding for aspects and rarity
-        private Color GetAspectColor(Aspect aspect)
-        {
-            return aspect switch
-            {
-                Aspect.Corporeal => new Color(0.8f, 0.6f, 0.4f, 0.8f), // Brown/Earth
-                Aspect.Frigid => new Color(0.4f, 0.8f, 1.0f, 0.8f),   // Ice Blue
-                Aspect.Scorch => new Color(1.0f, 0.4f, 0.2f, 0.8f),   // Fire Red
-                Aspect.Caustic => new Color(0.6f, 1.0f, 0.2f, 0.8f),  // Acid Green
-                Aspect.Arc => new Color(1.0f, 1.0f, 0.4f, 0.8f),      // Lightning Yellow
-                Aspect.Divine => new Color(1.0f, 0.8f, 1.0f, 0.8f),   // Holy Purple
-                _ => Color.gray
-            };
-        }
+        // GetAspectColor and GetRarityLetter methods removed - Grid Designer now only handles obstacles
         
-        private string GetRarityLetter(Rarity rarity)
-        {
-            return rarity switch
-            {
-                Rarity.None => "",
-                Rarity.Common => "C",
-                Rarity.Uncommon => "U", 
-                Rarity.Rare => "R",
-                Rarity.Epic => "E",
-                Rarity.Mythic => "M",
-                Rarity.Unique => "Q",
-                _ => "?"
-            };
-        }
         
         // Pattern preview methods
         private void PreviewPatternType(int patternType)
@@ -3664,10 +3986,11 @@ namespace FourFatesStudios.ProjectWarden.Editor
             }
             EditorGUILayout.EndHorizontal();
             
-            // Load current shape if not initialized
+            // Load current shape if not initialized or ingredient has changed
             if (currentIngredientGrid == null || selectedIngredient != ingredient)
             {
                 LoadIngredientShape(ingredient);
+                Debug.Log($"🔄 Loading ingredient shape for {ingredient.ItemName} in visual design editor");
             }
             
             // Template Selection
@@ -3704,49 +4027,102 @@ namespace FourFatesStudios.ProjectWarden.Editor
             EditorGUILayout.EndVertical();
         }
         
-        private void LoadIngredientShape(Ingredient ingredient)
+        // LoadIngredientShape method removed - Grid Designer now only handles obstacles
+        
+
+        /// <summary>
+        /// Updates the grid to match the ingredient's current dimensions, preserving existing cell data where possible
+        /// </summary>
+        private void UpdateGridToMatchIngredientDimensions(Ingredient ingredient)
         {
-            if (ingredient?.ShapeData != null)
+            if (ingredient == null) return;
+
+            int newWidth = ingredient.GridWidth;
+            int newHeight = ingredient.GridHeight;
+            
+            // Create new grid with ingredient dimensions
+            bool[,] newGrid = new bool[newWidth, newHeight];
+            
+            // Copy existing data if available, preserving what we can
+            if (currentIngredientGrid != null)
             {
-                currentIngredientGrid = ingredient.GetShape();
-            }
-            else
-            {
-                // Create default shape
-                int width = ingredient.GridWidth;
-                int height = ingredient.GridHeight;
-                currentIngredientGrid = new bool[width, height];
+                int oldWidth = currentIngredientGrid.GetLength(0);
+                int oldHeight = currentIngredientGrid.GetLength(1);
                 
-                for (int x = 0; x < width; x++)
+                Debug.Log($"🔄 Copying existing grid data from {oldWidth}x{oldHeight} to {newWidth}x{newHeight}");
+                
+                // Copy overlapping region
+                for (int x = 0; x < Mathf.Min(oldWidth, newWidth); x++)
                 {
-                    for (int y = 0; y < height; y++)
+                    for (int y = 0; y < Mathf.Min(oldHeight, newHeight); y++)
                     {
-                        currentIngredientGrid[x, y] = true;
+                        newGrid[x, y] = currentIngredientGrid[x, y];
                     }
                 }
                 
-                // Save default shape
-                ingredient.SetShape(currentIngredientGrid);
+                // Fill new areas with default state (filled)
+                for (int x = 0; x < newWidth; x++)
+                {
+                    for (int y = 0; y < newHeight; y++)
+                    {
+                        if (x >= oldWidth || y >= oldHeight)
+                        {
+                            newGrid[x, y] = true; // Default new cells to filled
+                        }
+                    }
+                }
             }
-            hasUnsavedGridChanges = false;
+            else
+            {
+                // No existing grid, fill all cells
+                Debug.Log($"🔄 Creating new grid with dimensions {newWidth}x{newHeight}");
+                for (int x = 0; x < newWidth; x++)
+                {
+                    for (int y = 0; y < newHeight; y++)
+                    {
+                        newGrid[x, y] = true;
+                    }
+                }
+            }
+            
+            currentIngredientGrid = newGrid;
+            hasUnsavedGridChanges = true;
+            
+            Debug.Log($"✅ Grid updated to match ingredient dimensions: {newWidth}x{newHeight}");
         }
         
         private void DrawGridVisual(Ingredient ingredient)
         {
-            if (currentIngredientGrid == null) return;
+            if (ingredient == null) return;
+            
+            // Check if ingredient dimensions have changed and update grid accordingly
+            int currentIngredientWidth = ingredient.GridWidth;
+            int currentIngredientHeight = ingredient.GridHeight;
+            
+            // Update grid if ingredient dimensions changed
+            if (currentIngredientGrid == null || 
+                currentIngredientGrid.GetLength(0) != currentIngredientWidth || 
+                currentIngredientGrid.GetLength(1) != currentIngredientHeight)
+            {
+                Debug.Log($"🔄 Grid dimensions changed from {currentIngredientGrid?.GetLength(0) ?? 0}x{currentIngredientGrid?.GetLength(1) ?? 0} to {currentIngredientWidth}x{currentIngredientHeight}. Updating grid...");
+                UpdateGridToMatchIngredientDimensions(ingredient);
+            }
             
             int gridWidth = currentIngredientGrid.GetLength(0);
             int gridHeight = currentIngredientGrid.GetLength(1);
             
-            // Add coordinate system explanation
+            // Add coordinate system explanation with dynamic dimensions
             EditorGUILayout.LabelField("Grid Coordinate System:", EditorStyles.boldLabel);
             using (new EditorGUILayout.HorizontalScope(EditorStyles.helpBox))
             {
                 EditorGUILayout.LabelField("• X-axis (horizontal): Left to Right");
                 EditorGUILayout.LabelField("• Y-axis (vertical): Bottom to Top (matches 3D game grid)");
             }
-            EditorGUILayout.HelpBox("This grid displays exactly as it appears in the 3D game world when viewed from above.\n(0,0) is at the bottom left corner, (Xmax,Ymax) is at the top right.", MessageType.Info);
-            //Xmax and Ymax are the same as the grid size, but they are listed as gridWidth and gridHeight.
+            
+            string coordinateInfo = $"This grid displays exactly as it appears in the 3D game world when viewed from above.\n" +
+                                  $"(0,0) is at the bottom left corner, ({gridWidth-1},{gridHeight-1}) is at the top right.\n" +
+                                  $"Current grid size: {gridWidth} x {gridHeight} cells";
+            EditorGUILayout.HelpBox(coordinateInfo, MessageType.Info);
             EditorGUILayout.Space();
             
             var rect = GUILayoutUtility.GetRect(gridWidth * CELL_SIZE + 30, gridHeight * CELL_SIZE + 30);
@@ -3858,6 +4234,12 @@ namespace FourFatesStudios.ProjectWarden.Editor
                 LoadIngredientShape(ingredient);
             }
             
+            if (GUILayout.Button("Refresh Grid", GUILayout.Width(80)))
+            {
+                UpdateGridToMatchIngredientDimensions(ingredient);
+                Repaint();
+            }
+            
             EditorGUILayout.EndHorizontal();
         }
         
@@ -3947,6 +4329,21 @@ namespace FourFatesStudios.ProjectWarden.Editor
                     currentIngredientGrid[x, y] = !currentIngredientGrid[x, y];
                 }
             }
+        }
+        
+        private void LoadIngredientShape(Ingredient ingredient)
+        {
+            if (ingredient == null) 
+            {
+                currentIngredientGrid = null;
+                return;
+            }
+            
+            // Load the ingredient's shape data into the current grid
+            currentIngredientGrid = ingredient.GetShape();
+            hasUnsavedGridChanges = false;
+            
+            Debug.Log($"🔄 Loaded ingredient shape for {ingredient.ItemName}: {currentIngredientGrid.GetLength(0)}x{currentIngredientGrid.GetLength(1)}");
         }
         
         private void ExportIngredientShape(Ingredient ingredient)
@@ -4299,73 +4696,6 @@ namespace FourFatesStudios.ProjectWarden.Editor
             EditorUtility.DisplayDialog("Regeneration Complete", $"Regenerated names for {renamedCount} assets.", "OK");
         }
         
-        // Grid Pattern Template Methods
-        private void CreateCrossPatternInGrid()
-        {
-            gridCells.Clear();
-            
-            // Create a cross pattern centered on the grid
-            int centerX = gridWidth / 2;
-            int centerY = gridHeight / 2;
-            
-            // Horizontal line
-            for (int x = centerX - 2; x <= centerX + 2; x++)
-            {
-                if (x >= 0 && x < gridWidth)
-                    gridCells[new Vector2Int(x, centerY)] = new CellData { isRequired = true };
-            }
-            
-            // Vertical line
-            for (int y = centerY - 2; y <= centerY + 2; y++)
-            {
-                if (y >= 0 && y < gridHeight)
-                    gridCells[new Vector2Int(centerX, y)] = new CellData { isRequired = true };
-            }
-        }
-        
-        private void CreateLShapePatternInGrid()
-        {
-            gridCells.Clear();
-            
-            // Create an L-shape in the bottom-left area
-            int startX = 1;
-            int startY = 1;
-            
-            // Vertical part of L
-            for (int y = startY; y <= startY + 3; y++)
-            {
-                gridCells[new Vector2Int(startX, y)] = new CellData { isRequired = true };
-            }
-            
-            // Horizontal part of L
-            for (int x = startX; x <= startX + 3; x++)
-            {
-                gridCells[new Vector2Int(x, startY)] = new CellData { isRequired = true };
-            }
-        }
-        
-        private void CreateDiamondPatternInGrid()
-        {
-            gridCells.Clear();
-            
-            // Create a diamond pattern centered on the grid
-            int centerX = gridWidth / 2;
-            int centerY = gridHeight / 2;
-            int radius = 2;
-            
-            for (int x = 0; x < gridWidth; x++)
-            {
-                for (int y = 0; y < gridHeight; y++)
-                {
-                    int manhattanDistance = Mathf.Abs(x - centerX) + Mathf.Abs(y - centerY);
-                    if (manhattanDistance == radius)
-                    {
-                        gridCells[new Vector2Int(x, y)] = new CellData { isRequired = true };
-                    }
-                }
-            }
-        }
-        
         // Enhanced Grid Pattern Methods
         private void SaveGridPatternToRecipe(AlchemyRecipe recipe)
         {
@@ -4375,33 +4705,42 @@ namespace FourFatesStudios.ProjectWarden.Editor
                 ? recipe.ItemName 
                 : recipe.name;
                 
-            Debug.Log($"💾 Saving grid pattern for {recipeName} with {gridCells.Count} cells");
+            Debug.Log($"💾 Saving custom grid layout for {recipeName} with {gridCells.Count} cells");
             
-            // Convert grid data to serializable format
-            var serializedObject = new SerializedObject(recipe);
-            var requiredPositions = serializedObject.FindProperty("requiredPositions");
+            // Initialize the custom grid layout
+            recipe.SaveCustomGridLayout(gridWidth, gridHeight);
             
-            requiredPositions.ClearArray();
-            
-            int index = 0;
+            // Save each cell's data
             foreach (var cell in gridCells)
             {
-                if (cell.Value.isRequired)
+                var cellData = cell.Value;
+                var position = cell.Key;
+                
+                ObstacleType obstacleType = ObstacleType.Corporeal;
+                bool hasObstacle = cellData.HasObstacle;
+                
+                if (hasObstacle && cellData.obstacle != null)
                 {
-                    requiredPositions.InsertArrayElementAtIndex(index);
-                    var positionElement = requiredPositions.GetArrayElementAtIndex(index);
-                    positionElement.vector2IntValue = cell.Key;
-                    index++;
+                    obstacleType = cellData.obstacle.ObstacleType;
                 }
+                
+                recipe.SaveCustomGridCell(
+                    position,
+                    cellData.aspect,
+                    cellData.rarity,
+                    cellData.isRequired,
+                    cellData.isOccupied,
+                    obstacleType,
+                    hasObstacle
+                );
             }
             
-            serializedObject.ApplyModifiedProperties();
             EditorUtility.SetDirty(recipe);
             AssetDatabase.SaveAssets();
             
             EditorUtility.DisplayDialog("Save Pattern", 
-                $"Grid pattern saved for {recipeName}!\n\nRequired Positions: {index}\nTotal Cells: {gridCells.Count}", 
-                "OK");
+                $"Grid pattern saved for {recipeName}!\n\n# of Free Cells: {gridCells.Count - gridCells.Values.Count(c => c.HasObstacle)}" +
+                $"\n# of Obstacles: {gridCells.Values.Count(c => c.HasObstacle)}\nTotal Cells: {gridCells.Count}", "OK");
         }
         
         private void LoadGridPatternFromRecipe(AlchemyRecipe recipe)
@@ -4412,24 +4751,101 @@ namespace FourFatesStudios.ProjectWarden.Editor
                 ? recipe.ItemName 
                 : recipe.name;
                 
-            Debug.Log($"📋 Loading grid pattern for {recipeName}");
+            Debug.Log($"📋 Loading custom grid layout for {recipeName}");
             
-            var serializedObject = new SerializedObject(recipe);
-            var requiredPositions = serializedObject.FindProperty("requiredPositions");
+            // Check if recipe has custom grid data
+            if (!recipe.HasCustomGridData())
+            {
+                EditorUtility.DisplayDialog("No Custom Grid", 
+                    $"Recipe '{recipeName}' doesn't have a custom grid layout saved.\n\nUse 'Save Pattern' to create one.", 
+                    "OK");
+                return;
+            }
             
             // Clear current grid
             gridCells.Clear();
             
-            // Load required positions
-            for (int i = 0; i < requiredPositions.arraySize; i++)
+            // Set grid dimensions from recipe
+            gridWidth = recipe.CustomGridWidth;
+            gridHeight = recipe.CustomGridHeight;
+            
+            // Load custom grid cells
+            foreach (var customCell in recipe.CustomGridCells)
             {
-                var position = requiredPositions.GetArrayElementAtIndex(i).vector2IntValue;
-                gridCells[position] = new CellData { isRequired = true };
+                var cellData = new CellData
+                {
+                    aspect = customCell.aspect,
+                    rarity = customCell.rarity,
+                    isRequired = customCell.isRequired,
+                    isOccupied = customCell.isOccupied
+                };
+                
+                // Add obstacle if present
+                if (customCell.hasObstacle)
+                {
+                    cellData.obstacle = new AspectObstacle(customCell.obstacleType, customCell.position);
+                }
+                
+                gridCells[customCell.position] = cellData;
             }
             
             EditorUtility.DisplayDialog("Load Pattern", 
-                $"Grid pattern loaded for {recipeName}!\n\nRequired Positions: {requiredPositions.arraySize}", 
+                $"Grid pattern loaded for {recipeName}!\n\nRequired Positions: {gridCells.Count}", 
                 "OK");
+        }
+        
+        /// <summary>
+        /// Automatically loads custom grid data for a recipe without showing dialogs (used for recipe switching)
+        /// </summary>
+        private void AutoLoadCustomGridForRecipe(AlchemyRecipe recipe)
+        {
+            if (recipe == null || !recipe.HasCustomGridData()) return;
+            
+            string recipeName = !string.IsNullOrEmpty(recipe.ItemName) && recipe.ItemName != "Unnamed Item" 
+                ? recipe.ItemName 
+                : recipe.name;
+                
+            Debug.Log($"🔄 Auto-loading custom grid layout for {recipeName}");
+            
+            // Clear current grid
+            gridCells.Clear();
+            
+            // Set grid dimensions from recipe
+            gridWidth = recipe.CustomGridWidth;
+            gridHeight = recipe.CustomGridHeight;
+            
+            // Load custom grid cells
+            foreach (var customCell in recipe.CustomGridCells)
+            {
+                var cellData = new CellData
+                {
+                    aspect = customCell.aspect,
+                    rarity = customCell.rarity,
+                    isRequired = customCell.isRequired,
+                    isOccupied = customCell.isOccupied
+                };
+                
+                // Add obstacle if present
+                if (customCell.hasObstacle)
+                {
+                    cellData.obstacle = new AspectObstacle(customCell.obstacleType, customCell.position);
+                }
+                
+                gridCells[customCell.position] = cellData;
+            }
+            
+            Debug.Log($"✅ Auto-loaded custom grid: {gridWidth}x{gridHeight} with {gridCells.Count} cells");
+        }
+        
+        /// <summary>
+        /// Clears the grid when switching to a recipe without custom grid data
+        /// </summary>
+        private void ClearGridForNewRecipe()
+        {
+            gridCells.Clear();
+            gridWidth = 5;  // Reset to default size
+            gridHeight = 5;
+            Debug.Log("🧹 Cleared grid for new recipe selection");
         }
         
         // Book Entry Management
@@ -4600,6 +5016,214 @@ namespace FourFatesStudios.ProjectWarden.Editor
                 return false;
             }
         }
+        
+        #region Obstacle System Helper Methods
+        
+        /// <summary>
+        /// Get obstacle color based on obstacle type (matches aspect colors for consistency)
+        /// </summary>
+        private Color GetObstacleColor(ObstacleType obstacleType)
+        {
+            return obstacleType switch
+            {
+                ObstacleType.Corporeal => new Color(0.8f, 0.6f, 0.4f, 0.9f), // Brown/Earth (matches Corporeal aspect)
+                ObstacleType.Scorch => new Color(1.0f, 0.4f, 0.2f, 0.9f),    // Fire Red (matches Scorch aspect)  
+                ObstacleType.FrigidFrozen => new Color(0.2f, 0.4f, 1.0f, 0.9f),    // Dark Ice Blue (matches Frigid aspect)
+                ObstacleType.FrigidMelted => new Color(0.4f, 0.8f, 1.0f, 0.9f),    // Light Ice Blue (matches Frigid aspect)
+                ObstacleType.Arc => new Color(1.0f, 1.0f, 0.4f, 0.9f),       // Lightning Yellow (matches Arc aspect)
+                ObstacleType.Caustic => new Color(0.6f, 1.0f, 0.2f, 0.9f),   // Acid Green (matches Caustic aspect)
+                ObstacleType.Divine => new Color(1.0f, 0.8f, 1.0f, 0.9f),    // Holy Purple (matches Divine aspect)
+                _ => new Color(0.7f, 0.7f, 0.7f, 0.9f)                      // Default grey
+            };
+        }
+        
+        /// <summary>
+        /// Get obstacle description based on obstacle type (matches AspectObstacle.GetObstacleDescription())
+        /// </summary>
+        private string GetObstacleDescription(ObstacleType obstacleType)
+        {
+            return obstacleType switch
+            {
+                ObstacleType.Corporeal => "Blocked cell - cannot place ingredients",
+                ObstacleType.FrigidFrozen => "Frozen cell - unlock with adjacent Scorch/Corporeal",
+                ObstacleType.FrigidMelted => "Melted cell - unlocked with adjacent Scorch/Corporeal",
+                ObstacleType.Scorch => "Volatile cell - requires Scorch, Caustic, or Arc aspects",
+                ObstacleType.Caustic => "Degrade cell - reduces ingredient potency by 20%",
+                ObstacleType.Arc => "Chaotic cell - triggers random effects",
+                ObstacleType.Divine => "Sanctified cell - only unrefined Divine aspects (+10% potency)",
+                _ => "Unknown obstacle"
+            };
+        }
+        
+        /// <summary>
+        /// Get obstacle symbol for visual display
+        /// </summary>
+        private string GetObstacleSymbol(ObstacleType obstacleType)
+        {
+            return obstacleType switch
+            {
+                ObstacleType.Corporeal => "■",  // Solid block
+                ObstacleType.FrigidFrozen => "❄",    // Snowflake
+                ObstacleType.FrigidMelted => "💧",    // Water drop
+                ObstacleType.Scorch => "🔥",   // Fire
+                ObstacleType.Caustic => "☣",   // Biohazard
+                ObstacleType.Arc => "⚡",      // Lightning
+                ObstacleType.Divine => "✨",   // Sparkles
+                _ => "?"
+            };
+        }
+        
+        /// <summary>
+        /// Draw obstacle cell with special visual effects
+        /// </summary>
+        private void DrawObstacleCell(Rect cellRect, AspectObstacle obstacle, Color cellColor)
+        {
+            // Draw main background
+            EditorGUI.DrawRect(cellRect, cellColor);
+            
+            // Add obstacle-specific effects
+            switch (obstacle.ObstacleType)
+            {
+                case ObstacleType.Corporeal:
+                    // Solid wall - draw with stone-like texture effect
+                    DrawStoneEffect(cellRect, cellColor);
+                    break;
+                    
+                case ObstacleType.FrigidFrozen:
+                    // Frozen - draw with ice crystal effect
+                    DrawIceEffect(cellRect, cellColor);
+                    break;
+                    
+                case ObstacleType.FrigidMelted:
+                    // Melted - draw with water effect
+                    DrawWaterEffect(cellRect, cellColor);
+                    break;
+                    
+                case ObstacleType.Scorch:
+                    // Fire - draw with flame effect
+                    DrawFlameEffect(cellRect, cellColor);
+                    break;
+                    
+                case ObstacleType.Caustic:
+                    // Poison - draw with bubbling effect
+                    DrawCausticEffect(cellRect, cellColor);
+                    break;
+                    
+                case ObstacleType.Arc:
+                    // Lightning - draw with electric effect
+                    DrawElectricEffect(cellRect, cellColor);
+                    break;
+                    
+                case ObstacleType.Divine:
+                    // Holy - draw with glowing effect
+                    DrawDivineEffect(cellRect, cellColor);
+                    break;
+            }
+        }
+        
+        // DrawIngredientCell method removed - Grid Designer now only handles obstacles
+        
+        
+        #region Obstacle Visual Effects
+        
+        private void DrawStoneEffect(Rect cellRect, Color baseColor)
+        {
+            // Create stone-like pattern with darker edges
+            var edgeRect = new Rect(cellRect.x + 1, cellRect.y + 1, cellRect.width - 2, cellRect.height - 2);
+            Color edgeColor = Color.Lerp(baseColor, Color.black, 0.4f);
+            EditorGUI.DrawRect(edgeRect, edgeColor);
+            
+            // Add some texture variation
+            var innerRect = new Rect(cellRect.x + 3, cellRect.y + 3, cellRect.width - 6, cellRect.height - 6);
+            Color innerColor = Color.Lerp(baseColor, Color.white, 0.1f);
+            EditorGUI.DrawRect(innerRect, innerColor);
+        }
+        
+        private void DrawIceEffect(Rect cellRect, Color baseColor)
+        {
+            // Create crystalline effect with light reflections
+            var centerRect = new Rect(cellRect.x + 4, cellRect.y + 4, cellRect.width - 8, cellRect.height - 8);
+            Color iceColor = Color.Lerp(baseColor, Color.white, 0.6f);
+            EditorGUI.DrawRect(centerRect, iceColor);
+            
+            // Add frost highlights
+            var highlightRect = new Rect(cellRect.x + 2, cellRect.y + 2, cellRect.width * 0.3f, cellRect.height * 0.3f);
+            Color highlightColor = Color.Lerp(baseColor, Color.white, 0.8f);
+            EditorGUI.DrawRect(highlightRect, highlightColor);
+        }
+        
+        private void DrawWaterEffect(Rect cellRect, Color baseColor)
+        {
+            // Create flowing water effect with waves
+            var centerRect = new Rect(cellRect.x + 3, cellRect.y + 3, cellRect.width - 6, cellRect.height - 6);
+            Color waterColor = Color.Lerp(baseColor, new Color(0.7f, 0.9f, 1.0f), 0.4f);
+            EditorGUI.DrawRect(centerRect, waterColor);
+            
+            // Add wave-like highlights
+            var waveRect1 = new Rect(cellRect.x + 1, cellRect.y + cellRect.height * 0.3f, cellRect.width - 2, 2);
+            var waveRect2 = new Rect(cellRect.x + 1, cellRect.y + cellRect.height * 0.7f, cellRect.width - 2, 2);
+            Color waveColor = Color.Lerp(baseColor, Color.white, 0.5f);
+            EditorGUI.DrawRect(waveRect1, waveColor);
+            EditorGUI.DrawRect(waveRect2, waveColor);
+        }
+        
+        private void DrawFlameEffect(Rect cellRect, Color baseColor)
+        {
+            // Create flickering flame effect
+            var flameRect = new Rect(cellRect.x + 2, cellRect.y + 6, cellRect.width - 4, cellRect.height - 8);
+            Color flameColor = Color.Lerp(baseColor, Color.yellow, 0.5f);
+            EditorGUI.DrawRect(flameRect, flameColor);
+            
+            // Add bright center
+            var centerRect = new Rect(cellRect.x + 6, cellRect.y + 8, cellRect.width - 12, cellRect.height - 16);
+            Color centerColor = Color.Lerp(baseColor, Color.white, 0.7f);
+            EditorGUI.DrawRect(centerRect, centerColor);
+        }
+        
+        private void DrawCausticEffect(Rect cellRect, Color baseColor)
+        {
+            // Create bubbling poison effect
+            var bubbleRect1 = new Rect(cellRect.x + 3, cellRect.y + 5, 8, 8);
+            var bubbleRect2 = new Rect(cellRect.x + 15, cellRect.y + 12, 6, 6);
+            var bubbleRect3 = new Rect(cellRect.x + 8, cellRect.y + 20, 4, 4);
+            
+            Color bubbleColor = Color.Lerp(baseColor, Color.yellow, 0.4f);
+            EditorGUI.DrawRect(bubbleRect1, bubbleColor);
+            EditorGUI.DrawRect(bubbleRect2, bubbleColor);
+            EditorGUI.DrawRect(bubbleRect3, bubbleColor);
+        }
+        
+        private void DrawElectricEffect(Rect cellRect, Color baseColor)
+        {
+            // Create electric spark effect
+            var sparkRect = new Rect(cellRect.x + 8, cellRect.y + 4, cellRect.width - 16, cellRect.height - 8);
+            Color sparkColor = Color.Lerp(baseColor, Color.white, 0.8f);
+            EditorGUI.DrawRect(sparkRect, sparkColor);
+            
+            // Add electric lines
+            var lineRect1 = new Rect(cellRect.x + 2, cellRect.y + cellRect.height * 0.3f, cellRect.width - 4, 2);
+            var lineRect2 = new Rect(cellRect.x + 4, cellRect.y + cellRect.height * 0.7f, cellRect.width - 8, 1);
+            EditorGUI.DrawRect(lineRect1, Color.white);
+            EditorGUI.DrawRect(lineRect2, Color.white);
+        }
+        
+        private void DrawDivineEffect(Rect cellRect, Color baseColor)
+        {
+            // Create divine glow effect
+            var glowRect = new Rect(cellRect.x + 2, cellRect.y + 2, cellRect.width - 4, cellRect.height - 4);
+            Color glowColor = Color.Lerp(baseColor, Color.white, 0.5f);
+            EditorGUI.DrawRect(glowRect, glowColor);
+            
+            // Add inner radiance
+            var radianceRect = new Rect(cellRect.x + 6, cellRect.y + 6, cellRect.width - 12, cellRect.height - 12);
+            Color radianceColor = Color.Lerp(baseColor, Color.white, 0.8f);
+            radianceColor.a = 0.7f;
+            EditorGUI.DrawRect(radianceRect, radianceColor);
+        }
+        
+        #endregion
+        
+        #endregion
     }
 
     // Simple rename dialog window
@@ -4686,6 +5310,12 @@ namespace FourFatesStudios.ProjectWarden.Editor
         public Rarity rarity = Rarity.Common;
         public bool isRequired = false;
         public bool isOccupied = false;
+        public AspectObstacle obstacle = null; // New: obstacle placed on this cell
+        
+        // Convenience properties
+        public bool HasObstacle => obstacle != null;
+        public bool IsBlocked => HasObstacle && obstacle.ObstacleType == ObstacleType.Corporeal;
+        public bool CanPlaceIngredient => !IsBlocked && (obstacle == null || obstacle.CanPlaceIngredient(null));
     }
     
     // Performance ranking system for minigames
