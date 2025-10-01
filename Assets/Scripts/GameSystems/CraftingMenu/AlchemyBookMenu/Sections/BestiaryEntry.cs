@@ -1,31 +1,24 @@
-using System.Collections.Generic;
-using FourFatesStudios.ProjectWarden.Enums;
 using GameSystems.CraftingMenu.AlchemyBookMenu.Sections;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyBookMenu.Sections
+namespace GameSystems.CraftingMenu.AlchemyBookMenu.Sections
 {
-    [System.Serializable]
+    [CreateAssetMenu(fileName = "New Bestiary Entry", menuName = "Alchemy Book/Bestiary Entry")]
     public class BestiaryEntry : BaseEntry
     {
         [Header("Bestiary Properties")]
-        public int level;
-        public int hp;
-        public int attack;
-        public int defense;
-        public int speed;
-        
-        [Header("Resistances & Weaknesses")]
-        public List<Aspect> resistances = new List<Aspect>();
-        public List<Aspect> weaknesses = new List<Aspect>();
-        public List<Aspect> immunities = new List<Aspect>();
-        
-        [Header("Locations")]
-        public List<string> encounterLocations = new List<string>();
-        
-        [Header("Abilities")]
-        public List<string> skills = new List<string>();
+        public CreatureType creatureType;
+        public string habitat;
+        [TextArea(2, 4)]
+        public string behavior;
+        public DangerLevel dangerLevel;
+        public string[] weaknesses;
+        public string[] resistances;
+        public string[] droppedIngredients;
+        public bool hasBeenEncountered = false;
+        public bool hasBeenDefeated = false;
+        public int encounterCount = 0;
 
         public override EntryType GetEntryType() => EntryType.Bestiary;
 
@@ -34,96 +27,156 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyBookMen
             var container = CreateBaseVisual();
             if (!isSeen) return container;
 
-            // Stats section
-            var statsContainer = new VisualElement();
-            statsContainer.AddToClassList("bestiary-stats");
+            // Creature type section
+            var typeContainer = new VisualElement();
+            typeContainer.AddToClassList("bestiary-type");
             
-            var levelLabel = new Label($"Level: {level}");
-            levelLabel.AddToClassList("stat-label");
-            statsContainer.Add(levelLabel);
+            var typeLabel = new Label($"Type: {creatureType}");
+            typeLabel.AddToClassList("type-label");
+            typeContainer.Add(typeLabel);
+            container.Add(typeContainer);
+
+            // Danger level section
+            var dangerContainer = new VisualElement();
+            dangerContainer.AddToClassList("bestiary-danger");
+            dangerContainer.AddToClassList($"danger-{dangerLevel.ToString().ToLower()}");
             
-            var hpLabel = new Label($"HP: {hp}");
-            hpLabel.AddToClassList("stat-label");
-            statsContainer.Add(hpLabel);
-            
-            var attackLabel = new Label($"ATK: {attack}");
-            attackLabel.AddToClassList("stat-label");
-            statsContainer.Add(attackLabel);
-            
-            var defenseLabel = new Label($"DEF: {defense}");
-            defenseLabel.AddToClassList("stat-label");
-            statsContainer.Add(defenseLabel);
-            
-            var speedLabel = new Label($"SPD: {speed}");
-            speedLabel.AddToClassList("stat-label");
-            statsContainer.Add(speedLabel);
-            
-            container.Add(statsContainer);
+            var dangerLabel = new Label($"Danger Level: {dangerLevel}");
+            dangerLabel.AddToClassList("danger-label");
+            dangerContainer.Add(dangerLabel);
+            container.Add(dangerContainer);
+
+            // Habitat section
+            if (!string.IsNullOrEmpty(habitat))
+            {
+                var habitatContainer = new VisualElement();
+                habitatContainer.AddToClassList("bestiary-habitat");
+                
+                var habitatLabel = new Label($"Habitat: {habitat}");
+                habitatLabel.AddToClassList("habitat-label");
+                habitatContainer.Add(habitatLabel);
+                container.Add(habitatContainer);
+            }
+
+            // Behavior section
+            if (!string.IsNullOrEmpty(behavior))
+            {
+                var behaviorContainer = new VisualElement();
+                behaviorContainer.AddToClassList("bestiary-behavior");
+                
+                var behaviorTitle = new Label("Behavior:");
+                behaviorTitle.AddToClassList("behavior-title");
+                behaviorContainer.Add(behaviorTitle);
+                
+                var behaviorDesc = new Label(behavior);
+                behaviorDesc.AddToClassList("behavior-description");
+                behaviorContainer.Add(behaviorDesc);
+                container.Add(behaviorContainer);
+            }
+
+            // Weaknesses section
+            if (weaknesses != null && weaknesses.Length > 0)
+            {
+                var weaknessContainer = new VisualElement();
+                weaknessContainer.AddToClassList("bestiary-weaknesses");
+                
+                var weaknessTitle = new Label("Weaknesses:");
+                weaknessTitle.AddToClassList("weakness-title");
+                weaknessContainer.Add(weaknessTitle);
+                
+                foreach (var weakness in weaknesses)
+                {
+                    var weaknessLabel = new Label($"• {weakness}");
+                    weaknessLabel.AddToClassList("weakness-label");
+                    weaknessContainer.Add(weaknessLabel);
+                }
+                
+                container.Add(weaknessContainer);
+            }
 
             // Resistances section
-            if (resistances.Count > 0 || weaknesses.Count > 0 || immunities.Count > 0)
+            if (resistances != null && resistances.Length > 0)
             {
-                var aspectContainer = new VisualElement();
-                aspectContainer.AddToClassList("bestiary-aspects");
+                var resistanceContainer = new VisualElement();
+                resistanceContainer.AddToClassList("bestiary-resistances");
                 
-                if (weaknesses.Count > 0)
+                var resistanceTitle = new Label("Resistances:");
+                resistanceTitle.AddToClassList("resistance-title");
+                resistanceContainer.Add(resistanceTitle);
+                
+                foreach (var resistance in resistances)
                 {
-                    var weakLabel = new Label($"Weaknesses: {string.Join(", ", weaknesses)}");
-                    weakLabel.AddToClassList("weakness-label");
-                    aspectContainer.Add(weakLabel);
+                    var resistanceLabel = new Label($"• {resistance}");
+                    resistanceLabel.AddToClassList("resistance-label");
+                    resistanceContainer.Add(resistanceLabel);
                 }
                 
-                if (resistances.Count > 0)
-                {
-                    var resLabel = new Label($"Resistances: {string.Join(", ", resistances)}");
-                    resLabel.AddToClassList("resistance-label");
-                    aspectContainer.Add(resLabel);
-                }
-                
-                if (immunities.Count > 0)
-                {
-                    var immLabel = new Label($"Immunities: {string.Join(", ", immunities)}");
-                    immLabel.AddToClassList("immunity-label");
-                    aspectContainer.Add(immLabel);
-                }
-                
-                container.Add(aspectContainer);
+                container.Add(resistanceContainer);
             }
 
-            // Locations section
-            if (encounterLocations.Count > 0)
+            // Dropped ingredients section
+            if (droppedIngredients != null && droppedIngredients.Length > 0)
             {
-                var locationContainer = new VisualElement();
-                locationContainer.AddToClassList("bestiary-locations");
+                var dropsContainer = new VisualElement();
+                dropsContainer.AddToClassList("bestiary-drops");
                 
-                var locationsLabel = new Label($"Found in: {string.Join(", ", encounterLocations)}");
-                locationsLabel.AddToClassList("location-label");
-                locationContainer.Add(locationsLabel);
+                var dropsTitle = new Label("Dropped Ingredients:");
+                dropsTitle.AddToClassList("drops-title");
+                dropsContainer.Add(dropsTitle);
                 
-                container.Add(locationContainer);
-            }
-
-            // Skills section
-            if (skills.Count > 0)
-            {
-                var skillsContainer = new VisualElement();
-                skillsContainer.AddToClassList("bestiary-skills");
-                
-                var skillsTitle = new Label("Abilities:");
-                skillsTitle.AddToClassList("skills-title");
-                skillsContainer.Add(skillsTitle);
-                
-                foreach (var skill in skills)
+                foreach (var drop in droppedIngredients)
                 {
-                    var skillLabel = new Label($"• {skill}");
-                    skillLabel.AddToClassList("skill-label");
-                    skillsContainer.Add(skillLabel);
+                    var dropLabel = new Label($"• {drop}");
+                    dropLabel.AddToClassList("drop-label");
+                    dropsContainer.Add(dropLabel);
                 }
                 
-                container.Add(skillsContainer);
+                container.Add(dropsContainer);
+            }
+
+            // Encounter statistics
+            if (hasBeenEncountered)
+            {
+                var statsContainer = new VisualElement();
+                statsContainer.AddToClassList("bestiary-stats");
+                
+                var encountersLabel = new Label($"Encounters: {encounterCount}");
+                encountersLabel.AddToClassList("encounters-label");
+                statsContainer.Add(encountersLabel);
+                
+                if (hasBeenDefeated)
+                {
+                    var defeatedLabel = new Label("Status: Defeated");
+                    defeatedLabel.AddToClassList("defeated-label");
+                    statsContainer.Add(defeatedLabel);
+                }
+                
+                container.Add(statsContainer);
             }
 
             return container;
         }
+    }
+
+    public enum CreatureType
+    {
+        Beast,
+        Fey,
+        Elemental,
+        Undead,
+        Dragon,
+        Humanoid,
+        Construct,
+        Aberration
+    }
+
+    public enum DangerLevel
+    {
+        Harmless,
+        Low,
+        Moderate,
+        High,
+        Extreme,
+        Legendary
     }
 }

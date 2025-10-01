@@ -12,7 +12,17 @@ namespace FourFatesStudios.ProjectWarden.Effects
         public int BaseShield { get => baseShield; set => baseShield = value; }
 
         public void Apply(CombatController source, List<CombatController> targets, float scale = 1) {
-            throw new System.NotImplementedException();
+            foreach (var target in targets)
+            {
+                if (target != null)
+                {
+                    int finalShieldAmount = Mathf.RoundToInt(baseShield * scale);
+                    Debug.Log($"Applying {finalShieldAmount} shield to {target.gameObject.name}");
+                    
+                    // You can extend this to integrate with your shield system:
+                    // target.GetComponent<ShieldComponent>()?.AddShield(finalShieldAmount);
+                }
+            }
         }
     }
 }

@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEditor;
 using FourFatesStudios.ProjectWarden.UI;
+using FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -127,8 +128,7 @@ namespace FourFatesStudios.ProjectWarden.Editor
 
             var existingControllers = new Dictionary<string, MonoBehaviour>
             {
-                {"PotionCrafting", Object.FindFirstObjectByType<FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu.PotionCraftingController>()},
-                {"BulkCrafting", Object.FindFirstObjectByType<FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu.BulkCraftingController>()}
+                {"BulkCrafting", Object.FindFirstObjectByType<BulkCraftingController>()}
             };
 
             int created = 0;

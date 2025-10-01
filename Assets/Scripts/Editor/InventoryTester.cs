@@ -45,13 +45,8 @@ namespace FourFatesStudios.ProjectWarden.Editor
                 
                 foreach (var item in allItems)
                 {
-                    // Get quantity via reflection to avoid missing method errors
-                    var countMethod = inventoryHolder.Container.GetType().GetMethod("Count");
-                    if (countMethod != null)
-                    {
-                        var quantity = (int)countMethod.Invoke(inventoryHolder.Container, new object[] { item });
-                        EditorGUILayout.LabelField($"  • {item.ItemName}: {quantity}");
-                    }
+                    var quantity = inventoryHolder.Container.GetItemCount(item);
+                    EditorGUILayout.LabelField($"  • {item.ItemName}: {quantity}");
                 }
             }
 
@@ -161,19 +156,8 @@ namespace FourFatesStudios.ProjectWarden.Editor
             var archetypeField = typeof(Ingredient).GetField("ingredientArchetype", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             archetypeField?.SetValue(ingredient, archetype);
             
-            // Create some basic potion effects
-            var effects = new System.Collections.Generic.List<FourFatesStudios.ProjectWarden.ScriptableObjects.PotionEffects.PotionEffect>();
-            
-            // Create a test effect
-            var effect = ScriptableObject.CreateInstance<FourFatesStudios.ProjectWarden.ScriptableObjects.PotionEffects.PotionEffect>();
-            var effectNameField = typeof(FourFatesStudios.ProjectWarden.ScriptableObjects.PotionEffects.PotionEffect).GetField("suffix", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            effectNameField?.SetValue(effect, name.Split(' ')[0]); // Use first word as effect name
-            
-            effects.Add(effect);
-            
-            // Set effects via reflection
-            var effectsField = typeof(Ingredient).GetField("potionEffects", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            effectsField?.SetValue(ingredient, effects);
+            // Note: Effects are now handled through EffectBundle component system
+            // Old PotionEffects system has been removed in favor of the new IEffect system
             
             ingredient.name = name;
             return ingredient;

@@ -5,9 +5,11 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.AlchemyRecipes;
+using InfusionBundle = FourFatesStudios.ProjectWarden.ScriptableObjects.InfusionBundle;
 using FourFatesStudios.ProjectWarden.Enums;
+using GameSystems.CraftingMenu.AlchemyBookMenu;
 
-namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
+namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu
 {
     public class BulkCraftingController : MonoBehaviour
     {
@@ -17,6 +19,7 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
         private DropdownField recipeDropdown;
         private IntegerField quantityField;
         private Button bulkCraftButton;
+        private Button alchemyBookButton;
         private Label costLabel;
         private Label resultLabel;
         private Label statusLabel;
@@ -65,6 +68,7 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
             recipeDropdown = root.Q<DropdownField>("RecipeDropdown");
             quantityField = root.Q<IntegerField>("QuantityField");
             bulkCraftButton = root.Q<Button>("BulkCraftButton");
+            alchemyBookButton = root.Q<Button>("alchemyBookButton");
             costLabel = root.Q<Label>("CostLabel");
             resultLabel = root.Q<Label>("ResultLabel");
             statusLabel = root.Q<Label>("StatusLabel");
@@ -77,6 +81,7 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
 
             recipeDropdown?.RegisterValueChangedCallback(evt => UpdateCostDisplay());
             bulkCraftButton?.RegisterCallback<ClickEvent>(_ => PerformBulkCraft());
+            alchemyBookButton?.RegisterCallback<ClickEvent>(_ => OpenAlchemyBook());
 
             RefreshAvailableRecipes();
             UpdateUI();
@@ -272,9 +277,9 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
                     var potion = ScriptableObject.CreateInstance<Potion>();
                     potion.name = recipe.recipe.OutputPotion.ItemName;
 
-                    // Apply rank modifier to effects
-                    var effectsField = typeof(Potion).GetField("potionEffects", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                    effectsField?.SetValue(potion, recipe.recipe.OutputPotion.PotionEffects.ToList());
+                    // Apply rank modifier to effects using InfusionBundle system
+                    var infusionBundleField = typeof(Potion).GetField("infusionBundle", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    infusionBundleField?.SetValue(potion, recipe.recipe.OutputPotion.InfusionBundle);
 
                     var upgradedProp = typeof(Potion).GetProperty("Upgraded");
                     upgradedProp?.SetValue(potion, recipe.recipe.OutputPotion.Upgraded);
@@ -313,6 +318,24 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.AlchemyMenu
         public void Hide()
         {
             gameObject.SetActive(false);
+        }
+
+        private void OpenAlchemyBook()
+        {
+            // Find the potion brewing guide in the scene
+            var alchemyBook = FindFirstObjectByType<AlchemyBook>();
+            if (alchemyBook != null)
+            {
+                // Open the book to the recipes section
+                alchemyBook.OpenToRecipes();
+                Debug.Log("📚 Opening Potion Brewing Guide to Recipes from Bulk Crafting");
+            }
+            else
+            {
+                Debug.LogWarning("⚠️ Potion Brewing Guide not found in scene. Make sure AlchemyBook GameObject is in the scene.");
+                if (resultLabel != null)
+                    resultLabel.text = "Potion Brewing Guide not available. Please ensure the guide is in the scene.";
+            }
         }
     }
 }

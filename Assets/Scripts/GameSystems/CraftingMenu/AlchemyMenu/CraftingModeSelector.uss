@@ -1,0 +1,213 @@
+/* ===== CRAFTING MODE SELECTOR STYLES ===== */
+
+/* Recipe scroll item styling */
+.recipe-scroll-item {
+    background-color: rgba(60, 60, 60, 0.9);
+    border-color: rgba(100, 100, 100, 0.8);
+    border-width: 1px;
+    border-radius: 8px;
+    padding: 30px;
+    margin-bottom: 20px;
+    cursor: pointer;
+    transition-duration: 0.2s;
+    transition-property: background-color, border-color, scale;
+}
+
+.recipe-scroll-item:hover,
+.recipe-item-hovered {
+    background-color: rgba(80, 120, 160, 0.8);
+    border-color: rgba(120, 160, 200, 1.0);
+    border-width: 2px;
+    scale: 1.02 1.02;
+}
+
+.recipe-scroll-item:active {
+    background-color: rgba(100, 140, 180, 0.9);
+    scale: 0.98 0.98;
+}
+
+.recipe-scroll-item.recipe-item-selected {
+    background-color: rgba(80, 120, 200, 0.8);
+    border-color: rgb(120, 150, 220);
+    border-width: 2px;
+}
+
+/* Recipe item content styling */
+.recipe-name {
+    font-size: 36px;
+    color: rgb(255, 255, 255);
+    -unity-font-style: bold;
+    margin-bottom: 16px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.recipe-difficulty {
+    font-size: 26px;
+    color: rgb(200, 200, 200);
+    margin-bottom: 10px;
+    -unity-font-style: italic;
+}
+
+.recipe-grid-info {
+    font-size: 24px;
+    color: rgb(180, 180, 180);
+    -unity-font-style: italic;
+    margin-bottom: 10px;
+}
+
+.recipe-output-info {
+    font-size: 24px;
+    color: rgba(150, 255, 150, 0.9);
+    margin-top: 10px;
+    -unity-font-style: bold;
+}
+
+/* Recipe difficulty color coding */
+.difficulty-beginner .recipe-difficulty {
+    color: rgba(150, 255, 150, 1);
+}
+
+.difficulty-standard .recipe-difficulty {
+    color: rgba(255, 255, 150, 1);
+}
+
+.difficulty-advanced .recipe-difficulty {
+    color: rgba(255, 200, 150, 1);
+}
+
+.difficulty-master .recipe-difficulty {
+    color: rgba(255, 150, 150, 1);
+}
+
+/* Recipe preview styling */
+.preview-title {
+    font-size: 36px;
+    color: rgb(255, 255, 255);
+    -unity-font-style: bold;
+    margin-bottom: 30px;
+    -unity-text-align: upper-center;
+}
+
+.recipe-details {
+    flex-direction: column;
+}
+
+.recipe-details Label {
+    font-size: 26px;
+    color: rgb(220, 220, 220);
+    margin-bottom: 10px;
+    padding-left: 10px;
+}
+
+/* Button hover effects */
+.unity-button:hover {
+    scale: 1.05;
+    transition-duration: 0.2s;
+}
+
+.unity-button:active {
+    scale: 0.95;
+}
+
+/* Free crafting button specific styling */
+#free-crafting-button:hover {
+    background-color: rgba(100, 140, 220, 1.0);
+    border-color: rgb(140, 170, 240);
+}
+
+/* Recipe crafting button specific styling */
+#recipe-crafting-button:hover {
+    background-color: rgba(220, 140, 100, 1.0);
+    border-color: rgb(240, 170, 140);
+}
+
+/* Confirm button styling */
+#confirm-recipe-button:hover {
+    background-color: rgba(100, 170, 100, 1.0);
+    border-color: rgb(140, 200, 140);
+}
+
+#confirm-recipe-button:disabled {
+    background-color: rgba(80, 80, 80, 0.5);
+    border-color: rgb(100, 100, 100);
+    color: rgb(150, 150, 150);
+}
+
+/* Enhanced scroll view styling */
+#recipe-scroll-view {
+    --unity-metrics-default_margin: 4px;
+    background-color: rgba(30, 30, 30, 0.9);
+    border-color: rgb(80, 80, 80);
+    border-width: 1px;
+    border-radius: 6px;
+    padding: 20px;
+}
+
+#recipe-scroll-view .unity-scroll-view__content-container {
+    padding: 16px;
+}
+
+/* Custom scrollbar styling */
+#recipe-scroll-view .unity-scroller--vertical {
+    width: 32px;
+    background-color: rgba(40, 40, 40, 0.8);
+    border-radius: 16px;
+    margin-left: 8px;
+}
+
+#recipe-scroll-view .unity-scroller--vertical .unity-slider {
+    margin-left: 4px;
+    margin-right: 4px;
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
+#recipe-scroll-view .unity-scroller--vertical .unity-slider__dragger {
+    background-color: rgba(120, 120, 120, 0.8);
+    border-radius: 12px;
+    border-width: 0;
+    min-height: 40px;
+}
+
+#recipe-scroll-view .unity-scroller--vertical .unity-slider__dragger:hover {
+    background-color: rgba(140, 140, 140, 0.9);
+}
+
+#recipe-scroll-view .unity-scroller--vertical .unity-slider__dragger:active {
+    background-color: rgba(160, 160, 160, 1.0);
+}
+
+/* Scroll view fade effects */
+#recipe-scroll-view .unity-scroll-view__content-viewport {
+    overflow: hidden;
+}
+
+/* Recipe count label styling */
+.recipe-count-label {
+    font-size: 24px;
+    color: rgba(255, 255, 255, 0.7);
+    -unity-text-align: upper-center;
+    margin-top: 20px;
+    -unity-font-style: italic;
+}
+
+/* Animation classes */
+.fade-in {
+    opacity: 0;
+    transition-property: opacity;
+    transition-duration: 0.3s;
+}
+
+.fade-in-active {
+    opacity: 1;
+}
+
+.slide-up {
+    translate: 0 50px;
+    transition-property: translate;
+    transition-duration: 0.3s;
+}
+
+.slide-up-active {
+    translate: 0 0;
+}

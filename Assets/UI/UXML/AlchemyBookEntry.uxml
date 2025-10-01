@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<engine:UXML
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:engine="UnityEngine.UIElements"
+    xmlns:editor="UnityEditor.UIElements"
+    noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd"
+    editor-extension-mode="False">
+    
+    <engine:VisualElement name="entry-container" class="book-entry">
+        
+        <!-- Header with bookmark -->
+        <engine:VisualElement name="entry-header" class="entry-header">
+            <engine:Button name="bookmark-button" text="☆" class="bookmark-button" />
+            <engine:Label name="entry-title" text="Entry Title" class="entry-title" />
+        </engine:VisualElement>
+        
+        <!-- Main content area -->
+        <engine:VisualElement name="entry-content" class="entry-content">
+            
+            <!-- Image/Icon area -->
+            <engine:VisualElement name="entry-image-container" class="entry-image-container">
+                <engine:VisualElement name="entry-image" class="entry-image" />
+                <engine:Label name="entry-subtitle" text="Subtitle" class="entry-subtitle" />
+            </engine:VisualElement>
+            
+            <!-- Text content area -->
+            <engine:VisualElement name="entry-text-container" class="entry-text-container">
+                
+                <!-- Description -->
+                <engine:Label name="entry-description" text="Entry description goes here..." class="entry-description" />
+                
+                <!-- Properties section (for ingredients/recipes) -->
+                <engine:VisualElement name="entry-properties" class="entry-properties">
+                    <engine:Label name="properties-title" text="Properties:" class="properties-title" />
+                    <engine:VisualElement name="properties-list" class="properties-list" />
+                </engine:VisualElement>
+                
+                <!-- Ingredients section (for recipes) -->
+                <engine:VisualElement name="entry-ingredients" class="entry-ingredients">
+                    <engine:Label name="ingredients-title" text="Ingredients:" class="ingredients-title" />
+                    <engine:VisualElement name="ingredients-list" class="ingredients-list" />
+                </engine:VisualElement>
+                
+                <!-- Effects section (for potions) -->
+                <engine:VisualElement name="entry-effects" class="entry-effects">
+                    <engine:Label name="effects-title" text="Effects:" class="effects-title" />
+                    <engine:VisualElement name="effects-list" class="effects-list" />
+                </engine:VisualElement>
+                
+                <!-- Tips section (for help entries) -->
+                <engine:VisualElement name="entry-tips" class="entry-tips">
+                    <engine:Label name="tips-title" text="Tips:" class="tips-title" />
+                    <engine:VisualElement name="tips-list" class="tips-list" />
+                </engine:VisualElement>
+                
+                <!-- Lore/Additional info -->
+                <engine:VisualElement name="entry-lore" class="entry-lore">
+                    <engine:Label name="lore-title" text="Additional Information:" class="lore-title" />
+                    <engine:Label name="lore-content" text="Additional lore content..." class="lore-content" />
+                </engine:VisualElement>
+                
+            </engine:VisualElement>
+            
+        </engine:VisualElement>
+        
+        <!-- Footer with page number or other info -->
+        <engine:VisualElement name="entry-footer" class="entry-footer">
+            <engine:Label name="entry-page-number" text="Page 1" class="entry-page-number" />
+            <engine:Label name="entry-discovered" text="Discovered" class="entry-discovered" />
+        </engine:VisualElement>
+        
+    </engine:VisualElement>
+    
+</engine:UXML>

@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c09b7f9945cc7b345ac3cdc9bc414dac, type: 3}
+  m_Name: Impact Infusion
+  m_EditorClassIdentifier: 
+  infusionName: Impact
+  description: A blank infusion template ready for customization.
+  rarity: 1
+  infusionColor: {r: 0.5754717, g: 0.48046458, b: 0.48046458, a: 1}
+  infusionIcon: {fileID: 0}
+  effectBundle:
+    Effects:
+    - rid: 5068044029768761416
+  powerLevel: 1
+  canStack: 0
+  maxStacks: 1
+  references:
+    version: 2
+    RefIds:
+    - rid: 5068044029768761416
+      type: {class: DamageEffect, ns: FourFatesStudios.ProjectWarden.Effects, asm: ProjectWarden}
+      data:
+        baseDamage: 10
+        stagger: 10
+        damageType: 0
+        aspect: 0

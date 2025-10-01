@@ -1,7 +1,7 @@
 /* Main Book Container */
 .book-container {
-    width: 800px;
-    height: 600px;
+    width: 95%;
+    height: 95%;
     background-color: rgb(139, 115, 85);
     border-color: rgb(101, 67, 33);
     border-width: 3px;
@@ -9,6 +9,9 @@
     padding: 20px;
     justify-content: center;
     align-items: center;
+    position: absolute;
+    top: 2.5%;
+    left: 2.5%;
 }
 
 /* Cover Styles */
@@ -35,7 +38,7 @@
 }
 
 .cover-subtitle {
-    font-size: 18px;
+    font-size: 20px;
     color: rgb(139, 115, 85);
     text-align: center;
 }
@@ -64,7 +67,7 @@
     border-width: 2px;
     border-radius: 8px 8px 0px 0px;
     color: rgb(101, 67, 33);
-    font-size: 14px;
+    font-size: 20px;  /* Changed from 14px to 20px */
     -unity-font-style: bold;
 }
 
@@ -79,7 +82,7 @@
 
 .bookmark-tab {
     width: 50px;
-    font-size: 16px;
+    font-size: 20px;
 }
 
 /* Search Container */
@@ -119,14 +122,15 @@
 }
 
 .page {
-    width: 50%;
-    height: 100%;
+    width: 400px;  /* Fixed width for standard size */
+    height: 500px;  /* Fixed height for standard size */
     background-color: rgb(245, 235, 220);
     border-color: rgb(139, 115, 85);
     border-width: 1px;
     padding: 20px;
     margin-left: 5px;
     margin-right: 5px;
+    overflow: hidden;  /* Prevent content from breaking page layout */
 }
 
 .left-page {
@@ -152,7 +156,7 @@
     border-width: 2px;
     border-radius: 5px;
     color: rgb(101, 67, 33);
-    font-size: 12px;
+    font-size: 20px;  /* Changed from 12px to 20px */
     -unity-font-style: bold;
 }
 
@@ -160,11 +164,28 @@
     background-color: rgb(180, 150, 118);
 }
 
+.close-button {
+    width: 60px;
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    background-color: rgb(200, 100, 100);
+    border-color: rgb(160, 80, 80);
+    color: white;
+}
+
+.close-button:hover {
+    background-color: rgb(220, 120, 120);
+    border-color: rgb(180, 100, 100);
+}
+
 /* Entry Styles */
 .entry-container {
-    width: 100%;
+    width: 350px;  /* Fixed width to fit in page */
+    height: 450px;  /* Fixed height to fit in page */
     padding: 10px;
     margin-bottom: 15px;
+    overflow: hidden;  /* Prevent content overflow */
 }
 
 .entry-unseen {
@@ -180,7 +201,7 @@
 }
 
 .entry-title {
-    font-size: 18px;
+    font-size: 20px;
     color: rgb(101, 67, 33);
     -unity-font-style: bold;
     margin-bottom: 10px;
@@ -197,7 +218,7 @@
 }
 
 .entry-description {
-    font-size: 12px;
+    font-size: 20px;  /* Changed from 12px to 20px */
     color: rgb(101, 67, 33);
     margin-bottom: 10px;
     white-space: normal;
@@ -221,7 +242,7 @@
 }
 
 .stat-label {
-    font-size: 11px;
+    font-size: 20px;  /* Changed from 11px to 20px */
     color: rgb(101, 67, 33);
     margin-bottom: 3px;
 }
@@ -231,19 +252,19 @@
 }
 
 .weakness-label {
-    font-size: 11px;
+    font-size: 20px;  /* Changed from 11px to 20px */
     color: rgb(178, 34, 34);
     margin-bottom: 3px;
 }
 
 .resistance-label {
-    font-size: 11px;
+    font-size: 20px;  /* Changed from 11px to 20px */
     color: rgb(34, 139, 34);
     margin-bottom: 3px;
 }
 
 .immunity-label {
-    font-size: 11px;
+    font-size: 20px;  /* Changed from 11px to 20px */
     color: rgb(70, 130, 180);
     margin-bottom: 3px;
 }
@@ -253,7 +274,7 @@
 }
 
 .location-label, .skills-title, .skill-label {
-    font-size: 11px;
+    font-size: 20px;  /* Changed from 11px to 20px */
     color: rgb(101, 67, 33);
     margin-bottom: 2px;
 }
@@ -265,13 +286,13 @@
 }
 
 .unique-recipe {
-    font-size: 14px;
+    font-size: 20px;  /* Changed from 14px to 20px */
     color: rgb(148, 0, 211);
     -unity-font-style: bold;
 }
 
 .custom-recipe {
-    font-size: 14px;
+    font-size: 20px;  /* Changed from 14px to 20px */
     color: rgb(255, 140, 0);
     -unity-font-style: bold;
 }
@@ -284,20 +305,20 @@
 }
 
 .ingredients-title, .infusions-title {
-    font-size: 12px;
+    font-size: 20px;  /* Changed from 12px to 20px */
     color: rgb(101, 67, 33);
     -unity-font-style: bold;
     margin-bottom: 5px;
 }
 
 .ingredient-label, .infusion-label {
-    font-size: 10px;
+    font-size: 20px;
     color: rgb(101, 67, 33);
     margin-bottom: 2px;
 }
 
 .ingredient-unknown {
-    font-size: 10px;
+    font-size: 20px;
     color: rgb(150, 150, 150);
     margin-bottom: 2px;
 }
@@ -308,7 +329,7 @@
 }
 
 .aspect-label {
-    font-size: 12px;
+    font-size: 20px;
     color: rgb(101, 67, 33);
     -unity-font-style: bold;
 }
@@ -321,14 +342,14 @@
 }
 
 .sources-title, .refinements-title {
-    font-size: 12px;
+    font-size: 20px;
     color: rgb(101, 67, 33);
     -unity-font-style: bold;
     margin-bottom: 5px;
 }
 
 .source-label, .refinement-label {
-    font-size: 10px;
+    font-size: 20px;
     color: rgb(101, 67, 33);
     margin-bottom: 2px;
 }
@@ -338,7 +359,7 @@
 }
 
 .corrupted-label {
-    font-size: 11px;
+    font-size: 20px;
     color: rgb(139, 0, 139);
     -unity-font-style: bold;
 }
@@ -349,8 +370,8 @@
 }
 
 .help-text {
-    font-size: 12px;
+    font-size: 20px;
     color: rgb(101, 67, 33);
     white-space: normal;
-    line-height: 16px;
+    line-height: 24px;
 }

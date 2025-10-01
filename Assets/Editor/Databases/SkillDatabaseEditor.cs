@@ -5,7 +5,7 @@ using UnityEditor;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Databases;
 
 [CustomEditor(typeof(SkillDatabase))]
-public class SkillDatabaseEditor : Editor
+public class SkillDatabaseEditor : UnityEditor.Editor
 {
     private const int GridColumns = 4;
     private const float IconSize = 64f;

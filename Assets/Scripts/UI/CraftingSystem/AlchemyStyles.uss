@@ -4,23 +4,43 @@
     justify-content: center;
     padding: 20px;
     top: 10px;
+    background-color: rgb(240, 255, 240); /* Light mint green background */
 }
 
 .menu-title {
     font-size: 24px;
     -unity-text-align: middle-center;
     margin-bottom: 20px;
+    color: rgb(34, 139, 34); /* Forest green title */
+    -unity-font-style: bold;
 }
 
 .menu-button {
-    width: 200px;
-    height: 40px;
-    font-size: 16px;
+    width: 300px;
+    height: 60px;
+    font-size: 20px;
     -unity-text-align: middle-center;
     cursor: link;
+    margin: 15px 0;
+    background-color: rgb(144, 238, 144); /* Light green buttons */
+    border-color: rgb(50, 205, 50); /* Lime green border */
+    border-width: 2px;
+    border-radius: 8px;
+    color: rgb(0, 100, 0); /* Dark green text */
+    -unity-font-style: bold;
+}
+
+.menu-button:hover {
+    background-color: rgb(124, 252, 0); /* Lawn green on hover */
+    border-color: rgb(34, 139, 34); /* Forest green border on hover */
+}
+
+.menu-button:active {
+    background-color: rgb(107, 142, 35); /* Olive drab when pressed */
 }
 
 .menu-button:disabled {
-    background-color: #444;
-    color: #aaa;
+    background-color: rgb(169, 169, 169); /* Light gray when disabled */
+    color: rgb(105, 105, 105); /* Dark gray text when disabled */
+    border-color: rgb(128, 128, 128); /* Gray border when disabled */
 }

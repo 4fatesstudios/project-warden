@@ -1,9 +1,9 @@
-﻿using UnityEditor;
+using UnityEditor;
 using UnityEngine;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Grinds;
 
 [CustomEditor(typeof(Grind))]
-public class GrindEditor : Editor
+public class GrindEditor : UnityEditor.Editor
 {
     public override void OnInspectorGUI()
     {

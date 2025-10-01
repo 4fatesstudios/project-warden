@@ -4,7 +4,7 @@ using UnityEngine.UIElements;
 
 namespace GameSystems.CraftingMenu.AlchemyBookMenu.Sections
 {
-    [System.Serializable]
+    [CreateAssetMenu(fileName = "New Recipe Entry", menuName = "Alchemy Book/Recipe Entry")]
     public class RecipeEntry : BaseEntry
     {
         [Header("Recipe Properties")]
@@ -13,6 +13,11 @@ namespace GameSystems.CraftingMenu.AlchemyBookMenu.Sections
         public List<string> infusions = new List<string>();
         public bool isUniquePotionRecipe;
         public List<string> discoveredInfusions = new List<string>(); // Only show if discovered
+        
+        [Header("Difficulty and Requirements")]
+        public int minAlchemyLevel = 1;
+        public float successRate = 100f;
+        public int brewingTime = 60; // in seconds
 
         public override EntryType GetEntryType() => EntryType.Recipe;
 
