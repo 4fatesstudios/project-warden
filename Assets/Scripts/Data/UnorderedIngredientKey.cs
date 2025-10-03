@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using UnityEngine;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
-using ScriptableObjects.Items;
 
 [Serializable]
 public struct UnorderedIngredientKey : IEquatable<UnorderedIngredientKey>
