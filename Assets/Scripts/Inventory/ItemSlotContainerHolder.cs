@@ -43,30 +43,30 @@ namespace FourFatesStudios.ProjectWarden
             Container.Remove(item, quantity);
         }
 
-
-        private void OnGUI()
-        {
-#if UNITY_EDITOR
-            // Set up a rect at the top-right corner of the screen
-            float width = 200f;   // how wide you want the panel
-            float height = 300f;  // how tall you want it (adjust as needed)
-            float x = Screen.width - width - 10f; // 10px padding from right
-            float y = 10f; // 10px padding from top
-
-            Rect panelRect = new Rect(x, y, width, height);
-
-            GUILayout.BeginArea(panelRect, GUI.skin.box); // optional box background
-
-            GUILayout.Label("Inventory Contents:");
-            foreach (var slot in Container.Slots)
-            {
-                if (slot.Item != null) // safeguard
-                    GUILayout.Label($"{slot.Item.ItemName} x{slot.Quantity}");
-            }
-
-            GUILayout.EndArea();
-#endif
-        }
+//
+//         private void OnGUI()
+//         {
+// #if UNITY_EDITOR
+//             // Set up a rect at the top-right corner of the screen
+//             float width = 200f;   // how wide you want the panel
+//             float height = 300f;  // how tall you want it (adjust as needed)
+//             float x = Screen.width - width - 10f; // 10px padding from right
+//             float y = 10f; // 10px padding from top
+//
+//             Rect panelRect = new Rect(x, y, width, height);
+//
+//             GUILayout.BeginArea(panelRect, GUI.skin.box); // optional box background
+//
+//             GUILayout.Label("Inventory Contents:");
+//             foreach (var slot in Container.Slots)
+//             {
+//                 if (slot.Item != null) // safeguard
+//                     GUILayout.Label($"{slot.Item.ItemName} x{slot.Quantity}");
+//             }
+//
+//             GUILayout.EndArea();
+// #endif
+//         }
 
 
     }

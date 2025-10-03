@@ -1,0 +1,148 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/CraftingUI.uss?fileID=7433441132597879392&amp;guid=3dde1ff1dcc277b418efde760cbd21c6&amp;type=3#CraftingUI" />
+    <ui:VisualElement name="root" class="root-container">
+        <!-- Top Banner: Title + Top Buttons -->
+        <ui:VisualElement name="top-banner" class="top-banner">
+            <ui:Label text="CRAFTING" display-tooltip-when-elided="true" name="title" class="title" />
+            <ui:VisualElement name="top-buttons" class="top-buttons">
+                <ui:Button text="💾" display-tooltip-when-elided="true" name="save-recipe-button" tooltip="Save to recipe book" class="circular-button" />
+                <ui:Button text="📋" display-tooltip-when-elided="true" name="open-recipe-button" tooltip="Open recipe book" class="circular-button" />
+                <ui:Button text="🌟" display-tooltip-when-elided="true" name="skill-tree-button" tooltip="Open skill tree" class="circular-button" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        
+        <!-- Main Content: Left + Right Containers -->
+        <ui:VisualElement name="main-content" class="main-content">
+            <!-- Left Container: Side Buttons + Crafting Grid + Craft Button -->
+            <ui:VisualElement name="left-side" class="left-side">
+                <ui:VisualElement name="left-side-buttons" class="left-side-buttons">
+                    <ui:Button text="🔄" display-tooltip-when-elided="true" name="clear-button" tooltip="Clear grid" class="round-button clear-button" />
+                    <ui:Button text="🎒" display-tooltip-when-elided="true" name="inventory-button" tooltip="Open inventory" class="round-button inventory-button" />
+                </ui:VisualElement>
+                <ui:VisualElement name="crafting-area" class="crafting-area">
+                    <ui:VisualElement name="grid-frame" class="grid-frame">
+                        <ui:VisualElement name="grid-viewport" class="grid-viewport" />
+                    </ui:VisualElement>
+                    <ui:Button text="Craft" display-tooltip-when-elided="true" name="craft-button" class="craft-button craft-button-disabled" style="display: none;" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="right-side" class="right-side">
+                <ui:VisualElement name="right-container" class="right-container">
+                    <ui:VisualElement name="advanced-filter-area" class="advanced-filter-area">
+                        <ui:TextField picking-mode="Ignore" placeholder-text="Search ingredients..." name="search-field" class="search-field" />
+                        <ui:DropdownField text="Sort by: New" name="sort-dropdown" class="sort-dropdown" />
+                        <ui:Button text="🎒" display-tooltip-when-elided="true" name="inventory-toggle" tooltip="Toggle Inventory" class="inventory-toggle-button" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="main-content-area" class="main-content-area">
+                        <ui:VisualElement name="ingredient-grid-container" class="ingredient-grid-container">
+                            <ui:VisualElement name="slot-grid" class="slot-grid">
+                                <ui:VisualElement name="slot-row-1" class="slot-row">
+                                    <ui:Button name="slot-0" class="ingredient-slot">
+                                        <ui:Label text="★" name="new-star-0" class="new-star" style="display: none;" />
+                                    </ui:Button>
+                                    <ui:Button name="slot-1" class="ingredient-slot">
+                                        <ui:Label text="★" name="new-star-1" class="new-star" style="display: none;" />
+                                    </ui:Button>
+                                    <ui:Button name="slot-2" class="ingredient-slot">
+                                        <ui:Label text="★" name="new-star-2" class="new-star" style="display: none;" />
+                                    </ui:Button>
+                                </ui:VisualElement>
+                                <ui:VisualElement name="slot-row-2" class="slot-row">
+                                    <ui:Button name="slot-3" class="ingredient-slot">
+                                        <ui:Label text="★" name="new-star-3" class="new-star" style="display: none;" />
+                                    </ui:Button>
+                                    <ui:Button name="slot-4" class="ingredient-slot">
+                                        <ui:Label text="★" name="new-star-4" class="new-star" style="display: none;" />
+                                    </ui:Button>
+                                    <ui:Button name="slot-5" class="ingredient-slot">
+                                        <ui:Label text="★" name="new-star-5" class="new-star" style="display: none;" />
+                                    </ui:Button>
+                                </ui:VisualElement>
+                                <ui:VisualElement name="slot-row-3" class="slot-row">
+                                    <ui:Button name="slot-6" class="ingredient-slot">
+                                        <ui:Label text="★" name="new-star-6" class="new-star" style="display: none;" />
+                                    </ui:Button>
+                                    <ui:Button name="slot-7" class="ingredient-slot">
+                                        <ui:Label text="★" name="new-star-7" class="new-star" style="display: none;" />
+                                    </ui:Button>
+                                    <ui:Button name="slot-8" class="ingredient-slot">
+                                        <ui:Label text="★" name="new-star-8" class="new-star" style="display: none;" />
+                                    </ui:Button>
+                                </ui:VisualElement>
+                                <ui:VisualElement name="slot-row-4" class="slot-row">
+                                    <ui:Button name="slot-9" class="ingredient-slot">
+                                        <ui:Label text="★" name="new-star-9" class="new-star" style="display: none;" />
+                                    </ui:Button>
+                                    <ui:Button name="slot-10" class="ingredient-slot">
+                                        <ui:Label text="★" name="new-star-10" class="new-star" style="display: none;" />
+                                    </ui:Button>
+                                    <ui:Button name="slot-11" class="ingredient-slot">
+                                        <ui:Label text="★" name="new-star-11" class="new-star" style="display: none;" />
+                                    </ui:Button>
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+                            <ui:VisualElement name="page-controls" class="page-controls">
+                                <ui:Button text="◀" display-tooltip-when-elided="true" name="page-prev" class="page-arrow" />
+                                <ui:Label text="1 / 2" display-tooltip-when-elided="true" name="page-number" class="page-number" />
+                                <ui:Button text="▶" display-tooltip-when-elided="true" name="page-next" class="page-arrow" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                        <ui:VisualElement name="filters" class="filters">
+                            <ui:Button text="All" display-tooltip-when-elided="true" name="filter-all" class="filter-tab filter-tab-active" />
+                            <ui:Button text="🌍" display-tooltip-when-elided="true" name="filter-corporeal" tooltip="Corporeal" class="filter-tab" />
+                            <ui:Button text="❄️" display-tooltip-when-elided="true" name="filter-frigid" tooltip="Frigid" class="filter-tab" />
+                            <ui:Button text="🔥" display-tooltip-when-elided="true" name="filter-scorch" tooltip="Scorch" class="filter-tab" />
+                            <ui:Button text="☣️" display-tooltip-when-elided="true" name="filter-caustic" tooltip="Caustic" class="filter-tab" />
+                            <ui:Button text="⚡" display-tooltip-when-elided="true" name="filter-arc" tooltip="Arc" class="filter-tab" />
+                            <ui:Button text="✨" display-tooltip-when-elided="true" name="filter-divine" tooltip="Divine" class="filter-tab" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    
+                    <!-- Inventory Section (Integrated) -->
+                    <ui:VisualElement name="inventory-section" class="inventory-section" style="display: none;">
+                        <ui:Label text="🎒 Inventory" display-tooltip-when-elided="true" class="inventory-title" />
+                        <ui:TextField picking-mode="Ignore" placeholder-text="Search potions..." name="inventory-search" class="search-field" />
+                        <ui:VisualElement name="inventory-grid" class="slot-grid">
+                            <ui:VisualElement name="inv-row-1" class="slot-row">
+                                <ui:Button name="inv-slot-0" class="ingredient-slot potion-slot" />
+                                <ui:Button name="inv-slot-1" class="ingredient-slot potion-slot" />
+                                <ui:Button name="inv-slot-2" class="ingredient-slot potion-slot" />
+                            </ui:VisualElement>
+                            <ui:VisualElement name="inv-row-2" class="slot-row">
+                                <ui:Button name="inv-slot-3" class="ingredient-slot potion-slot" />
+                                <ui:Button name="inv-slot-4" class="ingredient-slot potion-slot" />
+                                <ui:Button name="inv-slot-5" class="ingredient-slot potion-slot" />
+                            </ui:VisualElement>
+                            <ui:VisualElement name="inv-row-3" class="slot-row">
+                                <ui:Button name="inv-slot-6" class="ingredient-slot potion-slot" />
+                                <ui:Button name="inv-slot-7" class="ingredient-slot potion-slot" />
+                                <ui:Button name="inv-slot-8" class="ingredient-slot potion-slot" />
+                            </ui:VisualElement>
+                            <ui:VisualElement name="inv-row-4" class="slot-row">
+                                <ui:Button name="inv-slot-9" class="ingredient-slot potion-slot" />
+                                <ui:Button name="inv-slot-10" class="ingredient-slot potion-slot" />
+                                <ui:Button name="inv-slot-11" class="ingredient-slot potion-slot" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                        <ui:VisualElement name="inventory-page-controls" class="page-controls">
+                            <ui:Button text="◀" display-tooltip-when-elided="true" name="inv-page-prev" class="page-arrow" />
+                            <ui:Label text="1 / 1" display-tooltip-when-elided="true" name="inv-page-number" class="page-number" />
+                            <ui:Button text="▶" display-tooltip-when-elided="true" name="inv-page-next" class="page-arrow" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement name="container-separator" class="container-separator" />
+                <ui:VisualElement name="item-banner" class="item-banner">
+                    <ui:VisualElement name="item-info" class="item-info">
+                        <ui:Label text="Select an ingredient" display-tooltip-when-elided="true" name="item-name" class="item-name" />
+                        <ui:Label text="Choose an ingredient from the grid above" display-tooltip-when-elided="true" name="item-description" class="item-description" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="item-rarity" class="item-rarity">
+                        <ui:Label text="Common" display-tooltip-when-elided="true" name="rarity-label" class="rarity-label" />
+                        <ui:VisualElement name="rarity-badge" class="rarity-badge rarity-common" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

@@ -4,9 +4,43 @@ using UnityEngine;
 
 namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
 {
-    [System.Serializable]
+    public enum ShapeTemplate
+    {
+        Custom,
+        SingleCell,
+        Rectangle,
+        HorizontalLine,
+        VerticalLine,
+        Square2x2,
+        LShape,
+        TShape,
+        Cross,
+        Circle,
+        Diamond
+    }
+
+    [Serializable]
+    [CreateAssetMenu(menuName="Alchemy/IngredientShapeData")]
     public class IngredientShapeData
     {
+        public string id; // debug name
+        public Sprite icon;
+        public Vector2Int pivot = new Vector2Int(0,0); // anchor/origin for offsets
+
+        // Offsets the ingredient occupies relative to the pivot (e.g. {(0,0)} for 1x1, {(0,0),(1,0)} for 2x1)
+        public Vector2Int[] occupiedOffsets;
+
+        // Offsets relative to this ingredient's pivot that represent cells this ingredient can "expand into"
+        // (e.g. if an ingredient has expansionOffsets {(2,0)} then when placed, it enables placement in pivot + (2,0) if adjacency rules satisfied)
+        public Vector2Int[] expansionOffsets;
+
+        // Whether the expansion offsets are applied regardless of rotation or if they rotate with the ingredient
+        public bool expansionRotatesWithIngredient = true;
+        public bool rotatable = true;
+
+        // For editor/preview only:
+        public Color expansionColor = Color.yellow;
+        
         [Header("Grid Dimensions")]
         [SerializeField, Range(1, 8)]
         private int gridWidth = 1;
@@ -17,9 +51,6 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
         [Header("Shape Configuration")]
         [SerializeField, Tooltip("Serialized grid data as a list of active cell positions")]
         private List<Vector2Int> activeCells = new List<Vector2Int>();
-        
-        [SerializeField, Tooltip("Shape template used (for reference and consistency)")]
-        private ShapeTemplate template = ShapeTemplate.Rectangle;
         
         [Header("Visual Properties")]
         [SerializeField, Tooltip("Color tint for the ingredient shape in the grid")]
@@ -34,6 +65,9 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
         
         [SerializeField, Tooltip("Version number for backward compatibility")]
         private int dataVersion = 1;
+        
+        [SerializeField, Tooltip("Shape template type for categorization")]
+        private ShapeTemplate template = ShapeTemplate.Custom;
 
         public int GridWidth 
         { 
@@ -48,24 +82,30 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
         }
         
         public List<Vector2Int> ActiveCells => activeCells;
-        public ShapeTemplate Template => template;
         public Color ShapeColor => shapeColor;
         public Sprite ShapeSprite => shapeSprite;
         public string LastModified => lastModified;
         public int DataVersion => dataVersion;
+        public ShapeTemplate Template => template;
 
         public IngredientShapeData()
         {
             Initialize();
         }
 
-        public IngredientShapeData(int width, int height, ShapeTemplate shapeTemplate = ShapeTemplate.Rectangle)
+        public IngredientShapeData(int width, int height)
         {
             gridWidth = Mathf.Clamp(width, 1, 8);
             gridHeight = Mathf.Clamp(height, 1, 8);
-            template = shapeTemplate;
             Initialize();
-            ApplyTemplate();
+        }
+
+        public IngredientShapeData(int width, int height, ShapeTemplate template)
+        {
+            gridWidth = Mathf.Clamp(width, 1, 8);
+            gridHeight = Mathf.Clamp(height, 1, 8);
+            Initialize();
+            ApplyTemplate(template);
         }
 
         private void Initialize()
@@ -74,6 +114,205 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
                 activeCells = new List<Vector2Int>();
                 
             lastModified = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            InitializeExpansions();
+        }
+        
+        private void InitializeExpansions()
+        {
+            if (occupiedOffsets == null)
+                occupiedOffsets = new Vector2Int[] { Vector2Int.zero };
+                
+            if (expansionOffsets == null)
+                expansionOffsets = new Vector2Int[0];
+        }
+        
+        /// <summary>
+        /// Apply a predefined shape template
+        /// </summary>
+        public void ApplyTemplate(ShapeTemplate newTemplate)
+        {
+            template = newTemplate;
+            activeCells.Clear();
+            
+            switch (newTemplate)
+            {
+                case ShapeTemplate.SingleCell:
+                    gridWidth = gridHeight = 1;
+                    activeCells.Add(new Vector2Int(0, 0));
+                    break;
+                    
+                case ShapeTemplate.Rectangle:
+                    // Use current grid dimensions for rectangle
+                    for (int x = 0; x < gridWidth; x++)
+                    {
+                        for (int y = 0; y < gridHeight; y++)
+                        {
+                            activeCells.Add(new Vector2Int(x, y));
+                        }
+                    }
+                    break;
+                    
+                case ShapeTemplate.HorizontalLine:
+                    gridWidth = 3;
+                    gridHeight = 1;
+                    activeCells.Add(new Vector2Int(0, 0));
+                    activeCells.Add(new Vector2Int(1, 0));
+                    activeCells.Add(new Vector2Int(2, 0));
+                    break;
+                    
+                case ShapeTemplate.VerticalLine:
+                    gridWidth = 1;
+                    gridHeight = 3;
+                    activeCells.Add(new Vector2Int(0, 0));
+                    activeCells.Add(new Vector2Int(0, 1));
+                    activeCells.Add(new Vector2Int(0, 2));
+                    break;
+                    
+                case ShapeTemplate.Square2x2:
+                    gridWidth = gridHeight = 2;
+                    activeCells.Add(new Vector2Int(0, 0));
+                    activeCells.Add(new Vector2Int(1, 0));
+                    activeCells.Add(new Vector2Int(0, 1));
+                    activeCells.Add(new Vector2Int(1, 1));
+                    break;
+                    
+                case ShapeTemplate.LShape:
+                    gridWidth = gridHeight = 3;
+                    activeCells.Add(new Vector2Int(0, 0));
+                    activeCells.Add(new Vector2Int(0, 1));
+                    activeCells.Add(new Vector2Int(0, 2));
+                    activeCells.Add(new Vector2Int(1, 0));
+                    break;
+                    
+                case ShapeTemplate.TShape:
+                    gridWidth = gridHeight = 3;
+                    activeCells.Add(new Vector2Int(0, 1));
+                    activeCells.Add(new Vector2Int(1, 1));
+                    activeCells.Add(new Vector2Int(2, 1));
+                    activeCells.Add(new Vector2Int(1, 0));
+                    break;
+                    
+                case ShapeTemplate.Cross:
+                    gridWidth = gridHeight = 3;
+                    activeCells.Add(new Vector2Int(1, 0));
+                    activeCells.Add(new Vector2Int(0, 1));
+                    activeCells.Add(new Vector2Int(1, 1));
+                    activeCells.Add(new Vector2Int(2, 1));
+                    activeCells.Add(new Vector2Int(1, 2));
+                    break;
+                    
+                case ShapeTemplate.Circle:
+                    gridWidth = gridHeight = 4;
+                    // Simple circle approximation in 4x4 grid
+                    activeCells.Add(new Vector2Int(1, 0));
+                    activeCells.Add(new Vector2Int(2, 0));
+                    activeCells.Add(new Vector2Int(0, 1));
+                    activeCells.Add(new Vector2Int(1, 1));
+                    activeCells.Add(new Vector2Int(2, 1));
+                    activeCells.Add(new Vector2Int(3, 1));
+                    activeCells.Add(new Vector2Int(0, 2));
+                    activeCells.Add(new Vector2Int(1, 2));
+                    activeCells.Add(new Vector2Int(2, 2));
+                    activeCells.Add(new Vector2Int(3, 2));
+                    activeCells.Add(new Vector2Int(1, 3));
+                    activeCells.Add(new Vector2Int(2, 3));
+                    break;
+                    
+                case ShapeTemplate.Diamond:
+                    gridWidth = gridHeight = 4;
+                    // Diamond shape in 4x4 grid
+                    activeCells.Add(new Vector2Int(2, 0));
+                    activeCells.Add(new Vector2Int(1, 1));
+                    activeCells.Add(new Vector2Int(2, 1));
+                    activeCells.Add(new Vector2Int(3, 1));
+                    activeCells.Add(new Vector2Int(0, 2));
+                    activeCells.Add(new Vector2Int(1, 2));
+                    activeCells.Add(new Vector2Int(2, 2));
+                    activeCells.Add(new Vector2Int(1, 3));
+                    break;
+                    
+                case ShapeTemplate.Custom:
+                default:
+                    // Keep existing shape for custom
+                    break;
+            }
+            
+            UpdateOffsetsFromShape();
+            UpdateTimestamp();
+        }
+        
+        /// <summary>
+        /// Get occupied offsets, applying rotation if needed
+        /// </summary>
+        public Vector2Int[] GetOccupiedOffsets(int rotation = 0)
+        {
+            if (!rotatable || rotation == 0)
+                return occupiedOffsets;
+                
+            return RotateOffsets(occupiedOffsets, rotation);
+        }
+        
+        /// <summary>
+        /// Get expansion offsets, applying rotation if needed
+        /// </summary>
+        public Vector2Int[] GetExpansionOffsets(int rotation = 0)
+        {
+            if (!rotatable || rotation == 0 || !expansionRotatesWithIngredient)
+                return expansionOffsets;
+                
+            return RotateOffsets(expansionOffsets, rotation);
+        }
+        
+        /// <summary>
+        /// Rotate an array of offsets by 90-degree increments
+        /// </summary>
+        private Vector2Int[] RotateOffsets(Vector2Int[] offsets, int rotation)
+        {
+            if (offsets == null || offsets.Length == 0) return offsets;
+            
+            var rotated = new Vector2Int[offsets.Length];
+            int rotations = ((rotation % 360) / 90) % 4;
+            
+            for (int i = 0; i < offsets.Length; i++)
+            {
+                Vector2Int offset = offsets[i];
+                
+                for (int r = 0; r < rotations; r++)
+                {
+                    // Rotate 90 degrees clockwise: (x, y) -> (y, -x)
+                    offset = new Vector2Int(offset.y, -offset.x);
+                }
+                
+                rotated[i] = offset;
+            }
+            
+            return rotated;
+        }
+        
+        /// <summary>
+        /// Set occupied and expansion offsets from current shape data
+        /// </summary>
+        public void UpdateOffsetsFromShape()
+        {
+            var occupied = new List<Vector2Int>();
+            
+            foreach (var cell in activeCells)
+            {
+                // Convert to offset relative to pivot
+                Vector2Int offset = cell - pivot;
+                occupied.Add(offset);
+            }
+            
+            occupiedOffsets = occupied.ToArray();
+        }
+        
+        /// <summary>
+        /// Set expansion offsets manually (for editor use)
+        /// </summary>
+        public void SetExpansionOffsets(Vector2Int[] offsets)
+        {
+            expansionOffsets = offsets ?? new Vector2Int[0];
+            UpdateTimestamp();
         }
 
         /// <summary>
@@ -121,179 +360,6 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
         }
 
         /// <summary>
-        /// Apply a predefined shape template
-        /// </summary>
-        public void ApplyTemplate()
-        {
-            ApplyTemplate(template);
-        }
-
-        /// <summary>
-        /// Apply a specific shape template
-        /// </summary>
-        public void ApplyTemplate(ShapeTemplate shapeTemplate)
-        {
-            template = shapeTemplate;
-            activeCells.Clear();
-            
-            switch (template)
-            {
-                case ShapeTemplate.Rectangle:
-                    ApplyRectangleTemplate();
-                    break;
-                case ShapeTemplate.Cross:
-                    ApplyCrossTemplate();
-                    break;
-                case ShapeTemplate.LShape:
-                    ApplyLShapeTemplate();
-                    break;
-                case ShapeTemplate.TShape:
-                    ApplyTShapeTemplate();
-                    break;
-                case ShapeTemplate.ZShape:
-                    ApplyZShapeTemplate();
-                    break;
-                case ShapeTemplate.Circle:
-                    ApplyCircleTemplate();
-                    break;
-                case ShapeTemplate.Diamond:
-                    ApplyDiamondTemplate();
-                    break;
-                case ShapeTemplate.Custom:
-                    // Keep existing shape for custom
-                    break;
-            }
-            
-            UpdateTimestamp();
-        }
-
-        private void ApplyRectangleTemplate()
-        {
-            for (int x = 0; x < gridWidth; x++)
-            {
-                for (int y = 0; y < gridHeight; y++)
-                {
-                    activeCells.Add(new Vector2Int(x, y));
-                }
-            }
-        }
-
-        private void ApplyCrossTemplate()
-        {
-            int centerX = gridWidth / 2;
-            int centerY = gridHeight / 2;
-            
-            // Horizontal line
-            for (int x = 0; x < gridWidth; x++)
-            {
-                activeCells.Add(new Vector2Int(x, centerY));
-            }
-            
-            // Vertical line
-            for (int y = 0; y < gridHeight; y++)
-            {
-                activeCells.Add(new Vector2Int(centerX, y));
-            }
-        }
-
-        private void ApplyLShapeTemplate()
-        {
-            // Bottom row
-            for (int x = 0; x < gridWidth; x++)
-            {
-                activeCells.Add(new Vector2Int(x, 0));
-            }
-            
-            // Left column
-            for (int y = 0; y < gridHeight; y++)
-            {
-                activeCells.Add(new Vector2Int(0, y));
-            }
-        }
-
-        private void ApplyTShapeTemplate()
-        {
-            // Top row
-            for (int x = 0; x < gridWidth; x++)
-            {
-                activeCells.Add(new Vector2Int(x, gridHeight - 1));
-            }
-            
-            // Center column
-            int centerX = gridWidth / 2;
-            for (int y = 0; y < gridHeight; y++)
-            {
-                activeCells.Add(new Vector2Int(centerX, y));
-            }
-        }
-
-        private void ApplyZShapeTemplate()
-        {
-            if (gridWidth < 3 || gridHeight < 3) return;
-            
-            // Top row
-            for (int x = 0; x < gridWidth; x++)
-            {
-                activeCells.Add(new Vector2Int(x, gridHeight - 1));
-            }
-            
-            // Diagonal
-            int steps = Mathf.Min(gridWidth, gridHeight);
-            for (int i = 0; i < steps; i++)
-            {
-                int x = gridWidth - 1 - i;
-                int y = gridHeight - 1 - i;
-                if (x >= 0 && y >= 0)
-                {
-                    activeCells.Add(new Vector2Int(x, y));
-                }
-            }
-            
-            // Bottom row
-            for (int x = 0; x < gridWidth; x++)
-            {
-                activeCells.Add(new Vector2Int(x, 0));
-            }
-        }
-
-        private void ApplyCircleTemplate()
-        {
-            float centerX = (gridWidth - 1) / 2f;
-            float centerY = (gridHeight - 1) / 2f;
-            float radius = Mathf.Min(centerX, centerY);
-            
-            for (int x = 0; x < gridWidth; x++)
-            {
-                for (int y = 0; y < gridHeight; y++)
-                {
-                    float distance = Vector2.Distance(new Vector2(x, y), new Vector2(centerX, centerY));
-                    if (distance <= radius)
-                    {
-                        activeCells.Add(new Vector2Int(x, y));
-                    }
-                }
-            }
-        }
-
-        private void ApplyDiamondTemplate()
-        {
-            int centerX = gridWidth / 2;
-            int centerY = gridHeight / 2;
-            
-            for (int x = 0; x < gridWidth; x++)
-            {
-                for (int y = 0; y < gridHeight; y++)
-                {
-                    int manhattanDistance = Mathf.Abs(x - centerX) + Mathf.Abs(y - centerY);
-                    if (manhattanDistance <= Mathf.Min(centerX, centerY))
-                    {
-                        activeCells.Add(new Vector2Int(x, y));
-                    }
-                }
-            }
-        }
-
-        /// <summary>
         /// Check if a specific cell is active in the shape
         /// </summary>
         public bool IsCellActive(int x, int y)
@@ -336,7 +402,6 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
         public void FillShape()
         {
             activeCells.Clear();
-            ApplyRectangleTemplate();
         }
 
         /// <summary>
@@ -359,7 +424,6 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
             }
             
             activeCells = newActiveCells;
-            template = ShapeTemplate.Custom;
             UpdateTimestamp();
         }
 
@@ -404,7 +468,6 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
                 width = gridWidth,
                 height = gridHeight,
                 cells = activeCells.ToArray(),
-                template = template.ToString(),
                 color = ColorUtility.ToHtmlStringRGBA(shapeColor),
                 version = dataVersion
             };
@@ -424,11 +487,6 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
                 gridWidth = Mathf.Clamp(importData.width, 1, 8);
                 gridHeight = Mathf.Clamp(importData.height, 1, 8);
                 activeCells = new List<Vector2Int>(importData.cells);
-                
-                if (Enum.TryParse<ShapeTemplate>(importData.template, out var parsedTemplate))
-                {
-                    template = parsedTemplate;
-                }
                 
                 if (ColorUtility.TryParseHtmlString("#" + importData.color, out var parsedColor))
                 {
@@ -498,17 +556,5 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
         public string template;
         public string color;
         public int version;
-    }
-
-    public enum ShapeTemplate
-    {
-        Rectangle,
-        Cross,
-        LShape,
-        TShape,
-        ZShape,
-        Circle,
-        Diamond,
-        Custom
     }
 }

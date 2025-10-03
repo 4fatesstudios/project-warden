@@ -1,0 +1,954 @@
+/* Root Container */
+.root-container {
+    width: 100%;
+    height: 100%;
+    background-color: rgb(20, 15, 10);
+    background-image: url('project://database/Assets/UI/Textures/dark-texture-bg.png');
+    padding: 2%;
+    flex-direction: column;
+}
+
+/* Top Banner */
+.top-banner {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 2%;
+    padding: 1% 2%;
+    background-color: rgba(199, 166, 106, 0.1);
+    border-radius: 15px;
+    border-width: 2px;
+    border-color: rgb(199, 166, 106);
+    background-image: url('project://database/Assets/UI/Textures/ornate-frame.png');
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Title */
+.title {
+    font-size: 48px;
+    -unity-font-style: bold;
+    color: rgb(199, 166, 106);
+    -unity-text-align: middle-left;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    letter-spacing: 2px;
+    flex-grow: 1;
+}
+
+/* Top Buttons Container */
+.top-buttons {
+    flex-direction: row;
+    gap: 15px;
+    align-items: center;
+}
+
+/* Main Content */
+.main-content {
+    flex-direction: row;
+    flex-grow: 1;
+    justify-content: space-between;
+    gap: 2%;
+}
+
+/* Left Side */
+.left-side {
+    flex-direction: column;
+    width: 60%;
+    align-items: center;
+}
+
+/* Left Side Buttons */
+.left-side-buttons {
+    flex-direction: row;
+    gap: 15px;
+    margin-bottom: 2%;
+    align-self: flex-start;
+}
+
+/* Crafting Area - Grid + Craft Button Container */
+.crafting-area {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-grow: 1;
+    width: 100%;
+}
+
+/* Circular Buttons (Top Banner) */
+.circular-button {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: rgb(199, 166, 106);
+    border-width: 2px;
+    border-color: rgb(255, 215, 0);
+    font-size: 20px;
+    transition-duration: 0.2s;
+    transition-property: background-color, transform;
+}
+
+.circular-button:hover {
+    background-color: rgb(220, 186, 126);
+    transform: scale(1.1);
+}
+
+.circular-button:active {
+    background-color: rgb(179, 146, 86);
+    transform: scale(0.95);
+}
+
+/* Round Buttons (Left Side) */
+.round-button {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: rgb(199, 166, 106);
+    border-width: 2px;
+    border-color: rgb(255, 215, 0);
+    font-size: 24px;
+    transition-duration: 0.2s;
+    transition-property: background-color, transform;
+}
+
+.round-button:hover {
+    background-color: rgb(220, 186, 126);
+    transform: scale(1.1);
+}
+
+.round-button:active {
+    background-color: rgb(179, 146, 86);
+    transform: scale(0.95);
+}
+
+/* Grid Frame */
+.grid-frame {
+    width: 60%;
+    height: 0;
+    padding-bottom: 60%; /* Maintain 1:1 aspect ratio */
+    background-color: rgb(40, 30, 20);
+    border-width: 4px;
+    border-color: rgb(199, 166, 106);
+    border-radius: 10px;
+    background-image: url('project://database/Assets/UI/Textures/ornate-frame.png');
+    position: relative;
+    box-shadow: 0 0 20px rgba(199, 166, 106, 0.5);
+    margin-bottom: 2%;
+}
+
+.grid-viewport {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 5px;
+    overflow: hidden;
+    padding: 2%;
+    box-sizing: border-box;
+}
+
+/* Grid Tiles */
+.grid-tile {
+    position: absolute;
+    background-color: rgb(60, 50, 40);
+    border-width: 1px;
+    border-color: rgb(100, 80, 60);
+    border-radius: 3px;
+    transition-duration: 0.1s;
+    transition-property: background-color, border-color;
+    box-sizing: border-box;
+}
+
+.grid-tile:hover {
+    background-color: rgb(80, 70, 60);
+    border-color: rgb(199, 166, 106);
+}
+
+/* Grid States */
+.outer-ring-locked {
+    background-color: rgb(30, 25, 20);
+    border-color: rgb(50, 40, 30);
+    opacity: 0.5;
+}
+
+.outer-ring-unlocked {
+    background-color: rgb(60, 50, 40);
+    border-color: rgb(100, 80, 60);
+    opacity: 1.0;
+    box-shadow: 0 0 5px rgba(255, 215, 0, 0.3);
+}
+
+/* Placement Preview */
+.placement-preview-valid {
+    background-color: rgba(0, 255, 0, 0.3);
+    border-color: rgb(0, 255, 0);
+    border-width: 2px;
+}
+
+.placement-preview-invalid {
+    background-color: rgba(255, 0, 0, 0.3);
+    border-color: rgb(255, 0, 0);
+    border-width: 2px;
+}
+
+/* Expansion Highlight */
+.expansion-highlight {
+    background-color: rgba(255, 212, 74, 0.5);
+    border-color: rgb(255, 212, 74);
+    border-width: 2px;
+    box-shadow: 0 0 8px rgba(255, 212, 74, 0.8);
+}
+
+/* Craft Button - Centered below grid */
+.craft-button {
+    width: 200px;
+    height: 60px;
+    font-size: 24px;
+    -unity-font-style: bold;
+    border-radius: 30px;
+    transition-duration: 0.2s;
+    transition-property: background-color, transform, box-shadow;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+    align-self: center;
+}
+
+.craft-button-enabled {
+    background-color: rgb(255, 215, 0);
+    border-color: rgb(255, 255, 255);
+    color: rgb(20, 15, 10);
+    border-width: 3px;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+}
+
+.craft-button-enabled:hover {
+    background-color: rgb(255, 235, 20);
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+}
+
+.craft-button-enabled:active {
+    background-color: rgb(235, 195, 0);
+    transform: scale(0.98);
+}
+
+.craft-button-disabled {
+    background-color: rgb(80, 70, 60);
+    border-color: rgb(60, 50, 40);
+    color: rgb(120, 110, 100);
+    border-width: 2px;
+}
+
+/* Right Side */
+.right-side {
+    width: 35%;
+    flex-direction: column;
+}
+
+/* Right Container */
+.right-container {
+    width: 100%;
+    background-color: rgba(245, 235, 220, 0.95);
+    border-radius: 10px;
+    padding: 2%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    flex-direction: column;
+    background-image: url('project://database/Assets/UI/Textures/parchment-bg.png');
+    flex-grow: 1;
+    margin-bottom: 15px;
+}
+
+/* Advanced Filter Area */
+.advanced-filter-area {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    gap: 10px;
+    padding: 10px;
+    background-color: rgba(220, 186, 126, 0.3);
+    border-radius: 8px;
+    border-width: 1px;
+    border-color: rgb(180, 160, 140);
+}
+
+.sort-dropdown {
+    min-width: 120px;
+    height: 35px;
+    border-radius: 8px;
+    border-width: 2px;
+    border-color: rgb(180, 160, 140);
+    background-color: rgb(255, 250, 240);
+    font-size: 14px;
+    color: rgb(60, 50, 40);
+}
+
+.inventory-toggle-button {
+    width: 40px;
+    height: 40px;
+    border-radius: 20px;
+    background-color: rgb(199, 166, 106);
+    border-width: 2px;
+    border-color: rgb(179, 146, 86);
+    font-size: 18px;
+    transition-duration: 0.2s;
+    transition-property: background-color, transform;
+}
+
+.inventory-toggle-button:hover {
+    background-color: rgb(220, 186, 126);
+    transform: scale(1.1);
+}
+
+.inventory-toggle-button:active {
+    background-color: rgb(255, 215, 0);
+    border-color: rgb(255, 235, 20);
+}
+
+/* Main Content Area */
+.main-content-area {
+    flex-direction: row;
+    flex-grow: 1;
+    gap: 15px;
+}
+
+/* Ingredient Grid Container */
+.ingredient-grid-container {
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+/* Inventory Section */
+.inventory-section {
+    flex-direction: column;
+    margin-top: 20px;
+    padding: 15px;
+    background-color: rgba(245, 235, 220, 0.8);
+    border-radius: 10px;
+    border-width: 2px;
+    border-color: rgb(180, 160, 140);
+    gap: 10px;
+}
+
+.inventory-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: rgb(60, 50, 40);
+    -unity-text-align: middle-center;
+    margin-bottom: 10px;
+}
+
+.potion-slot {
+    background-color: rgb(220, 240, 255);
+    border-color: rgb(150, 190, 220);
+}
+
+.potion-slot:hover {
+    background-color: rgb(200, 230, 255);
+    border-color: rgb(100, 150, 200);
+}
+
+/* Container Separator */
+.container-separator {
+    height: 20px;
+    width: 100%;
+    background-color: transparent;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+/* Search Area */
+.search-area {
+    margin-bottom: 2%;
+}
+
+.search-field {
+    height: 35px;
+    border-radius: 8px;
+    border-width: 2px;
+    border-color: rgb(180, 160, 140);
+    background-color: rgb(255, 250, 240);
+    padding-left: 10px;
+    padding-right: 10px;
+    font-size: 14px;
+    color: rgb(60, 50, 40);
+    flex-grow: 1;
+    max-width: 200px;
+}
+
+.search-field:focus {
+    border-color: rgb(255, 215, 0);
+    background-color: rgb(255, 255, 240);
+}
+
+/* Sort Dropdown */
+.sort-dropdown {
+    height: 35px;
+    border-radius: 8px;
+    border-width: 2px;
+    border-color: rgb(180, 160, 140);
+    background-color: rgb(255, 250, 240);
+    font-size: 14px;
+    color: rgb(60, 50, 40);
+    min-width: 120px;
+}
+
+/* Inventory Toggle Button */
+.inventory-toggle-button {
+    width: 35px;
+    height: 35px;
+    border-radius: 8px;
+    background-color: rgb(199, 166, 106);
+    border-color: rgb(150, 120, 80);
+    border-width: 2px;
+    font-size: 18px;
+    -unity-text-align: middle-center;
+    transition-duration: 0.15s;
+    transition-property: background-color, transform;
+}
+
+.inventory-toggle-button:hover {
+    background-color: rgb(219, 186, 126);
+    transform: scale(1.05);
+}
+
+.inventory-toggle-button:active {
+    background-color: rgb(179, 146, 86);
+    transform: scale(0.95);
+}
+
+/* Filter Tabs */
+.filters {
+    flex-direction: column;
+    gap: 8px;
+    min-width: 60px;
+    align-self: flex-start;
+}
+
+.filter-tab {
+    width: 50px;
+    height: 60px;
+    border-radius: 8px;
+    background-color: rgb(199, 166, 106);
+    border-width: 2px;
+    border-color: rgb(179, 146, 86);
+    font-size: 16px;
+    transition-duration: 0.2s;
+    transition-property: background-color, transform;
+    -unity-text-align: middle-center;
+}
+
+.filter-tab:hover {
+    background-color: rgb(220, 186, 126);
+    transform: scale(1.05);
+}
+
+.filter-tab-active {
+    background-color: rgb(255, 215, 0);
+    border-color: rgb(255, 235, 20);
+    transform: scale(1.05);
+}
+
+.filter-tab-active:hover {
+    background-color: rgb(255, 235, 20);
+}
+
+/* Slot Grid */
+.slot-grid {
+    flex-direction: column;
+    gap: 8px;
+    flex-grow: 1;
+}
+
+.slot-row {
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.ingredient-slot {
+    width: 80px;
+    height: 80px;
+    background-color: rgb(240, 240, 240);
+    border-width: 2px;
+    border-color: rgb(200, 200, 200);
+    border-radius: 10px;
+    transition-duration: 0.2s;
+    transition-property: background-color, border-color, transform;
+    flex-shrink: 0;
+    position: relative;
+    overflow: visible;
+}
+
+/* New Star Indicator */
+.new-star {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    width: 20px;
+    height: 20px;
+    background-color: rgb(255, 215, 0);
+    border-radius: 10px;
+    border-width: 2px;
+    border-color: rgb(255, 255, 255);
+    font-size: 12px;
+    color: rgb(255, 255, 255);
+    -unity-text-align: middle-center;
+    -unity-font-style: bold;
+}
+
+.ingredient-slot:hover {
+    background-color: rgb(250, 250, 250);
+    border-color: rgb(199, 166, 106);
+    transform: scale(1.05);
+}
+
+.ingredient-slot:active {
+    background-color: rgb(230, 230, 230);
+    transform: scale(0.95);
+}
+
+/* Remove duplicate new-star definition */
+
+/* Additional UI Elements */
+.sort-dropdown {
+    min-width: 120px;
+    height: 35px;
+    border-radius: 8px;
+    border-width: 2px;
+    border-color: rgb(180, 160, 140);
+    background-color: rgb(255, 250, 240);
+    font-size: 14px;
+    color: rgb(60, 50, 40);
+}
+
+.inventory-toggle-button {
+    width: 40px;
+    height: 40px;
+    border-radius: 20px;
+    background-color: rgb(199, 166, 106);
+    border-width: 2px;
+    border-color: rgb(179, 146, 86);
+    font-size: 18px;
+    transition-duration: 0.2s;
+    transition-property: background-color, transform;
+}
+
+.inventory-toggle-button:hover {
+    background-color: rgb(220, 186, 126);
+    transform: scale(1.1);
+}
+
+.inventory-toggle-button:active {
+    background-color: rgb(255, 215, 0);
+    border-color: rgb(255, 235, 20);
+}
+
+/* Main Content Area */
+.main-content-area {
+    flex-direction: row;
+    flex-grow: 1;
+    gap: 15px;
+}
+
+/* Ingredient Grid Container */
+.ingredient-grid-container {
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+/* Inventory Section */
+.inventory-section {
+    flex-direction: column;
+    margin-top: 20px;
+    padding: 15px;
+    background-color: rgba(245, 235, 220, 0.8);
+    border-radius: 10px;
+    border-width: 2px;
+    border-color: rgb(180, 160, 140);
+    gap: 10px;
+}
+
+/* Container Separator */
+.container-separator {
+    height: 20px;
+    width: 100%;
+    background-color: transparent;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+/* Search Field */
+.search-field {
+    height: 35px;
+    border-radius: 8px;
+    border-width: 2px;
+    border-color: rgb(180, 160, 140);
+    background-color: rgb(255, 250, 240);
+    padding-left: 10px;
+    padding-right: 10px;
+    font-size: 14px;
+    color: rgb(60, 50, 40);
+    flex-grow: 1;
+    max-width: 200px;
+}
+
+.search-field:focus {
+    border-color: rgb(255, 215, 0);
+    background-color: rgb(255, 255, 240);
+}
+
+/* Filter Tabs */
+.filters {
+    flex-direction: column;
+    gap: 8px;
+    min-width: 60px;
+    align-self: flex-start;
+}
+
+.filter-tab {
+    width: 50px;
+    height: 60px;
+    border-radius: 8px;
+    background-color: rgb(199, 166, 106);
+    border-width: 2px;
+    border-color: rgb(179, 146, 86);
+    font-size: 16px;
+    transition-duration: 0.2s;
+    transition-property: background-color, transform;
+    -unity-text-align: middle-center;
+}
+
+.filter-tab:hover {
+    background-color: rgb(220, 186, 126);
+    transform: scale(1.05);
+}
+
+.filter-tab-active {
+    background-color: rgb(255, 215, 0);
+    border-color: rgb(255, 235, 20);
+    transform: scale(1.05);
+}
+
+.filter-tab-active:hover {
+    background-color: rgb(255, 235, 20);
+}
+
+/* Slot Grid */
+.slot-grid {
+    flex-direction: column;
+    gap: 8px;
+    flex-grow: 1;
+}
+
+.slot-row {
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.potion-slot {
+    border-color: rgb(128, 0, 128);
+}
+
+.potion-slot:hover {
+    border-color: rgb(148, 20, 148);
+}
+
+/* Rarity borders */
+.rarity-common {
+    border-color: rgb(192, 192, 192);
+}
+
+.rarity-uncommon {
+    border-color: rgb(0, 255, 0);
+    box-shadow: 0 0 3px rgba(0, 255, 0, 0.3);
+}
+
+.rarity-rare {
+    border-color: rgb(74, 144, 226);
+    box-shadow: 0 0 3px rgba(74, 144, 226, 0.3);
+}
+
+.rarity-epic {
+    border-color: rgb(163, 53, 238);
+    box-shadow: 0 0 3px rgba(163, 53, 238, 0.3);
+}
+
+.rarity-legendary {
+    border-color: rgb(255, 128, 0);
+    box-shadow: 0 0 3px rgba(255, 128, 0, 0.3);
+}
+
+.rarity-mythic {
+    border-color: rgb(255, 215, 0);
+    box-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+}
+
+/* Page Controls */
+.page-controls {
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 2%;
+}
+
+.page-arrow {
+    width: 30px;
+    height: 30px;
+    background-color: rgb(199, 166, 106);
+    border-color: rgb(179, 146, 86);
+    border-width: 1px;
+    border-radius: 5px;
+    font-size: 14px;
+    margin: 0 1%;
+    transition-duration: 0.1s;
+    transition-property: background-color;
+}
+
+.page-arrow:hover {
+    background-color: rgb(220, 186, 126);
+}
+
+.page-arrow:active {
+    background-color: rgb(179, 146, 86);
+}
+
+.page-number {
+    font-size: 14px;
+    -unity-font-style: bold;
+    color: rgb(80, 60, 40);
+    min-width: 50px;
+    -unity-text-align: middle-center;
+}
+
+/* Item Banner */
+.item-banner {
+    width: 100%;
+    height: 80px;
+    background-color: rgba(245, 235, 220, 0.95);
+    border-radius: 10px;
+    padding: 15px;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    background-image: url('project://database/Assets/UI/Textures/parchment-bg.png');
+}
+
+.item-info {
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.item-name {
+    font-size: 20px;
+    -unity-font-style: bold;
+    color: rgb(40, 30, 20);
+    margin-bottom: 5px;
+}
+
+.item-description {
+    font-size: 14px;
+    color: rgb(80, 60, 40);
+    white-space: normal;
+}
+
+.item-rarity {
+    flex-direction: column;
+    align-items: center;
+}
+
+.rarity-label {
+    font-size: 12px;
+    -unity-font-style: bold;
+    margin-bottom: 5px;
+    color: rgb(60, 50, 40);
+}
+
+.rarity-badge {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border-width: 2px;
+}
+
+/* Inventory Container */
+.inventory-container {
+    position: absolute;
+    left: 2%;
+    top: 100px;
+    width: 300px;
+    background-color: rgba(245, 235, 220, 0.98);
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+    border-width: 2px;
+    border-color: rgb(199, 166, 106);
+    background-image: url('project://database/Assets/UI/Textures/parchment-bg.png');
+}
+
+.inventory-title {
+    font-size: 18px;
+    -unity-font-style: bold;
+    color: rgb(40, 30, 20);
+    margin-bottom: 15px;
+    -unity-text-align: middle-center;
+}
+
+/* Responsive adjustments */
+@media (min-width: 2000px) {
+    .title {
+        font-size: 54px;
+    }
+    
+    .grid-frame {
+        width: 30%;
+        padding-bottom: 30%;
+    }
+    
+    .ingredient-slot {
+        width: 70px;
+        height: 70px;
+    }
+    
+    .circular-button {
+        width: 45px;
+        height: 45px;
+        font-size: 18px;
+    }
+    
+    .round-button {
+        width: 55px;
+        height: 55px;
+        font-size: 22px;
+    }
+}
+
+@media (max-width: 1600px) {
+    .title {
+        font-size: 42px;
+    }
+    
+    .grid-frame {
+        width: 32%;
+        padding-bottom: 32%;
+    }
+    
+    .ingredient-slot {
+        width: 75px;
+        height: 75px;
+    }
+}
+
+@media (max-width: 1200px) {
+    .main-content {
+        flex-direction: column;
+    }
+    
+    .left-side {
+        width: 100%;
+        margin-bottom: 3%;
+    }
+    
+    .right-side {
+        width: 100%;
+    }
+    
+    .right-container {
+        width: 100%;
+    }
+    
+    .title {
+        font-size: 36px;
+    }
+    
+    .top-banner {
+        flex-direction: column;
+        gap: 15px;
+        align-items: center;
+        text-align: center;
+    }
+    
+    .grid-frame {
+        width: 50%;
+        padding-bottom: 50%;
+    }
+    
+    .ingredient-slot {
+        width: 90px;
+        height: 90px;
+    }
+    
+    .circular-button {
+        width: 60px;
+        height: 60px;
+        font-size: 26px;
+    }
+    
+    .round-button {
+        width: 70px;
+        height: 70px;
+        font-size: 30px;
+    }
+}
+
+@media (max-width: 800px) {
+    .title {
+        font-size: 28px;
+    }
+    
+    .root-container {
+        padding: 1%;
+    }
+    
+    .top-banner {
+        padding: 2%;
+        flex-direction: column;
+    }
+    
+    .top-buttons {
+        gap: 10px;
+    }
+    
+    .left-side-buttons {
+        justify-content: center;
+        gap: 20px;
+    }
+    
+    .grid-frame {
+        width: 70%;
+        padding-bottom: 70%;
+    }
+    
+    .ingredient-slot {
+        width: 100px;
+        height: 100px;
+    }
+    
+    .filter-tab {
+        width: 50px;
+        height: 70px;
+        font-size: 18px;
+    }
+    
+    .filter-tab:hover,
+    .filter-tab-active {
+        width: 55px;
+    }
+    
+    .page-arrow {
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
+    }
+    
+    .item-name {
+        font-size: 18px;
+    }
+    
+    .item-description {
+        font-size: 12px;
+    }
+}
+}
