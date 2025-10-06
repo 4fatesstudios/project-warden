@@ -82,7 +82,7 @@ namespace FourFatesStudios.ProjectWarden.GameSystems
                 PlayerController.OnBack += targetingState.OnBack;
             }
         }
-
+        
         public void OnDisableInputs(){
             //Disable partySelectActionState inputs
             PlayerController.OnOpenSkills -= partySelectActionState.OpenSkillsList;

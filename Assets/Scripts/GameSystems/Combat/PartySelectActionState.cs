@@ -42,19 +42,20 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.Combat
                 availableClassSkills.Add(pair);
             }
             
-            availableItems = new List<Item>();
-            
-            for (int i = 0; i < 2; i++) {
-                var item = ScriptableObject.CreateInstance<Item>();
-                item.ItemName = "Item " + i;
-            
-                availableItems.Add(item);
-            }
+            // availableItems = new List<Item>();
+            //
+            // for (int i = 0; i < 2; i++) {
+            //     var item = ScriptableObject.CreateInstance<Item>();
+            //     item.ItemName = "Item " + i;
+            //
+            //     availableItems.Add(item);
+            // }
             
             BindInputs();
         }
 
         public void OpenSkillsList() {
+            Debug.Log("here");
             combatUIManager.OpenSkillsList();
             combatUIManager.GenerateSkillsButtons(availableClassSkills);
             combatUIManager.FocusSkillButton(currentSkillIndex);
