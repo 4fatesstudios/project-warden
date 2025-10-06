@@ -69,8 +69,8 @@ namespace FourFatesStudios.ProjectWarden.GameSystems
                 PlayerController.OnAttack += partySelectActionState.SelectTarget;
                 PlayerController.OnBack += partySelectActionState.OnBack;
                 
-                PlayerController.OnCycleUp += partySelectActionState.CycleUp;
-                PlayerController.OnCycleDown += partySelectActionState.CycleDown;
+                // PlayerController.OnCycleUp += partySelectActionState.CycleUp;
+                // PlayerController.OnCycleDown += partySelectActionState.CycleDown;
                 // PlayerController.OnCycleLeft += partySelectActionState.CycleLeft;
                 // PlayerController.OnCycleRight += partySelectActionState.CycleRight;
                 PlayerController.OnSelect += partySelectActionState.Select;

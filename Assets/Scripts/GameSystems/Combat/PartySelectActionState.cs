@@ -79,36 +79,8 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.Combat
         }
         
         public void OnBack() {
-            if (!combatUIManager.skillsWrapper.ClassListContains("ListHidden") ||
-                !combatUIManager.itemsWrapper.ClassListContains("ListHidden")) {
-                combatUIManager.RemoveUIMenu();
-                currentSkillIndex = 0;
-                playerController.EnableInputMapOnly(ActionMap.ActionSelection);
-            }
-            else
-                combatManager.SwitchState(combatManager.partyState);
+            combatManager.SwitchState(combatManager.partyState);
         }
-
-        public void CycleUp() {
-            currentSkillIndex = (currentSkillIndex - 1 + skillButtonsList.Count) % skillButtonsList.Count;
-            combatUIManager.FocusSkillButton(currentSkillIndex);
-            Debug.Log(currentSkillIndex);
-        }
-        
-        public void CycleDown() {
-            currentSkillIndex = (currentSkillIndex + 1) % skillButtonsList.Count;
-            combatUIManager.FocusSkillButton(currentSkillIndex);
-            Debug.Log(currentSkillIndex);
-        }
-
-        // public void CycleLeft() {
-        //     
-        // }
-        //
-        // public void CycleRight() {
-        //     
-        // }
-        //
         
         public void Select() {
             // buttonsList[currentSkillIndex];
