@@ -1,0 +1,57 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" 
+        xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" 
+        noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" 
+        editor-extension-mode="False">
+    <Style src="project://database/Assets/UI Toolkit/Potions_UI.uss?fileID=7433441132597879392&amp;guid=0123456789abcdef&amp;type=3#Potions_UI" />
+    
+    <!-- Main Container -->
+    <ui:VisualElement name="potions-container" class="potions-main-container">
+        
+        <!-- Header Section -->
+        <ui:VisualElement name="potions-header" class="potions-header">
+            <ui:Label text="Completed Potions" name="potions-title" class="potions-title" />
+            <ui:VisualElement name="potions-stats" class="potions-stats">
+                <ui:Label text="Total: 0" name="total-count" class="stat-label" />
+                <ui:Label text="Categories: 0" name="category-count" class="stat-label" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        
+        <!-- Filter and Search Section -->
+        <ui:VisualElement name="potions-controls" class="potions-controls">
+            <ui:TextField placeholder-text="Search potions..." name="search-field" class="search-field" />
+            <ui:DropdownField label="Category:" name="category-filter" class="category-filter" />
+            <ui:DropdownField label="Sort by:" name="sort-dropdown" class="sort-dropdown" />
+        </ui:VisualElement>
+        
+        <!-- Potions List -->
+        <ui:ScrollView name="potions-scroll" class="potions-scroll">
+            <ui:ListView name="potions-list" class="potions-list" 
+                        show-border="true" 
+                        show-alternating-row-backgrounds="ContentOnly"
+                        selection-type="Single"
+                        item-height="80" />
+        </ui:ScrollView>
+        
+        <!-- Selected Potion Details Panel -->
+        <ui:VisualElement name="potion-details" class="potion-details">
+            <ui:Label text="Select a potion to view details" name="details-title" class="details-title" />
+            <ui:ScrollView name="details-scroll" class="details-scroll">
+                <ui:VisualElement name="details-content" class="details-content">
+                    <ui:VisualElement name="potion-icon-container" class="icon-container">
+                        <ui:VisualElement name="potion-icon" class="potion-icon" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="potion-info" class="potion-info">
+                        <ui:Label text="Potion Name" name="potion-name" class="potion-name" />
+                        <ui:Label text="Description" name="potion-description" class="potion-description" />
+                        <ui:Label text="Effects:" name="effects-label" class="effects-label" />
+                        <ui:VisualElement name="effects-list" class="effects-list" />
+                        <ui:Label text="Ingredients:" name="ingredients-label" class="ingredients-label" />
+                        <ui:VisualElement name="ingredients-list" class="ingredients-list" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:ScrollView>
+        </ui:VisualElement>
+        
+    </ui:VisualElement>
+</ui:UXML>

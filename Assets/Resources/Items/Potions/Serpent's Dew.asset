@@ -1,0 +1,49 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 53efbf4862b0b5b4797dee728a66223a, type: 3}
+  m_Name: Serpent's Dew
+  m_EditorClassIdentifier: 
+  id: 
+  itemName: Serpent's Dew
+  itemDescription: Empty Description
+  itemRarity: 1
+  itemIcon: {fileID: 814221718, guid: d4ee4ae08a3c01b4188d6c2cbb1f35ef, type: 3}
+  itemPotionType: 1
+  infusionBundle:
+    infusions:
+    - {fileID: 11400000, guid: cb1d239c98a377240872ece2b29e296a, type: 2}
+  rarity: 0
+  tone: 2
+  bottleType: 0
+  isCustomPotion: 0
+  primaryColor: {r: 0, g: 0, b: 1, a: 1}
+  secondaryColor: {r: 1, g: 1, b: 1, a: 1}
+  turbidity: 1
+  hasGlow: 0
+  hasBubbles: 0
+  hasParticles: 1
+  compatibleAbilities: 
+  canBeUsedInCombat: 1
+  canBeUsedOutOfCombat: 0
+  canBeUsedInExploration: 0
+  maxStackSize: 10
+  shelfLife: 7200
+  degradesOverTime: 1
+  consumeTime: 2
+  isKeyItem: 0
+  isThrowable: 0
+  throwRange: 10
+  affectsArea: 0
+  areaRadius: 3
+  craftQuality: 1
+  crafterName: 
+  sourceIngredients: []

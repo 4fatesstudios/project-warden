@@ -4,7 +4,7 @@ using UnityEditor;
 using UnityEngine;
 
 [CustomEditor(typeof(FloorGenerator))]
-public class FloorGeneratorEditor : Editor
+public class FloorGeneratorEditor : UnityEditor.Editor
 {
     
     public override void OnInspectorGUI() {

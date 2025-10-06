@@ -9,7 +9,7 @@ namespace FourFatesStudios.ProjectWarden.Interactions.Interactables
         [SerializeField] private string dialogueKnotName;
         private DialogueManager dm;
 
-        private void Awake()
+        private void Start()
         {
             dm = GameObject.FindWithTag("DialogueManager").GetComponent<DialogueManager>();
         }

@@ -3,7 +3,7 @@
     <ui:VisualElement class="menu-root">
         <ui:Label text="Alchemy Menu" class="menu-title" />
         <ui:Button name="potionCraftingButton" text="Potion Brewing" class="menu-button" />
-        <ui:Button name="potionEnhancingButton" text="Potion Infusing" class="menu-button" />
+        <ui:Button name="potionEnhancingButton" text="Bulk Crafting" class="menu-button" />
         <ui:Button name="backButton" text="Back" class="menu-button" />
     </ui:VisualElement>
 </ui:UXML>

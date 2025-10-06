@@ -15,7 +15,18 @@ namespace FourFatesStudios.ProjectWarden.Effects
         public EffectTimingInfo EffectTiming { get => effectTiming; set => effectTiming = value; }
         
         public void Apply(CombatController source, List<CombatController> targets, float scale = 1) {
-            throw new System.NotImplementedException();
+            foreach (var target in targets)
+            {
+                if (target != null)
+                {
+                    int finalHealAmount = Mathf.RoundToInt(baseHeal * scale);
+                    Debug.Log($"Applying heal over time buff to {target.gameObject.name}: {finalHealAmount} HP");
+                    Debug.Log($"Effect timing: {effectTiming}");
+                    
+                    // You can extend this to integrate with your buff/heal over time system:
+                    // target.GetComponent<BuffComponent>()?.ApplyHealOverTime(finalHealAmount, effectTiming);
+                }
+            }
         }
     }
 }

@@ -1,0 +1,225 @@
+/* Alchemy Book Main UI Styles */
+
+.book-container {
+    width: 100%;
+    height: 100%;
+    background-color: rgba(40, 30, 20, 0.95);
+    padding: 20px;
+    border-radius: 10px;
+    border-width: 3px;
+    border-color: rgb(139, 112, 79);
+}
+
+.book-header {
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.book-title {
+    font-size: 28px;
+    color: rgb(255, 223, 186);
+    -unity-font-style: bold;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.tabs-container {
+    flex-direction: row;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.tab-button {
+    margin: 0 5px;
+    padding: 8px 16px;
+    background-color: rgb(101, 67, 33);
+    border-color: rgb(139, 112, 79);
+    border-width: 2px;
+    border-radius: 8px 8px 0 0;
+    color: rgb(255, 223, 186);
+    font-size: 14px;
+    transition-duration: 0.2s;
+}
+
+.tab-button:hover {
+    background-color: rgb(139, 112, 79);
+}
+
+.tab-button.active-tab {
+    background-color: rgb(160, 130, 98);
+    color: rgb(40, 30, 20);
+    -unity-font-style: bold;
+}
+
+.search-container {
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 15px;
+    padding: 10px;
+    background-color: rgba(101, 67, 33, 0.5);
+    border-radius: 8px;
+}
+
+.search-field {
+    flex-grow: 1;
+    max-width: 300px;
+    margin-right: 10px;
+    background-color: rgb(160, 130, 98);
+    border-color: rgb(139, 112, 79);
+    border-width: 2px;
+    border-radius: 4px;
+    color: rgb(40, 30, 20);
+    padding: 5px;
+}
+
+.search-button, .clear-button {
+    padding: 5px 10px;
+    background-color: rgb(101, 67, 33);
+    border-color: rgb(139, 112, 79);
+    border-width: 2px;
+    border-radius: 4px;
+    color: rgb(255, 223, 186);
+    margin-left: 5px;
+}
+
+.search-button:hover, .clear-button:hover {
+    background-color: rgb(139, 112, 79);
+}
+
+.book-pages {
+    flex-direction: row;
+    justify-content: center;
+    align-items: stretch;
+    height: 60%;
+    margin-bottom: 20px;
+    background-color: rgb(248, 240, 227);
+    border-radius: 10px;
+    border-width: 3px;
+    border-color: rgb(139, 112, 79);
+    padding: 20px;
+}
+
+.book-cover {
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    background-color: rgb(101, 67, 33);
+    border-radius: 8px;
+    padding: 40px;
+    border-width: 2px;
+    border-color: rgb(139, 112, 79);
+}
+
+.front-cover {
+    display: flex;
+}
+
+.back-cover {
+    display: none;
+}
+
+.cover-title {
+    font-size: 24px;
+    color: rgb(255, 223, 186);
+    -unity-font-style: bold;
+    text-align: middle-center;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.cover-subtitle {
+    font-size: 16px;
+    color: rgb(200, 180, 160);
+    text-align: middle-center;
+    margin-bottom: 30px;
+    font-style: italic;
+}
+
+.open-button, .close-button {
+    padding: 12px 24px;
+    background-color: rgb(160, 130, 98);
+    border-color: rgb(139, 112, 79);
+    border-width: 3px;
+    border-radius: 8px;
+    color: rgb(40, 30, 20);
+    font-size: 16px;
+    -unity-font-style: bold;
+}
+
+.open-button:hover, .close-button:hover {
+    background-color: rgb(200, 180, 160);
+}
+
+.book-page {
+    width: 50%;
+    background-color: rgb(255, 249, 240);
+    margin: 0 10px;
+    border-radius: 5px;
+    border-width: 1px;
+    border-color: rgb(200, 180, 160);
+    display: none;
+}
+
+.left-page, .right-page {
+    padding: 15px;
+}
+
+.page-content {
+    height: 100%;
+}
+
+.navigation-container {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: rgba(101, 67, 33, 0.5);
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.nav-button {
+    padding: 8px 16px;
+    background-color: rgb(101, 67, 33);
+    border-color: rgb(139, 112, 79);
+    border-width: 2px;
+    border-radius: 6px;
+    color: rgb(255, 223, 186);
+    font-size: 14px;
+}
+
+.nav-button:hover {
+    background-color: rgb(139, 112, 79);
+}
+
+.nav-button:disabled {
+    background-color: rgb(80, 60, 40);
+    color: rgb(120, 100, 80);
+}
+
+.page-counter {
+    color: rgb(255, 223, 186);
+    font-size: 14px;
+    -unity-font-style: bold;
+}
+
+.book-footer {
+    flex-direction: row;
+    justify-content: center;
+}
+
+.footer-button {
+    padding: 10px 20px;
+    background-color: rgb(101, 67, 33);
+    border-color: rgb(139, 112, 79);
+    border-width: 2px;
+    border-radius: 6px;
+    color: rgb(255, 223, 186);
+    font-size: 14px;
+}
+
+.footer-button:hover {
+    background-color: rgb(139, 112, 79);
+}

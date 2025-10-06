@@ -5,7 +5,7 @@ using UnityEngine;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Databases;
 
 [CustomEditor(typeof(GlobalAreasDatabase))]
-public class GlobalSpacesDatabaseEditor : Editor {
+public class GlobalSpacesDatabaseEditor : UnityEditor.Editor {
     public override void OnInspectorGUI() {
         DrawDefaultInspector();
 

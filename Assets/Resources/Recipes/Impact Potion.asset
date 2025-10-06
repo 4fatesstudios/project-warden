@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bec2dfcc48522c94f83cd7593ed604f5, type: 3}
+  m_Name: Impact Potion
+  m_EditorClassIdentifier: 
+  id: 
+  itemName: Healing Pot
+  itemDescription: A beginner difficulty recipe.
+  itemRarity: 0
+  itemIcon: {fileID: 0}
+  recipe1: {fileID: 0}
+  inputIngredient1: {fileID: 11400000, guid: 84b0183348c9f164b92bdafcf500d571, type: 2}
+  inputIngredient2: {fileID: 11400000, guid: d194b4e7033c81a489abf6db78c70009, type: 2}
+  inputIngredient3: {fileID: 11400000, guid: 6a52147714a48ff419e7b6d5c32332f4, type: 2}
+  outputPotion: {fileID: 11400000, guid: 302920b723c10514f825f3f04195db88, type: 2}
+  outputQuantity: 1
+  isKeyRecipe: 0
+  difficulty: 0
+  requiredPositions: []
+  bonusPatterns: []
+  aspectSynergies: []
+  minimumEfficiency: 0.6
+  gridRequirements:
+    minimumIngredientsUsed: 2
+    maximumIngredientsUsed: 10
+    requiresSymmetry: 0
+    requiresCompactness: 0
+    compactnessThreshold: 0.7
+  allowsIngredientInteractions: 1
+  forbiddenIngredients: []
+  alternativeIngredients: []
+  customSuccessEvaluator: {fileID: 0}
+  recipeHints: Arrange ingredients to create a stable reaction.
