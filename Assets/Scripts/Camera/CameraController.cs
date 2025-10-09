@@ -1,4 +1,6 @@
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Unity.Cinemachine;
 
@@ -38,8 +40,8 @@ namespace FourFatesStudios.ProjectWarden.Camera
         [SerializeField] private float perspectiveFOV = 60f;
 
         [Header("Combat Camera Views (Perspective Only")] 
-        [SerializeField] private Transform perspectiveCamRoot;
-        
+        [SerializeField] private List<ViewEntry> viewEntries = new();
+        private Dictionary<CombatCamView, CameraViewData> viewData;
 
         private bool inPerspective = false;
         private float blendTimer;
@@ -50,6 +52,9 @@ namespace FourFatesStudios.ProjectWarden.Camera
             if (!mainCam) mainCam = UnityEngine.Camera.main;
             brain = mainCam.GetComponent<CinemachineBrain>();
             
+            // set up dic
+            viewData = viewEntries.ToDictionary(v => v.view, v => v.data);
+            
             // start in ortho view
             SetProjection(false, instant: true);
             SetActiveCam(isoCam);
@@ -58,6 +63,23 @@ namespace FourFatesStudios.ProjectWarden.Camera
         private void Update() {
             if (Input.GetKeyDown(KeyCode.Tab)) {
                 TogglePerspective();
+            }
+            
+            if (Input.GetKeyDown(KeyCode.Alpha1)) {
+                StopAllCoroutines();
+                StartCoroutine(LerpCamera(perspectiveCam, viewData.GetValueOrDefault(CombatCamView.Default), 0.5f));
+            }
+            if (Input.GetKeyDown(KeyCode.Alpha2)) {
+                StopAllCoroutines();
+                StartCoroutine(LerpCamera(perspectiveCam, viewData.GetValueOrDefault(CombatCamView.CharacterSelect), 0.5f));
+            }
+            if (Input.GetKeyDown(KeyCode.Alpha3)) {
+                StopAllCoroutines();
+                StartCoroutine(LerpCamera(perspectiveCam, viewData.GetValueOrDefault(CombatCamView.ActionSelect), 0.5f));
+            }
+            if (Input.GetKeyDown(KeyCode.Alpha4)) {
+                StopAllCoroutines();
+                StartCoroutine(LerpCamera(perspectiveCam, viewData.GetValueOrDefault(CombatCamView.SkillSelect), 0.5f));
             }
 
             if (blendTimer < blendDuration) {
@@ -87,17 +109,13 @@ namespace FourFatesStudios.ProjectWarden.Camera
 
         private IEnumerator LerpCamera(CinemachineCamera cam, CameraViewData data, float duration)
         {
-            // Get the Body-stage component and cast to the Position Composer
             var bodyComp = cam.GetCinemachineComponent(CinemachineCore.Stage.Body);
             var composer = bodyComp as CinemachinePositionComposer;
             if (composer == null)
-                yield break; // no composer present, abort
+                yield break;
 
-            Vector3 startOffset = composer.TargetOffset;   // current tracked offset
+            Vector3 startOffset = composer.TargetOffset;
             Vector3 endOffset = data.positionOffset;
-
-            Vector3 startRot = cam.transform.localEulerAngles;
-            Vector3 endRot = data.rotationOffset;
 
             float t = 0f;
             while (t < 1f)
@@ -106,16 +124,11 @@ namespace FourFatesStudios.ProjectWarden.Camera
                 float lerpT = Mathf.SmoothStep(0f, 1f, t);
 
                 composer.TargetOffset = Vector3.Lerp(startOffset, endOffset, lerpT);
-                cam.transform.localEulerAngles = Vector3.Lerp(startRot, endRot, lerpT);
-
                 yield return null;
             }
 
-            // Ensure exact final values
             composer.TargetOffset = endOffset;
-            cam.transform.localEulerAngles = endRot;
         }
-
 
         private void SetActiveCam(CinemachineCamera cam) {
             isoCam.Priority = (cam == isoCam) ? 10 : 0;
