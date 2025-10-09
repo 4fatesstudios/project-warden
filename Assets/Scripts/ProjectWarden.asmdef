@@ -6,7 +6,8 @@
         "UniTask",
         "Unity.TextMeshPro",
         "Ink-Libraries",
-        "InkEditor"
+        "InkEditor",
+        "Unity.Cinemachine"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
