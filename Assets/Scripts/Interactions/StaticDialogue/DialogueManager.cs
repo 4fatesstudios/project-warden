@@ -2,6 +2,7 @@ using UnityEngine;
 using Ink.Runtime;
 using UnityEngine.InputSystem;
 using FourFatesStudios.ProjectWarden.Characters.Components;
+using FourFatesStudios.ProjectWarden.QuestSystem;
 using System.Collections;
 using System.Threading;
 
@@ -22,6 +23,48 @@ namespace FourFatesStudios.ProjectWarden.Interactions.StaticDialogue
         {
             story = new Story(inkJson.text);
             pm = GameObject.FindWithTag("Player").GetComponent<PlayerMovement>();
+            
+            // Bind external functions for quest system
+            BindQuestExternalFunctions();
+        }
+
+        /// <summary>
+        /// Binds quest-related external functions to the Ink story
+        /// </summary>
+        private void BindQuestExternalFunctions()
+        {
+            // Function to check if a quest can be accepted
+            story.BindExternalFunction("can_accept_quest", (string questId) =>
+            {
+                if (QuestManager.instance != null)
+                {
+                    bool canAccept = QuestManager.instance.CanAcceptQuest(questId);
+                    Debug.Log($"Checking if quest '{questId}' can be accepted: {canAccept}");
+                    return canAccept;
+                }
+                Debug.LogWarning("QuestManager instance not found when checking quest acceptance");
+                return false;
+            });
+
+            // Function to accept a quest
+            story.BindExternalFunction("accept_quest", (string questId) =>
+            {
+                if (QuestManager.instance != null)
+                {
+                    bool accepted = QuestManager.instance.TryAcceptQuestById(questId);
+                    Debug.Log($"Attempting to accept quest '{questId}': {accepted}");
+                    
+                    // Trigger quest event
+                    if (QuestEventSystem.instance != null)
+                    {
+                        QuestEventSystem.instance.questEvents.QuestAcceptanceAttempt(questId, accepted);
+                    }
+                    
+                    return accepted;
+                }
+                Debug.LogWarning("QuestManager instance not found when accepting quest");
+                return false;
+            });
         }
 
         private void OnEnable()
