@@ -50,14 +50,18 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu
         public Ingredient ingredient;
         public GridPosition position;
         public List<GridPosition> occupiedCells;
+        public List<GridPosition> expansionCells;
         public bool isOverlapping;
         public List<string> interactions;
+        public int rotation;
 
-        public PlacedIngredient(Ingredient ingredient, GridPosition position)
+        public PlacedIngredient(Ingredient ingredient, GridPosition position, int rotation = 0)
         {
             this.ingredient = ingredient;
             this.position = position;
+            this.rotation = rotation;
             this.occupiedCells = new List<GridPosition>();
+            this.expansionCells = new List<GridPosition>();
             this.isOverlapping = false;
             this.interactions = new List<string>();
 
@@ -67,6 +71,16 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu
                 for (int y = 0; y < ingredient.GridHeight; y++)
                 {
                     occupiedCells.Add(new GridPosition(position.x + x, position.y + y));
+                }
+            }
+            
+            // Calculate expansion cells if this ingredient unlocks additional space
+            if (ingredient.UnlocksAdditionalSpace && ingredient.ShapeData != null)
+            {
+                var expansionOffsets = ingredient.ShapeData.GetExpansionOffsets(rotation);
+                foreach (var offset in expansionOffsets)
+                {
+                    expansionCells.Add(new GridPosition(position.x + offset.x, position.y + offset.y));
                 }
             }
         }

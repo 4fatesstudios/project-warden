@@ -74,7 +74,7 @@ namespace FourFatesStudios.ProjectWarden.Editor
         
         private string newRecipeName = "";
         private RecipeDifficulty newRecipeDifficulty = RecipeDifficulty.Standard;
-        private Potion newRecipeOutputPotion;
+        private Item newRecipeOutputItem;
         
         // Integrated visual grid editor state
         private const int CELL_SIZE = 30;
@@ -1237,9 +1237,17 @@ namespace FourFatesStudios.ProjectWarden.Editor
                 
                 EditorGUILayout.Space();
                 
-                var outputProp = serializedObject.FindProperty("outputPotion");
+                var outputProp = serializedObject.FindProperty("outputItem");
                 if (outputProp != null)
-                    EditorGUILayout.PropertyField(outputProp);
+                {
+                    var currentItem = outputProp.objectReferenceValue as Item;
+                    var newItem = DrawPotionOrIngredientField("Output Item", currentItem, 0);
+                    
+                    if (newItem != currentItem)
+                    {
+                        outputProp.objectReferenceValue = newItem;
+                    }
+                }
                 
                 if (serializedObject.targetObject != null)
                 {
@@ -1280,8 +1288,8 @@ namespace FourFatesStudios.ProjectWarden.Editor
             
             GUILayout.Label("=", GUILayout.Width(20));
             
-            // Output potion
-            DrawPotionSlot(recipe.OutputPotion, "Result");
+            // Output item (potion or ingredient)
+            DrawItemSlot(recipe.OutputItem, "Result");
             
             EditorGUILayout.EndHorizontal();
             EditorGUILayout.EndVertical();
@@ -1335,6 +1343,100 @@ namespace FourFatesStudios.ProjectWarden.Editor
             }
             
             EditorGUILayout.EndVertical();
+        }
+
+        private void DrawItemSlot(Item item, string label)
+        {
+            EditorGUILayout.BeginVertical("Box", GUILayout.Width(80));
+            GUILayout.Label(label, EditorStyles.centeredGreyMiniLabel);
+            
+            if (item != null)
+            {
+                if (item.ItemIcon != null)
+                {
+                    GUILayout.Label(item.ItemIcon.texture, GUILayout.Width(60), GUILayout.Height(60));
+                }
+                else
+                {
+                    GUILayout.Box("No Icon", GUILayout.Width(60), GUILayout.Height(60));
+                }
+                
+                // Show item type indicator
+                string itemType = item is Potion ? "Potion" : item is Ingredient ? "Ingredient" : "Item";
+                GUILayout.Label($"{item.ItemName} ({itemType})", EditorStyles.centeredGreyMiniLabel);
+            }
+            else
+            {
+                GUILayout.Box("No Result", GUILayout.Width(60), GUILayout.Height(60));
+            }
+            
+            EditorGUILayout.EndVertical();
+        }
+
+        private int selectedOutputType = 0; // 0 = Potion, 1 = Synthetic Ingredient
+        
+        private Item DrawPotionOrIngredientField(string label, Item currentValue, float labelWidth = 100)
+        {
+            EditorGUILayout.BeginHorizontal();
+            
+            if (labelWidth > 0)
+            {
+                GUILayout.Label(label, GUILayout.Width(labelWidth));
+            }
+            else
+            {
+                EditorGUILayout.PrefixLabel(label);
+            }
+            
+            // Update selected type based on current value only if not null
+            if (currentValue != null)
+            {
+                selectedOutputType = currentValue is Potion ? 0 : 1;
+            }
+            
+            // Type selection toolbar
+            int newType = GUILayout.Toolbar(selectedOutputType, new string[] { "Potion", "Synthetic" }, GUILayout.Width(150));
+            
+            // Update if changed
+            if (newType != selectedOutputType)
+            {
+                selectedOutputType = newType;
+                currentValue = null; // Clear when switching types
+            }
+            
+            Item newValue = currentValue;
+            
+            // Show appropriate object field
+            if (selectedOutputType == 0)
+            {
+                // Potion picker
+                newValue = EditorGUILayout.ObjectField(newValue as Potion, typeof(Potion), false) as Item;
+            }
+            else
+            {
+                // Ingredient picker with Synthetic validation
+                var currentIngredient = newValue as Ingredient;
+                var selectedIngredient = EditorGUILayout.ObjectField(currentIngredient, typeof(Ingredient), false) as Ingredient;
+                
+                // Validate that it's a Synthetic ingredient
+                if (selectedIngredient != null && selectedIngredient.IngredientArchetype != IngredientArchetype.Synthetic)
+                {
+                    EditorUtility.DisplayDialog(
+                        "Invalid Ingredient Type",
+                        $"Only Synthetic ingredients can be used as recipe outputs.\n\n" +
+                        $"Selected: {selectedIngredient.ItemName} ({selectedIngredient.IngredientArchetype})\n\n" +
+                        $"💡 Tip: Use the search bar in the picker and type 'Synthetic' or the ingredient name.",
+                        "OK"
+                    );
+                    selectedIngredient = currentIngredient; // Revert
+                }
+                
+                newValue = selectedIngredient;
+            }
+            
+            EditorGUILayout.EndHorizontal();
+            
+            return newValue;
         }
 
         private void DrawPotionsTab()
@@ -2588,10 +2690,7 @@ namespace FourFatesStudios.ProjectWarden.Editor
             newRecipeDifficulty = (RecipeDifficulty)EditorGUILayout.EnumPopup(newRecipeDifficulty);
             EditorGUILayout.EndHorizontal();
             
-            EditorGUILayout.BeginHorizontal();
-            GUILayout.Label("Output Potion:", GUILayout.Width(100));
-            newRecipeOutputPotion = (Potion)EditorGUILayout.ObjectField(newRecipeOutputPotion, typeof(Potion), false);
-            EditorGUILayout.EndHorizontal();
+            newRecipeOutputItem = DrawPotionOrIngredientField("Output Item:", newRecipeOutputItem);
             
             GUILayout.Space(10);
             
@@ -2940,15 +3039,15 @@ namespace FourFatesStudios.ProjectWarden.Editor
 
                 try
                 {
-                    var outputPotionProp = serializedObject.FindProperty("outputPotion");
-                    if (outputPotionProp != null)
-                        EditorGUILayout.PropertyField(outputPotionProp);
+                    var outputItemProp = serializedObject.FindProperty("outputItem");
+                    if (outputItemProp != null)
+                        EditorGUILayout.PropertyField(outputItemProp);
                     else
-                        EditorGUILayout.LabelField("Output Potion: Property not found");
+                        EditorGUILayout.LabelField("Output Item: Property not found");
                 }
                 catch (System.Exception e)
                 {
-                    EditorGUILayout.LabelField($"Output Potion: Error - {e.Message}");
+                    EditorGUILayout.LabelField($"Output Item: Error - {e.Message}");
                 }
 
                 try
@@ -4858,9 +4957,17 @@ namespace FourFatesStudios.ProjectWarden.Editor
             serializedRecipe.FindProperty("difficulty").enumValueIndex = (int)newRecipeDifficulty;
             serializedRecipe.FindProperty("outputQuantity").intValue = 1;
             
-            if (newRecipeOutputPotion != null)
+            if (newRecipeOutputItem != null)
             {
-                serializedRecipe.FindProperty("outputPotion").objectReferenceValue = newRecipeOutputPotion;
+                // Validate that it's a Potion or Ingredient
+                if (newRecipeOutputItem is Potion || newRecipeOutputItem is Ingredient)
+                {
+                    serializedRecipe.FindProperty("outputItem").objectReferenceValue = newRecipeOutputItem;
+                }
+                else
+                {
+                    Debug.LogWarning($"Output item must be either a Potion or Ingredient. Current type: {newRecipeOutputItem.GetType().Name}");
+                }
             }
             
             serializedRecipe.ApplyModifiedProperties();
@@ -4894,7 +5001,7 @@ namespace FourFatesStudios.ProjectWarden.Editor
             
             newRecipeName = "";
             newRecipeDifficulty = RecipeDifficulty.Standard;
-            newRecipeOutputPotion = null;
+            newRecipeOutputItem = null;
         }
         
         private void DeleteSelectedIngredient()

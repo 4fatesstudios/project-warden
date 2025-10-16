@@ -129,6 +129,15 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
             {
                 shapeData = new IngredientShapeData(gridWidth, gridHeight);
             }
+            
+            // Ensure shape data is properly initialized
+            if (shapeData.GetOccupiedOffsets().Length == 0)
+            {
+                // Initialize with default single cell if no shape data exists
+                shapeData.SetCellActive(0, 0, true);
+                shapeData.UpdateOffsetsFromShape();
+            }
+            
             return shapeData.ToBoolArray();
         }
         

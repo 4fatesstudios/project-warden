@@ -115,6 +115,9 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
                 
             lastModified = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
             InitializeExpansions();
+            
+            // Auto-validate and fix any issues during initialization
+            ValidateAndFix();
         }
         
         private void InitializeExpansions()
@@ -246,6 +249,20 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
         /// </summary>
         public Vector2Int[] GetOccupiedOffsets(int rotation = 0)
         {
+            // Auto-fix: Ensure offsets are initialized and valid
+            if (occupiedOffsets == null || occupiedOffsets.Length == 0)
+            {
+                Debug.LogWarning("IngredientShapeData: Occupied offsets missing, regenerating from shape data");
+                UpdateOffsetsFromShape();
+            }
+            
+            // Double-check after update - if still empty, force default
+            if (occupiedOffsets == null || occupiedOffsets.Length == 0)
+            {
+                Debug.LogWarning("IngredientShapeData: Still no occupied offsets after update, using default single cell");
+                occupiedOffsets = new Vector2Int[] { Vector2Int.zero };
+            }
+            
             if (!rotatable || rotation == 0)
                 return occupiedOffsets;
                 
@@ -296,14 +313,56 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
         {
             var occupied = new List<Vector2Int>();
             
+            // Auto-fix: If no active cells, default to single cell at origin
+            if (activeCells == null || activeCells.Count == 0)
+            {
+                Debug.LogWarning($"IngredientShapeData: No active cells found, defaulting to single cell at origin");
+                activeCells = new List<Vector2Int> { Vector2Int.zero };
+                
+                // Ensure grid dimensions are valid
+                if (gridWidth < 1) gridWidth = 1;
+                if (gridHeight < 1) gridHeight = 1;
+            }
+            
+            // Auto-fix: Validate all active cells are within grid bounds
+            var validCells = new List<Vector2Int>();
             foreach (var cell in activeCells)
             {
-                // Convert to offset relative to pivot
+                if (cell.x >= 0 && cell.x < gridWidth && cell.y >= 0 && cell.y < gridHeight)
+                {
+                    validCells.Add(cell);
+                }
+                else
+                {
+                    Debug.LogWarning($"IngredientShapeData: Cell {cell} is outside grid bounds {gridWidth}x{gridHeight}, removing");
+                }
+            }
+            
+            // If all cells were invalid, add default cell
+            if (validCells.Count == 0)
+            {
+                validCells.Add(Vector2Int.zero);
+                Debug.LogWarning($"IngredientShapeData: All cells were invalid, added default cell at origin");
+            }
+            
+            activeCells = validCells;
+            
+            // Generate occupied offsets relative to pivot
+            foreach (var cell in activeCells)
+            {
                 Vector2Int offset = cell - pivot;
                 occupied.Add(offset);
             }
             
             occupiedOffsets = occupied.ToArray();
+            
+            // Auto-fix: Initialize expansion offsets if null
+            if (expansionOffsets == null)
+            {
+                expansionOffsets = new Vector2Int[0];
+            }
+            
+            UpdateTimestamp();
         }
         
         /// <summary>
@@ -345,6 +404,20 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
         /// </summary>
         public bool[,] ToBoolArray()
         {
+            // Auto-fix: Ensure shape data is properly initialized
+            if (activeCells == null || activeCells.Count == 0)
+            {
+                Debug.LogWarning("IngredientShapeData: No active cells when converting to bool array, auto-fixing");
+                UpdateOffsetsFromShape(); // This will create default cells
+            }
+            
+            // Auto-fix: Ensure grid dimensions are valid
+            if (gridWidth < 1 || gridHeight < 1)
+            {
+                Debug.LogWarning($"IngredientShapeData: Invalid grid dimensions {gridWidth}x{gridHeight}, setting to 1x1");
+                gridWidth = gridHeight = 1;
+            }
+            
             var result = new bool[gridWidth, gridHeight];
             
             foreach (var cell in activeCells)
@@ -353,6 +426,27 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
                     cell.y >= 0 && cell.y < gridHeight)
                 {
                     result[cell.x, cell.y] = true;
+                }
+            }
+            
+            // Auto-fix: If no valid cells were found, ensure at least one cell is active
+            bool hasActiveCell = false;
+            for (int x = 0; x < gridWidth && !hasActiveCell; x++)
+            {
+                for (int y = 0; y < gridHeight && !hasActiveCell; y++)
+                {
+                    if (result[x, y]) hasActiveCell = true;
+                }
+            }
+            
+            if (!hasActiveCell)
+            {
+                Debug.LogWarning("IngredientShapeData: No valid cells in bool array, setting origin cell to active");
+                result[0, 0] = true;
+                // Also update the active cells list to match
+                if (!activeCells.Contains(Vector2Int.zero))
+                {
+                    activeCells.Add(Vector2Int.zero);
                 }
             }
             
@@ -525,25 +619,90 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
         }
 
         /// <summary>
-        /// Auto-fix any invalid data
+        /// Auto-fix any invalid data with comprehensive validation
         /// </summary>
         public void ValidateAndFix()
         {
+            bool wasModified = false;
+            
+            // Fix grid dimensions
+            int originalWidth = gridWidth;
+            int originalHeight = gridHeight;
             gridWidth = Mathf.Clamp(gridWidth, 1, 8);
             gridHeight = Mathf.Clamp(gridHeight, 1, 8);
             
-            // Remove invalid cells
+            if (gridWidth != originalWidth || gridHeight != originalHeight)
+            {
+                wasModified = true;
+                Debug.LogWarning($"IngredientShapeData: Fixed grid dimensions from {originalWidth}x{originalHeight} to {gridWidth}x{gridHeight}");
+            }
+            
+            // Initialize active cells if null
+            if (activeCells == null)
+            {
+                activeCells = new List<Vector2Int>();
+                wasModified = true;
+            }
+            
+            // Remove invalid cells and track if any were removed
+            int originalCellCount = activeCells.Count;
             activeCells.RemoveAll(cell => 
                 cell.x < 0 || cell.x >= gridWidth || 
                 cell.y < 0 || cell.y >= gridHeight);
+                
+            if (activeCells.Count != originalCellCount)
+            {
+                wasModified = true;
+                Debug.LogWarning($"IngredientShapeData: Removed {originalCellCount - activeCells.Count} invalid cells");
+            }
             
             // If no cells are active, create a default 1x1 shape
             if (activeCells.Count == 0)
             {
                 activeCells.Add(new Vector2Int(0, 0));
+                wasModified = true;
+                // Only log warning in editor, not at runtime to reduce console spam
+                #if UNITY_EDITOR
+                Debug.LogWarning("IngredientShapeData: No valid cells found, added default cell at origin");
+                #endif
             }
             
-            UpdateTimestamp();
+            // Validate and fix pivot position
+            Vector2Int originalPivot = pivot;
+            pivot = new Vector2Int(
+                Mathf.Clamp(pivot.x, 0, gridWidth - 1),
+                Mathf.Clamp(pivot.y, 0, gridHeight - 1)
+            );
+            
+            if (pivot != originalPivot)
+            {
+                wasModified = true;
+                Debug.LogWarning($"IngredientShapeData: Fixed pivot from {originalPivot} to {pivot}");
+            }
+            
+            // Auto-fix: Regenerate offsets if they're missing or invalid
+            if (occupiedOffsets == null || occupiedOffsets.Length == 0 || occupiedOffsets.Length != activeCells.Count)
+            {
+                UpdateOffsetsFromShape();
+                wasModified = true;
+                Debug.LogWarning("IngredientShapeData: Regenerated occupied offsets");
+            }
+            
+            // Initialize expansion offsets if null
+            if (expansionOffsets == null)
+            {
+                expansionOffsets = new Vector2Int[0];
+                wasModified = true;
+            }
+            
+            if (wasModified)
+            {
+                UpdateTimestamp();
+                // Only log in editor, not at runtime
+                #if UNITY_EDITOR
+                Debug.Log("IngredientShapeData: Auto-fixed shape data inconsistencies");
+                #endif
+            }
         }
     }
 

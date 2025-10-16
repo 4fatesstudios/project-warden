@@ -3,7 +3,7 @@
     width: 100%;
     height: 100%;
     background-color: rgb(20, 15, 10);
-    background-image: url('project://database/Assets/UI/Textures/dark-texture-bg.png');
+    /* background-image: url('project://database/Assets/UI/Textures/dark-texture-bg.png'); - texture not found */
     padding: 2%;
     flex-direction: column;
 }
@@ -16,12 +16,6 @@
     width: 100%;
     margin-bottom: 2%;
     padding: 1% 2%;
-    background-color: rgba(199, 166, 106, 0.1);
-    border-radius: 15px;
-    border-width: 2px;
-    border-color: rgb(199, 166, 106);
-    background-image: url('project://database/Assets/UI/Textures/ornate-frame.png');
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 /* Title */
@@ -29,17 +23,16 @@
     font-size: 48px;
     -unity-font-style: bold;
     color: rgb(199, 166, 106);
-    -unity-text-align: middle-left;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
-    letter-spacing: 2px;
+    -unity-text-align: middle-center;
     flex-grow: 1;
 }
 
 /* Top Buttons Container */
 .top-buttons {
     flex-direction: row;
-    gap: 15px;
-    align-items: center;
+    align-items: flex-start;
+    margin-left: 15px;
+    margin-right: 15px;
 }
 
 /* Main Content */
@@ -47,22 +40,39 @@
     flex-direction: row;
     flex-grow: 1;
     justify-content: space-between;
-    gap: 2%;
+    margin-left: 2%;
+    margin-right: 2%;
 }
 
 /* Left Side */
 .left-side {
-    flex-direction: column;
     width: 60%;
+    flex-direction: row;
+    align-items: stretch;
+}
+
+/* Left Vertical Banner */
+.left-vertical-banner {
+    width: 80px;
+    /*background-color: rgba(199, 166, 106, 0.9);*/
+    border-radius: 10px;
+    margin-right: 2%;
+    padding: 2%;
+    flex-direction: column;
+    justify-content: center;
     align-items: center;
+    /*border-width: 3px;
+    border-color: rgb(179, 146, 86);*/
+    /* background-image: url('project://database/Assets/UI/Textures/ornate-frame.png'); - texture not found */
 }
 
 /* Left Side Buttons */
 .left-side-buttons {
-    flex-direction: row;
-    gap: 15px;
-    margin-bottom: 2%;
-    align-self: flex-start;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 10px;
+    margin-top: 10px;
 }
 
 /* Crafting Area - Grid + Craft Button Container */
@@ -84,17 +94,17 @@
     border-color: rgb(255, 215, 0);
     font-size: 20px;
     transition-duration: 0.2s;
-    transition-property: background-color, transform;
+    transition-property: background-color;
 }
 
 .circular-button:hover {
     background-color: rgb(220, 186, 126);
-    transform: scale(1.1);
+    /* transform: scale(1.1); - not supported in Unity USS */
 }
 
 .circular-button:active {
     background-color: rgb(179, 146, 86);
-    transform: scale(0.95);
+    /* transform: scale(0.95); - not supported in Unity USS */
 }
 
 /* Round Buttons (Left Side) */
@@ -107,76 +117,347 @@
     border-color: rgb(255, 215, 0);
     font-size: 24px;
     transition-duration: 0.2s;
-    transition-property: background-color, transform;
+    transition-property: background-color;
+    margin-bottom: 15px;
 }
+
+/* Remove last-child pseudo-class - not supported in Unity USS */
 
 .round-button:hover {
     background-color: rgb(220, 186, 126);
-    transform: scale(1.1);
+    /* transform: scale(1.1); - not supported in Unity USS */
 }
 
 .round-button:active {
     background-color: rgb(179, 146, 86);
-    transform: scale(0.95);
+    /* transform: scale(0.95); - not supported in Unity USS */
 }
 
 /* Grid Frame */
 .grid-frame {
-    width: 60%;
-    height: 0;
-    padding-bottom: 60%; /* Maintain 1:1 aspect ratio */
+    width: 70%;
+    height: 70%; /* Use direct height instead of padding-bottom hack */
     background-color: rgb(40, 30, 20);
     border-width: 4px;
     border-color: rgb(199, 166, 106);
     border-radius: 10px;
-    background-image: url('project://database/Assets/UI/Textures/ornate-frame.png');
-    position: relative;
-    box-shadow: 0 0 20px rgba(199, 166, 106, 0.5);
+    /* background-image: url('project://database/Assets/UI/Textures/ornate-frame.png'); - texture not found */
+    /* position: relative; - not fully supported in Unity USS */
     margin-bottom: 2%;
 }
 
 .grid-viewport {
     width: 100%;
     height: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
     background-color: rgba(0, 0, 0, 0.3);
     border-radius: 5px;
-    overflow: hidden;
     padding: 2%;
-    box-sizing: border-box;
+    /* Allow absolute positioning for dynamically created grid tiles */
+    position: relative;
 }
 
-/* Grid Tiles */
+/* Grid Tiles - Flexbox Layout */
+.grid-row {
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2px;
+}
+
 .grid-tile {
+    /* Absolute positioning for dynamic grid creation */
     position: absolute;
-    background-color: rgb(60, 50, 40);
+    width: 40px;
+    height: 40px;
+    background-color: rgb(100, 95, 90);
     border-width: 1px;
-    border-color: rgb(100, 80, 60);
+    border-color: rgb(140, 130, 120);
     border-radius: 3px;
     transition-duration: 0.1s;
     transition-property: background-color, border-color;
-    box-sizing: border-box;
 }
 
 .grid-tile:hover {
-    background-color: rgb(80, 70, 60);
+    background-color: rgb(120, 115, 110);
     border-color: rgb(199, 166, 106);
 }
 
 /* Grid States */
 .outer-ring-locked {
-    background-color: rgb(30, 25, 20);
-    border-color: rgb(50, 40, 30);
+    background-color: rgb(70, 65, 60);
+    border-color: rgb(90, 80, 70);
     opacity: 0.5;
 }
 
 .outer-ring-unlocked {
-    background-color: rgb(60, 50, 40);
-    border-color: rgb(100, 80, 60);
+    background-color: rgb(100, 95, 90);
+    border-color: rgb(140, 130, 120);
     opacity: 1.0;
-    box-shadow: 0 0 5px rgba(255, 215, 0, 0.3);
+}
+
+/* Ingredient placement states */
+.grid-tile.empty {
+    background-color: rgb(100, 95, 90);
+    border-color: rgb(140, 130, 120);
+}
+
+.grid-tile.filled {
+    background-color: rgb(80, 120, 160);
+    border-color: rgb(120, 180, 220);
+    border-width: 3px;
+}
+
+/* Aspect-based ingredient colors */
+.grid-tile.aspect-scorch {
+    background-color: rgb(200, 80, 80);
+    border-color: rgb(255, 120, 120);
+    box-shadow: 0px 0px 8px rgba(255, 120, 120, 0.4);
+}
+
+.grid-tile.aspect-frigid {
+    background-color: rgb(80, 130, 200);
+    border-color: rgb(120, 170, 255);
+    box-shadow: 0px 0px 8px rgba(120, 170, 255, 0.4);
+}
+
+.grid-tile.aspect-corporeal {
+    background-color: rgb(130, 150, 80);
+    border-color: rgb(170, 200, 120);
+    box-shadow: 0px 0px 8px rgba(170, 200, 120, 0.4);
+}
+
+.grid-tile.aspect-arc {
+    background-color: rgb(180, 180, 80);
+    border-color: rgb(220, 220, 120);
+    box-shadow: 0px 0px 8px rgba(220, 220, 120, 0.4);
+}
+
+.grid-tile.aspect-divine {
+    background-color: rgb(150, 130, 180);
+    border-color: rgb(190, 170, 220);
+    box-shadow: 0px 0px 8px rgba(190, 170, 220, 0.4);
+}
+
+.grid-tile.aspect-caustic {
+    background-color: rgb(230, 150, 50);
+    border-color: rgb(255, 190, 90);
+    box-shadow: 0px 0px 8px rgba(255, 190, 90, 0.4);
+}
+
+/* Complete Button Enhanced */
+.complete-button {
+    width: 200px;
+    height: 60px;
+    background-color: rgb(199, 166, 106);
+    border-width: 4px;
+    border-color: rgb(255, 215, 0);
+    border-radius: 12px;
+    font-size: 20px;
+    -unity-font-style: bold;
+    color: rgb(40, 30, 20);
+    margin-top: 20px;
+    transition-duration: 0.2s;
+    transition-property: background-color, border-color, box-shadow;
+    /* Add subtle glow effect */
+    box-shadow: 0px 0px 15px rgba(255, 215, 0, 0.3);
+}
+
+.complete-button:hover {
+    background-color: rgb(220, 186, 126);
+    border-color: rgb(255, 235, 60);
+    box-shadow: 0px 0px 20px rgba(255, 215, 0, 0.5);
+    /* Add subtle scale effect simulation with padding */
+    padding: 2px;
+}
+
+.complete-button:active {
+    background-color: rgb(179, 146, 86);
+    box-shadow: 0px 0px 10px rgba(255, 215, 0, 0.2);
+}
+
+.complete-button:disabled {
+    background-color: rgb(100, 80, 60);
+    border-color: rgb(120, 100, 80);
+    color: rgb(80, 70, 60);
+    opacity: 0.6;
+    box-shadow: none;
+}
+
+.complete-button-disabled {
+    background-color: rgb(100, 80, 60);
+    border-color: rgb(120, 100, 80);
+    color: rgb(80, 70, 60);
+    opacity: 0.6;
+    box-shadow: none;
+}
+
+/* Add glowing effect for enabled complete button */
+.complete-button-enabled {
+    box-shadow: 0px 0px 25px rgba(255, 215, 0, 0.6);
+    animation: glow 2s ease-in-out infinite alternate;
+}
+
+/* Pulsing animation for the complete button when ready */
+@keyframes glow {
+    from {
+        box-shadow: 0px 0px 15px rgba(255, 215, 0, 0.4);
+    }
+    to {
+        box-shadow: 0px 0px 30px rgba(255, 215, 0, 0.8);
+    }
+}
+
+/* Enhanced Grid Frame with Ornamental Look */
+.grid-frame {
+    width: 70%;
+    height: 70%;
+    background-color: rgb(40, 30, 20);
+    border-width: 6px;
+    border-color: rgb(199, 166, 106);
+    border-radius: 15px;
+    margin-bottom: 2%;
+    /* Add inner shadow effect with inset borders */
+    box-shadow: inset 0px 0px 10px rgba(0, 0, 0, 0.5);
+}
+
+/* Enhanced Grid Viewport */
+.grid-viewport {
+    width: 100%;
+    height: 100%;
+    background-color: rgba(20, 15, 10, 0.8);
+    border-radius: 8px;
+    padding: 3%;
+    position: relative;
+    border-width: 2px;
+    border-color: rgb(100, 80, 60);
+}
+
+/* Enhanced Grid Tiles */
+.grid-tile {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    background-color: rgb(60, 50, 40);
+    border-width: 2px;
+    border-color: rgb(100, 80, 60);
+    border-radius: 5px;
+    transition-duration: 0.15s;
+    transition-property: background-color, border-color, box-shadow;
+}
+
+.grid-tile:hover {
+    background-color: rgb(80, 70, 60);
+    border-color: rgb(199, 166, 106);
+    /* Add subtle glow effect */
+    box-shadow: 0px 0px 8px rgba(199, 166, 106, 0.3);
+}
+
+/* Drop Zone States */
+.drop-zone-active {
+    border-color: rgb(255, 215, 0);
+    box-shadow: 0px 0px 15px rgba(255, 215, 0, 0.4);
+}
+
+/* Drag Preview Enhancements */
+.drag-preview {
+    opacity: 0.9;
+    z-index: 1000;
+}
+
+.drag-preview-valid {
+    opacity: 0.8;
+}
+
+.drag-preview-invalid {
+    opacity: 0.5;
+    /* Add red tint for invalid placement */
+    background-color: rgba(255, 50, 50, 0.2);
+}
+
+/* Enhanced Item Slots */
+.ingredient-slot {
+    width: 80px;
+    height: 80px;
+    background-color: rgb(60, 50, 40);
+    border-width: 3px;
+    border-color: rgb(120, 100, 80);
+    border-radius: 8px;
+    transition-duration: 0.15s;
+    transition-property: background-color, border-color, box-shadow;
+    font-size: 12px;
+    -unity-font-style: bold;
+    color: rgb(200, 180, 140);
+    -unity-text-align: middle-center;
+}
+
+.ingredient-slot:hover {
+    background-color: rgb(80, 70, 60);
+    border-color: rgb(199, 166, 106);
+    box-shadow: 0px 0px 12px rgba(199, 166, 106, 0.4);
+}
+
+.ingredient-slot:active {
+    background-color: rgb(100, 90, 70);
+    border-color: rgb(255, 215, 0);
+}
+
+/* Enhanced Medieval Border Styling */
+.ornate-border {
+    border-width: 4px;
+    border-color: rgb(199, 166, 106);
+    background-color: rgb(40, 30, 20);
+    border-radius: 12px;
+    /* Add subtle inner glow effect */
+    box-shadow: inset 0px 0px 8px rgba(199, 166, 106, 0.2);
+}
+
+.ornate-border-gold {
+    border-width: 4px;
+    border-color: rgb(255, 215, 0);
+    background-color: rgb(40, 30, 20);
+    border-radius: 12px;
+    box-shadow: inset 0px 0px 10px rgba(255, 215, 0, 0.3);
+}
+
+/* Enhanced Title */
+.title {
+    font-size: 48px;
+    -unity-font-style: bold;
+    color: rgb(255, 215, 0);
+    -unity-text-align: middle-center;
+    flex-grow: 1;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+}
+
+/* Enhanced Item Banner */
+.item-banner {
+    background-color: rgba(40, 30, 20, 0.95);
+    border-width: 2px;
+    border-color: rgb(199, 166, 106);
+    border-radius: 8px;
+    padding: 10px;
+    margin: 5px;
+}
+
+.item-name {
+    font-size: 20px;
+    -unity-font-style: bold;
+    color: rgb(255, 215, 0);
+    margin-bottom: 5px;
+}
+
+.item-description {
+    font-size: 14px;
+    color: rgb(200, 180, 140);
+    white-space: normal;
+    margin-bottom: 5px;
+}
+
+.rarity-label {
+    font-size: 12px;
+    -unity-font-style: bold;
+    color: rgb(199, 166, 106);
 }
 
 /* Placement Preview */
@@ -197,7 +478,6 @@
     background-color: rgba(255, 212, 74, 0.5);
     border-color: rgb(255, 212, 74);
     border-width: 2px;
-    box-shadow: 0 0 8px rgba(255, 212, 74, 0.8);
 }
 
 /* Craft Button - Centered below grid */
@@ -208,8 +488,8 @@
     -unity-font-style: bold;
     border-radius: 30px;
     transition-duration: 0.2s;
-    transition-property: background-color, transform, box-shadow;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+    transition-property: background-color;
+    /* text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8); - not supported in Unity USS */
     align-self: center;
 }
 
@@ -218,18 +498,16 @@
     border-color: rgb(255, 255, 255);
     color: rgb(20, 15, 10);
     border-width: 3px;
-    box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
 }
 
 .craft-button-enabled:hover {
     background-color: rgb(255, 235, 20);
-    transform: scale(1.05);
-    box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+    /* transform: scale(1.05); - not supported in Unity USS */
 }
 
 .craft-button-enabled:active {
     background-color: rgb(235, 195, 0);
-    transform: scale(0.98);
+    /* transform: scale(0.98); - not supported in Unity USS */
 }
 
 .craft-button-disabled {
@@ -249,11 +527,12 @@
 .right-container {
     width: 100%;
     background-color: rgba(245, 235, 220, 0.95);
-    border-radius: 10px;
+    border-radius: 0px 10px 10px 0px; /* Only round right corners */
+    border-left-width: 2px;  /* Add left border to connect with tabs */
+    border-left-color: rgb(200, 200, 200);  /* Match filter tab border */
     padding: 2%;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
     flex-direction: column;
-    background-image: url('project://database/Assets/UI/Textures/parchment-bg.png');
+    /* background-image: url('project://database/Assets/UI/Textures/parchment-bg.png'); - texture not found */
     flex-grow: 1;
     margin-bottom: 15px;
 }
@@ -264,7 +543,8 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 15px;
-    gap: 10px;
+    margin-left: 10px;
+    margin-right: 10px;
     padding: 10px;
     background-color: rgba(220, 186, 126, 0.3);
     border-radius: 8px;
@@ -292,12 +572,12 @@
     border-color: rgb(179, 146, 86);
     font-size: 18px;
     transition-duration: 0.2s;
-    transition-property: background-color, transform;
+    transition-property: background-color;
 }
 
 .inventory-toggle-button:hover {
     background-color: rgb(220, 186, 126);
-    transform: scale(1.1);
+    /* transform: scale(1.1); - not supported in Unity USS */
 }
 
 .inventory-toggle-button:active {
@@ -309,7 +589,8 @@
 .main-content-area {
     flex-direction: row;
     flex-grow: 1;
-    gap: 15px;
+    margin-left: 15px;
+    margin-right: 0px;  /* Remove right margin to eliminate gap */
 }
 
 /* Ingredient Grid Container */
@@ -322,17 +603,17 @@
 .inventory-section {
     flex-direction: column;
     margin-top: 20px;
-    padding: 15px;
+    padding: 20px;
     background-color: rgba(245, 235, 220, 0.8);
     border-radius: 10px;
     border-width: 2px;
     border-color: rgb(180, 160, 140);
-    gap: 10px;
+    margin-bottom: 10px;
 }
 
 .inventory-title {
     font-size: 18px;
-    font-weight: bold;
+    -unity-font-style: bold;
     color: rgb(60, 50, 40);
     -unity-text-align: middle-center;
     margin-bottom: 10px;
@@ -404,77 +685,100 @@
     font-size: 18px;
     -unity-text-align: middle-center;
     transition-duration: 0.15s;
-    transition-property: background-color, transform;
+    transition-property: background-color;
 }
 
 .inventory-toggle-button:hover {
     background-color: rgb(219, 186, 126);
-    transform: scale(1.05);
+    /* transform: scale(1.05); - not supported in Unity USS */
 }
 
 .inventory-toggle-button:active {
     background-color: rgb(179, 146, 86);
-    transform: scale(0.95);
+    /* transform: scale(0.95); - not supported in Unity USS */
 }
 
-/* Filter Tabs */
+/* Filter Tabs - Page Tab Style */
 .filters {
     flex-direction: column;
-    gap: 8px;
+    margin-bottom: 8px;
     min-width: 60px;
     align-self: flex-start;
+    margin-right: 0px;  /* Reset to no overlap */
+    margin-left: 0px;
+    gap: 2px;
+    position: relative;
+    z-index: 1;  /* Ensure tabs appear above panel border */
 }
 
 .filter-tab {
-    width: 50px;
-    height: 60px;
-    border-radius: 8px;
-    background-color: rgb(199, 166, 106);
+    width: 55px;
+    height: 65px;
+    border-radius: 0px 8px 8px 0px;  /* Round right corners to connect with panel */
+    background-color: rgb(230, 229, 229);  /* E6E5E5 in RGB */
     border-width: 2px;
-    border-color: rgb(179, 146, 86);
+    border-color: rgb(200, 200, 200);
+    border-left-width: 2px;  /* Keep left border at 2px */
+    border-right-width: 2px;  /* Right border 2px as requested */
+    margin-left: 0px;  /* Default margin */
     font-size: 16px;
+    color: rgb(0, 0, 0);  /* Explicit black text color */
     transition-duration: 0.2s;
-    transition-property: background-color, transform;
+    transition-property: background-color, border-left-color, margin-left;
     -unity-text-align: middle-center;
+    margin-bottom: 1px;
 }
 
 .filter-tab:hover {
-    background-color: rgb(220, 186, 126);
-    transform: scale(1.05);
+    background-color: rgb(230, 229, 229) !important;  /* Same as inactive - E6E5E5 */
+    border-color: rgb(200, 200, 200) !important;  /* Normal border color */
+    margin-left: 2% !important;  /* Left margin for hover state */
+    color: rgb(0, 0, 0) !important;  /* Explicit black text */
 }
 
 .filter-tab-active {
-    background-color: rgb(255, 215, 0);
-    border-color: rgb(255, 235, 20);
-    transform: scale(1.05);
+    background-color: rgb(220, 219, 219) !important;  /* E6E5E5 minus 10 points */
+    border-color: rgb(200, 200, 200) !important;  /* Keep other borders normal */
+    border-left-color: rgb(220, 219, 219) !important;  /* Hide left border by matching background */
+    border-width: 2px !important;
+    border-left-width: 2px !important;  /* Keep left border 2px but invisible */
+    border-right-width: 2px !important;  /* Keep right border 2px */
+    margin-left: 2% !important;  /* Left margin for active state */
+    color: rgb(0, 0, 0) !important;  /* Explicit black text */
+    font-size: 16px !important;  /* Keep same font size */
 }
 
 .filter-tab-active:hover {
-    background-color: rgb(255, 235, 20);
+    background-color: rgb(220, 219, 219) !important;  /* Keep same background when active and hovering */
+    border-left-color: rgb(220, 219, 219) !important;  /* Keep left border hidden */
+    color: rgb(0, 0, 0) !important;  /* Explicit black text */
+    margin-left: 2% !important;  /* Keep left margin when active and hovering */
 }
 
 /* Slot Grid */
 .slot-grid {
     flex-direction: column;
-    gap: 8px;
+    margin-bottom: 8px;
     flex-grow: 1;
 }
 
 .slot-row {
     flex-direction: row;
     justify-content: space-between;
-    gap: 8px;
+    align-items: center;
+    margin-bottom: 12px;
+    flex-shrink: 0;
 }
 
 .ingredient-slot {
-    width: 80px;
-    height: 80px;
+    width: 100px;
+    height: 100px;
     background-color: rgb(240, 240, 240);
     border-width: 2px;
     border-color: rgb(200, 200, 200);
     border-radius: 10px;
     transition-duration: 0.2s;
-    transition-property: background-color, border-color, transform;
+    transition-property: background-color, border-color;
     flex-shrink: 0;
     position: relative;
     overflow: visible;
@@ -500,12 +804,12 @@
 .ingredient-slot:hover {
     background-color: rgb(250, 250, 250);
     border-color: rgb(199, 166, 106);
-    transform: scale(1.05);
+    /* transform: scale(1.05); - not supported in Unity USS */
 }
 
 .ingredient-slot:active {
     background-color: rgb(230, 230, 230);
-    transform: scale(0.95);
+    /* transform: scale(0.95); - not supported in Unity USS */
 }
 
 /* Remove duplicate new-star definition */
@@ -522,36 +826,7 @@
     color: rgb(60, 50, 40);
 }
 
-.inventory-toggle-button {
-    width: 40px;
-    height: 40px;
-    border-radius: 20px;
-    background-color: rgb(199, 166, 106);
-    border-width: 2px;
-    border-color: rgb(179, 146, 86);
-    font-size: 18px;
-    transition-duration: 0.2s;
-    transition-property: background-color, transform;
-}
-
-.inventory-toggle-button:hover {
-    background-color: rgb(220, 186, 126);
-    transform: scale(1.1);
-}
-
-.inventory-toggle-button:active {
-    background-color: rgb(255, 215, 0);
-    border-color: rgb(255, 235, 20);
-}
-
-/* Main Content Area */
-.main-content-area {
-    flex-direction: row;
-    flex-grow: 1;
-    gap: 15px;
-}
-
-/* Ingredient Grid Container */
+/* Remove duplicate sections */
 .ingredient-grid-container {
     flex-direction: column;
     flex-grow: 1;
@@ -566,7 +841,7 @@
     border-radius: 10px;
     border-width: 2px;
     border-color: rgb(180, 160, 140);
-    gap: 10px;
+    margin-bottom: 10px;
 }
 
 /* Container Separator */
@@ -598,53 +873,21 @@
     background-color: rgb(255, 255, 240);
 }
 
-/* Filter Tabs */
-.filters {
-    flex-direction: column;
-    gap: 8px;
-    min-width: 60px;
-    align-self: flex-start;
-}
-
-.filter-tab {
-    width: 50px;
-    height: 60px;
-    border-radius: 8px;
-    background-color: rgb(199, 166, 106);
-    border-width: 2px;
-    border-color: rgb(179, 146, 86);
-    font-size: 16px;
-    transition-duration: 0.2s;
-    transition-property: background-color, transform;
-    -unity-text-align: middle-center;
-}
-
-.filter-tab:hover {
-    background-color: rgb(220, 186, 126);
-    transform: scale(1.05);
-}
-
-.filter-tab-active {
-    background-color: rgb(255, 215, 0);
-    border-color: rgb(255, 235, 20);
-    transform: scale(1.05);
-}
-
-.filter-tab-active:hover {
-    background-color: rgb(255, 235, 20);
-}
+/* Duplicate section removed - filter-tab styles now defined above */
 
 /* Slot Grid */
 .slot-grid {
     flex-direction: column;
-    gap: 8px;
+    margin-bottom: 8px;
     flex-grow: 1;
 }
 
 .slot-row {
     flex-direction: row;
     justify-content: space-between;
-    gap: 8px;
+    align-items: center;
+    margin-bottom: 12px;
+    flex-shrink: 0;
 }
 
 .potion-slot {
@@ -662,27 +905,22 @@
 
 .rarity-uncommon {
     border-color: rgb(0, 255, 0);
-    box-shadow: 0 0 3px rgba(0, 255, 0, 0.3);
 }
 
 .rarity-rare {
     border-color: rgb(74, 144, 226);
-    box-shadow: 0 0 3px rgba(74, 144, 226, 0.3);
 }
 
 .rarity-epic {
     border-color: rgb(163, 53, 238);
-    box-shadow: 0 0 3px rgba(163, 53, 238, 0.3);
 }
 
 .rarity-legendary {
     border-color: rgb(255, 128, 0);
-    box-shadow: 0 0 3px rgba(255, 128, 0, 0.3);
 }
 
 .rarity-mythic {
     border-color: rgb(255, 215, 0);
-    box-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
 }
 
 /* Page Controls */
@@ -732,8 +970,7 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    background-image: url('project://database/Assets/UI/Textures/parchment-bg.png');
+    /* background-image: url('project://database/Assets/UI/Textures/parchment-bg.png'); - texture not found */
 }
 
 .item-info {
@@ -751,7 +988,7 @@
 .item-description {
     font-size: 14px;
     color: rgb(80, 60, 40);
-    white-space: normal;
+    -unity-text-align: upper-left;
 }
 
 .item-rarity {
@@ -771,21 +1008,21 @@
     height: 20px;
     border-radius: 50%;
     border-width: 2px;
+    border-color: rgb(60, 50, 40);
 }
 
 /* Inventory Container */
 .inventory-container {
-    position: absolute;
-    left: 2%;
-    top: 100px;
+    /* position: absolute; - not recommended in Unity USS */
+    /* left: 2%; - not needed without absolute positioning */
+    /* top: 100px; - not needed without absolute positioning */
     width: 300px;
     background-color: rgba(245, 235, 220, 0.98);
     border-radius: 10px;
     padding: 20px;
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
     border-width: 2px;
     border-color: rgb(199, 166, 106);
-    background-image: url('project://database/Assets/UI/Textures/parchment-bg.png');
+    /* background-image: url('project://database/Assets/UI/Textures/parchment-bg.png'); - texture not found */
 }
 
 .inventory-title {
@@ -796,159 +1033,166 @@
     -unity-text-align: middle-center;
 }
 
-/* Responsive adjustments */
-@media (min-width: 2000px) {
-    .title {
-        font-size: 54px;
+/* End of CraftingUI.uss - All CSS fixed for Unity USS compatibility */
+
+/* Drag and Drop Styles */
+.drag-preview {
+    position: absolute;
+    pointer-events: none;
+    z-index: 1000;
+    transition-duration: 0.1s;
+    transition-property: background-color, border-color;
+    /* Shadow effect using margins */
+    margin-left: 3px;
+    margin-top: 3px;
+}
+
+.drag-preview-valid {
+    /* Enhanced shadow for valid state */
+    margin-left: 2px;
+    margin-top: 2px;
+}
+
+.drag-preview-valid > VisualElement {
+    background-color: rgba(144, 238, 144, 0.9) !important; /* Light green for valid */
+    border-color: rgb(0, 200, 0) !important;
+}
+
+.drag-preview-invalid {
+    /* Enhanced shadow for invalid state */
+    margin-left: 4px;
+    margin-top: 4px;
+}
+
+.drag-preview-invalid > VisualElement {
+    background-color: rgba(255, 182, 193, 0.9) !important; /* Light red for invalid */
+    border-color: rgb(200, 0, 0) !important;
+}
+
+.drop-zone-active {
+    background-color: rgba(144, 238, 144, 0.15); /* Very light green */
+    border-color: rgb(0, 255, 0);
+    border-width: 3px;
+    transition-duration: 0.2s;
+    transition-property: background-color, border-color;
+}
+
+.grid-tile.drop-target-valid {
+    background-color: rgba(144, 238, 144, 0.6); /* Medium green */
+    transition-duration: 0.1s;
+    transition-property: background-color;
+}
+
+.grid-tile.drop-target-invalid {
+    background-color: rgba(255, 99, 71, 0.6); /* Medium red */
+    transition-duration: 0.1s;
+    transition-property: background-color;
+}
+
+/* Obstacle Visual Styles */
+.grid-tile.obstacle-corporeal {
+    background-color: rgba(120, 90, 60, 0.9) !important;
+    border-color: rgb(80, 60, 40) !important;
+    border-width: 3px !important;
+    border-radius: 0px !important;
+}
+
+.grid-tile.obstacle-corporeal::before {
+    content: '🚫';
+    font-size: 20px;
+    -unity-text-align: middle-center;
+}
+
+.grid-tile.obstacle-frigid-frozen {
+    background-color: rgba(51, 102, 255, 0.9) !important;
+    border-color: rgb(30, 80, 200) !important;
+    border-width: 3px !important;
+    animation: freeze-shimmer 2s ease-in-out infinite alternate;
+}
+
+.grid-tile.obstacle-frigid-melted {
+    background-color: rgba(102, 204, 255, 0.9) !important;
+    border-color: rgb(70, 150, 220) !important;
+    border-width: 2px !important;
+    animation: water-ripple 3s ease-in-out infinite;
+}
+
+.grid-tile.obstacle-scorch {
+    background-color: rgba(255, 102, 51, 0.9) !important;
+    border-color: rgb(200, 50, 0) !important;
+    border-width: 3px !important;
+    animation: fire-flicker 1s ease-in-out infinite alternate;
+}
+
+.grid-tile.obstacle-caustic {
+    background-color: rgba(153, 255, 51, 0.9) !important;
+    border-color: rgb(100, 200, 0) !important;
+    border-width: 3px !important;
+    animation: acid-bubble 2.5s ease-in-out infinite;
+}
+
+.grid-tile.obstacle-arc {
+    background-color: rgba(255, 255, 102, 0.9) !important;
+    border-color: rgb(200, 200, 0) !important;
+    border-width: 3px !important;
+    animation: lightning-flash 0.8s ease-in-out infinite alternate;
+}
+
+.grid-tile.obstacle-divine {
+    background-color: rgba(255, 204, 255, 0.9) !important;
+    border-color: rgb(200, 150, 200) !important;
+    border-width: 3px !important;
+    animation: divine-glow 3s ease-in-out infinite alternate;
+}
+
+.grid-tile.obstacle-void {
+    background-color: rgba(25, 25, 25, 0.95) !important;
+    border-color: rgb(10, 10, 10) !important;
+    border-width: 2px !important;
+    opacity: 0.5;
+}
+
+/* Obstacle Animations (Unity USS animations are limited, using opacity and color transitions) */
+@keyframes freeze-shimmer {
+    from { opacity: 0.8; }
+    to { opacity: 1.0; }
+}
+
+@keyframes water-ripple {
+    0% { opacity: 0.7; }
+    50% { opacity: 0.9; }
+    100% { opacity: 0.7; }
+}
+
+@keyframes fire-flicker {
+    from { 
+        opacity: 0.8;
+        background-color: rgba(255, 102, 51, 0.9);
     }
-    
-    .grid-frame {
-        width: 30%;
-        padding-bottom: 30%;
-    }
-    
-    .ingredient-slot {
-        width: 70px;
-        height: 70px;
-    }
-    
-    .circular-button {
-        width: 45px;
-        height: 45px;
-        font-size: 18px;
-    }
-    
-    .round-button {
-        width: 55px;
-        height: 55px;
-        font-size: 22px;
+    to { 
+        opacity: 1.0;
+        background-color: rgba(255, 140, 80, 0.9);
     }
 }
 
-@media (max-width: 1600px) {
-    .title {
-        font-size: 42px;
+@keyframes acid-bubble {
+    0% { opacity: 0.8; }
+    50% { opacity: 1.0; }
+    100% { opacity: 0.8; }
+}
+
+@keyframes lightning-flash {
+    from { 
+        opacity: 0.7;
+        background-color: rgba(255, 255, 102, 0.9);
     }
-    
-    .grid-frame {
-        width: 32%;
-        padding-bottom: 32%;
-    }
-    
-    .ingredient-slot {
-        width: 75px;
-        height: 75px;
+    to { 
+        opacity: 1.0;
+        background-color: rgba(255, 255, 200, 0.9);
     }
 }
 
-@media (max-width: 1200px) {
-    .main-content {
-        flex-direction: column;
-    }
-    
-    .left-side {
-        width: 100%;
-        margin-bottom: 3%;
-    }
-    
-    .right-side {
-        width: 100%;
-    }
-    
-    .right-container {
-        width: 100%;
-    }
-    
-    .title {
-        font-size: 36px;
-    }
-    
-    .top-banner {
-        flex-direction: column;
-        gap: 15px;
-        align-items: center;
-        text-align: center;
-    }
-    
-    .grid-frame {
-        width: 50%;
-        padding-bottom: 50%;
-    }
-    
-    .ingredient-slot {
-        width: 90px;
-        height: 90px;
-    }
-    
-    .circular-button {
-        width: 60px;
-        height: 60px;
-        font-size: 26px;
-    }
-    
-    .round-button {
-        width: 70px;
-        height: 70px;
-        font-size: 30px;
-    }
-}
-
-@media (max-width: 800px) {
-    .title {
-        font-size: 28px;
-    }
-    
-    .root-container {
-        padding: 1%;
-    }
-    
-    .top-banner {
-        padding: 2%;
-        flex-direction: column;
-    }
-    
-    .top-buttons {
-        gap: 10px;
-    }
-    
-    .left-side-buttons {
-        justify-content: center;
-        gap: 20px;
-    }
-    
-    .grid-frame {
-        width: 70%;
-        padding-bottom: 70%;
-    }
-    
-    .ingredient-slot {
-        width: 100px;
-        height: 100px;
-    }
-    
-    .filter-tab {
-        width: 50px;
-        height: 70px;
-        font-size: 18px;
-    }
-    
-    .filter-tab:hover,
-    .filter-tab-active {
-        width: 55px;
-    }
-    
-    .page-arrow {
-        width: 40px;
-        height: 40px;
-        font-size: 16px;
-    }
-    
-    .item-name {
-        font-size: 18px;
-    }
-    
-    .item-description {
-        font-size: 12px;
-    }
-}
+@keyframes divine-glow {
+    from { opacity: 0.9; }
+    to { opacity: 1.0; }
 }

@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UIElements;
+using UnityEngine.InputSystem;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Linq;
@@ -18,13 +19,12 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu
     {
         [Header("UI References")]
         [SerializeField] private UIDocument uiDocument;
-        [SerializeField] private VisualTreeAsset recipeScrollItemTemplate;
         
         [Header("Navigation")]
         [SerializeField] private bool enableDebugLogging = true;
         
         [Header("Grid Configuration")]
-        [SerializeField] private Vector2Int freeCraftingGridSize = new Vector2Int(3, 3);
+        [SerializeField] private Vector2Int freeCraftingGridSize = new Vector2Int(5, 5); // ✅ Changed to match GridCraftingManager.GRID_SIZE
         
         // UI Elements
         private Button freeCraftingButton;
@@ -92,12 +92,21 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu
                 }
             }
                 
+            Debug.Log("🔄 ===== CraftingModeSelector OnEnable called =====");
             InitializeUI();
             LoadAvailableRecipes();
+            Debug.Log("🔄 ===== CraftingModeSelector OnEnable complete =====");
         }
         
         void OnDisable()
         {
+            Debug.Log("🔄 ===== CraftingModeSelector OnDisable called =====");
+            Debug.Log($"🔄 OnDisable Stack Trace:\n{System.Environment.StackTrace}");
+            Debug.Log($"🔄 This GameObject: {gameObject.name}, active: {gameObject.activeSelf}");
+            if (uiDocument != null)
+            {
+                Debug.Log($"🔄 UIDocument GameObject: {uiDocument.gameObject.name}, active: {uiDocument.gameObject.activeSelf}");
+            }
             UnregisterCallbacks();
         }
         
@@ -166,21 +175,46 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu
                 Debug.Log("🎮 CraftingModeSelector initialized successfully");
         }
         
+        void Update()
+        {
+            // Only handle ESC when in recipe selection mode (not main mode selection)
+            if (currentMode == CraftingMode.None && recipeModePanel != null && recipeModePanel.style.display == DisplayStyle.Flex)
+            {
+                if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
+                {
+                    HandleBackFromModeSelection();
+                }
+            }
+        }
+        
         private void RegisterCallbacks()
         {
+            Debug.Log("🔧 ===== Registering UI callbacks =====");
+            
             // First unregister any existing callbacks to prevent duplicates
             UnregisterCallbacks();
             
             // Register fresh callbacks
             freeCraftingButton?.RegisterCallback<ClickEvent>(OnFreeCraftingClicked);
+            Debug.Log($"🔧 Free Crafting button callback registered: {freeCraftingButton != null}");
+            
             recipeCraftingButton?.RegisterCallback<ClickEvent>(OnRecipeCraftingClicked);
+            Debug.Log($"🔧 Recipe Crafting button callback registered: {recipeCraftingButton != null}");
+            
             backButton?.RegisterCallback<ClickEvent>(OnBackClicked);
+            Debug.Log($"🔧 Back button callback registered: {backButton != null}");
+            
             recipeBackButton?.RegisterCallback<ClickEvent>(OnRecipeBackClicked);
+            Debug.Log($"🔧 Recipe Back button callback registered: {recipeBackButton != null}");
+            
             confirmRecipeButton?.RegisterCallback<ClickEvent>(OnConfirmRecipeClicked);
+            Debug.Log($"🔧 Confirm Recipe button callback registered: {confirmRecipeButton != null}");
             
             // Search and filter callbacks
             recipeSearchField?.RegisterCallback<ChangeEvent<string>>(OnSearchTextChanged);
             difficultyFilter?.RegisterCallback<ChangeEvent<string>>(OnDifficultyFilterChanged);
+            
+            Debug.Log("🔧 ===== UI callbacks registered =====");
         }
         
         private void UnregisterCallbacks()
@@ -427,24 +461,26 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu
         
         private void OnFreeCraftingClicked(ClickEvent evt)
         {
-            if (enableDebugLogging)
-                Debug.Log("🎮 Free Crafting mode selected");
+            Debug.Log("🎮 ===== FREE CRAFTING BUTTON CLICKED =====");
+            Debug.Log($"🎮 Current mode before: {currentMode}");
                 
             currentMode = CraftingMode.Free;
             StartFreeCrafting();
+            
+            Debug.Log("🎮 ===== FREE CRAFTING SETUP COMPLETE =====");
         }
         
         private void OnRecipeCraftingClicked(ClickEvent evt)
         {
-            if (enableDebugLogging)
-            {
-                Debug.Log("📜 Recipe Crafting mode selected");
-                Debug.Log($"📜 UI Elements Status - mainModeSelection: {mainModeSelection != null}, recipeModePanel: {recipeModePanel != null}");
-                Debug.Log($"📜 Available recipes: {availableRecipes.Count}");
-            }
+            Debug.Log("📜 ===== RECIPE CRAFTING BUTTON CLICKED =====");
+            Debug.Log($"📜 Current mode before: {currentMode}");
+            Debug.Log($"📜 UI Elements - mainModeSelection: {mainModeSelection != null}, recipeModePanel: {recipeModePanel != null}");
+            Debug.Log($"📜 Available recipes: {availableRecipes.Count}");
                 
             currentMode = CraftingMode.Recipe;
             ShowRecipeSelection();
+            
+            Debug.Log("📜 ===== RECIPE SELECTION SHOWN =====");
         }
         
         private void OnBackClicked(ClickEvent evt)
@@ -496,7 +532,18 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu
         
         #region Navigation Methods
         
-        private void ShowMainSelection()
+        public void ReinitializeAfterReturn()
+        {
+            Debug.Log("🔄 ===== ReinitializeAfterReturn called =====");
+            
+            // Re-register callbacks and reset UI state
+            RegisterCallbacks();
+            ShowMainSelection();
+            
+            Debug.Log("🔄 ===== Reinitialization complete =====");
+        }
+        
+        public void ShowMainSelection()
         {
             if (mainModeSelection != null)
                 mainModeSelection.style.display = DisplayStyle.Flex;
@@ -504,8 +551,7 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu
                 recipeModePanel.style.display = DisplayStyle.None;
             currentMode = CraftingMode.None;
             
-            if (enableDebugLogging)
-                Debug.Log("📜 ShowMainSelection completed - showing main mode selection");
+            Debug.Log("📜 ShowMainSelection completed - showing main mode selection");
         }
         
         private void ShowRecipeSelection()
@@ -586,149 +632,240 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu
         
         private void StartFreeCrafting()
         {
-            if (enableDebugLogging)
-                Debug.Log("🎮 Starting Free Crafting Mode");
+            Debug.Log("🎮 ===== STARTING FREE CRAFTING =====");
             
             // Hide the mode selector UI
             if (uiDocument != null)
             {
                 uiDocument.gameObject.SetActive(false);
-            }
-            
-            // Launch the grid minigame with free crafting configuration
-            var gridGameManager = FindFirstObjectByType<FourFatesStudios.ProjectWarden.GridDemo.GridGameManager>();
-            if (gridGameManager != null)
-            {
-                // Configure for free crafting (3x3 grid, no preset obstacles)
-                SetupFreeCraftingGrid(gridGameManager);
-                
-                if (enableDebugLogging)
-                    Debug.Log("🎮 Free crafting grid configured successfully");
+                Debug.Log("🎮 ✅ UIDocument deactivated");
             }
             else
             {
-                Debug.LogError("🎮 GridGameManager not found - cannot start free crafting");
+                Debug.LogWarning("🎮 ⚠️ UIDocument is null!");
+            }
+            
+            // Hide the main crafting menu UI
+            var craftingMenuUI = GameObject.Find("CraftingMenuUI");
+            if (craftingMenuUI != null)
+            {
+                craftingMenuUI.SetActive(false);
+                Debug.Log("🎮 ✅ CraftingMenuUI hidden");
+            }
+            else
+            {
+                Debug.LogWarning("🎮 ⚠️ CraftingMenuUI not found!");
+            }
+            
+            // Ensure the CraftingUIController is active and visible (search including inactive)
+            var craftingUIController = FindFirstObjectByType<FourFatesStudios.ProjectWarden.UI.CraftingUIController>(FindObjectsInactive.Include);
+            if (craftingUIController != null)
+            {
+                craftingUIController.gameObject.SetActive(true);
+                Debug.Log("🎮 ✅ CraftingUIController activated");
+            }
+            else
+            {
+                Debug.LogError("🎮 ❌ CraftingUIController not found!");
+            }
+            
+            // Show the CraftingUI UIDocument (search including inactive)
+            var allUIDocuments = FindObjectsByType<UnityEngine.UIElements.UIDocument>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            Debug.Log($"🎮 Found {allUIDocuments.Length} total UIDocuments");
+            bool foundCraftingUI = false;
+            foreach (var doc in allUIDocuments)
+            {
+                Debug.Log($"🎮 - UIDocument: {doc.gameObject.name}");
+                if (doc.gameObject.name == "CraftingUI")
+                {
+                    doc.gameObject.SetActive(true);
+                    Debug.Log("🎮 ✅ CraftingUI UIDocument shown");
+                    foundCraftingUI = true;
+                    break;
+                }
+            }
+            if (!foundCraftingUI)
+            {
+                Debug.LogError("🎮 ❌ CraftingUI UIDocument not found!");
+            }
+            
+            // Launch the grid minigame with free crafting configuration
+            var gridCraftingManager = FindFirstObjectByType<FourFatesStudios.ProjectWarden.GridDemo.GridCraftingManager>();
+            if (gridCraftingManager != null)
+            {
+                Debug.Log("🎮 ✅ GridCraftingManager found, reinitializing it");
+                gridCraftingManager.Initialize(false);
+                Debug.Log("🎮 ✅ GridCraftingManager reinitialized");
+                SetupFreeCraftingGrid(gridCraftingManager);
+                Debug.Log("🎮 ✅ Free crafting grid configured");
+            }
+            else
+            {
+                Debug.LogError("🎮 ❌ GridCraftingManager not found!");
+            }
+            
+            // Initialize the CraftingUIController
+            if (craftingUIController != null)
+            {
+                Debug.Log("🎮 ✅ CraftingUIController found, reinitializing it");
+                craftingUIController.Initialize();
+                Debug.Log("🎮 ✅ CraftingUIController reinitialized");
             }
         }
         
         private void StartRecipeCrafting(AlchemyRecipe recipe)
         {
-            if (enableDebugLogging)
-                Debug.Log($"📜 Starting Recipe Crafting Mode with recipe: {recipe.ItemName}");
+            Debug.Log($"📜 ===== STARTING RECIPE CRAFTING: {recipe.ItemName} =====");
             
             // Hide the mode selector UI
             if (uiDocument != null)
             {
                 uiDocument.gameObject.SetActive(false);
-            }
-            
-            // Also trigger the GridDemoUIController to start
-            GridDemoUIController.StartGridUI();
-            
-            // Launch the grid minigame with recipe configuration
-            var gridGameManager = FindFirstObjectByType<GridGameManager>();
-            if (gridGameManager != null)
-            {
-                // Configure for recipe crafting (use saved grid pattern)
-                SetupRecipeCraftingGrid(gridGameManager, recipe);
-                
-                if (enableDebugLogging)
-                    Debug.Log("📜 Recipe crafting grid configured successfully");
+                Debug.Log("📜 ✅ UIDocument deactivated");
             }
             else
             {
-                Debug.LogError("📜 GridGameManager not found - cannot start recipe crafting");
+                Debug.LogWarning("📜 ⚠️ UIDocument is null!");
+            }
+            
+            // Hide the main crafting menu UI
+            var craftingMenuUI = GameObject.Find("CraftingMenuUI");
+            if (craftingMenuUI != null)
+            {
+                craftingMenuUI.SetActive(false);
+                Debug.Log("📜 ✅ CraftingMenuUI hidden");
+            }
+            else
+            {
+                Debug.LogWarning("📜 ⚠️ CraftingMenuUI not found!");
+            }
+            
+            // Ensure the CraftingUIController is active and visible (search including inactive)
+            var craftingUIController = FindFirstObjectByType<FourFatesStudios.ProjectWarden.UI.CraftingUIController>(FindObjectsInactive.Include);
+            if (craftingUIController != null)
+            {
+                craftingUIController.gameObject.SetActive(true);
+                Debug.Log("📜 ✅ CraftingUIController activated");
+            }
+            else
+            {
+                Debug.LogError("📜 ❌ CraftingUIController not found!");
+            }
+            
+            // Show the CraftingUI UIDocument (search including inactive)
+            var allUIDocuments = FindObjectsByType<UnityEngine.UIElements.UIDocument>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            Debug.Log($"📜 Found {allUIDocuments.Length} total UIDocuments");
+            bool foundCraftingUI = false;
+            foreach (var doc in allUIDocuments)
+            {
+                Debug.Log($"📜 - UIDocument: {doc.gameObject.name}");
+                if (doc.gameObject.name == "CraftingUI")
+                {
+                    doc.gameObject.SetActive(true);
+                    Debug.Log("📜 ✅ CraftingUI UIDocument shown");
+                    foundCraftingUI = true;
+                    break;
+                }
+            }
+            if (!foundCraftingUI)
+            {
+                Debug.LogError("📜 ❌ CraftingUI UIDocument not found!");
+            }
+            
+            // Launch the grid minigame with recipe configuration
+            var gridCraftingManager = FindFirstObjectByType<FourFatesStudios.ProjectWarden.GridDemo.GridCraftingManager>();
+            if (gridCraftingManager != null)
+            {
+                Debug.Log("📜 ✅ GridCraftingManager found, assigning UIDocument");
+                
+                // Find and assign the CraftingUI UIDocument
+                var craftingUIDoc = GameObject.Find("CraftingUI");
+                if (craftingUIDoc != null)
+                {
+                    var uiDoc = craftingUIDoc.GetComponent<UnityEngine.UIElements.UIDocument>();
+                    if (uiDoc != null)
+                    {
+                        // Use reflection to set the uiDocument field
+                        var field = typeof(FourFatesStudios.ProjectWarden.GridDemo.GridCraftingManager).GetField("uiDocument", 
+                            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+                        if (field != null)
+                        {
+                            field.SetValue(gridCraftingManager, uiDoc);
+                            Debug.Log("📜 ✅ UIDocument assigned to GridCraftingManager");
+                        }
+                    }
+                }
+                
+                gridCraftingManager.Initialize(true);
+                Debug.Log("📜 ✅ GridCraftingManager reinitialized");
+                SetupRecipeCraftingGrid(gridCraftingManager, recipe);
+                Debug.Log("📜 ✅ Recipe crafting grid configured");
+            }
+            else
+            {
+                Debug.LogError("📜 ❌ GridCraftingManager not found!");
+            }
+            
+            // Initialize the CraftingUIController
+            if (craftingUIController != null)
+            {
+                Debug.Log("📜 ✅ CraftingUIController found, reinitializing it");
+                craftingUIController.Initialize();
+                Debug.Log("📜 ✅ CraftingUIController reinitialized");
             }
         }
         
-        private void SetupFreeCraftingGrid(FourFatesStudios.ProjectWarden.GridDemo.GridGameManager gridManager)
+        private void SetupFreeCraftingGrid(FourFatesStudios.ProjectWarden.GridDemo.GridCraftingManager gridManager)
         {
             if (enableDebugLogging)
                 Debug.Log($"🎮 Configuring grid for free crafting: {freeCraftingGridSize.x}x{freeCraftingGridSize.y}");
             
-            // Store the old size
-            int oldWidth = gridManager.gridWidth;
-            int oldHeight = gridManager.gridHeight;
+            // Switch to free crafting mode (disables recipe constraints)
+            gridManager.ToggleRecipeMode(false);
             
-            // Set grid size for free crafting (3x3)
-            gridManager.gridWidth = freeCraftingGridSize.x;
-            gridManager.gridHeight = freeCraftingGridSize.y;
-            
-            // Disable obstacles for free crafting
-            gridManager.enableObstacles = false;
-            
-            // Force the grid to recreate if size changed
-            if (oldWidth != gridManager.gridWidth || oldHeight != gridManager.gridHeight)
-            {
-                ForceGridRecreation(gridManager);
-            }
-            
-            // Now clear the grid after recreation
+            // Clear the grid to start fresh (this removes all ingredients and resets unlocked cells)
             gridManager.ClearGrid();
             
-            // Center camera on the new grid
-            gridManager.CenterCameraOnGrid();
+            // Note: GridCraftingManager uses a fixed 5x5 grid size
+            // The center 3x3 area will be initially available, outer ring unlocks based on placement
             
             if (enableDebugLogging)
-                Debug.Log($"🎮 Free crafting grid configured: {freeCraftingGridSize.x}x{freeCraftingGridSize.y}, obstacles disabled");
+                Debug.Log($"🎮 Free crafting mode configured successfully - 5x5 grid with center 3x3 unlocked");
         }
         
-        private void SetupRecipeCraftingGrid(FourFatesStudios.ProjectWarden.GridDemo.GridGameManager gridManager, AlchemyRecipe recipe)
+        private void SetupRecipeCraftingGrid(FourFatesStudios.ProjectWarden.GridDemo.GridCraftingManager gridManager, AlchemyRecipe recipe)
         {
             if (enableDebugLogging)
                 Debug.Log($"📜 Configuring grid for recipe crafting with {recipe.ItemName}");
             
-            // Store the old size
-            int oldWidth = gridManager.gridWidth;
-            int oldHeight = gridManager.gridHeight;
+            // Switch to recipe mode
+            gridManager.ToggleRecipeMode(true);
             
-            // Load the recipe's custom grid pattern
-            if (recipe.HasCustomGridData())
-            {
-                var gridInfo = recipe.GetGridInfo();
-                
-                // Set grid size from recipe (typically 5x5 for recipes)
-                gridManager.gridWidth = gridInfo.gridWidth;
-                gridManager.gridHeight = gridInfo.gridHeight;
-                
-                if (enableDebugLogging)
-                    Debug.Log($"📜 Recipe grid configured: {gridInfo.gridWidth}x{gridInfo.gridHeight} with {gridInfo.obstacleCount} obstacles");
-            }
-            else
-            {
-                // Default recipe grid size if no custom data
-                gridManager.gridWidth = 5;
-                gridManager.gridHeight = 5;
-                
-                if (enableDebugLogging)
-                    Debug.Log("📜 Using default recipe grid: 5x5 with obstacles enabled");
-            }
+            // Clear ALL obstacles first (remove any test or previous obstacles)
+            gridManager.ClearAllObstacles();
+            Debug.Log("✅ Cleared all obstacles");
             
-            // Enable obstacles for recipe crafting
-            gridManager.enableObstacles = true;
-            
-            // Force the grid to recreate if size changed
-            if (oldWidth != gridManager.gridWidth || oldHeight != gridManager.gridHeight)
-            {
-                ForceGridRecreation(gridManager);
-            }
-            
-            // Now clear the grid after recreation
-            gridManager.ClearGrid();
-            
-            // CRITICAL FIX: Clear existing obstacles before loading recipe obstacles
-            ClearExistingObstacles(gridManager);
-
             // Load the specific obstacle pattern from the recipe
             LoadRecipeObstaclePattern(gridManager, recipe);
-
-            // DO NOT spawn random obstacles for recipe crafting - they would overwrite recipe obstacles!
-            // Random obstacles are only for free crafting mode
+            
+            // Clear ingredients but keep the newly loaded recipe obstacles
+            gridManager.ClearGridKeepObstacles();
+            
+            // Force a visual refresh to ensure obstacles are displayed
+            // Use reflection to call private UpdateGridVisuals method
+            var updateMethod = typeof(FourFatesStudios.ProjectWarden.GridDemo.GridCraftingManager).GetMethod("UpdateGridVisuals", 
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            if (updateMethod != null)
+            {
+                updateMethod.Invoke(gridManager, null);
+                Debug.Log("🔄 Forced visual refresh after loading obstacles");
+            }
+            
+            // Debug: Print grid state
+            gridManager.DebugGridState();
+            
             if (enableDebugLogging)
-                Debug.Log("📜 Skipping random obstacle spawn for recipe crafting - using recipe-defined obstacles only");
-
-            // Center camera on the new grid
-            gridManager.CenterCameraOnGrid();
+                Debug.Log("📜 Recipe crafting mode configured successfully");
         }
         
         /// <summary>
@@ -762,85 +899,60 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu
                 Debug.Log($"🧹 Cleared {clearedCount} existing obstacles");
         }
         
-        private void LoadRecipeObstaclePattern(FourFatesStudios.ProjectWarden.GridDemo.GridGameManager gridManager, AlchemyRecipe recipe)
+        private void LoadRecipeObstaclePattern(FourFatesStudios.ProjectWarden.GridDemo.GridCraftingManager gridManager, AlchemyRecipe recipe)
         {
-            if (enableDebugLogging)
-                Debug.Log($"📜 Loading obstacle pattern for recipe: {recipe.ItemName}");
+            Debug.Log($"📜 Loading obstacle pattern for recipe: {recipe.ItemName}");
             
             if (recipe.HasCustomGridData())
             {
                 // Get the custom grid cells from the recipe
                 var customCells = recipe.CustomGridCells;
                 
-                if (enableDebugLogging)
-                    Debug.Log($"📜 Recipe has {customCells.Count} custom grid cells");
+                Debug.Log($"📜 Recipe has {customCells.Count} custom grid cells");
                 
                 // Filter cells that have obstacles
                 var obstacleCells = customCells.Where(cell => cell.hasObstacle).ToList();
                 
                 if (obstacleCells.Count > 0)
                 {
-                    if (enableDebugLogging)
-                        Debug.Log($"📜 Found {obstacleCells.Count} obstacle cells to load");
+                    Debug.Log($"📜 Found {obstacleCells.Count} obstacle cells to load");
                     
                     foreach (var cell in obstacleCells)
                     {
                         // Get the obstacle position
                         var obstaclePosition = cell.position;
                         
-                        // Verify position is within grid bounds
-                        if (obstaclePosition.x >= 0 && obstaclePosition.x < gridManager.gridWidth &&
-                            obstaclePosition.y >= 0 && obstaclePosition.y < gridManager.gridHeight)
+                        Debug.Log($"📜 Processing obstacle: Type={cell.obstacleType}, Position=({obstaclePosition.x}, {obstaclePosition.y}), HasObstacle={cell.hasObstacle}");
+                        
+                        // Verify position is within grid bounds (GridCraftingManager uses GRID_SIZE = 5)
+                        if (obstaclePosition.x >= 0 && obstaclePosition.x < 5 &&
+                            obstaclePosition.y >= 0 && obstaclePosition.y < 5)
                         {
                             // Use the obstacle type from the recipe cell
                             var obstacleType = cell.obstacleType;
                             
-                            // Create the obstacle and add it to the grid directly
+                            // Create the obstacle and add it to the grid using GridCraftingManager's API
                             var obstacle = new FourFatesStudios.ProjectWarden.GridDemo.AspectObstacle(obstacleType, obstaclePosition);
-                            gridManager.aspectObstacles.Add(obstacle);
+                            gridManager.SetObstacle(obstaclePosition, obstacle);
                             
-                            // Also set the obstacle on the grid cell so it knows it has an obstacle
-                            var gridCell = gridManager.GetCell(obstaclePosition.x, obstaclePosition.y);
-                            if (gridCell != null)
-                            {
-                                gridCell.SetObstacle(obstacle);
-                            }
-                            
-                            if (enableDebugLogging)
-                                Debug.Log($"📜 Added {obstacleType} obstacle at position ({obstaclePosition.x}, {obstaclePosition.y})");
+                            Debug.Log($"✅ Added {obstacleType} obstacle at position ({obstaclePosition.x}, {obstaclePosition.y})");
                         }
                         else
                         {
-                            Debug.LogWarning($"📜 Obstacle position ({obstaclePosition.x}, {obstaclePosition.y}) is outside grid bounds ({gridManager.gridWidth}x{gridManager.gridHeight})");
+                            Debug.LogWarning($"📜 Obstacle position ({obstaclePosition.x}, {obstaclePosition.y}) is outside grid bounds (5x5)");
                         }
                     }
                     
-                    // Refresh the grid visualization to show the new obstacles
-                    var visualizer = gridManager.GetComponent<FourFatesStudios.ProjectWarden.GridDemo.GridVisualizer>();
-                    if (visualizer != null)
-                    {
-                        visualizer.RefreshGrid();
-                        if (enableDebugLogging)
-                            Debug.Log("📜 Grid visualization refreshed to show recipe obstacles");
-                    }
-                    else
-                    {
-                        Debug.LogWarning("📜 Grid visualizer not found - obstacles may not be visible");
-                    }
-                    
-                    if (enableDebugLogging)
-                        Debug.Log($"✅ Successfully loaded {obstacleCells.Count} obstacles from recipe {recipe.ItemName}");
+                    Debug.Log($"✅ Successfully loaded {obstacleCells.Count} obstacles from recipe {recipe.ItemName}");
                 }
                 else
                 {
-                    if (enableDebugLogging)
-                        Debug.Log($"📜 Recipe {recipe.ItemName} has no obstacle data");
+                    Debug.Log($"⚠️ Recipe {recipe.ItemName} has custom grid data but no obstacle cells (hasObstacle=true)");
                 }
             }
             else
             {
-                if (enableDebugLogging)
-                    Debug.Log($"📜 Recipe {recipe.ItemName} has no custom grid data");
+                Debug.Log($"⚠️ Recipe {recipe.ItemName} has no custom grid data");
             }
         }
         
@@ -859,6 +971,15 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu
             {
                 Debug.LogWarning("🔙 CraftingNavigationController not found - cannot navigate to main menu");
             }
+        }
+        
+        private void HandleBackFromModeSelection()
+        {
+            // Show the main mode selection UI
+            ShowMainSelection();
+            
+            if (enableDebugLogging)
+                Debug.Log("🔙 ESC pressed - Returned to main mode selection");
         }
         
         #endregion

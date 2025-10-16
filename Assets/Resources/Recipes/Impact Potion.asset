@@ -20,14 +20,19 @@ MonoBehaviour:
   recipe1: {fileID: 0}
   inputIngredient1: {fileID: 11400000, guid: 84b0183348c9f164b92bdafcf500d571, type: 2}
   inputIngredient2: {fileID: 11400000, guid: d194b4e7033c81a489abf6db78c70009, type: 2}
-  inputIngredient3: {fileID: 11400000, guid: 6a52147714a48ff419e7b6d5c32332f4, type: 2}
-  outputPotion: {fileID: 11400000, guid: 302920b723c10514f825f3f04195db88, type: 2}
+  inputIngredient3: {fileID: 11400000, guid: 91a433150e932274f9487ca48880f1d8, type: 2}
+  outputItem: {fileID: 11400000, guid: 302920b723c10514f825f3f04195db88, type: 2}
   outputQuantity: 1
   isKeyRecipe: 0
   difficulty: 0
   requiredPositions: []
   bonusPatterns: []
   aspectSynergies: []
+  plannedObstacles: []
+  hasCustomGrid: 0
+  customGridWidth: 5
+  customGridHeight: 5
+  customGridCells: []
   minimumEfficiency: 0.6
   gridRequirements:
     minimumIngredientsUsed: 2

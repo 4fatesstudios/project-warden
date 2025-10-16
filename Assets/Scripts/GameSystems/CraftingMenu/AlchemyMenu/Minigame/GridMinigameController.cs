@@ -140,6 +140,7 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu
         private List<Ingredient> availableIngredients;
         private Dictionary<Vector2Int, PlacedIngredient> placedIngredients;
         private Ingredient selectedIngredient;
+        private int selectedIngredientRotation = 0;
         private List<Vector2Int> expandedGridCells;
         private Dictionary<Ingredient, List<Ingredient>> ingredientInteractions;
         private bool isKeyRecipe;
@@ -335,6 +336,50 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu
             UpdateGridVisuals();
 
             Debug.Log($"✅ Unlocked {newlyUnlockedCells.Count} new grid cells");
+        }
+        
+        private void ExpandGridForIngredientWithRotation(Ingredient ingredient, Vector2Int placementPosition, int rotation)
+        {
+            if (ingredient == null || !ingredient.UnlocksAdditionalSpace)
+                return;
+
+            // If ingredient has shape data with expansion offsets, use those with rotation
+            if (ingredient.ShapeData != null && ingredient.ShapeData.expansionOffsets != null && ingredient.ShapeData.expansionOffsets.Length > 0)
+            {
+                Debug.Log($"🔓 Expanding grid for ingredient: {ingredient.ItemName} using rotated expansion offsets (rotation: {rotation}°)");
+
+                var expansionOffsets = ingredient.ShapeData.GetExpansionOffsets(rotation);
+                List<Vector2Int> newlyUnlockedCells = new List<Vector2Int>();
+
+                foreach (var offset in expansionOffsets)
+                {
+                    Vector2Int cellPos = placementPosition + offset;
+                    
+                    if (IsValidGridPosition(cellPos) && !visibleGridCells[cellPos.x, cellPos.y])
+                    {
+                        UnlockGridCell(cellPos, ingredient);
+                        newlyUnlockedCells.Add(cellPos);
+                        Debug.Log($"  ✅ Unlocked cell at {cellPos} (offset: {offset})");
+                    }
+                    else if (IsValidGridPosition(cellPos) && visibleGridCells[cellPos.x, cellPos.y])
+                    {
+                        Debug.Log($"  ℹ️ Cell at {cellPos} already visible (offset: {offset})");
+                    }
+                    else
+                    {
+                        Debug.Log($"  ⚠️ Cell at {cellPos} is outside grid bounds (offset: {offset})");
+                    }
+                }
+
+                UpdateGridVisuals();
+                Debug.Log($"✅ Unlocked {newlyUnlockedCells.Count} new grid cells using expansion offsets");
+            }
+            else
+            {
+                // Fallback to radius-based expansion if no shape data
+                Debug.Log($"🔓 Expanding grid for ingredient: {ingredient.ItemName} using radius-based expansion (no shape data)");
+                ExpandGridForIngredient(ingredient, placementPosition);
+            }
         }
 
         /// <summary>
@@ -1431,17 +1476,35 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu
             // Check if any other placed expansion ingredients could support this cell
             foreach (var kvp in placedIngredients)
             {
-                var ingredient = kvp.Value.ingredient;
+                var placedIngredient = kvp.Value;
+                var ingredient = placedIngredient.ingredient;
                 var placementPos = kvp.Key;
 
                 if (ingredient == excludeIngredient || !ingredient.UnlocksAdditionalSpace)
                     continue;
 
-                // Check if this ingredient could unlock the cell in question
-                float distance = Vector2Int.Distance(placementPos, cellPosition);
-                if (distance <= 2) // Within reasonable expansion range
+                // If ingredient has shape data with expansion offsets, check those with rotation
+                if (ingredient.ShapeData != null && ingredient.ShapeData.expansionOffsets != null && ingredient.ShapeData.expansionOffsets.Length > 0)
                 {
-                    return true;
+                    var expansionOffsets = ingredient.ShapeData.GetExpansionOffsets(placedIngredient.rotation);
+                    
+                    foreach (var offset in expansionOffsets)
+                    {
+                        Vector2Int expandedCellPos = placementPos + offset;
+                        if (expandedCellPos == cellPosition)
+                        {
+                            return true; // This cell is unlocked by this ingredient's expansion offsets
+                        }
+                    }
+                }
+                else
+                {
+                    // Fallback: Check if this ingredient could unlock the cell based on distance
+                    float distance = Vector2Int.Distance(placementPos, cellPosition);
+                    if (distance <= 2) // Within reasonable expansion range
+                    {
+                        return true;
+                    }
                 }
             }
 
@@ -1679,7 +1742,7 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu
         {
             if (!CanPlaceIngredient(position, ingredient)) return;
 
-            var placedIngredient = new PlacedIngredient(ingredient, new GridPosition(position.x, position.y));
+            var placedIngredient = new PlacedIngredient(ingredient, new GridPosition(position.x, position.y), selectedIngredientRotation);
 
             for (int x = 0; x < ingredient.GridWidth; x++)
             {
@@ -1704,8 +1767,11 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu
             // Check for ingredient interactions
             CheckIngredientInteractions(placedIngredient);
 
-            // Handle grid expansion from this ingredient
-            HandleGridExpansion(ingredient);
+            // Handle grid expansion from this ingredient with rotation awareness
+            if (ingredient.UnlocksAdditionalSpace)
+            {
+                ExpandGridForIngredientWithRotation(ingredient, position, selectedIngredientRotation);
+            }
 
             ShowPlacementFeedback(position, true);
             UpdateUI();
@@ -1715,7 +1781,7 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu
         {
             if (!CanPlaceIngredientWithOverlap(position, ingredient)) return;
 
-            var placedIngredient = new PlacedIngredient(ingredient, new GridPosition(position.x, position.y));
+            var placedIngredient = new PlacedIngredient(ingredient, new GridPosition(position.x, position.y), selectedIngredientRotation);
             placedIngredient.isOverlapping = true;
 
             for (int x = 0; x < ingredient.GridWidth; x++)
