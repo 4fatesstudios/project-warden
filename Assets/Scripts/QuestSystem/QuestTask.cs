@@ -1,5 +1,5 @@
 using UnityEngine;
-
+using System;
 
 namespace FourFatesStudios.ProjectWarden.QuestSystem
 {
@@ -19,9 +19,28 @@ namespace FourFatesStudios.ProjectWarden.QuestSystem
         public string TaskName => taskName;
         public bool IsCompleted => isCompleted;
 
+        /// <summary>
+        /// Event triggered when this task is completed
+        /// </summary>
+        public static event Action<QuestTask> OnTaskCompleted;
+
         public void CompleteTask()
         {
-            isCompleted = true;
+            if (!isCompleted)
+            {
+                isCompleted = true;
+                Debug.Log($"Task completed: {taskName}");
+                OnTaskCompleted?.Invoke(this);
+            }
+        }
+
+        /// <summary>
+        /// Reset task to incomplete state (for debugging)
+        /// </summary>
+        public void ResetTask()
+        {
+            isCompleted = false;
+            Debug.Log($"Task reset: {taskName}");
         }
     }
 }

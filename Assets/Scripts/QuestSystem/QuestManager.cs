@@ -59,6 +59,9 @@ namespace FourFatesStudios.ProjectWarden.QuestSystem
             {
                 QuestEventSystem.instance.questEvents.onCheckQuestAcceptable += CanAcceptQuest;
             }
+
+            // Subscribe to task completion events
+            QuestTask.OnTaskCompleted += OnTaskCompleted;
         }
 
         private void OnDestroy()
@@ -68,6 +71,23 @@ namespace FourFatesStudios.ProjectWarden.QuestSystem
             {
                 QuestEventSystem.instance.questEvents.onCheckQuestAcceptable -= CanAcceptQuest;
             }
+
+            // Unsubscribe from task events
+            QuestTask.OnTaskCompleted -= OnTaskCompleted;
+        }
+
+        /// <summary>
+        /// Called when any task is completed
+        /// </summary>
+        private void OnTaskCompleted(QuestTask completedTask)
+        {
+            Debug.Log($"Task completed: {completedTask.TaskName}");
+            
+            // Check if any quest is now complete
+            CheckQuestCompletion();
+            
+            // Trigger UI update
+            OnQuestsChanged?.Invoke();
         }
 
         public void AddQuest(QuestSO quest)
@@ -122,14 +142,17 @@ namespace FourFatesStudios.ProjectWarden.QuestSystem
             {
                 questToAdd = questDatabase.GetQuestById(questId);
             }
+            else
+            {
+                Debug.LogWarning($"No QuestDatabase assigned to QuestManager! Cannot accept quest '{questId}'");
+                return false;
+            }
 
-            // If not found in database, create a dummy quest SO
+            // If not found in database, don't create dummy quest
             if (questToAdd == null)
             {
-                Debug.LogWarning($"Quest '{questId}' not found in database, creating dummy quest");
-                questToAdd = ScriptableObject.CreateInstance<QuestSO>();
-                questToAdd.questName = questId;
-                questToAdd.description = $"Quest: {questId}";
+                Debug.LogWarning($"Quest '{questId}' not found in database! Make sure to add it to the QuestDatabase ScriptableObject.");
+                return false;
             }
             
             AddQuest(questToAdd);
@@ -208,6 +231,174 @@ namespace FourFatesStudios.ProjectWarden.QuestSystem
             foreach (QuestSO quest in activeQuests)
             {
                 Debug.Log($"- {quest.questName}: {quest.description}");
+            }
+        }
+
+        /// <summary>
+        /// Checks if any active quests are now complete and moves them to completed list
+        /// </summary>
+        private void CheckQuestCompletion()
+        {
+            var questsToComplete = new List<QuestSO>();
+            
+            foreach (var quest in activeQuests)
+            {
+                if (IsQuestComplete(quest))
+                {
+                    questsToComplete.Add(quest);
+                }
+            }
+            
+            foreach (var quest in questsToComplete)
+            {
+                CompleteQuest(quest);
+            }
+        }
+
+        /// <summary>
+        /// Checks if a quest is complete (all tasks finished)
+        /// </summary>
+        private bool IsQuestComplete(QuestSO quest)
+        {
+            if (quest.tasks == null || quest.tasks.Count == 0)
+                return false;
+                
+            return quest.tasks.All(task => task.IsCompleted);
+        }
+
+        /// <summary>
+        /// Complete a specific task by name in any active quest
+        /// </summary>
+        public bool CompleteTaskByName(string taskName)
+        {
+            foreach (var quest in activeQuests)
+            {
+                var task = quest.tasks.FirstOrDefault(t => t.TaskName.Equals(taskName, StringComparison.OrdinalIgnoreCase));
+                if (task != null && !task.IsCompleted)
+                {
+                    task.CompleteTask();
+                    Debug.Log($"Completed task '{taskName}' in quest '{quest.questName}'");
+                    return true;
+                }
+            }
+            
+            Debug.LogWarning($"Task '{taskName}' not found in any active quest");
+            return false;
+        }
+
+        /// <summary>
+        /// Complete a specific task in a specific quest
+        /// </summary>
+        public bool CompleteTask(string questName, string taskName)
+        {
+            var quest = activeQuests.FirstOrDefault(q => q.questName.Equals(questName, StringComparison.OrdinalIgnoreCase));
+            if (quest == null)
+            {
+                Debug.LogWarning($"Quest '{questName}' not found in active quests");
+                return false;
+            }
+
+            var task = quest.tasks.FirstOrDefault(t => t.TaskName.Equals(taskName, StringComparison.OrdinalIgnoreCase));
+            if (task == null)
+            {
+                Debug.LogWarning($"Task '{taskName}' not found in quest '{questName}'");
+                return false;
+            }
+
+            if (task.IsCompleted)
+            {
+                Debug.Log($"Task '{taskName}' is already completed");
+                return false;
+            }
+
+            task.CompleteTask();
+            Debug.Log($"Completed task '{taskName}' in quest '{questName}'");
+            return true;
+        }
+
+        // ===== DEBUG METHODS FOR EASY TASK COMPLETION =====
+
+        [ContextMenu("Complete First Task in First Quest")]
+        public void DebugCompleteFirstTask()
+        {
+            if (activeQuests.Count == 0)
+            {
+                Debug.LogWarning("No active quests to complete tasks in");
+                return;
+            }
+
+            var firstQuest = activeQuests[0];
+            if (firstQuest.tasks == null || firstQuest.tasks.Count == 0)
+            {
+                Debug.LogWarning($"Quest '{firstQuest.questName}' has no tasks");
+                return;
+            }
+
+            var firstIncompleteTask = firstQuest.tasks.FirstOrDefault(t => !t.IsCompleted);
+            if (firstIncompleteTask != null)
+            {
+                firstIncompleteTask.CompleteTask();
+                Debug.Log($"DEBUG: Completed task '{firstIncompleteTask.TaskName}' in quest '{firstQuest.questName}'");
+            }
+            else
+            {
+                Debug.Log($"All tasks in quest '{firstQuest.questName}' are already completed");
+            }
+        }
+
+        [ContextMenu("Complete Random Task")]
+        public void DebugCompleteRandomTask()
+        {
+            var allIncompleteTasks = new List<(QuestSO quest, QuestTask task)>();
+            
+            foreach (var quest in activeQuests)
+            {
+                if (quest.tasks != null)
+                {
+                    foreach (var task in quest.tasks.Where(t => !t.IsCompleted))
+                    {
+                        allIncompleteTasks.Add((quest, task));
+                    }
+                }
+            }
+
+            if (allIncompleteTasks.Count == 0)
+            {
+                Debug.LogWarning("No incomplete tasks found in any active quest");
+                return;
+            }
+
+            var randomIndex = UnityEngine.Random.Range(0, allIncompleteTasks.Count);
+            var (randomQuest, randomTask) = allIncompleteTasks[randomIndex];
+            
+            randomTask.CompleteTask();
+            Debug.Log($"DEBUG: Randomly completed task '{randomTask.TaskName}' in quest '{randomQuest.questName}'");
+        }
+
+        [ContextMenu("Show All Active Tasks")]
+        public void DebugShowAllActiveTasks()
+        {
+            if (activeQuests.Count == 0)
+            {
+                Debug.Log("No active quests");
+                return;
+            }
+
+            foreach (var quest in activeQuests)
+            {
+                Debug.Log($"=== Quest: {quest.questName} ===");
+                if (quest.tasks == null || quest.tasks.Count == 0)
+                {
+                    Debug.Log("  No tasks");
+                    continue;
+                }
+
+                for (int i = 0; i < quest.tasks.Count; i++)
+                {
+                    var task = quest.tasks[i];
+                    string status = task.IsCompleted ? "✓ COMPLETED" : "○ INCOMPLETE";
+                    Debug.Log($"  Task {i + 1}: {task.TaskName} [{status}]");
+                }
             }
         }
         

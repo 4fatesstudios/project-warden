@@ -28,6 +28,9 @@ public class QuestDisplay : MonoBehaviour
         // Subscribe to quest changes event
         QuestManager.OnQuestsChanged += RefreshQuestDisplay;
         
+        // Subscribe to task completion events for instant updates
+        QuestTask.OnTaskCompleted += OnTaskCompleted;
+        
         // Initial display update
         UpdateQuestDisplay();
     }
@@ -36,6 +39,16 @@ public class QuestDisplay : MonoBehaviour
     {
         // Unsubscribe from events to prevent memory leaks
         QuestManager.OnQuestsChanged -= RefreshQuestDisplay;
+        QuestTask.OnTaskCompleted -= OnTaskCompleted;
+    }
+
+    /// <summary>
+    /// Called when any task is completed - triggers instant UI update
+    /// </summary>
+    private void OnTaskCompleted(QuestTask completedTask)
+    {
+        Debug.Log($"QuestDisplay: Task completed, refreshing UI - {completedTask.TaskName}");
+        RefreshQuestDisplay();
     }
 
     // Remove or comment out the Update method since we're using events now
@@ -206,7 +219,7 @@ public class QuestDisplay : MonoBehaviour
             
             // Add and configure TextMeshPro component
             TextMeshProUGUI taskText = taskObject.AddComponent<TextMeshProUGUI>();
-            taskText.text = $"• {task.TaskName}";
+            taskText.text = $"{(task.IsCompleted ? "✓" : "○")} {task.TaskName}";
             taskText.fontSize = 12;
             taskText.color = task.IsCompleted ? Color.green : Color.white;
             taskText.fontStyle = FontStyles.Normal;
@@ -220,16 +233,57 @@ public class QuestDisplay : MonoBehaviour
             taskRect.anchorMin = new Vector2(0, 1);
             taskRect.anchorMax = new Vector2(0, 1);
             taskRect.pivot = new Vector2(0, 1);
-            taskRect.sizeDelta = new Vector2(200, 25); // Fixed width and height
+            taskRect.sizeDelta = new Vector2(180, 25); // Leave space for button
             taskRect.anchoredPosition = new Vector2(10, -i * 30); // Vertical spacing of 30 units
             
-            // Configure the TextMeshPro RectTransform with fixed size
+            // Configure the TextMeshPro RectTransform
             RectTransform textRect = taskText.rectTransform;
             textRect.anchorMin = new Vector2(0, 1);
             textRect.anchorMax = new Vector2(0, 1);
             textRect.pivot = new Vector2(0, 1);
-            textRect.sizeDelta = new Vector2(200, 25);
+            textRect.sizeDelta = new Vector2(180, 25);
             textRect.anchoredPosition = Vector2.zero;
+            
+            // Add completion button for incomplete tasks
+            if (!task.IsCompleted)
+            {
+                GameObject buttonObject = new GameObject("CompleteButton", typeof(RectTransform));
+                buttonObject.transform.SetParent(tasksContainer, false);
+                
+                Button completeButton = buttonObject.AddComponent<Button>();
+                Image buttonImage = buttonObject.AddComponent<Image>();
+                buttonImage.color = new Color(0.2f, 0.8f, 0.2f, 0.7f); // Semi-transparent green
+                
+                // Button positioning
+                RectTransform buttonRect = buttonObject.GetComponent<RectTransform>();
+                buttonRect.anchorMin = new Vector2(0, 1);
+                buttonRect.anchorMax = new Vector2(0, 1);
+                buttonRect.pivot = new Vector2(0, 1);
+                buttonRect.sizeDelta = new Vector2(60, 20);
+                buttonRect.anchoredPosition = new Vector2(190, -i * 30 - 2); // Next to the task text
+                
+                // Button text
+                GameObject buttonTextObj = new GameObject("Text", typeof(RectTransform));
+                buttonTextObj.transform.SetParent(buttonObject.transform, false);
+                TextMeshProUGUI buttonText = buttonTextObj.AddComponent<TextMeshProUGUI>();
+                buttonText.text = "Complete";
+                buttonText.fontSize = 10;
+                buttonText.color = Color.white;
+                buttonText.alignment = TextAlignmentOptions.Center;
+                
+                RectTransform buttonTextRect = buttonText.rectTransform;
+                buttonTextRect.anchorMin = Vector2.zero;
+                buttonTextRect.anchorMax = Vector2.one;
+                buttonTextRect.sizeDelta = Vector2.zero;
+                buttonTextRect.anchoredPosition = Vector2.zero;
+                
+                // Button functionality - capture the task in a closure
+                QuestTask capturedTask = task;
+                completeButton.onClick.AddListener(() => {
+                    capturedTask.CompleteTask();
+                    Debug.Log($"Completed task via UI button: {capturedTask.TaskName}");
+                });
+            }
             
             Debug.Log($"Task object created and configured: {taskObject.name}");
         }

@@ -3,6 +3,7 @@ using Ink.Runtime;
 using UnityEngine.InputSystem;
 using FourFatesStudios.ProjectWarden.Characters.Components;
 using FourFatesStudios.ProjectWarden.QuestSystem;
+using FourFatesStudios.ProjectWarden.RelationshipSystem;
 using System.Collections;
 using System.Threading;
 
@@ -26,6 +27,69 @@ namespace FourFatesStudios.ProjectWarden.Interactions.StaticDialogue
             
             // Bind external functions for quest system
             BindQuestExternalFunctions();
+            // Bind external functions for relationship system
+            BindRelationshipExternalFunctions();
+        }
+
+        /// <summary>
+        /// Binds relationship-related external functions to the Ink story
+        /// </summary>
+        private void BindRelationshipExternalFunctions()
+        {
+            // Function to add/subtract relationship points
+            story.BindExternalFunction("relationship_points", (string characterName, int points) =>
+            {
+                if (RelationshipManager.Instance != null)
+                {
+                    RelationshipManager.Instance.ChangeRelationshipPoints(characterName, points);
+                    Debug.Log($"Changed relationship points for '{characterName}' by {points}");
+                }
+                else
+                {
+                    Debug.LogWarning("RelationshipManager instance not found when changing relationship points");
+                }
+            });
+
+            // Function to get relationship status
+            story.BindExternalFunction("get_relationship_status", (string characterName) =>
+            {
+                if (RelationshipManager.Instance != null)
+                {
+                    RelationshipStatus status = RelationshipManager.Instance.GetRelationshipStatus(characterName);
+                    string statusString = status.ToString();
+                    Debug.Log($"Getting relationship status for '{characterName}': {statusString}");
+                    return statusString;
+                }
+                Debug.LogWarning("RelationshipManager instance not found when getting relationship status");
+                return "Unknown";
+            });
+
+            // Function to get relationship points
+            story.BindExternalFunction("get_relationship_points", (string characterName) =>
+            {
+                if (RelationshipManager.Instance != null)
+                {
+                    int points = RelationshipManager.Instance.GetRelationshipPoints(characterName);
+                    Debug.Log($"Getting relationship points for '{characterName}': {points}");
+                    return points;
+                }
+                Debug.LogWarning("RelationshipManager instance not found when getting relationship points");
+                return 0;
+            });
+
+            // Function to update relationship status
+            story.BindExternalFunction("update_relationship_status", (string characterName) =>
+            {
+                if (RelationshipManager.Instance != null)
+                {
+                    RelationshipManager.Instance.UpdateRelationshipStatus(characterName);
+                    Debug.Log($"Updated relationship status for '{characterName}'");
+                }
+                else
+                {
+                    Debug.LogWarning("RelationshipManager instance not found when updating relationship status");
+                }
+            });
         }
 
         /// <summary>

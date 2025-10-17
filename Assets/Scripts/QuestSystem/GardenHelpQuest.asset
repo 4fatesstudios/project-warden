@@ -10,10 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b9dade58ad49a6c4aa14d4031c1f65fd, type: 3}
-  m_Name: QuestNo2
+  m_Name: GardenHelpQuest
   m_EditorClassIdentifier: 
-  questName: Get 5 apple
-  description: yummy
+  questName: Garden Maintenance
+  description: FLJDSFLJKLDJFLGardentHLPE
   tasks:
-  - taskName: Get apples
-    isCompleted: 0
+  - taskName: 123132
+    isCompleted: 1
+  - taskName: 2134214
+    isCompleted: 1

@@ -10,7 +10,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1614790179561385052, guid: fc5a1c3d000881444aa59b016bb69d9e, type: 3}
       propertyPath: m_Name
-      value: Interactable Variant
+      value: DialogueInteractable
       objectReference: {fileID: 0}
     - target: {fileID: 3371233918898253755, guid: fc5a1c3d000881444aa59b016bb69d9e, type: 3}
       propertyPath: m_LocalPosition.x
@@ -76,6 +76,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 1614790179561385052, guid: fc5a1c3d000881444aa59b016bb69d9e, type: 3}
       insertIndex: 2
       addedObject: {fileID: 7604384622514065248}
+    - targetCorrespondingSourceObject: {fileID: 1614790179561385052, guid: fc5a1c3d000881444aa59b016bb69d9e, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6801736211121239575}
   m_SourcePrefab: {fileID: 100100000, guid: fc5a1c3d000881444aa59b016bb69d9e, type: 3}
 --- !u!1 &4688901856390736966 stripped
 GameObject:
@@ -101,4 +104,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   interactText: Press E to Speak
   focusVisual: {fileID: 4688901856390736966}
-  dialogueSO: {fileID: 11400000, guid: cae6955f4539f5548a0f4ecb6c780058, type: 2}
+  dialogueKnotName: 
+--- !u!114 &6801736211121239575
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5118167609449540201}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 45fec559c4f6dca43839a05b25293c27, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  characterName: DebugNPC
