@@ -184,7 +184,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isoCam: {fileID: 0}
-  perspectiveCam: {fileID: 0}
+  twoPointFiveDCam: {fileID: 0}
   mainCam: {fileID: 557833094602142253}
   blendDuration: 1
   blendCurve:
@@ -213,3 +213,20 @@ MonoBehaviour:
     m_RotationOrder: 4
   orthoSize: 10
   perspectiveFOV: 40
+  viewEntries:
+  - view: 0
+    data:
+      positionOffset: {x: 0, y: 1, z: 0}
+      rotationOffset: {x: 0, y: 0, z: 0}
+  - view: 1
+    data:
+      positionOffset: {x: -1.5, y: 1, z: 1.5}
+      rotationOffset: {x: 0, y: 0, z: 0}
+  - view: 2
+    data:
+      positionOffset: {x: 0, y: -0.5, z: 0}
+      rotationOffset: {x: 0, y: 0, z: 0}
+  - view: 3
+    data:
+      positionOffset: {x: 1.5, y: 1, z: -1.5}
+      rotationOffset: {x: 0, y: 0, z: 0}
