@@ -609,6 +609,7 @@
     border-width: 2px;
     border-color: rgb(180, 160, 140);
     margin-bottom: 10px;
+    picking-mode: Position;
 }
 
 .inventory-title {
@@ -842,6 +843,7 @@
     border-width: 2px;
     border-color: rgb(180, 160, 140);
     margin-bottom: 10px;
+    picking-mode: Position;
 }
 
 /* Container Separator */

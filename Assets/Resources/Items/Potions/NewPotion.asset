@@ -13,13 +13,14 @@ MonoBehaviour:
   m_Name: NewPotion
   m_EditorClassIdentifier: 
   id: 
-  itemName: Unnamed Item
+  itemName: NewPotion
   itemDescription: Empty Description
   itemRarity: 0
   itemIcon: {fileID: 0}
   itemPotionType: 0
-  effectBundle:
-    Effects: []
+  potency: 100
+  infusionBundle:
+    infusions: []
   rarity: 0
   tone: 2
   bottleType: 0
@@ -46,6 +47,3 @@ MonoBehaviour:
   craftQuality: 1
   crafterName: 
   sourceIngredients: []
-  references:
-    version: 2
-    RefIds: []

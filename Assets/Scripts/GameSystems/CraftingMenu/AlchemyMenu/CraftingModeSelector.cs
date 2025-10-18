@@ -774,9 +774,14 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu
             
             // Launch the grid minigame with recipe configuration
             var gridCraftingManager = FindFirstObjectByType<FourFatesStudios.ProjectWarden.GridDemo.GridCraftingManager>();
+            Debug.Log($"📜 Looking for GridCraftingManager, found: {gridCraftingManager != null}");
             if (gridCraftingManager != null)
             {
-                Debug.Log("📜 ✅ GridCraftingManager found, assigning UIDocument");
+                Debug.Log($"📜 ✅ GridCraftingManager found on GameObject: {gridCraftingManager.gameObject.name}");
+                
+                // Set the current recipe BEFORE initializing
+                gridCraftingManager.CurrentRecipe = recipe;
+                Debug.Log($"📜 ✅ Set CurrentRecipe to: {recipe.ItemName}");
                 
                 // Find and assign the CraftingUI UIDocument
                 var craftingUIDoc = GameObject.Find("CraftingUI");
@@ -796,8 +801,11 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu
                     }
                 }
                 
+                Debug.Log($"📜 About to call Initialize(true) on GridCraftingManager");
                 gridCraftingManager.Initialize(true);
                 Debug.Log("📜 ✅ GridCraftingManager reinitialized");
+                
+                Debug.Log($"📜 About to call SetupRecipeCraftingGrid with recipe: {recipe.ItemName}");
                 SetupRecipeCraftingGrid(gridCraftingManager, recipe);
                 Debug.Log("📜 ✅ Recipe crafting grid configured");
             }
@@ -848,8 +856,8 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu
             // Load the specific obstacle pattern from the recipe
             LoadRecipeObstaclePattern(gridManager, recipe);
             
-            // Clear ingredients but keep the newly loaded recipe obstacles
-            gridManager.ClearGridKeepObstacles();
+            // Clear ingredients and reapply recipe obstacles
+            gridManager.ClearGridPreserveObstacles();
             
             // Force a visual refresh to ensure obstacles are displayed
             // Use reflection to call private UpdateGridVisuals method
@@ -919,10 +927,15 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu
                     
                     foreach (var cell in obstacleCells)
                     {
-                        // Get the obstacle position
-                        var obstaclePosition = cell.position;
+                        // Get the obstacle position from recipe
+                        var recipePosition = cell.position;
                         
-                        Debug.Log($"📜 Processing obstacle: Type={cell.obstacleType}, Position=({obstaclePosition.x}, {obstaclePosition.y}), HasObstacle={cell.hasObstacle}");
+                        // Flip Y coordinate to match visual grid coordinate system
+                        // Recipe uses (0,0) at top-left, grid uses (0,0) at bottom-left
+                        int flippedY = 4 - recipePosition.y;
+                        var obstaclePosition = new Vector2Int(recipePosition.x, flippedY);
+                        
+                        Debug.Log($"📜 Processing obstacle: Type={cell.obstacleType}, Recipe Position=({recipePosition.x}, {recipePosition.y}), Flipped Position=({obstaclePosition.x}, {obstaclePosition.y})");
                         
                         // Verify position is within grid bounds (GridCraftingManager uses GRID_SIZE = 5)
                         if (obstaclePosition.x >= 0 && obstaclePosition.x < 5 &&

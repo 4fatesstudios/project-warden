@@ -1487,6 +1487,7 @@ namespace FourFatesStudios.ProjectWarden.Editor
                 if (GUILayout.Toggle(isSelected, "", GUILayout.Width(20)) && !isSelected)
                 {
                     selectedPotion = potion;
+                    Repaint();
                 }
                 
                 EditorGUILayout.ObjectField(potion, typeof(Potion), false);

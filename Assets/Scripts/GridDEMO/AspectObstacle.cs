@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
 using FourFatesStudios.ProjectWarden.Enums;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
 
@@ -7,14 +8,27 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
 {
     public enum ObstacleType
     {
-        Corporeal,  // Blocked cell (stone/residue), not counted for completion
-        FrigidFrozen,     // Frozen cell, needs adjacency to unlock
-        FrigidMelted, // Frozen cell, needs adjacency to unlock and melt
-        Scorch,     // Volatile cell, needs compatible aspects
-        Caustic,    // Degrade cell, reduces potency by 20%
-        Arc,        // Chaotic RNG effects
-        Divine,     // Sanctified cell, only unrefined divine aspects
-        Void        // Cosmetic void - disables visuals, blocks placement, not counted for completion
+        Corporeal,      // Blocked cells - can be erupted and removed with specific ingredient combinations
+        FrigidFrozen,   // Frozen cells - must be melted before placement
+        FrigidMelted,   // Melted cells - unlocked and can place ingredients
+        Scorch,         // Enflamed cells - HP-based burn/enhance mechanics
+        Caustic,        // Deteriorating cells - multi-state potency modifiers
+        Arc,            // Fulminating cells - Volatile/Static states with spawning
+        Divine,         // Sanctified cells - Divine aspects only, global potency bonus
+        Void            // Cosmetic void - disables visuals, blocks placement, not counted for completion
+    }
+    
+    public enum CausticState
+    {
+        Deteriorated,  // Non-Caustic ingredients: -20% potency
+        Controlled,    // Herb ingredients: -60% negative effects
+        Hyperactive    // Caustic ingredients: +20% potency
+    }
+    
+    public enum ArcState
+    {
+        Volatile,  // Default: -20% total potion potency
+        Static     // Placed: +20% ingredient potency, spawns children
     }
 
     [System.Serializable]
@@ -24,11 +38,30 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         [SerializeField] private Vector2Int position;
         [SerializeField] private bool isCompleted = false;
         [SerializeField] private Ingredient placedIngredient;
+        
+        [SerializeField] private int currentHP = 2;
+        [SerializeField] private int maxHP = 2;
+        
+        [SerializeField] private List<CausticState> activeCausticStates = new List<CausticState>();
+        
+        [SerializeField] private ArcState arcState = ArcState.Volatile;
+        [SerializeField] private List<AspectObstacle> childArcObstacles = new List<AspectObstacle>();
+        [SerializeField] private AspectObstacle parentArcObstacle = null;
+        [SerializeField] private int arcSpawnCount = 0;
+        
+        [SerializeField] private List<Ingredient> eruptionIngredients = new List<Ingredient>();
+        [SerializeField] private bool isErupted = false;
 
         public ObstacleType ObstacleType => obstacleType;
         public Vector2Int Position => position;
         public bool IsCompleted => isCompleted;
         public Ingredient PlacedIngredient => placedIngredient;
+        public int CurrentHP => currentHP;
+        public int MaxHP => maxHP;
+        public ArcState ArcState => arcState;
+        public List<CausticState> ActiveCausticStates => activeCausticStates;
+        public bool IsErupted => isErupted;
+        public bool IsFrozenUnlocked => obstacleType == ObstacleType.FrigidMelted;
 
         public AspectObstacle(ObstacleType type, Vector2Int pos)
         {
@@ -36,6 +69,17 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             position = pos;
             isCompleted = false;
             placedIngredient = null;
+            
+            if (type == ObstacleType.Scorch)
+            {
+                currentHP = 2;
+                maxHP = 2;
+            }
+            
+            if (type == ObstacleType.Arc)
+            {
+                arcState = ArcState.Volatile;
+            }
         }
 
         /// <summary>
@@ -48,33 +92,28 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             switch (obstacleType)
             {
                 case ObstacleType.Corporeal:
-                    return false; // Blocked cells cannot have ingredients placed
+                    return isErupted;
 
                 case ObstacleType.FrigidFrozen:
-                    return false; // Frozen cells need to be melted first by adjacency
+                    return false;
 
                 case ObstacleType.FrigidMelted:
-                    // Melted cells can accept any ingredient, but with special effects
                     return true;
 
                 case ObstacleType.Scorch:
-                    // Volatile cells accept scorch, caustic, or arc aspects
-                    return ingredient.IngredientAspect == Aspect.Scorch ||
-                           ingredient.IngredientAspect == Aspect.Caustic ||
-                           ingredient.IngredientAspect == Aspect.Arc;
+                    return currentHP > 0;
 
                 case ObstacleType.Caustic:
-                    return true; // Any ingredient can be placed but will have reduced potency
+                    return true;
 
                 case ObstacleType.Arc:
-                    return true; // Any ingredient can be placed but triggers RNG effects
+                    return true;
 
                 case ObstacleType.Divine:
-                    // Only unrefined divine aspects
-                    return ingredient.IngredientAspect == Aspect.Divine && ingredient.IsUnrefined;
+                    return ingredient.IngredientAspect == Aspect.Divine;
 
                 case ObstacleType.Void:
-                    return false; // Void cells cannot have ingredients placed
+                    return false;
 
                 default:
                     return false;
@@ -94,15 +133,16 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             switch (obstacleType)
             {
                 case ObstacleType.Corporeal:
-                    // Should not reach here as CanPlaceIngredient returns false
-                    return false;
-
-                case ObstacleType.FrigidFrozen:
-                    // Only completed through melting, not direct placement
-                    return false;
+                    if (isErupted)
+                    {
+                        Debug.Log($"🪨 Corporeal: Placed {ingredient.ItemName} on erupted blocked cell");
+                        isCompleted = true;
+                    }
+                    break;
 
                 case ObstacleType.FrigidMelted:
-                    HandleFrigidMeltedObstacle(ingredient, gridManager);
+                    Debug.Log($"❄️ Frigid: Placed {ingredient.ItemName} on melted frozen cell");
+                    isCompleted = true;
                     break;
 
                 case ObstacleType.Scorch:
@@ -122,7 +162,6 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                     break;
 
                 case ObstacleType.Void:
-                    // Void obstacles should never have ingredients placed on them
                     return false;
             }
 
@@ -138,20 +177,30 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                                ingredient.IngredientAspect == Aspect.Caustic ||
                                ingredient.IngredientAspect == Aspect.Arc);
 
-            if (isCompatible)
+            bool isIncompatible = (ingredient.IngredientAspect == Aspect.Corporeal ||
+                                 ingredient.IngredientAspect == Aspect.Frigid);
+
+            int ingredientSize = GetIngredientSize(ingredient);
+
+            if (isIncompatible)
             {
-                // Compatible placement enhances potency
-                Debug.Log($"🔥 Scorch obstacle: {ingredient.ItemName} potency enhanced by 50%");
-                isCompleted = true;
-            }
-            else
-            {
-                // Incompatible placement burns ingredient
-                float sizeReduction = 1.1f / GetIngredientSize(ingredient);
-                Debug.Log($"🔥 Scorch obstacle: {ingredient.ItemName} burned, potency reduced by {sizeReduction:P0}%");
+                float potencyReduction = (1.1f / ingredientSize) * 100f;
+                Debug.Log($"🔥 Scorch: {ingredient.ItemName} burned! Potency reduced by {potencyReduction:F1}%");
                 
-                // Note: In a full implementation, you'd modify the ingredient's actual potency
-                // For now, we'll just track the penalty
+                currentHP = Mathf.Max(0, currentHP - 1);
+                Debug.Log($"🔥 Scorch: Cell HP reduced to {currentHP}/{maxHP}");
+                
+                if (currentHP == 0)
+                {
+                    isCompleted = true;
+                    Debug.Log($"🔥 Scorch: Flame quenched!");
+                }
+            }
+            else if (isCompatible)
+            {
+                float potencyBonus = (0.5f / ingredientSize) * 100f;
+                Debug.Log($"🔥 Scorch: {ingredient.ItemName} enhanced! Potency increased by {potencyBonus:F1}%");
+                isCompleted = true;
             }
         }
         
@@ -160,23 +209,24 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         /// </summary>
         private void HandleCausticObstacle(Ingredient ingredient, GridGameManager gridManager)
         {
+            activeCausticStates.Clear();
+            
             if (ingredient.IngredientArchetype == IngredientArchetype.Herb)
             {
-                // Herb ingredients trigger "Controlled" state
-                Debug.Log($"🧪 Caustic obstacle: Herb {ingredient.ItemName} reduces negative effects by 60%");
-                // Set state to Controlled
+                activeCausticStates.Add(CausticState.Controlled);
+                Debug.Log($"🧪 Caustic: Herb {ingredient.ItemName} → Controlled state (-60% negative effects)");
             }
-            else if (ingredient.IngredientAspect == Aspect.Caustic)
+            
+            if (ingredient.IngredientAspect == Aspect.Caustic)
             {
-                // Caustic ingredients trigger "Hyperactive" state
-                Debug.Log($"🧪 Caustic obstacle: Caustic {ingredient.ItemName} potency increased by 20%");
-                // Set state to Hyperactive
+                activeCausticStates.Add(CausticState.Hyperactive);
+                Debug.Log($"🧪 Caustic: Caustic {ingredient.ItemName} → Hyperactive state (+20% potency)");
             }
-            else
+            
+            if (activeCausticStates.Count == 0)
             {
-                // Default "Deteriorated" state
-                Debug.Log($"🧪 Caustic obstacle: {ingredient.ItemName} potency reduced by 20%");
-                // Set state to Deteriorated
+                activeCausticStates.Add(CausticState.Deteriorated);
+                Debug.Log($"🧪 Caustic: {ingredient.ItemName} → Deteriorated state (-20% potency)");
             }
             
             isCompleted = true;
@@ -187,16 +237,78 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         /// </summary>
         private void HandleArcObstacle(Ingredient ingredient, GridGameManager gridManager)
         {
-            // Arc obstacles create volatile/static states
-            Debug.Log($"⚡ Arc obstacle: {ingredient.ItemName} creates static field");
+            if (arcState == ArcState.Volatile)
+            {
+                arcState = ArcState.Static;
+                Debug.Log($"⚡ Arc: Volatile → Static, {ingredient.ItemName} potency increased by 20%");
+                
+                if (arcSpawnCount < 2)
+                {
+                    int spawnCount = Mathf.Min(2 - arcSpawnCount, 2);
+                    SpawnChildArcObstacles(gridManager, spawnCount);
+                    arcSpawnCount += spawnCount;
+                }
+                
+                isCompleted = true;
+            }
+        }
+        
+        private void SpawnChildArcObstacles(GridGameManager gridManager, int count)
+        {
+            var emptyCells = new List<Vector2Int>();
             
-            // Switch from Volatile to Static
-            Debug.Log($"⚡ Volatile cell becomes Static, {ingredient.ItemName} potency increased by 20%");
+            for (int x = 0; x < gridManager.gridWidth; x++)
+            {
+                for (int y = 0; y < gridManager.gridHeight; y++)
+                {
+                    var cell = gridManager.GetCell(x, y);
+                    var pos = new Vector2Int(x, y);
+                    
+                    if (cell != null && !cell.IsOccupied && gridManager.GetObstacleAt(pos) == null)
+                    {
+                        emptyCells.Add(pos);
+                    }
+                }
+            }
             
-            // Spawn up to 2 new Fulminating cells randomly
-            SpawnRandomFulminatingCells(gridManager, 2);
+            int spawned = 0;
+            for (int i = 0; i < count && emptyCells.Count > 0; i++)
+            {
+                int randomIndex = Random.Range(0, emptyCells.Count);
+                Vector2Int spawnPos = emptyCells[randomIndex];
+                emptyCells.RemoveAt(randomIndex);
+                
+                var childObstacle = new AspectObstacle(ObstacleType.Arc, spawnPos);
+                childObstacle.parentArcObstacle = this;
+                childArcObstacles.Add(childObstacle);
+                
+                Debug.Log($"⚡ Arc: Spawned child Fulminating cell at ({spawnPos.x}, {spawnPos.y})");
+                spawned++;
+            }
             
-            isCompleted = true;
+            Debug.Log($"⚡ Arc: Spawned {spawned} child cells (total spawns: {arcSpawnCount})");
+        }
+        
+        public void OnIngredientRemoved()
+        {
+            placedIngredient = null;
+            
+            if (obstacleType == ObstacleType.Arc && arcState == ArcState.Static)
+            {
+                arcState = ArcState.Volatile;
+                Debug.Log($"⚡ Arc: Static → Volatile, child cells reset");
+                
+                foreach (var child in childArcObstacles)
+                {
+                    child.arcState = ArcState.Volatile;
+                    child.isCompleted = false;
+                }
+            }
+            else if (obstacleType == ObstacleType.Scorch)
+            {
+                currentHP = Mathf.Min(currentHP + 1, maxHP);
+                Debug.Log($"🔥 Scorch: Ingredient returned to inventory, HP restored to {currentHP}/{maxHP}");
+            }
         }
         
         /// <summary>
@@ -204,14 +316,14 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         /// </summary>
         private void HandleDivineObstacle(Ingredient ingredient, GridGameManager gridManager)
         {
-            if (ingredient.IngredientAspect == Aspect.Divine && ingredient.IsUnrefined)
+            if (ingredient.IngredientAspect == Aspect.Divine)
             {
-                Debug.Log($"✨ Divine obstacle: Unrefined Divine {ingredient.ItemName} potency increased by 10%");
+                Debug.Log($"✨ Divine: {ingredient.ItemName} → +10% overall potion potency");
                 isCompleted = true;
             }
             else
             {
-                Debug.LogWarning($"⚠️ Divine obstacle: {ingredient.ItemName} cannot be placed (requires unrefined Divine aspect)");
+                Debug.LogWarning($"⚠️ Divine: {ingredient.ItemName} cannot be placed (requires Divine aspect)");
             }
         }
         
@@ -302,16 +414,15 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             return ingredient.GridWidth * ingredient.GridHeight;
         }
 
-        /// <summary>
-        /// Attempt to melt a frozen obstacle through adjacency
-        /// </summary>
-        public bool TryMeltFrozen(GridGameManager gridManager)
+        public bool TryUnlockFrozen(GridGameManager gridManager)
         {
-            if (obstacleType != ObstacleType.FrigidFrozen || isCompleted)
+            if (obstacleType != ObstacleType.Frigid || isFrozenUnlocked)
                 return false;
 
-            // Check adjacent cells for scorch or corporeal aspects
             Vector2Int[] directions = { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right };
+            
+            int adjacentCorporealCount = 0;
+            bool hasAdjacentScorch = false;
             
             foreach (var direction in directions)
             {
@@ -321,241 +432,174 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                 if (adjacentCell != null && adjacentCell.IsOccupied)
                 {
                     var adjacentIngredient = adjacentCell.OccupiedByIngredient;
-                    if (adjacentIngredient.IngredientAspect == Aspect.Scorch ||
-                        adjacentIngredient.IngredientAspect == Aspect.Corporeal)
+                    
+                    if (adjacentIngredient.IngredientAspect == Aspect.Scorch)
                     {
-                        // Transition from FrigidFrozen to FrigidMelted
-                        obstacleType = ObstacleType.FrigidMelted;
-                        isCompleted = false; // Reset completion status for the new state
-                        Debug.Log($"❄️ Frigid obstacle melted by adjacent {adjacentIngredient.IngredientAspect} aspect - now FrigidMelted");
-                        return true;
+                        hasAdjacentScorch = true;
+                    }
+                    else if (adjacentIngredient.IngredientAspect == Aspect.Corporeal)
+                    {
+                        adjacentCorporealCount++;
                     }
                 }
             }
-
+            
+            if (hasAdjacentScorch)
+            {
+                isFrozenUnlocked = true;
+                Debug.Log($"❄️ Frigid: Unlocked by adjacent Scorch ingredient");
+                return true;
+            }
+            
+            if (adjacentCorporealCount >= 3)
+            {
+                isFrozenUnlocked = true;
+                Debug.Log($"❄️ Frigid: Unlocked by {adjacentCorporealCount} adjacent Corporeal ingredients");
+                return true;
+            }
+            
             return false;
         }
-
-        /// <summary>
-        /// Check if this obstacle can be melted by a specific adjacent ingredient
-        /// Used for validation and UI feedback
-        /// </summary>
-        public bool CanBeMeltedBy(Ingredient adjacentIngredient)
+        
+        public bool TryEruptCorporeal(GridGameManager gridManager, List<Ingredient> placedIngredients)
         {
-            if (obstacleType != ObstacleType.FrigidFrozen || isCompleted)
+            if (obstacleType != ObstacleType.Corporeal || isErupted)
                 return false;
 
-            return adjacentIngredient.IngredientAspect == Aspect.Scorch ||
-                   adjacentIngredient.IngredientAspect == Aspect.Corporeal;
-        }
-
-        /// <summary>
-        /// Get the current state description for the frigid obstacle
-        /// </summary>
-        public string GetFrigidStateDescription()
-        {
-            return obstacleType switch
+            Vector2Int[] adjacentDirections = new Vector2Int[]
             {
-                ObstacleType.FrigidFrozen => "Frozen - Requires adjacent Scorch/Corporeal to melt",
-                ObstacleType.FrigidMelted => "Melted - Can place ingredients with special effects",
-                _ => "Not a frigid obstacle"
+                Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right,
+                Vector2Int.up + Vector2Int.left, Vector2Int.up + Vector2Int.right,
+                Vector2Int.down + Vector2Int.left, Vector2Int.down + Vector2Int.right
             };
-        }
-
-        /// <summary>
-        /// Get the effective potency of an ingredient placed on this obstacle
-        /// </summary>
-        public int GetEffectivePotency(Ingredient ingredient)
-        {
-            if (ingredient == null) return 0;
-
-            switch (obstacleType)
+            
+            bool hasFrigid = false;
+            bool hasCaustic = false;
+            bool hasScorch = false;
+            bool hasArc = false;
+            
+            List<Ingredient> triggeringIngredients = new List<Ingredient>();
+            
+            foreach (var direction in adjacentDirections)
             {
-                case ObstacleType.FrigidMelted:
-                    // Varies based on ingredient aspect
-                    if (ingredient.IngredientAspect == Aspect.Scorch)
-                        return Mathf.RoundToInt(ingredient.Potency * 1.3f); // 30% increase for evaporation
-                    else if (ingredient.IngredientAspect == Aspect.Corporeal)
-                        return Mathf.RoundToInt(ingredient.Potency * 1.1f); // 10% increase for stabilization
-                    else
-                        return Mathf.RoundToInt(ingredient.Potency * 0.9f); // 10% decrease for chilled state
+                Vector2Int adjacentPos = position + direction;
+                var adjacentCell = gridManager.GetCell(adjacentPos.x, adjacentPos.y);
                 
-                case ObstacleType.Caustic:
-                    // 20% reduction in potency
-                    return Mathf.RoundToInt(ingredient.Potency * 0.8f);
-
-                case ObstacleType.Divine:
-                    // 10% increase in potency for unrefined divine aspects
-                    if (ingredient.IngredientAspect == Aspect.Divine && ingredient.IsUnrefined)
-                        return Mathf.RoundToInt(ingredient.Potency * 1.1f);
-                    break;
-            }
-
-            return ingredient.Potency;
-        }
-
-        /// <summary>
-        /// Trigger chaotic RNG effect for Arc obstacles
-        /// </summary>
-        private void TriggerArcEffect(GridGameManager gridManager)
-        {
-            float roll = Random.Range(0f, 100f);
-
-            if (roll < 40f) // 40%: new moving obstacle spawns
-            {
-                Debug.Log("⚡ Arc Effect: New moving obstacle spawned!");
-                // This would spawn a new obstacle in a random location
-                SpawnNewMovingObstacle(gridManager);
-            }
-            else if (roll < 65f) // 25%: shuffle all obstacle locations
-            {
-                Debug.Log("⚡ Arc Effect: All obstacle locations shuffled!");
-                // This would shuffle obstacle positions
-                ShuffleObstacleLocations(gridManager);
-            }
-            else if (roll < 85f) // 20%: nudge placed ingredient 1 tile
-            {
-                Debug.Log("⚡ Arc Effect: Ingredient nudged 1 tile!");
-                NudgeIngredient(gridManager);
-            }
-            else if (roll < 95f) // 10%: teleport ingredient with rotation
-            {
-                Debug.Log("⚡ Arc Effect: Ingredient teleported with random rotation!");
-                TeleportIngredient(gridManager);
-            }
-            else // 5%: shuffle all ingredient placements
-            {
-                Debug.Log("⚡ Arc Effect: All ingredient placements shuffled!");
-                ShuffleAllIngredients(gridManager);
-            }
-        }
-
-        private void SpawnNewMovingObstacle(GridGameManager gridManager)
-        {
-            // Find a random empty cell to spawn a new obstacle
-            var emptyCells = new List<Vector2Int>();
-            for (int x = 0; x < gridManager.gridWidth; x++)
-            {
-                for (int y = 0; y < gridManager.gridHeight; y++)
+                if (adjacentCell != null && adjacentCell.IsOccupied)
                 {
-                    var cell = gridManager.GetCell(x, y);
-                    if (cell != null && !cell.IsOccupied)
+                    var ingredient = adjacentCell.OccupiedByIngredient;
+                    
+                    if (ingredient.IngredientAspect == Aspect.Frigid)
                     {
-                        emptyCells.Add(new Vector2Int(x, y));
+                        hasFrigid = true;
+                        if (!triggeringIngredients.Contains(ingredient))
+                            triggeringIngredients.Add(ingredient);
+                    }
+                    else if (ingredient.IngredientAspect == Aspect.Caustic)
+                    {
+                        hasCaustic = true;
+                        if (!triggeringIngredients.Contains(ingredient))
+                            triggeringIngredients.Add(ingredient);
+                    }
+                    else if (ingredient.IngredientAspect == Aspect.Scorch)
+                    {
+                        hasScorch = true;
+                        if (!triggeringIngredients.Contains(ingredient))
+                            triggeringIngredients.Add(ingredient);
+                    }
+                    else if (ingredient.IngredientAspect == Aspect.Arc)
+                    {
+                        hasArc = true;
+                        if (!triggeringIngredients.Contains(ingredient))
+                            triggeringIngredients.Add(ingredient);
                     }
                 }
             }
-
-            if (emptyCells.Count > 0)
+            
+            bool canErupt = (hasFrigid && hasCaustic) || (hasScorch && hasArc);
+            
+            if (canErupt)
             {
-                var randomPos = emptyCells[Random.Range(0, emptyCells.Count)];
-                var newObstacleType = (ObstacleType)Random.Range(0, System.Enum.GetValues(typeof(ObstacleType)).Length);
-                // GridManager would need to handle spawning new obstacles
-                Debug.Log($"New {newObstacleType} obstacle would spawn at {randomPos}");
+                isErupted = true;
+                eruptionIngredients = new List<Ingredient>(triggeringIngredients);
+                
+                string combo = (hasFrigid && hasCaustic) ? "Frigid+Caustic" : "Scorch+Arc";
+                Debug.Log($"🪨 Corporeal: Erupted by {combo} combination!");
+                Debug.Log($"🪨 Corporeal: Tracking {eruptionIngredients.Count} triggering ingredients");
+                
+                return true;
             }
+            
+            return false;
         }
-
-        private void ShuffleObstacleLocations(GridGameManager gridManager)
+        
+        public bool CheckEruptionIngredientsStillPresent(List<Ingredient> currentIngredients)
         {
-            // This would be implemented by the GridGameManager to shuffle all obstacles
-            Debug.Log("Shuffling obstacle locations...");
-        }
+            if (obstacleType != ObstacleType.Corporeal || !isErupted)
+                return true;
 
-        private void NudgeIngredient(GridGameManager gridManager)
-        {
-            if (placedIngredient == null) return;
-
-            // Find current ingredient position and try to move it 1 tile in a random direction
-            Vector2Int[] directions = { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right };
-            var randomDirection = directions[Random.Range(0, directions.Length)];
-            var newPosition = position + randomDirection;
-
-            // GridManager would handle moving the ingredient
-            Debug.Log($"Ingredient would nudge from {position} to {newPosition}");
-        }
-
-        private void TeleportIngredient(GridGameManager gridManager)
-        {
-            if (placedIngredient == null) return;
-
-            // Find a random empty location to teleport the ingredient
-            var emptyCells = new List<Vector2Int>();
-            for (int x = 0; x < gridManager.gridWidth; x++)
+            foreach (var ingredient in eruptionIngredients)
             {
-                for (int y = 0; y < gridManager.gridHeight; y++)
+                if (!currentIngredients.Contains(ingredient))
                 {
-                    var cell = gridManager.GetCell(x, y);
-                    if (cell != null && !cell.IsOccupied)
-                    {
-                        emptyCells.Add(new Vector2Int(x, y));
-                    }
+                    Debug.Log($"🪨 Corporeal: Eruption ingredient {ingredient.ItemName} removed - regenerating block!");
+                    isErupted = false;
+                    eruptionIngredients.Clear();
+                    isCompleted = false;
+                    return false;
                 }
             }
-
-            if (emptyCells.Count > 0)
-            {
-                var randomPos = emptyCells[Random.Range(0, emptyCells.Count)];
-                Debug.Log($"Ingredient would teleport from {position} to {randomPos} with random rotation");
-            }
+            
+            return true;
         }
 
-        private void ShuffleAllIngredients(GridGameManager gridManager)
-        {
-            // GridManager would handle shuffling all placed ingredients
-            Debug.Log("All ingredient placements would be shuffled with randomized rotations");
-        }
-
-        /// <summary>
-        /// Get visual representation color for the obstacle (matches aspect colors for consistency)
-        /// </summary>
         public Color GetObstacleColor()
         {
             return obstacleType switch
             {
-                ObstacleType.Corporeal => new Color(0.8f, 0.6f, 0.4f, 0.9f), // Brown/Earth (matches Corporeal aspect)
-                ObstacleType.Scorch => new Color(1.0f, 0.4f, 0.2f, 0.9f),    // Fire Red (matches Scorch aspect)  
-                ObstacleType.FrigidFrozen => new Color(0.2f, 0.4f, 1.0f, 0.9f),    // Dark Ice Blue (matches Frigid aspect)
-                ObstacleType.FrigidMelted => new Color(0.4f, 0.8f, 1.0f, 0.9f), // Ice Blue (matches Frigid aspect)
-                ObstacleType.Arc => new Color(1.0f, 1.0f, 0.4f, 0.9f),       // Lightning Yellow (matches Arc aspect)
-                ObstacleType.Caustic => new Color(0.6f, 1.0f, 0.2f, 0.9f),   // Acid Green (matches Caustic aspect)
-                ObstacleType.Divine => new Color(1.0f, 0.8f, 1.0f, 0.9f),    // Holy Purple (matches Divine aspect)
-                ObstacleType.Void => new Color(0.1f, 0.1f, 0.1f, 0.95f),     // Dark void (mostly transparent)
-                _ => new Color(0.7f, 0.7f, 0.7f, 0.9f)                      // Default grey
+                ObstacleType.Corporeal => new Color(0.8f, 0.6f, 0.4f, 0.9f),
+                ObstacleType.Scorch => new Color(1.0f, 0.4f, 0.2f, 0.9f),
+                ObstacleType.FrigidFrozen => new Color(0.2f, 0.4f, 1.0f, 0.9f),
+                ObstacleType.FrigidMelted => new Color(0.4f, 0.8f, 1.0f, 0.9f),
+                ObstacleType.Arc => new Color(1.0f, 1.0f, 0.4f, 0.9f),
+                ObstacleType.Caustic => new Color(0.6f, 1.0f, 0.2f, 0.9f),
+                ObstacleType.Divine => new Color(1.0f, 0.8f, 1.0f, 0.9f),
+                ObstacleType.Void => new Color(0.1f, 0.1f, 0.1f, 0.95f),
+                _ => new Color(0.7f, 0.7f, 0.7f, 0.9f)
             };
         }
 
-        /// <summary>
-        /// Check if this obstacle subtracts from available grid space
-        /// Only Corporeal and Void obstacles block space entirely
-        /// </summary>
         public bool SubtractsFromAvailableSpace()
         {
-            return obstacleType == ObstacleType.Corporeal || obstacleType == ObstacleType.Void;
+            if (obstacleType == ObstacleType.Corporeal)
+                return !isErupted;
+            
+            if (obstacleType == ObstacleType.FrigidFrozen)
+                return true;
+            
+            return obstacleType == ObstacleType.Void;
         }
 
-        /// <summary>
-        /// Check if this obstacle should be counted for completion metrics
-        /// Void and Corporeal obstacles are not counted for completion
-        /// </summary>
         public bool CountsForCompletion()
         {
             return obstacleType != ObstacleType.Void && obstacleType != ObstacleType.Corporeal;
         }
 
-        /// <summary>
-        /// Get description of the obstacle for UI
-        /// </summary>
         public string GetObstacleDescription()
         {
             return obstacleType switch
             {
-                ObstacleType.Corporeal => "Blocked cell - cannot place ingredients",
-                ObstacleType.FrigidFrozen => "Frozen cell - unlock with adjacent Scorch/Corporeal",
-                ObstacleType.FrigidMelted => "Melted cell - unlocked with adjacent Scorch/Corporeal",
-                ObstacleType.Scorch => "Volatile cell - requires Scorch, Caustic, or Arc aspects",
-                ObstacleType.Caustic => "Degrade cell - reduces ingredient potency by 20%",
-                ObstacleType.Arc => "Chaotic cell - triggers random effects",
-                ObstacleType.Divine => "Sanctified cell - only unrefined Divine aspects (+10% potency)",
+                ObstacleType.Corporeal => isErupted 
+                    ? "Blocked cell - erupted (can now place ingredients)" 
+                    : "Blocked cell - erupt with Frigid+Caustic or Scorch+Arc proximity",
+                ObstacleType.FrigidFrozen => "Frozen cell - melt with 1 Scorch or 3 Corporeal adjacent",
+                ObstacleType.FrigidMelted => "Melted cell - unlocked (can place ingredients)",
+                ObstacleType.Scorch => $"Enflamed cell ({currentHP}/{maxHP} HP) - burns incompatible, enhances compatible",
+                ObstacleType.Caustic => "Deteriorating cell - multi-state potency modifiers",
+                ObstacleType.Arc => arcState == ArcState.Volatile 
+                    ? "Fulminating cell (Volatile) - reduces total potency by 20%" 
+                    : "Fulminating cell (Static) - ingredient +20% potency, spawns children",
+                ObstacleType.Divine => "Sanctified cell - Divine aspects only (+10% overall potency)",
                 ObstacleType.Void => "Void cell - cosmetic only, cannot place ingredients",
                 _ => "Unknown obstacle"
             };

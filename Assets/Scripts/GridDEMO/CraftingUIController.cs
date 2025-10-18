@@ -120,16 +120,30 @@ namespace FourFatesStudios.ProjectWarden.UI
                 }
             }
             
-            // Subscribe to grid changes to update button state
+            // Subscribe to grid changes to update button state and ingredient quantities
             if (gridManager != null)
             {
                 gridManager.OnGridChanged += UpdateCompleteButtonState;
+                gridManager.OnGridChanged += RefreshIngredientQuantities;
             }
             
+            if (gameObject.activeInHierarchy)
+            {
+                StartCoroutine(InitializeWhenReady());
+            }
+        }
+        
+        private System.Collections.IEnumerator InitializeWhenReady()
+        {
+            yield return null;
+            
             InitializeUI();
-            PopulateAvailableItems();
-            RefreshIngredientDisplay();
-            UpdateCompleteButtonState();
+            if (root != null)
+            {
+                PopulateAvailableItems();
+                RefreshIngredientDisplay();
+                UpdateCompleteButtonState();
+            }
         }
 
         public void Initialize()
@@ -156,12 +170,31 @@ namespace FourFatesStudios.ProjectWarden.UI
                 }
             }
             
-            InitializeUI();
-            PopulateAvailableItems();
-            RefreshIngredientDisplay();
-            UpdateCompleteButtonState();
+            StartCoroutine(InitializeAfterFrame());
+        }
+        
+        private System.Collections.IEnumerator InitializeAfterFrame()
+        {
+            Debug.Log($"⏳ Waiting one frame before initializing UI... GameObject: {gameObject.name}, active: {gameObject.activeSelf}, enabled: {enabled}");
+            yield return null;
             
-            Debug.Log("🔄 CraftingUIController initialization complete");
+            Debug.Log($"⏳ Attempting to initialize UI now... GameObject: {gameObject.name}, active: {gameObject.activeSelf}, enabled: {enabled}");
+            InitializeUI();
+            
+            if (root != null)
+            {
+                Debug.Log("✅ Root is valid, populating UI...");
+                PopulateAvailableItems();
+                RefreshIngredientDisplay();
+                RefreshInventoryDisplay();
+                UpdateCompleteButtonState();
+                
+                Debug.Log("🔄 CraftingUIController initialization complete");
+            }
+            else
+            {
+                Debug.LogError($"❌ CraftingUIController: root still null after waiting a frame. UIDocument: {uiDocument != null}, UIDocument GameObject: {uiDocument?.gameObject.name}, active: {uiDocument?.gameObject.activeSelf}");
+            }
         }
 
         private void Update()
@@ -185,17 +218,37 @@ namespace FourFatesStudios.ProjectWarden.UI
 
         private void InitializeUI()
         {
+            Debug.Log($"🔍 InitializeUI called. GameObject: {gameObject.name}, active: {gameObject.activeSelf}");
+            
             if (uiDocument == null)
             {
                 uiDocument = GetComponent<UIDocument>();
                 if (uiDocument == null)
                 {
-                    Debug.LogError("CraftingUIController: UIDocument is null! Please assign the UIDocument reference in the Inspector.");
+                    Debug.LogError("CraftingUIController: Could not find UIDocument component on this GameObject!");
                     return;
                 }
+                Debug.Log($"✅ Found UIDocument on {gameObject.name}");
             }
 
+            if (!uiDocument.gameObject.activeInHierarchy)
+            {
+                Debug.LogWarning($"⚠️ CraftingUIController: UIDocument's GameObject '{uiDocument.gameObject.name}' is not active in hierarchy, can't initialize yet.");
+                return;
+            }
+            
             root = uiDocument.rootVisualElement;
+            
+            if (root == null)
+            {
+                Debug.LogError($"❌ CraftingUIController: rootVisualElement is null! UIDocument GameObject: {uiDocument.gameObject.name}, active: {uiDocument.gameObject.activeSelf}");
+                return;
+            }
+            
+            Debug.Log("✅ CraftingUIController: UI root found successfully!");
+            
+            root.RegisterCallback<PointerMoveEvent>(OnDebugPointerMove);
+            root.RegisterCallback<ClickEvent>(OnDebugClick, TrickleDown.TrickleDown);
             
             // Main UI elements
             searchField = root.Q<TextField>("search-field");
@@ -310,7 +363,15 @@ namespace FourFatesStudios.ProjectWarden.UI
             
             // Left buttons
             if (clearButton != null) clearButton.clicked += OnClearButtonClicked;
-            if (inventoryButton != null) inventoryButton.clicked += OnInventoryButtonClicked;
+            if (inventoryButton != null)
+            {
+                inventoryButton.clicked += OnInventoryButtonClicked;
+                Debug.Log($"✅ Inventory button click handler registered. Button: {inventoryButton != null}");
+            }
+            else
+            {
+                Debug.LogError("❌ inventory-button not found in UI!");
+            }
             
             // Filter buttons
             if (filterCorporeal != null) filterCorporeal.clicked += () => SetFilter(Aspect.Corporeal);
@@ -396,15 +457,23 @@ namespace FourFatesStudios.ProjectWarden.UI
 
         private void ToggleInventory()
         {
+            Debug.Log($"🔄 ToggleInventory called. Current state: showingInventory={showingInventory}, inventorySection={inventorySection != null}");
+            
             showingInventory = !showingInventory;
             
             if (inventorySection != null)
             {
                 inventorySection.style.display = showingInventory ? DisplayStyle.Flex : DisplayStyle.None;
+                Debug.Log($"📦 Inventory display set to: {inventorySection.style.display.value}");
+            }
+            else
+            {
+                Debug.LogError("❌ inventorySection is NULL! UI was not initialized properly.");
             }
             
             if (showingInventory)
             {
+                Debug.Log("📦 Refreshing inventory display...");
                 RefreshInventoryDisplay();
             }
         }
@@ -446,6 +515,16 @@ namespace FourFatesStudios.ProjectWarden.UI
         private List<Ingredient> FilterAndSortIngredients()
         {
             var filtered = availableIngredients.AsEnumerable();
+            
+            var inventory = FindFirstObjectByType<FourFatesStudios.ProjectWarden.ItemSlotContainerHolder>();
+            if (inventory != null && inventory.Container != null)
+            {
+                filtered = filtered.Where(ingredient =>
+                {
+                    var itemSlot = inventory.Container.Slots.FirstOrDefault(s => s.Item == ingredient);
+                    return itemSlot != null && itemSlot.Quantity > 0;
+                });
+            }
             
             // Apply aspect filter
             if (currentFilter.HasValue)
@@ -493,7 +572,17 @@ namespace FourFatesStudios.ProjectWarden.UI
 
         private void UpdateIngredientSlots()
         {
+            if (root == null)
+            {
+                Debug.LogWarning("⚠️ UpdateIngredientSlots: root is null, skipping");
+                return;
+            }
+            
             int startIndex = currentPage * itemsPerPage;
+            var inventory = FindFirstObjectByType<FourFatesStudios.ProjectWarden.ItemSlotContainerHolder>();
+            var gridManager = FindFirstObjectByType<FourFatesStudios.ProjectWarden.GridDemo.GridCraftingManager>();
+            
+            Debug.Log($"🔧 UpdateIngredientSlots: inventory={inventory != null}, gridManager={gridManager != null}");
             
             for (int i = 0; i < itemsPerPage; i++)
             {
@@ -506,25 +595,19 @@ namespace FourFatesStudios.ProjectWarden.UI
                 {
                     var ingredient = filteredIngredients[ingredientIndex];
                     
-                    // Setup slot content
-                    slot.text = ingredient.name.Length > 8 ? ingredient.name.Substring(0, 8) + "..." : ingredient.name;
+                    string displayName = ingredient.name.Length > 8 ? ingredient.name.Substring(0, 8) + "..." : ingredient.name;
+                    slot.text = displayName;
                     slot.style.display = DisplayStyle.Flex;
                     
-                    // Remove previous click handler if it exists
                     if (currentClickHandlers.ContainsKey(i))
                     {
                         slot.clicked -= currentClickHandlers[i];
                     }
                     
-                    // Create and store new click handler
                     System.Action clickHandler = () => OnIngredientClicked(ingredient);
                     currentClickHandlers[i] = clickHandler;
                     slot.clicked += clickHandler;
                     
-                    // Note: We've removed hover handler registration here to prevent infinite loops
-                    // Hover behavior is handled elsewhere or can be added with proper cleanup if needed
-                    
-                    // Show/hide new star
                     if (newStars.ContainsKey(i))
                     {
                         bool isNew = NewIngredientTracker.Instance.IsIngredientNew(ingredient);
@@ -533,16 +616,14 @@ namespace FourFatesStudios.ProjectWarden.UI
                 }
                 else
                 {
-                    // Empty slot - remove click handler if it exists
                     if (currentClickHandlers.ContainsKey(i))
                     {
                         slot.clicked -= currentClickHandlers[i];
                         currentClickHandlers.Remove(i);
                     }
                     
-                    // Keep slot visible but empty to maintain the 3x4 grid layout
                     slot.text = "";
-                    slot.style.display = DisplayStyle.Flex;  // Keep slots visible to maintain grid structure
+                    slot.style.display = DisplayStyle.Flex;
                     
                     if (newStars.ContainsKey(i))
                     {
@@ -554,32 +635,60 @@ namespace FourFatesStudios.ProjectWarden.UI
 
         private void RefreshInventoryDisplay()
         {
-            // Filter potions based on search
+            var inventoryHolder = FindFirstObjectByType<FourFatesStudios.ProjectWarden.ItemSlotContainerHolder>();
+            if (inventoryHolder != null && inventoryHolder.Container != null)
+            {
+                availablePotions.Clear();
+                
+                foreach (var slot in inventoryHolder.Container.Slots)
+                {
+                    if (slot.Item != null && slot.Item is Potion potion && slot.Quantity > 0)
+                    {
+                        availablePotions.Add(potion);
+                    }
+                }
+                
+                Debug.Log($"🔄 RefreshInventoryDisplay: Found {availablePotions.Count} potions in inventory");
+            }
+            
             string searchQuery = inventorySearch?.value ?? "";
             filteredPotions = availablePotions.Where(potion => 
                 string.IsNullOrEmpty(searchQuery) || 
                 potion.name.ToLower().Contains(searchQuery.ToLower())).ToList();
             
-            // Update pagination
             int totalPages = Mathf.CeilToInt((float)filteredPotions.Count / itemsPerPage);
             invCurrentPage = Mathf.Clamp(invCurrentPage, 0, Mathf.Max(0, totalPages - 1));
             
-            // Update page display
             if (invPageNumber != null)
             {
                 invPageNumber.text = totalPages > 0 ? $"{invCurrentPage + 1} / {totalPages}" : "0 / 0";
             }
             
-            // Enable/disable page buttons
             if (invPagePrev != null) invPagePrev.SetEnabled(invCurrentPage > 0);
             if (invPageNext != null) invPageNext.SetEnabled(invCurrentPage < totalPages - 1);
             
-            // Update potion slots
             UpdatePotionSlots();
+        }
+        
+        private void RefreshIngredientQuantities()
+        {
+            // Debug.Log($"🔄 RefreshIngredientQuantities called. Ingredients: {filteredIngredients?.Count ?? 0}, Potions: {filteredPotions?.Count ?? 0}");
+            
+            if (filteredIngredients != null && filteredIngredients.Count > 0)
+            {
+                UpdateIngredientSlots();
+            }
+            
+            if (filteredPotions != null && filteredPotions.Count > 0)
+            {
+                UpdatePotionSlots();
+            }
         }
 
         private void UpdatePotionSlots()
         {
+            Debug.Log($"📦 UpdatePotionSlots called. filteredPotions count: {filteredPotions?.Count ?? 0}");
+            
             int startIndex = invCurrentPage * itemsPerPage;
             
             for (int i = 0; i < itemsPerPage; i++)
@@ -587,23 +696,35 @@ namespace FourFatesStudios.ProjectWarden.UI
                 int potionIndex = startIndex + i;
                 var slot = root.Q<Button>($"inv-slot-{i}");
                 
-                if (slot == null) continue;
+                if (slot == null)
+                {
+                    Debug.LogWarning($"📦 Slot inv-slot-{i} is null!");
+                    continue;
+                }
+                
+                int slotKey = 1000 + i;
+                if (currentClickHandlers.ContainsKey(slotKey))
+                {
+                    slot.clicked -= currentClickHandlers[slotKey];
+                    currentClickHandlers.Remove(slotKey);
+                }
                 
                 if (potionIndex < filteredPotions.Count)
                 {
                     var potion = filteredPotions[potionIndex];
                     
-                    // Setup slot content
-                    slot.text = potion.name.Length > 8 ? potion.name.Substring(0, 8) + "..." : potion.name;
+                    string displayName = potion.name.Length > 8 ? potion.name.Substring(0, 8) + "..." : potion.name;
+                    slot.text = displayName;
                     slot.style.display = DisplayStyle.Flex;
                     
-                    // Setup click handler
-                    slot.clicked -= () => { }; // Remove previous handlers
-                    slot.clicked += () => OnPotionClicked(potion);
+                    Debug.Log($"📦 Slot {i}: Assigned potion '{potion.name}'");
+                    
+                    System.Action clickHandler = () => OnPotionClicked(potion);
+                    currentClickHandlers[slotKey] = clickHandler;
+                    slot.clicked += clickHandler;
                 }
                 else
                 {
-                    // Empty slot
                     slot.text = "";
                     slot.style.display = DisplayStyle.None;
                 }
@@ -612,8 +733,9 @@ namespace FourFatesStudios.ProjectWarden.UI
 
         private void OnIngredientClicked(Ingredient ingredient)
         {
-            Debug.Log($"🖱️ OnIngredientClicked called with ingredient: {(ingredient != null ? ingredient.name : "NULL")}");
-            Debug.Log($"   Current state - isDragging: {isDragging}, draggedIngredient: {(draggedIngredient != null ? draggedIngredient.name : "NULL")}, selectedIngredient: {(selectedIngredient != null ? selectedIngredient.name : "NULL")}");
+            // Debug.Log($"🖱️ ========== OnIngredientClicked START ==========");
+            // Debug.Log($"🖱️ Ingredient parameter: {(ingredient != null ? ingredient.name : "NULL")}");
+            // Debug.Log($"   Current state - isDragging: {isDragging}, draggedIngredient: {(draggedIngredient != null ? draggedIngredient.name : "NULL")}, selectedIngredient: {(selectedIngredient != null ? selectedIngredient.name : "NULL")}");
             
             if (ingredient == null) 
             {
@@ -621,25 +743,77 @@ namespace FourFatesStudios.ProjectWarden.UI
                 return;
             }
             
-            // Start drag operation instead of just updating banner
+            // Debug.Log($"✅ Ingredient is valid: {ingredient.name}");
             StartDragOperation(ingredient);
+            // Debug.Log($"✅ StartDragOperation completed");
             
-            // Still update item banner for visual feedback
-            Debug.Log("Updating item banner...");
-            UpdateItemBanner(ingredient.name, ingredient.ItemDescription, ingredient.ItemRarity.ToString());
+            // Debug.Log($"🔍 Finding inventory holder...");
+            var inventory = FindFirstObjectByType<FourFatesStudios.ProjectWarden.ItemSlotContainerHolder>();
+            // Debug.Log($"   Inventory found: {inventory != null}");
             
-            // Mark as viewed (removed the RefreshIngredientDisplay call that was causing infinite loop)
+            // Debug.Log($"🔍 Finding grid manager...");
+            var gridManager = FindFirstObjectByType<FourFatesStudios.ProjectWarden.GridDemo.GridCraftingManager>();
+            // Debug.Log($"   GridManager found: {gridManager != null}");
+            
+            // Debug.Log($"📦 Getting actual quantity from inventory...");
+            int actualQuantity = 0;
+            if (inventory != null && inventory.Container != null)
+            {
+                // Debug.Log($"   Inventory.Container is valid");
+                var itemSlot = inventory.Container.Slots.FirstOrDefault(s => s.Item == ingredient);
+                // Debug.Log($"   ItemSlot found: {itemSlot != null}");
+                actualQuantity = itemSlot?.Quantity ?? 0;
+                // Debug.Log($"   ✅ Actual quantity from inventory: {actualQuantity}");
+            }
+            else
+            {
+                Debug.LogWarning($"⚠️ Inventory or Container is null, actualQuantity remains: {actualQuantity}");
+            }
+            
+            // Debug.Log($"📊 Getting pending changes from grid manager...");
+            int pendingChange = gridManager?.GetPendingQuantityChange(ingredient) ?? 0;
+            // Debug.Log($"   ✅ Pending change (placed on grid): {pendingChange}");
+            
+            // Debug.Log($"🧮 Calculating display quantity...");
+            // Debug.Log($"   Formula: actualQuantity - pendingChange");
+            // Debug.Log($"   Calculation: {actualQuantity} - {pendingChange}");
+            int displayQuantity = actualQuantity - pendingChange;
+            // Debug.Log($"   ✅ Display quantity result: {displayQuantity}");
+            
+            // Debug.Log($"📋 Summary for {ingredient.name}:");
+            // Debug.Log($"   • Actual in inventory: {actualQuantity}");
+            // Debug.Log($"   • Placed on grid (pending): {pendingChange}");
+            // Debug.Log($"   • Available to place (display): {displayQuantity}");
+            
+            // Debug.Log($"🎨 Updating item banner...");
+            UpdateItemBanner(ingredient.name, ingredient.ItemDescription, ingredient.ItemRarity.ToString(), displayQuantity);
+            // Debug.Log($"   ✅ Item banner updated");
+            
+            // Debug.Log($"⭐ Marking ingredient as viewed...");
             NewIngredientTracker.Instance.MarkIngredientAsViewed(ingredient);
+            // Debug.Log($"   ✅ Ingredient marked as viewed");
             
-            Debug.Log("✅ OnIngredientClicked completed successfully.");
+            // Debug.Log($"✅ ========== OnIngredientClicked END ==========");
         }
 
         private void OnPotionClicked(Potion potion)
         {
+            Debug.Log($"🧪 OnPotionClicked called with potion: {(potion != null ? potion.name : "NULL")}");
+            
             if (potion == null) return;
             
-            // Update item banner
-            UpdateItemBanner(potion.name, potion.ItemDescription, "Potion");
+            var inventory = FindFirstObjectByType<FourFatesStudios.ProjectWarden.ItemSlotContainerHolder>();
+            int quantity = 0;
+            
+            if (inventory != null && inventory.Container != null)
+            {
+                var itemSlot = inventory.Container.Slots.FirstOrDefault(s => s.Item == potion);
+                quantity = itemSlot?.Quantity ?? 0;
+                Debug.Log($"🧪 Found quantity for {potion.name}: {quantity}");
+            }
+            
+            Debug.Log($"🧪 Calling UpdateItemBanner with: name={potion.name}, desc={potion.ItemDescription}, quantity={quantity}");
+            UpdateItemBanner(potion.name, potion.ItemDescription, "Potion", quantity);
         }
 
         private void OnCompleteButtonClicked()
@@ -660,6 +834,11 @@ namespace FourFatesStudios.ProjectWarden.UI
                 {
                     Debug.Log("Crafting completed successfully!");
                     UpdateCompleteButtonState();
+                    
+                    RefreshIngredientDisplay();
+                    RefreshInventoryDisplay();
+                    
+                    Debug.Log("✅ UI refreshed after crafting completion");
                 }
                 else
                 {
@@ -707,7 +886,7 @@ namespace FourFatesStudios.ProjectWarden.UI
             RefreshInventoryDisplay();
         }
 
-        public void UpdateItemBanner(string name, string description, string rarity)
+        public void UpdateItemBanner(string name, string description, string rarity, int quantity = -1)
         {
             if (itemName == null || itemDescription == null || rarityLabel == null)
             {
@@ -715,9 +894,15 @@ namespace FourFatesStudios.ProjectWarden.UI
                 return;
             }
             
-            itemName.text = name;
+            string displayText = quantity >= 0 ? $"{name} (x{quantity})" : name;
+            
+            Debug.Log($"📋 UpdateItemBanner called with name='{name}', quantity={quantity}, displayText='{displayText}'");
+            
+            itemName.text = displayText;
             itemDescription.text = description;
             rarityLabel.text = rarity;
+            
+            Debug.Log($"📋 After setting, itemName.text='{itemName.text}'");
             
             // Update rarity badge color
             if (rarityBadge != null)
@@ -737,9 +922,9 @@ namespace FourFatesStudios.ProjectWarden.UI
             
             if (isInRecipeMode)
             {
-                // Recipe mode: Clear grid and place obstacles down again for the recipe
-                gridManager.ClearGridKeepObstacles();
-                Debug.Log("Grid cleared - obstacles preserved for recipe mode");
+                // Recipe mode: Clear grid and reapply recipe obstacles
+                gridManager.ClearGridPreserveObstacles();
+                Debug.Log("Grid cleared - recipe obstacles reapplied");
             }
             else
             {
@@ -751,7 +936,7 @@ namespace FourFatesStudios.ProjectWarden.UI
         
         private void OnInventoryButtonClicked()
         {
-            // Toggle the inventory display
+            Debug.Log("🔘 Inventory button clicked!");
             ToggleInventory();
             Debug.Log("Inventory button clicked - toggling inventory display");
         }
@@ -1677,17 +1862,61 @@ namespace FourFatesStudios.ProjectWarden.UI
         
         private Color GetIngredientColor(Ingredient ingredient)
         {
-            // Return color based on ingredient aspect
-            switch (ingredient.IngredientAspect)
+            return ingredient.IngredientAspect switch
             {
-                case Aspect.Scorch: return Color.red;
-                case Aspect.Frigid: return Color.cyan;
-                case Aspect.Arc: return Color.yellow;
-                case Aspect.Caustic: return Color.green;
-                case Aspect.Corporeal: return Color.gray;
-                case Aspect.Divine: return Color.magenta;
-                default: return Color.white;
+                Aspect.Corporeal => new Color(0.8f, 0.6f, 0.4f, 0.9f),
+                Aspect.Frigid => new Color(0.4f, 0.8f, 1.0f, 0.9f),
+                Aspect.Scorch => new Color(1.0f, 0.4f, 0.2f, 0.9f),
+                Aspect.Caustic => new Color(0.6f, 1.0f, 0.2f, 0.9f),
+                Aspect.Arc => new Color(1.0f, 1.0f, 0.4f, 0.9f),
+                Aspect.Divine => new Color(1.0f, 0.8f, 1.0f, 0.9f),
+                _ => new Color(0.7f, 0.7f, 0.7f, 0.9f)
+            };
+        }
+        
+        private VisualElement lastHoveredElement;
+        
+        private void OnDebugPointerMove(PointerMoveEvent evt)
+        {
+            var element = evt.target as VisualElement;
+            if (element != lastHoveredElement)
+            {
+                lastHoveredElement = element;
+                string elementInfo = GetElementDebugInfo(element);
+                Debug.Log($"🖱️ Mouse over: {elementInfo}");
             }
+        }
+        
+        private void OnDebugClick(ClickEvent evt)
+        {
+            var element = evt.target as VisualElement;
+            string elementInfo = GetElementDebugInfo(element);
+            Debug.Log($"🖱️ CLICK on: {elementInfo}");
+            Debug.Log($"   Button: {evt.button}, Position: {evt.position}");
+            Debug.Log($"   Event phase: {evt.propagationPhase}");
+        }
+        
+        private string GetElementDebugInfo(VisualElement element)
+        {
+            if (element == null) return "NULL";
+            
+            string info = $"Type: {element.GetType().Name}";
+            
+            if (!string.IsNullOrEmpty(element.name))
+                info += $", Name: '{element.name}'";
+            
+            var classes = element.GetClasses();
+            if (classes != null && classes.Any())
+                info += $", Classes: [{string.Join(", ", classes)}]";
+            
+            info += $", PickingMode: {element.pickingMode}";
+            info += $", EnabledInHierarchy: {element.enabledInHierarchy}";
+            info += $", Display: {element.style.display.value}";
+            
+            if (element is TextElement textElement && !string.IsNullOrEmpty(textElement.text))
+                info += $", Text: '{textElement.text.Substring(0, System.Math.Min(20, textElement.text.Length))}'";
+            
+            return info;
         }
         
         private void OnDestroy()
@@ -1702,6 +1931,7 @@ namespace FourFatesStudios.ProjectWarden.UI
             if (gridManager != null)
             {
                 gridManager.OnGridChanged -= UpdateCompleteButtonState;
+                gridManager.OnGridChanged -= RefreshIngredientQuantities;
             }
         }
     }

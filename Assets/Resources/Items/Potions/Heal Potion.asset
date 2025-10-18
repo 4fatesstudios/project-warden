@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 53efbf4862b0b5b4797dee728a66223a, type: 3}
-  m_Name: Rubbish
+  m_Name: Heal Potion
   m_EditorClassIdentifier: 
   id: 
-  itemName: Unnamed Item
+  itemName: Heal Potion
   itemDescription: Empty Description
-  itemRarity: 1
+  itemRarity: 0
   itemIcon: {fileID: 0}
-  itemPotionType: 1
+  itemPotionType: 0
   potency: 100
   infusionBundle:
     infusions: []

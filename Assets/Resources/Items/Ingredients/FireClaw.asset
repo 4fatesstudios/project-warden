@@ -30,19 +30,30 @@ MonoBehaviour:
   isUnrefined: 1
   originalIngredient: {fileID: 0}
   shapeData:
+    id: 
+    icon: {fileID: 0}
+    pivot: {x: 0, y: 0}
+    occupiedOffsets:
+    - {x: 0, y: 0}
+    - {x: 1, y: 1}
+    expansionOffsets: []
+    expansionRotatesWithIngredient: 1
+    rotatable: 1
+    expansionColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
     gridWidth: 2
     gridHeight: 2
     activeCells:
     - {x: 0, y: 0}
     - {x: 1, y: 1}
-    template: 0
     shapeColor: {r: 0, g: 1, b: 0, a: 1}
     shapeSprite: {fileID: 0}
-    lastModified: 2025-09-27 03:33:10
+    lastModified: 2025-10-16 09:32:19
     dataVersion: 1
+    template: 0
   infusionBundle:
     infusions:
     - {fileID: 11400000, guid: cb1d239c98a377240872ece2b29e296a, type: 2}
+    - {fileID: 11400000, guid: 5e9bb16af257975488d29087a6d692e0, type: 2}
   effectBundle:
     Effects: []
   canGrind: 0
