@@ -41,7 +41,9 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         [Space]
         [Header("Test Configuration")]
         [SerializeField] private bool createTestObstacles = true;
+        #pragma warning disable 0414
         [SerializeField, Tooltip("Force refresh flag")] private bool refreshFlag = true;
+        #pragma warning restore 0414
         
         // UI Elements
         private VisualElement gridViewport;
@@ -1257,6 +1259,14 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             }
             
             return instances;
+        }
+        
+        public IngredientInstance GetPlacedAt(int x, int y)
+        {
+            if (x < 0 || x >= GRID_SIZE || y < 0 || y >= GRID_SIZE)
+                return null;
+            
+            return placed[x, y];
         }
         
         public bool HasIngredientsPlaced()

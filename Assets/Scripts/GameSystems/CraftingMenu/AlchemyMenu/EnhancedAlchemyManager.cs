@@ -20,7 +20,9 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu
         // private SyntheticIngredientCreator syntheticCreator; // TODO: Implement SyntheticIngredientCreator
 
         [Header("System Configuration")]
+        #pragma warning disable 0414
         [SerializeField] private bool enableAdvancedFeatures = true;
+        #pragma warning restore 0414
         [SerializeField] private bool enableTemplateMode = true;
         [SerializeField] private bool enableSynergyDiscovery = true;
         [SerializeField] private bool enableSyntheticCreation = true;
@@ -28,7 +30,9 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu
 
         [Header("Skill Integration")]
         [SerializeField] private bool enableSkillEffects = true;
+        #pragma warning disable 0414
         [SerializeField] private int maxOverlapTiles = 3;
+        #pragma warning restore 0414
         [SerializeField] private bool enableIngredientRefund = false;
         [SerializeField] private float refundChance = 0.15f;
 
@@ -40,7 +44,9 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu
 
         // Statistics tracking
         private int synergiesDiscoveredThisSession = 0;
+        #pragma warning disable 0414
         private int syntheticsCreatedThisSession = 0;
+        #pragma warning restore 0414
         private int templatesCompletedThisSession = 0;
 
         // Events for UI integration

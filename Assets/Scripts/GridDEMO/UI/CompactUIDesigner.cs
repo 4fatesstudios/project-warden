@@ -36,7 +36,10 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         [Header("UI Design Settings")]
         [SerializeField] private bool autoSetupOnStart = true;
         [SerializeField] private bool useSidebarLayout = true;
+        
+        #pragma warning disable 0414
         [SerializeField] private bool addScrolling = true;
+        #pragma warning restore 0414
         
         [Header("Auto-Fix & Debug")]
         [SerializeField] private bool autoLoadIngredients = true;

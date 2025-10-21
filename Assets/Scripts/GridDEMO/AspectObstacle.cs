@@ -414,9 +414,9 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             return ingredient.GridWidth * ingredient.GridHeight;
         }
 
-        public bool TryUnlockFrozen(GridGameManager gridManager)
+        public bool TryMeltFrozen(GridGameManager gridManager)
         {
-            if (obstacleType != ObstacleType.Frigid || isFrozenUnlocked)
+            if (obstacleType != ObstacleType.FrigidFrozen)
                 return false;
 
             Vector2Int[] directions = { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right };
@@ -446,19 +446,129 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             
             if (hasAdjacentScorch)
             {
-                isFrozenUnlocked = true;
-                Debug.Log($"❄️ Frigid: Unlocked by adjacent Scorch ingredient");
+                obstacleType = ObstacleType.FrigidMelted;
+                Debug.Log($"❄️ FrigidFrozen: Melted by adjacent Scorch ingredient");
                 return true;
             }
             
             if (adjacentCorporealCount >= 3)
             {
-                isFrozenUnlocked = true;
-                Debug.Log($"❄️ Frigid: Unlocked by {adjacentCorporealCount} adjacent Corporeal ingredients");
+                obstacleType = ObstacleType.FrigidMelted;
+                Debug.Log($"❄️ FrigidFrozen: Melted by {adjacentCorporealCount} adjacent Corporeal ingredients");
                 return true;
             }
             
             return false;
+        }
+        
+        public bool TryMeltFrozen(GridCraftingManager gridManager)
+        {
+            if (obstacleType != ObstacleType.FrigidFrozen)
+                return false;
+
+            Vector2Int[] directions = { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right };
+            
+            int adjacentCorporealCount = 0;
+            bool hasAdjacentScorch = false;
+            
+            foreach (var direction in directions)
+            {
+                Vector2Int adjacentPos = position + direction;
+                
+                if (adjacentPos.x < 0 || adjacentPos.x >= GridCraftingManager.GRID_SIZE ||
+                    adjacentPos.y < 0 || adjacentPos.y >= GridCraftingManager.GRID_SIZE)
+                    continue;
+                
+                var placedIngredient = gridManager.GetPlacedAt(adjacentPos.x, adjacentPos.y);
+                
+                if (placedIngredient != null && placedIngredient.ingredient != null)
+                {
+                    if (placedIngredient.ingredient.IngredientAspect == Aspect.Scorch)
+                    {
+                        hasAdjacentScorch = true;
+                    }
+                    else if (placedIngredient.ingredient.IngredientAspect == Aspect.Corporeal)
+                    {
+                        adjacentCorporealCount++;
+                    }
+                }
+            }
+            
+            if (hasAdjacentScorch)
+            {
+                obstacleType = ObstacleType.FrigidMelted;
+                Debug.Log($"❄️ FrigidFrozen: Melted by adjacent Scorch ingredient");
+                return true;
+            }
+            
+            if (adjacentCorporealCount >= 3)
+            {
+                obstacleType = ObstacleType.FrigidMelted;
+                Debug.Log($"❄️ FrigidFrozen: Melted by {adjacentCorporealCount} adjacent Corporeal ingredients");
+                return true;
+            }
+            
+            return false;
+        }
+        
+        public int GetEffectivePotency(Ingredient ingredient)
+        {
+            if (ingredient == null)
+                return 0;
+                
+            float potency = ingredient.Potency;
+            
+            switch (obstacleType)
+            {
+                case ObstacleType.Scorch:
+                    bool isCompatible = (ingredient.IngredientAspect == Aspect.Scorch ||
+                                       ingredient.IngredientAspect == Aspect.Caustic ||
+                                       ingredient.IngredientAspect == Aspect.Arc);
+                    bool isIncompatible = (ingredient.IngredientAspect == Aspect.Corporeal ||
+                                         ingredient.IngredientAspect == Aspect.Frigid);
+                    int ingredientSize = GetIngredientSize(ingredient);
+                    
+                    if (isIncompatible)
+                    {
+                        potency -= (1.1f / ingredientSize);
+                    }
+                    else if (isCompatible)
+                    {
+                        potency += (0.5f / ingredientSize);
+                    }
+                    break;
+                    
+                case ObstacleType.Caustic:
+                    if (activeCausticStates.Contains(CausticState.Hyperactive))
+                    {
+                        potency *= 1.2f;
+                    }
+                    else if (activeCausticStates.Contains(CausticState.Deteriorated))
+                    {
+                        potency *= 0.8f;
+                    }
+                    break;
+                    
+                case ObstacleType.Arc:
+                    if (arcState == ArcState.Static)
+                    {
+                        potency *= 1.2f;
+                    }
+                    else
+                    {
+                        potency *= 0.8f;
+                    }
+                    break;
+                    
+                case ObstacleType.Divine:
+                    if (ingredient.IngredientAspect == Aspect.Divine)
+                    {
+                        potency *= 1.1f;
+                    }
+                    break;
+            }
+            
+            return Mathf.RoundToInt(potency);
         }
         
         public bool TryEruptCorporeal(GridGameManager gridManager, List<Ingredient> placedIngredients)
@@ -488,6 +598,83 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
                 if (adjacentCell != null && adjacentCell.IsOccupied)
                 {
                     var ingredient = adjacentCell.OccupiedByIngredient;
+                    
+                    if (ingredient.IngredientAspect == Aspect.Frigid)
+                    {
+                        hasFrigid = true;
+                        if (!triggeringIngredients.Contains(ingredient))
+                            triggeringIngredients.Add(ingredient);
+                    }
+                    else if (ingredient.IngredientAspect == Aspect.Caustic)
+                    {
+                        hasCaustic = true;
+                        if (!triggeringIngredients.Contains(ingredient))
+                            triggeringIngredients.Add(ingredient);
+                    }
+                    else if (ingredient.IngredientAspect == Aspect.Scorch)
+                    {
+                        hasScorch = true;
+                        if (!triggeringIngredients.Contains(ingredient))
+                            triggeringIngredients.Add(ingredient);
+                    }
+                    else if (ingredient.IngredientAspect == Aspect.Arc)
+                    {
+                        hasArc = true;
+                        if (!triggeringIngredients.Contains(ingredient))
+                            triggeringIngredients.Add(ingredient);
+                    }
+                }
+            }
+            
+            bool canErupt = (hasFrigid && hasCaustic) || (hasScorch && hasArc);
+            
+            if (canErupt)
+            {
+                isErupted = true;
+                eruptionIngredients = new List<Ingredient>(triggeringIngredients);
+                
+                string combo = (hasFrigid && hasCaustic) ? "Frigid+Caustic" : "Scorch+Arc";
+                Debug.Log($"🪨 Corporeal: Erupted by {combo} combination!");
+                Debug.Log($"🪨 Corporeal: Tracking {eruptionIngredients.Count} triggering ingredients");
+                
+                return true;
+            }
+            
+            return false;
+        }
+        
+        public bool TryEruptCorporeal(GridCraftingManager gridManager, List<Ingredient> placedIngredients)
+        {
+            if (obstacleType != ObstacleType.Corporeal || isErupted)
+                return false;
+
+            Vector2Int[] adjacentDirections = new Vector2Int[]
+            {
+                Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right,
+                Vector2Int.up + Vector2Int.left, Vector2Int.up + Vector2Int.right,
+                Vector2Int.down + Vector2Int.left, Vector2Int.down + Vector2Int.right
+            };
+            
+            bool hasFrigid = false;
+            bool hasCaustic = false;
+            bool hasScorch = false;
+            bool hasArc = false;
+            
+            List<Ingredient> triggeringIngredients = new List<Ingredient>();
+            
+            foreach (var direction in adjacentDirections)
+            {
+                Vector2Int adjacentPos = position + direction;
+                
+                if (adjacentPos.x < 0 || adjacentPos.x >= GridCraftingManager.GRID_SIZE ||
+                    adjacentPos.y < 0 || adjacentPos.y >= GridCraftingManager.GRID_SIZE)
+                    continue;
+                
+                var placedInstance = gridManager.GetPlacedAt(adjacentPos.x, adjacentPos.y);
+                
+                if (placedInstance != null && placedInstance.ingredient != null)
+                {
+                    var ingredient = placedInstance.ingredient;
                     
                     if (ingredient.IngredientAspect == Aspect.Frigid)
                     {

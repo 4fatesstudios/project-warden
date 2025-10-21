@@ -104,7 +104,7 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             sceneObjects.Clear();
             
             // Get all GameObjects in the scene
-            GameObject[] allObjects = FindObjectsOfType<GameObject>();
+            GameObject[] allObjects = FindObjectsByType<GameObject>(FindObjectsSortMode.None);
             
             foreach (var obj in allObjects)
             {
@@ -153,7 +153,7 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
             if (gridManager != null) managedComponents.Add(gridManager);
 
             // Find additional components
-            var itemHolders = FindObjectsOfType<FourFatesStudios.ProjectWarden.ItemSlotContainerHolder>();
+            var itemHolders = FindObjectsByType<FourFatesStudios.ProjectWarden.ItemSlotContainerHolder>(FindObjectsSortMode.None);
             managedComponents.AddRange(itemHolders);
 
             if (enableDebugLogging)
@@ -211,7 +211,7 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         /// </summary>
         public List<T> GetAllComponentsOfType<T>() where T : Component
         {
-            return FindObjectsOfType<T>().ToList();
+            return FindObjectsByType<T>(FindObjectsSortMode.None).ToList();
         }
 
         /// <summary>
@@ -339,7 +339,7 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         {
             Debug.Log("🔍 === Scene Components ===");
             
-            var allMonoBehaviours = FindObjectsOfType<MonoBehaviour>();
+            var allMonoBehaviours = FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None);
             var componentGroups = allMonoBehaviours
                 .GroupBy(mb => mb.GetType().Name)
                 .OrderBy(g => g.Key);

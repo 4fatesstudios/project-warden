@@ -41,11 +41,13 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         private GameObject differentEffectsParticlePrefab;
         
         [Header("Visual Settings")]
+        #pragma warning disable 0414
         [SerializeField, Tooltip("Duration for particle effects")]
         private float effectDuration = 3f;
         
         [SerializeField, Tooltip("Distance for checking adjacent ingredients")]
         private float adjacencyDistance = 1.5f;
+        #pragma warning restore 0414
         
         [SerializeField, Tooltip("Height offset for particle effects")]
         private float effectHeightOffset = 0.5f;

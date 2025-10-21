@@ -715,37 +715,21 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu
         
         private void StartRecipeCrafting(AlchemyRecipe recipe)
         {
-            Debug.Log($"📜 ===== STARTING RECIPE CRAFTING: {recipe.ItemName} =====");
+            // Debug.Log($"📜 ===== STARTING RECIPE CRAFTING: {recipe.ItemName} =====");
             
-            // Hide the mode selector UI
-            if (uiDocument != null)
-            {
-                uiDocument.gameObject.SetActive(false);
-                Debug.Log("📜 ✅ UIDocument deactivated");
-            }
-            else
-            {
-                Debug.LogWarning("📜 ⚠️ UIDocument is null!");
-            }
-            
-            // Hide the main crafting menu UI
-            var craftingMenuUI = GameObject.Find("CraftingMenuUI");
-            if (craftingMenuUI != null)
-            {
-                craftingMenuUI.SetActive(false);
-                Debug.Log("📜 ✅ CraftingMenuUI hidden");
-            }
-            else
-            {
-                Debug.LogWarning("📜 ⚠️ CraftingMenuUI not found!");
-            }
+            // Hide THIS GameObject (CraftingMenuUI) which contains the mode selector
+            gameObject.SetActive(false);
+            // Debug.Log("📜 ✅ CraftingMenuUI (this GameObject) deactivated");
             
             // Ensure the CraftingUIController is active and visible (search including inactive)
             var craftingUIController = FindFirstObjectByType<FourFatesStudios.ProjectWarden.UI.CraftingUIController>(FindObjectsInactive.Include);
             if (craftingUIController != null)
             {
                 craftingUIController.gameObject.SetActive(true);
-                Debug.Log("📜 ✅ CraftingUIController activated");
+                // Debug.Log("📜 ✅ CraftingUIController activated");
+                
+                craftingUIController.Initialize();
+                // Debug.Log("📜 ✅ CraftingUIController.Initialize() called");
             }
             else
             {
@@ -754,15 +738,15 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu
             
             // Show the CraftingUI UIDocument (search including inactive)
             var allUIDocuments = FindObjectsByType<UnityEngine.UIElements.UIDocument>(FindObjectsInactive.Include, FindObjectsSortMode.None);
-            Debug.Log($"📜 Found {allUIDocuments.Length} total UIDocuments");
+            // Debug.Log($"📜 Found {allUIDocuments.Length} total UIDocuments");
             bool foundCraftingUI = false;
             foreach (var doc in allUIDocuments)
             {
-                Debug.Log($"📜 - UIDocument: {doc.gameObject.name}");
+                // Debug.Log($"📜 - UIDocument: {doc.gameObject.name}");
                 if (doc.gameObject.name == "CraftingUI")
                 {
                     doc.gameObject.SetActive(true);
-                    Debug.Log("📜 ✅ CraftingUI UIDocument shown");
+                    // Debug.Log("📜 ✅ CraftingUI UIDocument shown");
                     foundCraftingUI = true;
                     break;
                 }
@@ -774,14 +758,14 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu
             
             // Launch the grid minigame with recipe configuration
             var gridCraftingManager = FindFirstObjectByType<FourFatesStudios.ProjectWarden.GridDemo.GridCraftingManager>();
-            Debug.Log($"📜 Looking for GridCraftingManager, found: {gridCraftingManager != null}");
+            // Debug.Log($"📜 Looking for GridCraftingManager, found: {gridCraftingManager != null}");
             if (gridCraftingManager != null)
             {
-                Debug.Log($"📜 ✅ GridCraftingManager found on GameObject: {gridCraftingManager.gameObject.name}");
+                // Debug.Log($"📜 ✅ GridCraftingManager found on GameObject: {gridCraftingManager.gameObject.name}");
                 
                 // Set the current recipe BEFORE initializing
                 gridCraftingManager.CurrentRecipe = recipe;
-                Debug.Log($"📜 ✅ Set CurrentRecipe to: {recipe.ItemName}");
+                // Debug.Log($"📜 ✅ Set CurrentRecipe to: {recipe.ItemName}");
                 
                 // Find and assign the CraftingUI UIDocument
                 var craftingUIDoc = GameObject.Find("CraftingUI");
@@ -796,18 +780,18 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu
                         if (field != null)
                         {
                             field.SetValue(gridCraftingManager, uiDoc);
-                            Debug.Log("📜 ✅ UIDocument assigned to GridCraftingManager");
+                            // Debug.Log("📜 ✅ UIDocument assigned to GridCraftingManager");
                         }
                     }
                 }
                 
-                Debug.Log($"📜 About to call Initialize(true) on GridCraftingManager");
+                // Debug.Log($"📜 About to call Initialize(true) on GridCraftingManager");
                 gridCraftingManager.Initialize(true);
-                Debug.Log("📜 ✅ GridCraftingManager reinitialized");
+                // Debug.Log("📜 ✅ GridCraftingManager reinitialized");
                 
-                Debug.Log($"📜 About to call SetupRecipeCraftingGrid with recipe: {recipe.ItemName}");
+                // Debug.Log($"📜 About to call SetupRecipeCraftingGrid with recipe: {recipe.ItemName}");
                 SetupRecipeCraftingGrid(gridCraftingManager, recipe);
-                Debug.Log("📜 ✅ Recipe crafting grid configured");
+                // Debug.Log("📜 ✅ Recipe crafting grid configured");
             }
             else
             {

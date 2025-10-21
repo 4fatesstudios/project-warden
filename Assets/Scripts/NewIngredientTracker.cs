@@ -13,7 +13,7 @@ namespace FourFatesStudios.ProjectWarden.UI
             {
                 if (instance == null)
                 {
-                    instance = FindObjectOfType<NewIngredientTracker>();
+                    instance = FindFirstObjectByType<NewIngredientTracker>();
                     if (instance == null)
                     {
                         GameObject go = new GameObject("NewIngredientTracker");

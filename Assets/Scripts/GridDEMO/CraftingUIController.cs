@@ -85,6 +85,9 @@ namespace FourFatesStudios.ProjectWarden.UI
         // Click handler tracking to prevent accumulation
         private Dictionary<int, System.Action> currentClickHandlers = new Dictionary<int, System.Action>();
         
+        // Initialization tracking to prevent duplicate setup
+        private bool hasInitialized = false;
+        
         // Drag and drop system
         private VisualElement dragPreview;
         private Ingredient draggedIngredient;
@@ -95,7 +98,7 @@ namespace FourFatesStudios.ProjectWarden.UI
         {
             if (uiDocument == null)
             {
-                uiDocument = FindObjectOfType<UIDocument>();
+                uiDocument = FindFirstObjectByType<UIDocument>();
                 if (uiDocument != null)
                 {
                     // Debug.Log("Auto-assigned UIDocument to CraftingUIController");
@@ -245,10 +248,10 @@ namespace FourFatesStudios.ProjectWarden.UI
                 return;
             }
             
-            Debug.Log("✅ CraftingUIController: UI root found successfully!");
+            // Debug.Log("✅ CraftingUIController: UI root found successfully!");
             
-            root.RegisterCallback<PointerMoveEvent>(OnDebugPointerMove);
-            root.RegisterCallback<ClickEvent>(OnDebugClick, TrickleDown.TrickleDown);
+            // root.RegisterCallback<PointerMoveEvent>(OnDebugPointerMove);
+            // root.RegisterCallback<ClickEvent>(OnDebugClick, TrickleDown.TrickleDown);
             
             // Main UI elements
             searchField = root.Q<TextField>("search-field");
@@ -325,6 +328,15 @@ namespace FourFatesStudios.ProjectWarden.UI
 
         private void SetupEventHandlers()
         {
+            if (hasInitialized)
+            {
+                Debug.LogWarning($"⚠️ SetupEventHandlers already called - skipping to prevent duplicate handlers!");
+                return;
+            }
+            
+            // Debug.Log($"⚙️ SetupEventHandlers called! (This should only happen ONCE)");
+            hasInitialized = true;
+            
             // Search field
             if (searchField != null)
             {
@@ -359,14 +371,22 @@ namespace FourFatesStudios.ProjectWarden.UI
             if (invPagePrev != null) invPagePrev.clicked += () => ChangeInventoryPage(-1);
             
             // Complete button
-            if (completeButton != null) completeButton.clicked += OnCompleteButtonClicked;
+            if (completeButton != null)
+            {
+                completeButton.clicked += OnCompleteButtonClicked;
+                // Debug.Log($"✅ Complete button click handler registered. Button: {completeButton != null}, Name: '{completeButton.name}'");
+            }
+            else
+            {
+                Debug.LogError("❌ complete-button not found in UI!");
+            }
             
             // Left buttons
             if (clearButton != null) clearButton.clicked += OnClearButtonClicked;
             if (inventoryButton != null)
             {
                 inventoryButton.clicked += OnInventoryButtonClicked;
-                Debug.Log($"✅ Inventory button click handler registered. Button: {inventoryButton != null}");
+                // Debug.Log($"✅ Inventory button click handler registered. Button: {inventoryButton != null}");
             }
             else
             {
@@ -374,6 +394,14 @@ namespace FourFatesStudios.ProjectWarden.UI
             }
             
             // Filter buttons
+            // Debug.Log($"🔧 Registering filter button callbacks...");
+            // Debug.Log($"   - filterCorporeal: {filterCorporeal != null}");
+            // Debug.Log($"   - filterFrigid: {filterFrigid != null}");
+            // Debug.Log($"   - filterScorch: {filterScorch != null}");
+            // Debug.Log($"   - filterCaustic: {filterCaustic != null}");
+            // Debug.Log($"   - filterArc: {filterArc != null}");
+            // Debug.Log($"   - filterDivine: {filterDivine != null}");
+            
             if (filterCorporeal != null) filterCorporeal.clicked += () => SetFilter(Aspect.Corporeal);
             if (filterFrigid != null) filterFrigid.clicked += () => SetFilter(Aspect.Frigid);
             if (filterScorch != null) filterScorch.clicked += () => SetFilter(Aspect.Scorch);
@@ -420,14 +448,19 @@ namespace FourFatesStudios.ProjectWarden.UI
 
         private void SetFilter(Aspect? aspect)
         {
+            Debug.Log($"🔍 SetFilter called with aspect: {aspect} | currentFilter before: {currentFilter}");
+            Debug.Log($"🔍 Stack trace: {System.Environment.StackTrace}");
+            
             // Toggle filter: if same filter is clicked, clear it (show all)
             if (currentFilter == aspect)
             {
                 currentFilter = null; // Clear filter to show all
+                Debug.Log($"🔍 Filter cleared - showing all ingredients");
             }
             else
             {
                 currentFilter = aspect; // Set new filter
+                Debug.Log($"🔍 Filter set to: {currentFilter}");
             }
             
             currentPage = 0;
@@ -452,6 +485,7 @@ namespace FourFatesStudios.ProjectWarden.UI
             else if (currentFilter == Aspect.Divine && filterDivine != null)
                 filterDivine.AddToClassList("filter-tab-active");
             
+            Debug.Log($"🔍 Calling RefreshIngredientDisplay...");
             RefreshIngredientDisplay();
         }
 
@@ -516,6 +550,8 @@ namespace FourFatesStudios.ProjectWarden.UI
         {
             var filtered = availableIngredients.AsEnumerable();
             
+            Debug.Log($"🔍 FilterAndSortIngredients - Starting with {availableIngredients.Count} total ingredients");
+            
             var inventory = FindFirstObjectByType<FourFatesStudios.ProjectWarden.ItemSlotContainerHolder>();
             if (inventory != null && inventory.Container != null)
             {
@@ -526,11 +562,19 @@ namespace FourFatesStudios.ProjectWarden.UI
                 });
             }
             
+            Debug.Log($"🔍 After inventory filter: {filtered.Count()} ingredients available");
+            
             // Apply aspect filter
             if (currentFilter.HasValue)
             {
+                Debug.Log($"🔍 Applying aspect filter: {currentFilter.Value}");
                 filtered = filtered.Where(ingredient => 
                     ingredient.IngredientAspect == currentFilter.Value);
+                Debug.Log($"🔍 After aspect filter: {filtered.Count()} ingredients match {currentFilter.Value}");
+            }
+            else
+            {
+                Debug.Log($"🔍 No aspect filter applied - showing all");
             }
             
             // Apply search filter
@@ -538,6 +582,7 @@ namespace FourFatesStudios.ProjectWarden.UI
             {
                 filtered = filtered.Where(ingredient => 
                     ingredient.name.ToLower().Contains(currentSearchQuery.ToLower()));
+                Debug.Log($"🔍 After search filter '{currentSearchQuery}': {filtered.Count()} ingredients");
             }
             
             // Apply sorting
@@ -567,7 +612,9 @@ namespace FourFatesStudios.ProjectWarden.UI
                     break;
             }
             
-            return filtered.ToList();
+            var result = filtered.ToList();
+            Debug.Log($"🔍 Final filtered result: {result.Count} ingredients");
+            return result;
         }
 
         private void UpdateIngredientSlots()
@@ -582,22 +629,68 @@ namespace FourFatesStudios.ProjectWarden.UI
             var inventory = FindFirstObjectByType<FourFatesStudios.ProjectWarden.ItemSlotContainerHolder>();
             var gridManager = FindFirstObjectByType<FourFatesStudios.ProjectWarden.GridDemo.GridCraftingManager>();
             
-            Debug.Log($"🔧 UpdateIngredientSlots: inventory={inventory != null}, gridManager={gridManager != null}");
+            Debug.Log($"🔧 UpdateIngredientSlots: filteredIngredients.Count={filteredIngredients.Count}, startIndex={startIndex}, itemsPerPage={itemsPerPage}");
+            
+            var slotGridElement = root.Q<VisualElement>("slot-grid");
+            var mainContentArea = root.Q<VisualElement>("main-content-area");
+            var ingredientGridContainer = root.Q<VisualElement>("ingredient-grid-container");
+            
+            if (slotGridElement != null)
+            {
+                Debug.Log($"📐 slot-grid STYLES: marginLeft={slotGridElement.resolvedStyle.marginLeft}px, marginRight={slotGridElement.resolvedStyle.marginRight}px, width={slotGridElement.resolvedStyle.width}px");
+            }
+            else
+            {
+                Debug.LogWarning("⚠️ slot-grid element is NULL!");
+            }
+            
+            if (mainContentArea != null)
+            {
+                Debug.Log($"📐 main-content-area STYLES: alignItems={mainContentArea.resolvedStyle.alignItems}, alignSelf={mainContentArea.resolvedStyle.alignSelf}, justifyContent={mainContentArea.resolvedStyle.justifyContent}");
+            }
+            else
+            {
+                Debug.LogWarning("⚠️ main-content-area element is NULL!");
+            }
+            
+            if (ingredientGridContainer != null)
+            {
+                Debug.Log($"📐 ingredient-grid-container STYLES: alignItems={ingredientGridContainer.resolvedStyle.alignItems}, justifyContent={ingredientGridContainer.resolvedStyle.justifyContent}");
+            }
+            else
+            {
+                Debug.LogWarning("⚠️ ingredient-grid-container element is NULL!");
+            }
+            
+            Debug.Log($"📊 Current Page: {currentPage}, Visible ingredients on this page: {Mathf.Min(itemsPerPage, filteredIngredients.Count - startIndex)}");
+            
+            int[] visibleSlotsPerRow = new int[3];
             
             for (int i = 0; i < itemsPerPage; i++)
             {
                 int ingredientIndex = startIndex + i;
                 var slot = root.Q<Button>($"slot-{i}");
                 
-                if (slot == null) continue;
+                if (slot == null)
+                {
+                    Debug.LogWarning($"⚠️ slot-{i} not found in UI");
+                    continue;
+                }
                 
-                if (ingredientIndex < filteredIngredients.Count)
+                bool isSlotVisible = ingredientIndex < filteredIngredients.Count;
+                
+                if (isSlotVisible)
                 {
                     var ingredient = filteredIngredients[ingredientIndex];
                     
                     string displayName = ingredient.name.Length > 8 ? ingredient.name.Substring(0, 8) + "..." : ingredient.name;
                     slot.text = displayName;
                     slot.style.display = DisplayStyle.Flex;
+                    
+                    int rowIndex = i / 4;
+                    visibleSlotsPerRow[rowIndex]++;
+                    
+                    Debug.Log($"✅ slot-{i}: Showing ingredient '{ingredient.name}' (index {ingredientIndex})");
                     
                     if (currentClickHandlers.ContainsKey(i))
                     {
@@ -623,13 +716,57 @@ namespace FourFatesStudios.ProjectWarden.UI
                     }
                     
                     slot.text = "";
-                    slot.style.display = DisplayStyle.Flex;
+                    slot.style.display = DisplayStyle.None;
+                    
+                    Debug.Log($"🚫 slot-{i}: HIDING (no ingredient at index {ingredientIndex})");
                     
                     if (newStars.ContainsKey(i))
                     {
                         newStars[i].style.display = DisplayStyle.None;
                     }
                 }
+                
+                if (i % 4 < 3)
+                {
+                    int nextSlotIndex = i + 1;
+                    bool isNextSlotVisible = (startIndex + nextSlotIndex) < filteredIngredients.Count && nextSlotIndex < itemsPerPage;
+                    
+                    string separatorName = $"separator-{i}-{nextSlotIndex}";
+                    var separator = root.Q<VisualElement>(separatorName);
+                    
+                    if (separator != null)
+                    {
+                        separator.style.display = (isSlotVisible && isNextSlotVisible) ? DisplayStyle.Flex : DisplayStyle.None;
+                    }
+                }
+            }
+            
+            for (int rowIndex = 0; rowIndex < 3; rowIndex++)
+            {
+                var row = root.Q<VisualElement>($"slot-row-{rowIndex + 1}");
+                if (row != null)
+                {
+                    if (visibleSlotsPerRow[rowIndex] > 0)
+                    {
+                        row.style.display = DisplayStyle.Flex;
+                        Debug.Log($"✅ slot-row-{rowIndex + 1}: Showing ({visibleSlotsPerRow[rowIndex]} visible slots)");
+                    }
+                    else
+                    {
+                        row.style.display = DisplayStyle.None;
+                        Debug.Log($"🚫 slot-row-{rowIndex + 1}: HIDING (no visible slots)");
+                    }
+                }
+            }
+            
+            Debug.Log($"📐 AFTER UPDATE - Checking styles again...");
+            if (slotGridElement != null)
+            {
+                Debug.Log($"📐 slot-grid AFTER: marginLeft={slotGridElement.resolvedStyle.marginLeft}px, marginRight={slotGridElement.resolvedStyle.marginRight}px");
+            }
+            if (mainContentArea != null)
+            {
+                Debug.Log($"📐 main-content-area AFTER: alignItems={mainContentArea.resolvedStyle.alignItems}");
             }
         }
 
@@ -1878,22 +2015,22 @@ namespace FourFatesStudios.ProjectWarden.UI
         
         private void OnDebugPointerMove(PointerMoveEvent evt)
         {
-            var element = evt.target as VisualElement;
-            if (element != lastHoveredElement)
-            {
-                lastHoveredElement = element;
-                string elementInfo = GetElementDebugInfo(element);
-                Debug.Log($"🖱️ Mouse over: {elementInfo}");
-            }
+            // var element = evt.target as VisualElement;
+            // if (element != lastHoveredElement)
+            // {
+            //     lastHoveredElement = element;
+            //     string elementInfo = GetElementDebugInfo(element);
+            //     Debug.Log($"🖱️ Mouse over: {elementInfo}");
+            // }
         }
         
         private void OnDebugClick(ClickEvent evt)
         {
-            var element = evt.target as VisualElement;
-            string elementInfo = GetElementDebugInfo(element);
-            Debug.Log($"🖱️ CLICK on: {elementInfo}");
-            Debug.Log($"   Button: {evt.button}, Position: {evt.position}");
-            Debug.Log($"   Event phase: {evt.propagationPhase}");
+            // var element = evt.target as VisualElement;
+            // string elementInfo = GetElementDebugInfo(element);
+            // Debug.Log($"🖱️ CLICK on: {elementInfo}");
+            // Debug.Log($"   Button: {evt.button}, Position: {evt.position}");
+            // Debug.Log($"   Event phase: {evt.propagationPhase}");
         }
         
         private string GetElementDebugInfo(VisualElement element)

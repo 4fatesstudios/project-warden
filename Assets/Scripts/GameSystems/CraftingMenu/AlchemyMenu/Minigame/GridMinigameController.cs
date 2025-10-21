@@ -91,8 +91,12 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu
         private int baseGridWidth = 3;
 
         [SerializeField] private int baseGridHeight = 3;
+        
+        #pragma warning disable 0414
         [SerializeField] private int maxGridWidth = 5;
         [SerializeField] private int maxGridHeight = 5;
+        #pragma warning restore 0414
+        
         [SerializeField] private int currentGridWidth = 3;
         [SerializeField] private int currentGridHeight = 3;
         [SerializeField] private float cellSize = 40f;

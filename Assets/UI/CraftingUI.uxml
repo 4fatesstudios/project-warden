@@ -59,54 +59,63 @@
                     </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:VisualElement name="right-side" class="right-side" style="height: 115%;">
-                    <ui:VisualElement name="right-container" class="right-container" style="margin-bottom: 0%; width: 100%; height: 100%; padding-top: 2%; flex-direction: column; flex-wrap: wrap; background-color: rgba(240, 240, 240, 0.95); border-left-color: rgb(200, 200, 200); border-right-color: rgb(200, 200, 200); border-top-color: rgb(200, 200, 200); border-bottom-color: rgb(200, 200, 200); border-top-left-radius: 0; border-top-right-radius: 0; border-bottom-right-radius: 0; border-bottom-left-radius: 0; border-top-width: 2px; border-right-width: 2px; border-bottom-width: 2px;">
-                        <ui:VisualElement name="advanced-filter-area" class="advanced-filter-area" style="width: 100%; height: 5%; margin-left: 0%; margin-bottom: 2%; margin-right: 0%; padding-top: 10px; align-items: center; flex-direction: row-reverse; justify-content: flex-start; border-left-color: rgba(200, 200, 200, 0); border-right-color: rgba(200, 200, 200, 0); border-top-color: rgba(200, 200, 200, 0); border-bottom-color: rgba(200, 200, 200, 0); border-top-left-radius: 0; border-top-right-radius: 0; border-bottom-right-radius: 0; border-bottom-left-radius: 0; border-top-width: 0; border-right-width: 0; border-bottom-width: 0; border-left-width: 0; background-color: rgba(220, 186, 126, 0); margin-top: 2%;">
+                    <ui:VisualElement name="right-container" class="right-container" style="margin-bottom: 0%; width: 100%; height: 100%; padding-top: 2%; flex-direction: column; flex-wrap: wrap; background-color: rgba(240, 240, 240, 0.95); border-left-color: rgb(200, 200, 200); border-right-color: rgb(200, 200, 200); border-top-color: rgb(200, 200, 200); border-bottom-color: rgb(200, 200, 200); border-top-left-radius: 0; border-top-right-radius: 0; border-bottom-right-radius: 0; border-bottom-left-radius: 0; border-top-width: 2px; border-right-width: 2px; border-bottom-width: 2px; padding-left: 8%;">
+                        <ui:VisualElement name="advanced-filter-area" class="advanced-filter-area" style="width: 100%; height: 5%; margin-left: 0%; margin-bottom: 6%; margin-right: 0%; padding-top: 10px; align-items: center; flex-direction: row-reverse; justify-content: flex-start; border-left-color: rgba(200, 200, 200, 0); border-right-color: rgba(200, 200, 200, 0); border-top-color: rgba(200, 200, 200, 0); border-bottom-color: rgba(200, 200, 200, 0); border-top-left-radius: 0; border-top-right-radius: 0; border-bottom-right-radius: 0; border-bottom-left-radius: 0; border-top-width: 0; border-right-width: 0; border-bottom-width: 0; border-left-width: 0; background-color: rgba(220, 186, 126, 0); margin-top: 4%;">
                             <ui:TextField picking-mode="Ignore" placeholder-text="Search ingredients..." name="search-field" class="search-field" style="color: rgb(200, 200, 200); border-left-color: rgb(200, 200, 200); border-right-color: rgb(200, 200, 200); border-top-color: rgb(200, 200, 200); border-bottom-color: rgb(200, 200, 200); margin-right: 5%;" />
                             <ui:DropdownField text="Sort by: New" name="sort-dropdown" class="sort-dropdown" style="border-left-color: rgb(200, 200, 200); border-right-color: rgb(200, 200, 200); border-top-color: rgb(200, 200, 200); border-bottom-color: rgb(200, 200, 200); color: rgb(200, 200, 200);" />
                             <ui:Button text="🎒" display-tooltip-when-elided="true" name="inventory-toggle" tooltip="Toggle Inventory" class="inventory-toggle-button" style="flex-direction: column; overflow: visible; visibility: hidden; display: none;" />
                         </ui:VisualElement>
-                        <ui:VisualElement name="main-content-area" class="main-content-area" style="margin-right: 0%; margin-left: 0%; margin-top: 2%; height: 90%; width: 100%; flex-direction: column; align-items: center; align-self: center;">
-                            <ui:VisualElement name="ingredient-grid-container" class="ingredient-grid-container" style="align-items: flex-start; flex-direction: column; align-content: auto; justify-content: center; padding-left: 5%;">
-                                <ui:VisualElement name="slot-grid" class="slot-grid" style="margin-bottom: 4%; flex-direction: row; align-items: flex-start; justify-content: flex-start; align-self: auto; flex-wrap: wrap;">
-                                    <ui:VisualElement name="slot-row-1" class="slot-row" style="margin-bottom: 2%;">
-                                        <ui:Button name="slot-0" class="ingredient-slot" style="margin-top: 2%; margin-right: 2%; margin-bottom: 2%; margin-left: 0%;">
+                        <ui:VisualElement name="main-content-area" class="main-content-area" style="margin-right: 0%; margin-left: 0%; margin-top: 2%; height: 90%; width: 100%; flex-direction: column; align-items: flex-start; align-self: flex-start;">
+                            <ui:VisualElement name="ingredient-grid-container" class="ingredient-grid-container" style="align-items: flex-start; flex-direction: column; align-content: auto; justify-content: flex-start; padding-left: 0%; padding-right: 0%;">
+                                <ui:VisualElement name="slot-grid" class="slot-grid" style="margin-bottom: 0; padding-right: 0; margin-right: 2%;">
+                                    <ui:VisualElement name="slot-row-1" class="slot-row" style="margin-bottom: 4%; width: 110%;">
+                                        <ui:Button name="slot-0" class="ingredient-slot" style="margin-top: 0%; margin-left: 0%; margin-bottom: 0%; margin-right: 0%;">
                                             <ui:Label text="★" name="new-star-0" class="new-star" style="display: none;" />
                                         </ui:Button>
-                                        <ui:Button name="slot-1" class="ingredient-slot" style="margin-top: 2%; margin-right: 2%; margin-bottom: 2%; margin-left: 2%; color: rgb(230, 229, 229);">
+                                        <ui:VisualElement name="separator-0-1" class="slot-separator" />
+                                        <ui:Button name="slot-1" class="ingredient-slot" style="margin-top: 0%; margin-right: 0%; margin-bottom: 0%; margin-left: 0%;">
                                             <ui:Label text="★" name="new-star-0" class="new-star" style="display: none;" />
                                         </ui:Button>
-                                        <ui:Button name="slot-2" class="ingredient-slot" style="margin-top: 2%; margin-right: 2%; margin-bottom: 2%; margin-left: 2%;">
+                                        <ui:VisualElement name="separator-1-2" class="slot-separator" />
+                                        <ui:Button name="slot-2" class="ingredient-slot" style="margin-top: 0%; margin-right: 0%; margin-bottom: 0%; margin-left: 0%;">
                                             <ui:Label text="★" name="new-star-0" class="new-star" style="display: none;" />
                                         </ui:Button>
-                                        <ui:Button name="slot-3" class="ingredient-slot" style="margin-top: 2%; margin-right: 0%; margin-bottom: 2%; margin-left: 2%;">
+                                        <ui:VisualElement name="separator-2-3" class="slot-separator" />
+                                        <ui:Button name="slot-3" class="ingredient-slot" style="margin-top: 0%; margin-right: 0%; margin-bottom: 0%; margin-left: 0%;">
                                             <ui:Label text="★" name="new-star-0" class="new-star" style="display: none;" />
                                         </ui:Button>
                                     </ui:VisualElement>
-                                    <ui:VisualElement name="slot-row-2" class="slot-row" style="margin-bottom: 2%;">
-                                        <ui:Button name="slot-4" class="ingredient-slot" style="margin-top: 2%; margin-right: 2%; margin-bottom: 2%; margin-left: 0%;">
+                                    <ui:VisualElement name="slot-row-2" class="slot-row" style="margin-bottom: 4%; width: 110%; margin-top: 0; margin-right: 0; margin-left: 0;">
+                                        <ui:Button name="slot-4" class="ingredient-slot" style="margin-top: 0%; margin-right: 0%; margin-bottom: 0%; margin-left: 0%;">
                                             <ui:Label text="★" name="new-star-4" class="new-star" style="display: none;" />
                                         </ui:Button>
-                                        <ui:Button name="slot-5" class="ingredient-slot" style="margin-top: 2%; margin-right: 2%; margin-bottom: 2%; margin-left: 2%;">
+                                        <ui:VisualElement name="separator-4-5" class="slot-separator" />
+                                        <ui:Button name="slot-5" class="ingredient-slot" style="margin-top: 0%; margin-right: 0%; margin-bottom: 0%; margin-left: 0%;">
                                             <ui:Label text="★" name="new-star-4" class="new-star" style="display: none;" />
                                         </ui:Button>
-                                        <ui:Button name="slot-6" class="ingredient-slot" style="margin-top: 2%; margin-right: 2%; margin-bottom: 2%; margin-left: 2%;">
+                                        <ui:VisualElement name="separator-5-6" class="slot-separator" />
+                                        <ui:Button name="slot-6" class="ingredient-slot" style="margin-top: 0%; margin-right: 0%; margin-bottom: 0%; margin-left: 0%;">
                                             <ui:Label text="★" name="new-star-4" class="new-star" style="display: none;" />
                                         </ui:Button>
-                                        <ui:Button name="slot-7" class="ingredient-slot" style="margin-top: 2%; margin-right: 0%; margin-bottom: 2%; margin-left: 2%;">
+                                        <ui:VisualElement name="separator-6-7" class="slot-separator" />
+                                        <ui:Button name="slot-7" class="ingredient-slot" style="margin-top: 0%; margin-right: 0%; margin-bottom: 0%; margin-left: 0%;">
                                             <ui:Label text="★" name="new-star-4" class="new-star" style="display: none;" />
                                         </ui:Button>
                                     </ui:VisualElement>
-                                    <ui:VisualElement name="slot-row-3" class="slot-row" style="margin-bottom: 2%;">
-                                        <ui:Button name="slot-8" class="ingredient-slot" style="margin-top: 2%; margin-right: 2%; margin-bottom: 2%; margin-left: 0%; width: 100px;">
+                                    <ui:VisualElement name="slot-row-3" class="slot-row" style="margin-bottom: 4%; width: 110%;">
+                                        <ui:Button name="slot-8" class="ingredient-slot" style="margin-top: 0%; margin-right: 0%; margin-bottom: 0%; margin-left: 0%;">
                                             <ui:Label text="★" name="new-star-8" class="new-star" style="display: none;" />
                                         </ui:Button>
-                                        <ui:Button name="slot-9" class="ingredient-slot" style="margin-top: 2%; margin-right: 2%; margin-bottom: 2%; margin-left: 2%;">
+                                        <ui:VisualElement name="separator-8-9" class="slot-separator" />
+                                        <ui:Button name="slot-9" class="ingredient-slot" style="margin-top: 0%; margin-right: 0%; margin-bottom: 0%; margin-left: 0%;">
                                             <ui:Label text="★" name="new-star-9" class="new-star" style="display: none;" />
                                         </ui:Button>
-                                        <ui:Button name="slot-10" class="ingredient-slot" style="margin-top: 2%; margin-right: 2%; margin-bottom: 2%; margin-left: 2%;">
+                                        <ui:VisualElement name="separator-9-10" class="slot-separator" />
+                                        <ui:Button name="slot-10" class="ingredient-slot" style="margin-top: 0%; margin-right: 0%; margin-bottom: 0%; margin-left: 0%;">
                                             <ui:Label text="★" name="new-star-10" class="new-star" style="display: none;" />
                                         </ui:Button>
-                                        <ui:Button name="slot-11" class="ingredient-slot" style="margin-top: 2%; margin-right: 0%; margin-bottom: 2%; margin-left: 2%;">
+                                        <ui:VisualElement name="separator-10-11" class="slot-separator" />
+                                        <ui:Button name="slot-11" class="ingredient-slot" style="margin-top: 0%; margin-right: 0%; margin-bottom: 0%; margin-left: 0%;">
                                             <ui:Label text="★" name="new-star-11" class="new-star" style="display: none;" />
                                         </ui:Button>
                                     </ui:VisualElement>
@@ -118,7 +127,7 @@
                                 <ui:Button text="&gt;&#10;" display-tooltip-when-elided="true" name="page-next" class="page-arrow" style="background-color: rgba(255, 255, 255, 0); border-left-color: rgba(179, 146, 86, 0); border-right-color: rgba(179, 146, 86, 0); border-top-color: rgba(179, 146, 86, 0); border-bottom-color: rgba(179, 146, 86, 0); -unity-font-style: bold; font-size: 14%;" />
                             </ui:VisualElement>
                         </ui:VisualElement>
-                        <ui:VisualElement name="filters" class="filters" style="align-self: auto; align-content: auto; align-items: auto; margin-bottom: 0; min-width: auto; width: 10%; justify-content: flex-start; position: relative; left: auto; top: auto; overflow: visible; visibility: visible; flex-direction: column; height: 100%; flex-shrink: 0; margin-left: 1%; margin-right: 0;">
+                        <ui:VisualElement name="filters" class="filters" style="align-self: auto; align-content: auto; align-items: auto; margin-bottom: 0; min-width: auto; width: auto; justify-content: flex-start; position: absolute; left: 95%; top: auto; overflow: visible; visibility: visible; flex-direction: column; height: 100%; flex-shrink: 0; margin-left: 0%; margin-right: 0;">
                             <ui:Button text="🌍" display-tooltip-when-elided="true" name="filter-corporeal" tooltip="Corporeal" enable-rich-text="false" class="filter-tab" />
                             <ui:Button text="❄️" display-tooltip-when-elided="true" name="filter-frigid" tooltip="Frigid" class="filter-tab" />
                             <ui:Button text="🔥" display-tooltip-when-elided="true" name="filter-scorch" tooltip="Scorch" class="filter-tab" />
