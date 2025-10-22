@@ -66,6 +66,8 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         
         public int PlacedCount => placedCount;
         public VisualElement viewRoot => uiDocument?.rootVisualElement;
+        public int gridWidth => GRID_SIZE;
+        public int gridHeight => GRID_SIZE;
         
         public AlchemyRecipe CurrentRecipe 
         { 
@@ -74,6 +76,61 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         }
         
         public bool IsProcessingRecipe => isProcessingRecipe;
+        
+        public Dictionary<Vector2Int, Ingredient> GetPlacedIngredients()
+        {
+            var result = new Dictionary<Vector2Int, Ingredient>();
+            for (int x = 0; x < GRID_SIZE; x++)
+            {
+                for (int y = 0; y < GRID_SIZE; y++)
+                {
+                    if (placed[x, y] != null)
+                    {
+                        result[new Vector2Int(x, y)] = placed[x, y].ingredient;
+                    }
+                }
+            }
+            return result;
+        }
+        
+        public List<AspectObstacle> GetAspectObstacles()
+        {
+            var result = new List<AspectObstacle>();
+            for (int x = 0; x < GRID_SIZE; x++)
+            {
+                for (int y = 0; y < GRID_SIZE; y++)
+                {
+                    if (obstacles[x, y] != null)
+                    {
+                        result.Add(obstacles[x, y]);
+                    }
+                }
+            }
+            return result;
+        }
+        
+        public List<Vector2Int> GetIngredientCells(Ingredient ingredient, Vector2Int anchor)
+        {
+            var cells = new List<Vector2Int>();
+            var shape = ingredient.GetShape();
+            if (shape == null) return cells;
+            
+            int width = shape.GetLength(0);
+            int height = shape.GetLength(1);
+            
+            for (int x = 0; x < width; x++)
+            {
+                for (int y = 0; y < height; y++)
+                {
+                    if (shape[x, y])
+                    {
+                        cells.Add(new Vector2Int(anchor.x + x, anchor.y + y));
+                    }
+                }
+            }
+            
+            return cells;
+        }
         
         public int GetPendingQuantityChange(Ingredient ingredient)
         {

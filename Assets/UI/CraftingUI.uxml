@@ -9,6 +9,11 @@
                     <ui:Button text="🌟" display-tooltip-when-elided="true" name="skill-tree-button" tooltip="Open skill tree" class="circular-button" style="margin-top: 0%; margin-right: 0; margin-bottom: 0; margin-left: 320%; justify-content: flex-start; flex-direction: column-reverse; position: absolute; width: 250%; height: 100%; border-left-color: rgb(184, 184, 183); border-right-color: rgb(184, 184, 183); border-top-color: rgb(184, 184, 183); border-bottom-color: rgb(184, 184, 183); background-color: rgba(199, 166, 106, 0);" />
                 </ui:VisualElement>
                 <ui:Label text="CRAFTING" display-tooltip-when-elided="true" name="title" class="title" style="font-size: 72px; margin-right: 2%; align-self: center; align-items: center; justify-content: center; margin-left: 20%; color: rgb(184, 184, 183);" />
+                <ui:VisualElement name="proficiency-display" style="position: absolute; right: 2%; top: 2%; flex-direction: column; align-items: flex-end; padding: 10px; background-color: rgba(0, 0, 0, 0.6); border-radius: 8px; border-width: 2px; border-color: rgb(199, 166, 106);">
+                    <ui:Label text="Grade" name="proficiency-label" style="font-size: 14px; color: rgb(200, 200, 200); margin-bottom: 4px; -unity-font-style: bold;" />
+                    <ui:Label text="F" name="proficiency-grade" style="font-size: 48px; color: rgb(255, 100, 100); -unity-font-style: bold; margin-bottom: 4px;" />
+                    <ui:Label text="0%" name="proficiency-score" style="font-size: 18px; color: rgb(200, 200, 200);" />
+                </ui:VisualElement>
                 <ui:VisualElement name="top-buttons" class="top-buttons" style="margin-right: 0; margin-left: 0; display: flex; visibility: hidden; overflow: visible; opacity: 0;">
                     <ui:Button text="💾" display-tooltip-when-elided="true" name="save-recipe-button" tooltip="Save to recipe book" enabled="false" class="circular-button" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0;" />
                     <ui:Button text="💾" display-tooltip-when-elided="true" name="save-recipe-button" tooltip="Save to recipe book" enabled="false" class="circular-button" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0;" />

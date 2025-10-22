@@ -6,6 +6,7 @@ using System.Linq;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
 using FourFatesStudios.ProjectWarden.GridDemo;
 using FourFatesStudios.ProjectWarden.Enums;
+using FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu;
 
 namespace FourFatesStudios.ProjectWarden.UI
 {
@@ -61,6 +62,15 @@ namespace FourFatesStudios.ProjectWarden.UI
         private VisualElement inventoryGrid;
         private Label invPageNumber;
         private Button invPageNext, invPagePrev;
+        
+        // UI Elements - Proficiency Display
+        private VisualElement proficiencyDisplay;
+        private Label proficiencyGrade;
+        private Label proficiencyScore;
+        
+        // Proficiency tracking
+        private ProficiencyGrade currentProficiencyGrade;
+        private ProficiencyWeights proficiencyWeights = new ProficiencyWeights();
         
         // Filter and Sort System
         private Aspect? currentFilter = null; // null means "All"
@@ -128,6 +138,7 @@ namespace FourFatesStudios.ProjectWarden.UI
             {
                 gridManager.OnGridChanged += UpdateCompleteButtonState;
                 gridManager.OnGridChanged += RefreshIngredientQuantities;
+                gridManager.OnGridChanged += UpdateProficiencyDisplay;
             }
             
             if (gameObject.activeInHierarchy)
@@ -291,6 +302,17 @@ namespace FourFatesStudios.ProjectWarden.UI
             invPageNumber = root.Q<Label>("inv-page-number");
             invPageNext = root.Q<Button>("inv-page-next");
             invPagePrev = root.Q<Button>("inv-page-prev");
+            
+            // Proficiency display elements
+            proficiencyDisplay = root.Q<VisualElement>("proficiency-display");
+            proficiencyGrade = root.Q<Label>("proficiency-grade");
+            proficiencyScore = root.Q<Label>("proficiency-score");
+            
+            // Initialize proficiency display
+            if (proficiencyDisplay != null)
+            {
+                UpdateProficiencyDisplay();
+            }
             
             // Setup sort dropdown
             SetupSortDropdown();
@@ -2046,14 +2068,87 @@ namespace FourFatesStudios.ProjectWarden.UI
             if (classes != null && classes.Any())
                 info += $", Classes: [{string.Join(", ", classes)}]";
             
-            info += $", PickingMode: {element.pickingMode}";
-            info += $", EnabledInHierarchy: {element.enabledInHierarchy}";
-            info += $", Display: {element.style.display.value}";
+            info += ", PickingMode: {element.pickingMode}";
+            info += ", EnabledInHierarchy: {element.enabledInHierarchy}";
+            info += ", Display: {element.style.display.value}";
             
             if (element is TextElement textElement && !string.IsNullOrEmpty(textElement.text))
-                info += $", Text: '{textElement.text.Substring(0, System.Math.Min(20, textElement.text.Length))}'";
+                info += ", Text: '{textElement.text.Substring(0, System.Math.Min(20, textElement.text.Length))}'";
             
             return info;
+        }
+        
+        public void UpdateProficiencyDisplay()
+        {
+            if (proficiencyGrade == null || proficiencyScore == null || gridManager == null)
+                return;
+            
+            var placedIngredients = gridManager.GetPlacedIngredients();
+            
+            if (placedIngredients == null || placedIngredients.Count == 0)
+            {
+                SetDefaultProficiencyDisplay();
+                return;
+            }
+            
+            var obstacles = gridManager.GetAspectObstacles();
+            bool isFreeCrafting = gridManager.CurrentRecipe == null;
+            
+            currentProficiencyGrade = ProficiencyGrading.CalculateProficiency(
+                gridManager,
+                placedIngredients,
+                obstacles,
+                proficiencyWeights,
+                isFreeCrafting
+            );
+            
+            if (currentProficiencyGrade != null)
+            {
+                GradeLevel displayGrade = currentProficiencyGrade.gradeLevel;
+                
+                if (displayGrade == GradeLevel.S)
+                {
+                    bool obstaclesFullyCompleted = currentProficiencyGrade.obstaclesCompleted >= 1.0f;
+                    
+                    if (!obstaclesFullyCompleted || isFreeCrafting)
+                    {
+                        displayGrade = GradeLevel.A;
+                    }
+                }
+                
+                proficiencyGrade.text = displayGrade.ToString();
+                proficiencyScore.text = $"{Mathf.RoundToInt(currentProficiencyGrade.proficiencyPercentage)}%";
+                
+                proficiencyGrade.style.color = GetGradeColor(displayGrade);
+            }
+        }
+        
+        private void SetDefaultProficiencyDisplay()
+        {
+            if (proficiencyGrade != null)
+            {
+                proficiencyGrade.text = "F";
+                proficiencyGrade.style.color = new StyleColor(new Color(1f, 0.4f, 0.4f));
+            }
+            
+            if (proficiencyScore != null)
+            {
+                proficiencyScore.text = "0%";
+            }
+        }
+        
+        private Color GetGradeColor(GradeLevel grade)
+        {
+            switch (grade)
+            {
+                case GradeLevel.S: return new Color(1f, 0.84f, 0f);
+                case GradeLevel.A: return new Color(0.2f, 1f, 0.2f);
+                case GradeLevel.B: return new Color(0.4f, 0.8f, 1f);
+                case GradeLevel.C: return new Color(1f, 0.8f, 0.4f);
+                case GradeLevel.D: return new Color(1f, 0.6f, 0.2f);
+                case GradeLevel.F: return new Color(1f, 0.4f, 0.4f);
+                default: return Color.white;
+            }
         }
         
         private void OnDestroy()
@@ -2069,6 +2164,7 @@ namespace FourFatesStudios.ProjectWarden.UI
             {
                 gridManager.OnGridChanged -= UpdateCompleteButtonState;
                 gridManager.OnGridChanged -= RefreshIngredientQuantities;
+                gridManager.OnGridChanged -= UpdateProficiencyDisplay;
             }
         }
     }

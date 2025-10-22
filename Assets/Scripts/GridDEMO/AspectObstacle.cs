@@ -769,7 +769,7 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
 
         public bool CountsForCompletion()
         {
-            return obstacleType != ObstacleType.Void && obstacleType != ObstacleType.Corporeal;
+            return obstacleType != ObstacleType.Void;
         }
 
         public string GetObstacleDescription()
