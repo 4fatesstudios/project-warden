@@ -11,6 +11,7 @@ public class FloorPropertiesDesignerWindow : EditorWindow
     private Vector2 scrollPosition;
     private static readonly string previewRootName = "FloorPreviewRoot";
     private static EditorConfig config;
+    private GameObject previewRoot;
     
     [MenuItem("Tools/Floors/Floor Properties Designer")]
     public static void ShowWindow() {
@@ -68,24 +69,41 @@ public class FloorPropertiesDesignerWindow : EditorWindow
 
     private void GeneratePreview() {
         ClearPreview();
-        
+    
         SceneView sceneView = SceneView.lastActiveSceneView;
-        Camera cam = sceneView.camera;
-        Vector3 spawnPosition = cam.transform.position + cam.transform.transform.forward * 5f;
-        
-        GameObject root = new GameObject(previewRootName) {
-            transform = {
-                position = spawnPosition
-            }
-        };
+        if (sceneView == null) {
+            Debug.LogWarning("No active SceneView found for preview generation.");
+            return;
+        }
 
-        // use floor generator here
-        var instance = (GameObject)PrefabUtility.InstantiatePrefab(config.floorGeneratorPrefab);
-        instance.transform.SetParent(root.transform);
-        
-        var generator = instance.GetComponent<FloorGenerator>();
-        // continue generation logic here
+        Camera cam = sceneView.camera;
+        if (cam == null) {
+            Debug.LogWarning("No active camera found in SceneView.");
+            return;
+        }
+
+        Vector3 spawnPosition = cam.transform.position + cam.transform.forward * 5f;
+
+        // Instantiate prefab as the root
+        var root = (GameObject)PrefabUtility.InstantiatePrefab(config.floorGeneratorPrefab);
+        root.name = previewRootName;
+        root.transform.position = spawnPosition;
+
+        // Get the FloorGenerator component
+        var generator = root.GetComponent<FloorGenerator>();
+        if (generator == null) {
+            Debug.LogError("FloorGenerator component missing on prefab.");
+            return;
+        }
+
+        // Generate the preview floor
+        generator.GenerateFloor();
+        generator.PruneDeadEndHallways();
+
+        // Optionally store reference for later cleanup
+        previewRoot = root;
     }
+
 
     private void ClearPreview() {
         GameObject root = GameObject.Find(previewRootName);

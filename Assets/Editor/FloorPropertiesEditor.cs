@@ -60,7 +60,10 @@ public class FloorPropertiesEditor : BaseDataSOEditor {
 
             // Sync Free Rooms list
             if (db != null) {
+                floorProps.FreeRooms ??= new List<FloorProperties.FreeRoomProperties>();
                 SyncPropertiesList(db.Rooms, floorProps.FreeRooms, true);
+                
+                floorProps.Hallways ??= new List<FloorProperties.HallwayProperties>();
                 SyncPropertiesList(db.Hallways, floorProps.Hallways, false);
             }
         }
@@ -109,9 +112,12 @@ public class FloorPropertiesEditor : BaseDataSOEditor {
     // Helper: ensure the ScriptableObject lists match DB prefabs
     private void SyncPropertiesList<T>(
         IReadOnlyList<SpaceData> dbSpaces,
-        System.Collections.Generic.List<T> targetList,
+        List<T> targetList,
         bool isFreeRoom
     ) {
+        if (dbSpaces == null)
+            return;
+
         if (targetList == null)
             return;
 
