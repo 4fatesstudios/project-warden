@@ -1,0 +1,38 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/Scripts/UI/CraftingSystem/AlchemySystem/BulkCraftingStyles.uss?fileID=7433441132597879392&amp;guid=&amp;type=3#BulkCraftingStyles" />
+    <ui:VisualElement name="MainContainer" class="main-container">
+        <ui:VisualElement name="HeaderContainer" class="header-container">
+            <ui:Label text="Bulk Alchemy Crafting" name="TitleLabel" class="title-label" />
+            <ui:Label text="Craft multiple potions automatically using unlocked recipes. Requires S-rank achievement on recipes." name="InstructionsLabel" class="instructions-label" />
+        </ui:VisualElement>
+        
+        <ui:VisualElement name="ContentContainer" class="content-container">
+            <ui:VisualElement name="RecipeSelection" class="recipe-selection">
+                <ui:Label text="Select Recipe" class="section-title" />
+                <ui:DropdownField name="RecipeDropdown" class="recipe-dropdown" />
+            </ui:VisualElement>
+            
+            <ui:VisualElement name="QuantitySection" class="quantity-section">
+                <ui:Label text="Quantity" class="section-title" />
+                <ui:IntegerField name="QuantityField" value="1" class="quantity-field" />
+            </ui:VisualElement>
+            
+            <ui:VisualElement name="CostSection" class="cost-section">
+                <ui:Label text="Required Ingredients" class="section-title" />
+                <ui:Label text="Select a recipe to see costs" name="CostLabel" class="cost-label" />
+            </ui:VisualElement>
+            
+            <ui:VisualElement name="StatusSection" class="status-section">
+                <ui:Label text="Ready to craft" name="StatusLabel" class="status-label" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        
+        <ui:VisualElement name="ButtonContainer" class="button-container">
+            <ui:Button text="Bulk Craft" name="BulkCraftButton" class="bulk-craft-button" />
+        </ui:VisualElement>
+        
+        <ui:VisualElement name="ResultContainer" class="result-container">
+            <ui:Label text="" name="ResultLabel" class="result-label" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

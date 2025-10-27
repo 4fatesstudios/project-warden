@@ -14,9 +14,9 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.AlchemyRecipes
             get
             {
                 if (_instance == null)
-                    _instance = Resources.Load<AlchemyRecipeDatabase>("AlchemyRecipes/AlchemyRecipeDatabase");
+                    _instance = Resources.Load<AlchemyRecipeDatabase>("Databases/AlchemyRecipeDatabase");
                 if (_instance == null)
-                    Debug.LogError("AlchemyRecipeDatabase asset not found in Resources/AlchemyRecipes/AlchemyRecipeDatabase");
+                    Debug.LogError("AlchemyRecipeDatabase asset not found in Resources/Databases/AlchemyRecipeDatabase");
                 return _instance;
             }
         }

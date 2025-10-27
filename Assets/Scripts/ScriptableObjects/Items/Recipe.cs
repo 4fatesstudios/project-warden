@@ -12,7 +12,7 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
         public AlchemyRecipe Recipe1 => recipe1;
 
 #if UNITY_EDITOR
-        private void OnValidate()
+        private new void OnValidate()
         {
             if (Recipe1 == null)
                 Debug.LogWarning($"[{name}] AlchemyRecipe has not been assigned.");

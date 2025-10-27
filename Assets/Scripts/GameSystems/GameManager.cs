@@ -1,4 +1,4 @@
-using FourFatesStudios.ProjectWarden.ScriptableObjects.PotionEffects;
+using FourFatesStudios.ProjectWarden.Effects;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Databases;
 using UnityEngine;
 
@@ -19,8 +19,7 @@ namespace FourFatesStudios.ProjectWarden.GameSystems
             
         }
 
-        [SerializeField] private PotionEffectDatabase potionEffectDb;
-        [SerializeField] private ItemDatabase itemDb;
+        // [SerializeField] private ItemDatabase itemDb;
 
         private void Awake()
         {

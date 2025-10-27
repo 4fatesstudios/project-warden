@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a0ef25238d788a9459402779ad06e253, type: 3}
+  m_Name: GridMinigameEntry
+  m_EditorClassIdentifier: 
+  title: Mastering the Grid Minigame
+  description: Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+    The grid minigame is the heart of potion brewing. Understanding how to efficiently
+    place ingredients and manage your brewing space is crucial for creating powerful
+    potions.
+  visualElement: {fileID: 0}
+  isSeen: 0
+  isBookmarked: 0
+  pageNumber: 0
+  category: 4
+  steps:
+  - Study the ingredient shapes before starting
+  - Plan your placement strategy in advance
+  - Consider ingredient interactions and synergies
+  - Use rotation and flipping to optimize space usage
+  - Watch for special ingredient effects during placement
+  tips:
+  - 'Lorem ipsum: larger ingredients often provide better effects'
+  - Corner pieces are valuable for maximizing space
+  - Some ingredients work better when placed adjacent to specific others
+  - Don't rush - planning saves time in the long run
+  relatedTopics:
+  - Advanced Brewing Techniques
+  - Ingredient Synergies
+  - Potion Optimization
+  illustrationImages: []
+  isBasicTutorial: 0

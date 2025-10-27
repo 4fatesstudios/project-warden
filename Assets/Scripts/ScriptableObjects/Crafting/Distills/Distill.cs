@@ -25,7 +25,7 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Distills
         [SerializeField, Tooltip("Maximum time allowed to complete the distillation (seconds).")]
         private float totalDuration = 10f;
 
-        [SerializeField, Tooltip("Ordered progression stages (e.g., None ¨ Shiny ¨ Sparkling ¨ ShinyAndSparkling).")]
+        [SerializeField, Tooltip("Ordered progression stages (e.g., None ï¿½ï¿½ Shiny ï¿½ï¿½ Sparkling ï¿½ï¿½ ShinyAndSparkling).")]
         private List<DistillVisualState> progressionStages = new();
 
         public Ingredient InputIngredient => inputIngredient;

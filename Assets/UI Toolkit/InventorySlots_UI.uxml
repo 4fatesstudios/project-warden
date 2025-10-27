@@ -1,0 +1,28 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" 
+        xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" 
+        noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" 
+        editor-extension-mode="False">
+    <Style src="project://database/Assets/UI Toolkit/InventorySlots_UI.uss?fileID=7433441132597879392&amp;guid=0123456789abcdef&amp;type=3#InventorySlots_UI" />
+    
+    <!-- Main Inventory Container positioned at top-right -->
+    <ui:VisualElement name="inventory-container" class="inventory-main-container">
+        
+        <!-- Header Section -->
+        <ui:VisualElement name="inventory-header" class="inventory-header">
+            <ui:Label text="Inventory" name="inventory-title" class="inventory-title" />
+            <ui:Label text="0/30" name="slot-count" class="slot-count" />
+        </ui:VisualElement>
+        
+        <!-- Inventory Slots Grid -->
+        <ui:ScrollView name="inventory-scroll" class="inventory-scroll">
+            <ui:VisualElement name="inventory-grid" class="inventory-grid">
+                <!-- Slots will be dynamically populated here -->
+            </ui:VisualElement>
+        </ui:ScrollView>
+        
+        <!-- Toggle Button for Collapse/Expand -->
+        <ui:Button text="−" name="toggle-button" class="toggle-button" />
+        
+    </ui:VisualElement>
+</ui:UXML>

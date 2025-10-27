@@ -20,15 +20,5 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
             get => statModifierList;
             set => statModifierList = value;
         }
-
-#if UNITY_EDITOR
-        protected override void OnValidate() {
-            base.OnValidate();
-
-            if (statModifierList == null) return;
-            statModifierList.SetSourceID(ItemID);
-            EditorUtility.SetDirty(this);
-        }
-#endif
     }
 }

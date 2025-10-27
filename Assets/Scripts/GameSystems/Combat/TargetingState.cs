@@ -11,11 +11,11 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.Combat
         private CombatUIManager combatUIManager;
         private PlayerController playerController;
         
-        public override void Enter(CombatManager combatManager, CombatUIManager combatUIManager){
+        public override void Enter(CombatManager combatManagerTemp, CombatUIManager combatUIManagerTemp){
             Debug.Log("Entering Targeting State: Select a Target");
-            this.combatManager = combatManager;
-            this.combatUIManager = combatUIManager;
-            playerController = GameObject.FindObjectOfType<PlayerController>();
+            this.combatManager = combatManagerTemp;
+            this.combatUIManager = combatUIManagerTemp;
+            playerController = GameObject.FindFirstObjectByType<PlayerController>();
             BindInputs();
         }
         

@@ -8,7 +8,7 @@ using UnityEditor;
 using UnityEngine;
 
 [CustomEditor(typeof(AreaSpacesDatabase))]
-public class AreaSpacesDatabaseEditor : Editor {
+public class AreaSpacesDatabaseEditor : UnityEditor.Editor {
     public override void OnInspectorGUI() {
         DrawDefaultInspector();
 

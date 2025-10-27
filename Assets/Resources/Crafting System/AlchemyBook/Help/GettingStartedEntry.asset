@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a0ef25238d788a9459402779ad06e253, type: 3}
+  m_Name: GettingStartedEntry
+  m_EditorClassIdentifier: 
+  title: Getting Started with Alchemy
+  description: Lorem ipsum dolor sit amet, consectetur adipiscing elit. This guide
+    will help you take your first steps into the world of alchemical brewing. Learn
+    the basics of ingredient preparation, potion crafting, and the fundamental principles
+    that govern all alchemical practices.
+  visualElement: {fileID: 0}
+  isSeen: 0
+  isBookmarked: 0
+  pageNumber: 0
+  category: 0
+  steps:
+  - Gather basic ingredients from the surrounding area
+  - Learn to identify ingredient aspects and properties
+  - Practice basic grinding and preparation techniques
+  - Attempt your first simple potion recipe
+  - Document your results in the alchemy book
+  tips:
+  - Start with common ingredients before attempting rare ones
+  - Always prepare ingredients properly before brewing
+  - Keep detailed notes of successful and failed attempts
+  - Practice the grid minigame to improve your brewing skills
+  relatedTopics:
+  - Ingredient Harvesting
+  - Recipe Crafting
+  - Grid Minigame Basics
+  illustrationImages: []
+  isBasicTutorial: 1

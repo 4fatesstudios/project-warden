@@ -1,0 +1,60 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac12d8c1b64a441a9fd60f1ef7e48a67, type: 3}
+  m_Name: FireTalon
+  m_EditorClassIdentifier: 
+  id: 91c22615-6141-4e39-b570-dab80551a860
+  itemName: Fire Talon
+  itemDescription: Empty Description
+  itemRarity: 0
+  itemIcon: {fileID: 0}
+  noun: 
+  adjective: 
+  ingredientArchetype: 1
+  ingredientAspect: 2
+  isCorrupted: 0
+  potency: 1
+  gridWidth: 2
+  gridHeight: 2
+  unlocksAdditionalSpace: 0
+  additionalSpaceCount: 0
+  isUnrefined: 1
+  originalIngredient: {fileID: 0}
+  shapeData:
+    gridWidth: 2
+    gridHeight: 2
+    activeCells:
+    - {x: 0, y: 0}
+    - {x: 1, y: 0}
+    - {x: 1, y: 1}
+    template: 0
+    shapeColor: {r: 0, g: 1, b: 0, a: 1}
+    shapeSprite: {fileID: 0}
+    lastModified: 2025-09-25 16:11:16
+    dataVersion: 1
+  infusionBundle:
+    infusions:
+    - {fileID: 11400000, guid: cb1d239c98a377240872ece2b29e296a, type: 2}
+  effectBundle:
+    Effects: []
+  canGrind: 0
+  grindingResult: {fileID: 0}
+  canDistill: 0
+  distillingResult: {fileID: 0}
+  canRoast: 0
+  roastingResult: {fileID: 0}
+  baseRefiningSuccessRate: 0.7
+  stabilityRating: 0.8
+  minimumRefiningSkill: 1
+  references:
+    version: 2
+    RefIds: []

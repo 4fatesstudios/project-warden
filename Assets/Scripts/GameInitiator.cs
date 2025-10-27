@@ -6,7 +6,7 @@ namespace FourFatesStudios.ProjectWarden
     
     public class GameInitiator : MonoBehaviour
     {
-        private async void Start() {
+        private void Start() {
             // BindObjects();
             // _loadingScreen.Show();
             // Load BaseStats save

@@ -1,0 +1,33 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/Scripts/UI/CraftingSystem/GridMinigameStyles.uss?fileID=7433441132597879392&amp;guid=fd1a2e64a2fea654293ae06d82d3477b&amp;type=3#GridMinigameStyles" />
+    <ui:VisualElement name="MainContainer" class="main-container">
+        <ui:VisualElement name="HeaderContainer" class="header-container">
+            <ui:Label text="Alchemy Grid" name="TitleLabel" class="title-label" />
+            <ui:Label text="Drag Tetris-style pieces onto the grid for strategic placement! Rotate with R key, place with Enter, or use mouse controls." name="InstructionsLabel" class="instructions-label" />
+        </ui:VisualElement>
+        <ui:VisualElement name="GameArea" class="game-area">
+            <ui:VisualElement name="GridContainer" class="grid-container">
+                <ui:VisualElement name="CraftingGrid" class="crafting-grid" />
+            </ui:VisualElement>
+            <ui:VisualElement name="IngredientQueue" class="ingredient-queue">
+                <ui:Label text="Ingredients List" class="queue-label" />
+                <ui:VisualElement name="QueueItems" class="queue-items" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="ControlsArea" class="controls-area">
+            <ui:VisualElement name="ScoreContainer" class="score-container">
+                <ui:Label text="Potency Score" class="score-label" />
+                <ui:Label text="0" name="ScoreValue" class="score-value" />
+            </ui:VisualElement>
+            <ui:VisualElement name="RankContainer" class="rank-container">
+                <ui:Label text="Current Rank" class="rank-label" />
+                <ui:Label text="F" name="RankValue" class="rank-value" />
+            </ui:VisualElement>
+            <ui:VisualElement name="ButtonContainer" class="button-container">
+                <ui:Button text="Rotate" name="RotateButton" class="action-button" />
+                <ui:Button text="Place" name="PlaceButton" class="action-button primary" />
+                <ui:Button text="Complete" name="CompleteButton" class="action-button complete" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
