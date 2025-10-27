@@ -15,7 +15,7 @@ MonoBehaviour:
   lootEntries:
   - minimumDropAmount: 1
     maximumDropAmount: 3
-    item: {fileID: 11400000, guid: 0d5e8efe3343d2f4fa07e6311fd21419, type: 2}
+    item: {fileID: 11400000, guid: 1ad6788088b097c409488fa6b9913971, type: 2}
   - minimumDropAmount: 1
     maximumDropAmount: 4
-    item: {fileID: 11400000, guid: 38adaff10689ee9429164caeb4f01328, type: 2}
+    item: {fileID: 11400000, guid: e668cf657c95ac14aacfe5da38199b93, type: 2}
