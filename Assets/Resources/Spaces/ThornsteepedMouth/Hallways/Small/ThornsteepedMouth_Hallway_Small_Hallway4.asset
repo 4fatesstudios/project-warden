@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 710a054946e11eb44bf55df88ee683e3, type: 3}
+  m_Name: ThornsteepedMouth_Hallway_Small_Hallway4
+  m_EditorClassIdentifier: 
+  spacePrefab: {fileID: 3702804085412172271, guid: f41267f86663aff4791194a2854bfa39, type: 3}
+  spaceType: 1
+  spaceSize: 0
+  doorSpawnPoints:
+  - doorSpawnPoint: {fileID: 5468038349368400374, guid: f41267f86663aff4791194a2854bfa39, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 2
+    doorSpawnGroup: 0
+  - doorSpawnPoint: {fileID: 5065720988334852205, guid: f41267f86663aff4791194a2854bfa39, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 1
+    doorSpawnGroup: 0
+  - doorSpawnPoint: {fileID: 4418308503741561358, guid: f41267f86663aff4791194a2854bfa39, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 4
+    doorSpawnGroup: 1
+  - doorSpawnPoint: {fileID: 745273553181588696, guid: f41267f86663aff4791194a2854bfa39, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 3
+    doorSpawnGroup: 2

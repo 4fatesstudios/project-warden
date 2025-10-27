@@ -1,0 +1,78 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 710a054946e11eb44bf55df88ee683e3, type: 3}
+  m_Name: ThornsteepedMouth_Room_Small_RoomRafters
+  m_EditorClassIdentifier: 
+  spacePrefab: {fileID: 2571217923155203205, guid: ffed086075842da408f13f499b8b1907, type: 3}
+  spaceType: 0
+  spaceSize: 0
+  doorSpawnPoints:
+  - doorSpawnPoint: {fileID: 6918159994478142193, guid: ffed086075842da408f13f499b8b1907, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 2
+    doorSpawnGroup: 6
+  - doorSpawnPoint: {fileID: 8125684987705054738, guid: ffed086075842da408f13f499b8b1907, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 2
+    doorSpawnGroup: 0
+  - doorSpawnPoint: {fileID: 5464473713418887852, guid: ffed086075842da408f13f499b8b1907, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 2
+    doorSpawnGroup: 1
+  - doorSpawnPoint: {fileID: 2947147126102051293, guid: ffed086075842da408f13f499b8b1907, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 4
+    doorSpawnGroup: 0
+  - doorSpawnPoint: {fileID: 6743354308541727034, guid: ffed086075842da408f13f499b8b1907, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 4
+    doorSpawnGroup: 0
+  - doorSpawnPoint: {fileID: 3436932904980754085, guid: ffed086075842da408f13f499b8b1907, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 4
+    doorSpawnGroup: 0
+  - doorSpawnPoint: {fileID: 2176741730869759598, guid: ffed086075842da408f13f499b8b1907, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 3
+    doorSpawnGroup: 6
+  - doorSpawnPoint: {fileID: 5817235596816678086, guid: ffed086075842da408f13f499b8b1907, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 3
+    doorSpawnGroup: 4
+  - doorSpawnPoint: {fileID: 5301404406830000681, guid: ffed086075842da408f13f499b8b1907, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 3
+    doorSpawnGroup: 4
+  - doorSpawnPoint: {fileID: 683867611268831661, guid: ffed086075842da408f13f499b8b1907, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 1
+    doorSpawnGroup: 5
+  - doorSpawnPoint: {fileID: 3366326425428391975, guid: ffed086075842da408f13f499b8b1907, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 1
+    doorSpawnGroup: 2
+  - doorSpawnPoint: {fileID: 859954132290654269, guid: ffed086075842da408f13f499b8b1907, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 1
+    doorSpawnGroup: 3
