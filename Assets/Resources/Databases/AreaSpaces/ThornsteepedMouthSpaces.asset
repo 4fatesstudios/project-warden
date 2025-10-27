@@ -13,5 +13,25 @@ MonoBehaviour:
   m_Name: ThornsteepedMouthSpaces
   m_EditorClassIdentifier: 
   area: 1
-  rooms: []
-  hallways: []
+  rooms:
+  - {fileID: 11400000, guid: 79a0a28d0cac4564484c0cefbc1c5ced, type: 2}
+  - {fileID: 11400000, guid: eff388a174d601b42917356cde9bc7f2, type: 2}
+  - {fileID: 11400000, guid: 4fd7ba5531c0a0940a66c9faf138a45b, type: 2}
+  - {fileID: 11400000, guid: dcf9ec1f1e973ca4aa4851bb716edb61, type: 2}
+  - {fileID: 11400000, guid: a43f64a1f5bafb2439a6c43d4dd02cda, type: 2}
+  - {fileID: 11400000, guid: 98b41937ecc01d6458ec6513b5debf70, type: 2}
+  - {fileID: 11400000, guid: 2db190fc3261ac743a135d0de591b374, type: 2}
+  - {fileID: 11400000, guid: a12eb0b13a27a2f4ba004c9c98d0dbce, type: 2}
+  - {fileID: 11400000, guid: 40bc2490bf852da4e8ab9c6dd8201b9b, type: 2}
+  - {fileID: 11400000, guid: 50234dd0020b16541920cb92ca482ca3, type: 2}
+  hallways:
+  - {fileID: 11400000, guid: ae7a96bf4a3187a4689b3d1f19fc3f3c, type: 2}
+  - {fileID: 11400000, guid: 2cd14435b1a28d946a8a78088bfb80d7, type: 2}
+  - {fileID: 11400000, guid: f67d3f4f269dcf0459a08a840e8feaed, type: 2}
+  - {fileID: 11400000, guid: a1e75a5fdb70fcd4387174da7e88d72b, type: 2}
+  - {fileID: 11400000, guid: 234a08695904b004cb94a89b98916811, type: 2}
+  - {fileID: 11400000, guid: 8854725a4d0a50e4daadb7fad7a733fe, type: 2}
+  - {fileID: 11400000, guid: 107b311facba6b84595792feb7561a6b, type: 2}
+  - {fileID: 11400000, guid: 87c6b78ea1a19574dbd1b54f6de9ae46, type: 2}
+  - {fileID: 11400000, guid: 9fa80a49676f17e46ae099063c44a877, type: 2}
+  - {fileID: 11400000, guid: f2cada03d656a3a42ba06d304c297a6c, type: 2}

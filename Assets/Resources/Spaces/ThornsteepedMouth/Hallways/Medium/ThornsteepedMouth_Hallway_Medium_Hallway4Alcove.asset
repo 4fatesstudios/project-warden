@@ -1,0 +1,58 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 710a054946e11eb44bf55df88ee683e3, type: 3}
+  m_Name: ThornsteepedMouth_Hallway_Medium_Hallway4Alcove
+  m_EditorClassIdentifier: 
+  spacePrefab: {fileID: 5990393739331628159, guid: 6b0bc9dee68743d4a8ae190d31f074ab, type: 3}
+  spaceType: 1
+  spaceSize: 1
+  doorSpawnPoints:
+  - doorSpawnPoint: {fileID: 3460865425702771829, guid: 6b0bc9dee68743d4a8ae190d31f074ab, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 2
+    doorSpawnGroup: 1
+  - doorSpawnPoint: {fileID: 2018607148391005009, guid: 6b0bc9dee68743d4a8ae190d31f074ab, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 2
+    doorSpawnGroup: 0
+  - doorSpawnPoint: {fileID: 4443323995708683507, guid: 6b0bc9dee68743d4a8ae190d31f074ab, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 4
+    doorSpawnGroup: 0
+  - doorSpawnPoint: {fileID: 72326035411186514, guid: 6b0bc9dee68743d4a8ae190d31f074ab, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 4
+    doorSpawnGroup: 0
+  - doorSpawnPoint: {fileID: 1996753525305792254, guid: 6b0bc9dee68743d4a8ae190d31f074ab, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 3
+    doorSpawnGroup: 2
+  - doorSpawnPoint: {fileID: 5051186286331180756, guid: 6b0bc9dee68743d4a8ae190d31f074ab, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 3
+    doorSpawnGroup: 3
+  - doorSpawnPoint: {fileID: 1865772576507936997, guid: 6b0bc9dee68743d4a8ae190d31f074ab, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 1
+    doorSpawnGroup: 4
+  - doorSpawnPoint: {fileID: 8851891784091776787, guid: 6b0bc9dee68743d4a8ae190d31f074ab, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 1
+    doorSpawnGroup: 0

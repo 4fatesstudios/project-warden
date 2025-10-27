@@ -1,0 +1,58 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 710a054946e11eb44bf55df88ee683e3, type: 3}
+  m_Name: ThornsteepedMouth_Hallway_Medium_Hallway2
+  m_EditorClassIdentifier: 
+  spacePrefab: {fileID: 4543275140802171992, guid: 8db5bacddf92bad4e9e7f71644d9cbf2, type: 3}
+  spaceType: 1
+  spaceSize: 1
+  doorSpawnPoints:
+  - doorSpawnPoint: {fileID: 6641020759424918610, guid: 8db5bacddf92bad4e9e7f71644d9cbf2, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 2
+    doorSpawnGroup: 1
+  - doorSpawnPoint: {fileID: 8083217463751033718, guid: 8db5bacddf92bad4e9e7f71644d9cbf2, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 2
+    doorSpawnGroup: 2
+  - doorSpawnPoint: {fileID: 5874673398614510804, guid: 8db5bacddf92bad4e9e7f71644d9cbf2, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 4
+    doorSpawnGroup: 3
+  - doorSpawnPoint: {fileID: 7867269373994961781, guid: 8db5bacddf92bad4e9e7f71644d9cbf2, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 4
+    doorSpawnGroup: 4
+  - doorSpawnPoint: {fileID: 8618543016001007321, guid: 8db5bacddf92bad4e9e7f71644d9cbf2, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 3
+    doorSpawnGroup: 5
+  - doorSpawnPoint: {fileID: 3042103341345509107, guid: 8db5bacddf92bad4e9e7f71644d9cbf2, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 3
+    doorSpawnGroup: 6
+  - doorSpawnPoint: {fileID: 8487699460973820098, guid: 8db5bacddf92bad4e9e7f71644d9cbf2, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 1
+    doorSpawnGroup: 7
+  - doorSpawnPoint: {fileID: 1654773078116831028, guid: 8db5bacddf92bad4e9e7f71644d9cbf2, type: 3}
+    doorType: 0
+    spawnWeight: 1
+    spawnDirection: 1
+    doorSpawnGroup: 8
