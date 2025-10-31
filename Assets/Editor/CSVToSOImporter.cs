@@ -89,7 +89,7 @@ public class CSVToSOImporter : EditorWindow
             if (isNew) {
                 instance = ScriptableObject.CreateInstance(type);
                 AssetDatabase.CreateAsset(instance, assetPath);
-                CustomLogger.Log(LogSystem.CSVImporter, $"Row {row}: Created new SO asset at {assetPath}.");
+                CustomLogger.LogInfo(LogSystem.CSVImporter, $"Row {row}: Created new SO asset at {assetPath}.");
             }
 
             SerializedObject serialized = new SerializedObject(instance);
@@ -117,14 +117,14 @@ public class CSVToSOImporter : EditorWindow
         foreach (var id in result.DeletedIDs) {
             string assetPath = $"{outputFolder}/{type.Name+id}.asset";
             if (AssetDatabase.DeleteAsset(assetPath)) {
-                CustomLogger.Log(LogSystem.CSVImporter, $"Deleted SO asset not found in CSV: {assetPath}");
+                CustomLogger.LogInfo(LogSystem.CSVImporter, $"Deleted SO asset not found in CSV: {assetPath}");
             }
         }
 
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
 
-        CustomLogger.Log(LogSystem.CSVImporter, $"Import finished. Created: {result.NewCount}, Updated: {result.UpdatedCount}, Deleted: {result.DeletedCount}");
+        CustomLogger.LogInfo(LogSystem.CSVImporter, $"Import finished. Created: {result.NewCount}, Updated: {result.UpdatedCount}, Deleted: {result.DeletedCount}");
         Debug.Log("CSV import completed.");
     }
  
@@ -136,16 +136,16 @@ public class CSVToSOImporter : EditorWindow
             CustomLogger.LogError(LogSystem.CSVImporter, err);
 
         foreach (var warn in result.EntryWarnings)
-            CustomLogger.Log(LogSystem.CSVImporter, warn);
+            CustomLogger.LogInfo(LogSystem.CSVImporter, warn);
 
         if (result.DeletedIDs.Count > 0)
-            CustomLogger.Log(LogSystem.CSVImporter, $"IDs to delete ({result.DeletedIDs.Count}): {string.Join(", ", result.DeletedIDs)}");
+            CustomLogger.LogInfo(LogSystem.CSVImporter, $"IDs to delete ({result.DeletedIDs.Count}): {string.Join(", ", result.DeletedIDs)}");
 
         if (result.UpdatedIDs.Count > 0)
-            CustomLogger.Log(LogSystem.CSVImporter, $"IDs to update ({result.UpdatedIDs.Count}): {string.Join(", ", result.UpdatedIDs)}");
+            CustomLogger.LogInfo(LogSystem.CSVImporter, $"IDs to update ({result.UpdatedIDs.Count}): {string.Join(", ", result.UpdatedIDs)}");
 
         if (result.NewIDs.Count > 0)
-            CustomLogger.Log(LogSystem.CSVImporter, $"IDs to create ({result.NewIDs.Count}): {string.Join(", ", result.NewIDs)}");
+            CustomLogger.LogInfo(LogSystem.CSVImporter, $"IDs to create ({result.NewIDs.Count}): {string.Join(", ", result.NewIDs)}");
     }
 
 }
