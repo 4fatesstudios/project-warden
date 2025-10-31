@@ -19,7 +19,7 @@ MonoBehaviour:
   itemIcon: {fileID: 0}
   noun: 
   adjective: 
-  ingredientArchetype: 0
+  ingredientArchetype: 4
   ingredientAspect: 4
   isCorrupted: 0
   potency: 1
@@ -30,15 +30,24 @@ MonoBehaviour:
   isUnrefined: 1
   originalIngredient: {fileID: 0}
   shapeData:
+    id: 
+    icon: {fileID: 0}
+    pivot: {x: 0, y: 0}
+    occupiedOffsets:
+    - {x: 0, y: 0}
+    expansionOffsets: []
+    expansionRotatesWithIngredient: 1
+    rotatable: 1
+    expansionColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
     gridWidth: 1
     gridHeight: 1
     activeCells:
     - {x: 0, y: 0}
-    template: 0
     shapeColor: {r: 0, g: 1, b: 0, a: 1}
     shapeSprite: {fileID: 0}
     lastModified: 2025-09-25 10:42:08
     dataVersion: 1
+    template: 0
   infusionBundle:
     infusions: []
   effectBundle:

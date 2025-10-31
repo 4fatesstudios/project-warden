@@ -19,7 +19,9 @@ namespace FourFatesStudios.ProjectWarden.GridDemo.UI
         [SerializeField] private LayerMask gridLayerMask = -1;
         
         [Header("Visual Feedback")]
+        #pragma warning disable 0414
         [SerializeField] private bool showGridPreview = true;
+        #pragma warning restore 0414
         [SerializeField] private Color validDropColor = Color.green;
         [SerializeField] private Color invalidDropColor = Color.red;
         

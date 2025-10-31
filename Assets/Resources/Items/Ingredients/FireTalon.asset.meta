@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/Resources/Items/Ingredients/FireTalon.asset.meta
 guid: 6a52147714a48ff419e7b6d5c32332f4
+========
+guid: 96f7584e56ebacf46930f8fb828319e2
+>>>>>>>> d974821 (Shapes are now integrated!):Assets/Resources/TestIngredients/Ice Crystal.asset.meta
 NativeFormatImporter:
   externalObjects: {}
   mainObjectFileID: 11400000

@@ -1,5 +1,7 @@
 #if UNITY_EDITOR
 using FourFatesStudios.ProjectWarden.ScriptableObjects.AlchemyRecipes;
+using FourFatesStudios.ProjectWarden.ScriptableObjects.Items;
+using FourFatesStudios.ProjectWarden.Enums;
 using System.Linq;
 using System.Collections.Generic;
 using UnityEditor;
@@ -141,9 +143,25 @@ public class AlchemyRecipeEditor : UnityEditor.Editor // Fixed namespace conflic
         EditorGUILayout.LabelField("Rhythm Requirements", EditorStyles.boldLabel);
         DrawHitsAndAttempts();
 
-        // Output Potion 
+        // Output Item
         EditorGUILayout.Space(4);
-        DrawProperty("outputPotion", "Output Potion");
+        
+        var outputItemProp = serializedObject.FindProperty("outputItem");
+        if (outputItemProp != null)
+        {
+            var currentItem = outputItemProp.objectReferenceValue as Item;
+            var newItem = DrawPotionOrIngredientField("Output Item", currentItem);
+            
+            if (newItem != currentItem)
+            {
+                outputItemProp.objectReferenceValue = newItem;
+            }
+        }
+        else
+        {
+            // Fallback for old recipes still using outputPotion
+            DrawProperty("outputPotion", "Output Potion");
+        }
 
         // Temperature and Duration 
         EditorGUILayout.Space(4);
@@ -176,6 +194,64 @@ public class AlchemyRecipeEditor : UnityEditor.Editor // Fixed namespace conflic
         var prop = serializedObject.FindProperty(propName);
         if (prop == null) return;
         EditorGUILayout.PropertyField(prop, new GUIContent(label ?? prop.displayName));
+    }
+
+    private int selectedOutputType = 0; // 0 = Potion, 1 = Synthetic Ingredient
+    
+    private Item DrawPotionOrIngredientField(string label, Item currentValue)
+    {
+        EditorGUILayout.BeginHorizontal();
+        EditorGUILayout.PrefixLabel(label);
+        
+        // Update selected type based on current value only if not null
+        if (currentValue != null)
+        {
+            selectedOutputType = currentValue is Potion ? 0 : 1;
+        }
+        
+        // Type selection toolbar
+        int newType = GUILayout.Toolbar(selectedOutputType, new string[] { "Potion", "Synthetic" }, GUILayout.Width(150));
+        
+        // Update if changed
+        if (newType != selectedOutputType)
+        {
+            selectedOutputType = newType;
+            currentValue = null; // Clear when switching types
+        }
+        
+        Item newValue = currentValue;
+        
+        // Show appropriate object field
+        if (selectedOutputType == 0)
+        {
+            // Potion picker
+            newValue = EditorGUILayout.ObjectField(newValue as Potion, typeof(Potion), false) as Item;
+        }
+        else
+        {
+            // Ingredient picker with Synthetic validation
+            var currentIngredient = newValue as Ingredient;
+            var selectedIngredient = EditorGUILayout.ObjectField(currentIngredient, typeof(Ingredient), false) as Ingredient;
+            
+            // Validate that it's a Synthetic ingredient
+            if (selectedIngredient != null && selectedIngredient.IngredientArchetype != IngredientArchetype.Synthetic)
+            {
+                EditorUtility.DisplayDialog(
+                    "Invalid Ingredient Type",
+                    $"Only Synthetic ingredients can be used as recipe outputs.\n\n" +
+                    $"Selected: {selectedIngredient.ItemName} ({selectedIngredient.IngredientArchetype})\n\n" +
+                    $"💡 Tip: Use the search bar in the picker and type 'Synthetic' or the ingredient name.",
+                    "OK"
+                );
+                selectedIngredient = currentIngredient; // Revert
+            }
+            
+            newValue = selectedIngredient;
+        }
+        
+        EditorGUILayout.EndHorizontal();
+        
+        return newValue;
     }
 
     private void DrawHitsAndAttempts()

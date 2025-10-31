@@ -48,33 +48,33 @@
 
 /* Aspect-based colors */
 .grid-cell.aspect-scorch {
-    background-color: rgba(200, 80, 80, 0.9);
-    border-color: rgba(255, 120, 120, 0.8);
+    background-color: rgba(255, 102, 51, 0.9);
+    border-color: rgba(255, 140, 90, 0.8);
 }
 
 .grid-cell.aspect-frigid {
-    background-color: rgba(80, 130, 200, 0.9);
-    border-color: rgba(120, 170, 255, 0.8);
+    background-color: rgba(102, 204, 255, 0.9);
+    border-color: rgba(140, 220, 255, 0.8);
 }
 
 .grid-cell.aspect-corporeal {
-    background-color: rgba(130, 150, 80, 0.9);
-    border-color: rgba(170, 200, 120, 0.8);
+    background-color: rgba(204, 153, 102, 0.9);
+    border-color: rgba(230, 180, 130, 0.8);
 }
 
 .grid-cell.aspect-arc {
-    background-color: rgba(180, 180, 80, 0.9);
-    border-color: rgba(220, 220, 120, 0.8);
+    background-color: rgba(255, 255, 102, 0.9);
+    border-color: rgba(255, 255, 150, 0.8);
 }
 
 .grid-cell.aspect-divine {
-    background-color: rgba(150, 130, 180, 0.9);
-    border-color: rgba(190, 170, 220, 0.8);
+    background-color: rgba(255, 204, 255, 0.9);
+    border-color: rgba(255, 220, 255, 0.8);
 }
 
 .grid-cell.aspect-caustic {
-    background-color: rgba(230, 150, 50, 0.9);
-    border-color: rgba(255, 190, 90, 0.8);
+    background-color: rgba(153, 255, 51, 0.9);
+    border-color: rgba(180, 255, 100, 0.8);
 }
 
 /* Placement Preview States */

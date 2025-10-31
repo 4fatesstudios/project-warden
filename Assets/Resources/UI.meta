@@ -1,5 +1,13 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/Resources/TestIngredients.meta
+<<<<<<<< HEAD:Assets/Scripts/GameSystems/SkillSystem.meta
+guid: 11e46c38f8a9841419f1173e537fa439
+========
+guid: 0db47caac49b2da489cd92ed15e3a404
+>>>>>>>> d974821 (Shapes are now integrated!):Assets/Resources/TestIngredients.meta
+========
 guid: 92699c40ce15b4241ad4fd7a892091fc
+>>>>>>>> 0e65769 (98%):Assets/Resources/UI.meta
 folderAsset: yes
 DefaultImporter:
   externalObjects: {}

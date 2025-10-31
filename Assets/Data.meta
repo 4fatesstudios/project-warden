@@ -1,5 +1,13 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/Resources/Items/Ingredients/Demo.meta
+<<<<<<<< HEAD:Assets/Data.meta
 guid: e52653fe720974c43b0e6c605b1d7cdf
+========
+guid: 183fcc7bf55431d4a8e13ed6b57fb2ce
+>>>>>>>> 7134ab6 (Initial Push):Assets/Resources/Items/Ingredients/Demo.meta
+========
+guid: e52653fe720974c43b0e6c605b1d7cdf
+>>>>>>>> d974821 (Shapes are now integrated!):Assets/Data.meta
 folderAsset: yes
 DefaultImporter:
   externalObjects: {}

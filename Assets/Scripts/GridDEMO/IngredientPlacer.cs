@@ -934,5 +934,6 @@ namespace FourFatesStudios.ProjectWarden.GridDemo
         public Vector2Int gridPosition;
         public GameObject visualObject;
         public float placementTime;
+        public int rotation = 0; // Rotation in 90-degree increments (0, 90, 180, 270)
     }
 }

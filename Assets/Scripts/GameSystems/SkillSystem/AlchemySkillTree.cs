@@ -24,7 +24,9 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.SkillSystem
 
         [Header("Overlap System")]
         [SerializeField] private int maxOverlapTiles = 0;
+        #pragma warning disable 0414
         [SerializeField] private bool canOverlapOnObstacles = false;
+        #pragma warning restore 0414
 
         [Header("Grid Expansion")]
         [SerializeField] private Vector2Int baseGridSize = new Vector2Int(3, 3);
@@ -34,7 +36,9 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.SkillSystem
         [Header("Special Abilities")]
         [SerializeField] private int purifyCharges = 0;
         [SerializeField] private int maxPotionsHeld = 3;
+        #pragma warning disable 0414
         [SerializeField] private bool enableIngredientRefund = false;
+        #pragma warning restore 0414
         [SerializeField] private float refundChance = 0.0f;
 
         // Events

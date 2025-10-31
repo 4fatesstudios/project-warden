@@ -74,7 +74,7 @@ namespace FourFatesStudios.ProjectWarden.Editor
         
         private string newRecipeName = "";
         private RecipeDifficulty newRecipeDifficulty = RecipeDifficulty.Standard;
-        private Potion newRecipeOutputPotion;
+        private Item newRecipeOutputItem;
         
         // Integrated visual grid editor state
         private const int CELL_SIZE = 30;
@@ -504,6 +504,11 @@ namespace FourFatesStudios.ProjectWarden.Editor
             
             EditorGUILayout.Space();
             
+            // Shape Data Editor
+            DrawShapeDataEditor(serializedObject);
+            
+            EditorGUILayout.Space();
+            
             // Infusions & Effects
             EditorGUILayout.BeginVertical("HelpBox");
             GUILayout.Label("🌟 Infusions & Effects", EditorStyles.boldLabel);
@@ -553,6 +558,344 @@ namespace FourFatesStudios.ProjectWarden.Editor
             EditorGUILayout.EndVertical();
             
             EditorGUILayout.EndVertical();
+        }
+        
+        private void DrawShapeDataEditor(SerializedObject serializedObject)
+        {
+            EditorGUILayout.BeginVertical("HelpBox");
+            GUILayout.Label("🎯 Shape & Expansion Editor", EditorStyles.boldLabel);
+            
+            var shapeDataProperty = serializedObject.FindProperty("shapeData");
+            if (shapeDataProperty == null)
+            {
+                EditorGUILayout.HelpBox("ShapeData property not found.", MessageType.Warning);
+                return;
+            }
+            
+            // Shape data basic properties
+            EditorGUILayout.PropertyField(shapeDataProperty.FindPropertyRelative("id"));
+            EditorGUILayout.PropertyField(shapeDataProperty.FindPropertyRelative("icon"));
+            EditorGUILayout.PropertyField(shapeDataProperty.FindPropertyRelative("pivot"));
+            EditorGUILayout.PropertyField(shapeDataProperty.FindPropertyRelative("rotatable"));
+            EditorGUILayout.PropertyField(shapeDataProperty.FindPropertyRelative("expansionRotatesWithIngredient"));
+            
+            EditorGUILayout.Space(10);
+            
+            // 5x5 Grid Editor
+            Draw5x5GridEditor(shapeDataProperty);
+            
+            EditorGUILayout.Space(10);
+            
+            // Rotation preview
+            DrawRotationPreview(selectedIngredient.ShapeData);
+            
+            EditorGUILayout.EndVertical();
+        }
+        
+        private void Draw5x5GridEditor(SerializedProperty shapeDataProperty)
+        {
+            if (selectedIngredient?.ShapeData == null) return;
+            
+            EditorGUILayout.LabelField("5×5 Grid Editor", EditorStyles.boldLabel);
+            EditorGUILayout.HelpBox("Left click: Toggle occupied | Right click: Toggle expansion", MessageType.Info);
+            
+            const int gridSize = 5;
+            const float cellSize = 25f;
+            const float totalSize = gridSize * cellSize;
+            
+            var shapeData = selectedIngredient.ShapeData;
+            bool hasChanges = false;
+            
+            // Get current occupied and expansion offsets
+            var occupiedOffsets = shapeData.occupiedOffsets ?? new Vector2Int[0];
+            var expansionOffsets = shapeData.expansionOffsets ?? new Vector2Int[0];
+            
+            var occupiedSet = new HashSet<Vector2Int>(occupiedOffsets);
+            var expansionSet = new HashSet<Vector2Int>(expansionOffsets);
+            
+            // Create grid rect
+            Rect gridRect = GUILayoutUtility.GetRect(totalSize + 40, totalSize + 40);
+            gridRect = new Rect(gridRect.x + 20, gridRect.y + 20, totalSize, totalSize);
+            
+            // Draw background
+            EditorGUI.DrawRect(gridRect, new Color(0.3f, 0.3f, 0.3f));
+            
+            // Handle mouse input
+            Event currentEvent = Event.current;
+            Vector2 mousePos = currentEvent.mousePosition;
+            bool mouseInGrid = gridRect.Contains(mousePos);
+            
+            // Draw grid cells
+            for (int y = 0; y < gridSize; y++)
+            {
+                for (int x = 0; x < gridSize; x++)
+                {
+                    Vector2Int gridPos = new Vector2Int(x - 2, y - 2); // Center around (0,0)
+                    
+                    Rect cellRect = new Rect(
+                        gridRect.x + x * cellSize,
+                        gridRect.y + y * cellSize,
+                        cellSize - 1,
+                        cellSize - 1
+                    );
+                    
+                    // Determine cell state
+                    bool isOccupied = occupiedSet.Contains(gridPos);
+                    bool isExpansion = expansionSet.Contains(gridPos);
+                    bool isCenter = gridPos == Vector2Int.zero;
+                    
+                    // Choose cell color
+                    Color cellColor;
+                    if (isOccupied)
+                    {
+                        cellColor = new Color(0.2f, 0.8f, 0.2f); // Green for occupied
+                    }
+                    else if (isExpansion)
+                    {
+                        cellColor = new Color(1.0f, 0.85f, 0.29f); // Yellow for expansion
+                    }
+                    else if (isCenter)
+                    {
+                        cellColor = new Color(0.6f, 0.6f, 0.8f); // Blue for center
+                    }
+                    else
+                    {
+                        cellColor = new Color(0.5f, 0.5f, 0.5f); // Gray for empty
+                    }
+                    
+                    // Highlight on hover
+                    if (mouseInGrid && cellRect.Contains(mousePos))
+                    {
+                        cellColor = Color.Lerp(cellColor, Color.white, 0.3f);
+                    }
+                    
+                    // Draw cell
+                    EditorGUI.DrawRect(cellRect, cellColor);
+                    
+                    // Draw border
+                    EditorGUI.DrawRect(new Rect(cellRect.x, cellRect.y, cellRect.width, 1), Color.black);
+                    EditorGUI.DrawRect(new Rect(cellRect.x, cellRect.y, 1, cellRect.height), Color.black);
+                    EditorGUI.DrawRect(new Rect(cellRect.xMax - 1, cellRect.y, 1, cellRect.height), Color.black);
+                    EditorGUI.DrawRect(new Rect(cellRect.x, cellRect.yMax - 1, cellRect.width, 1), Color.black);
+                    
+                    // Draw coordinates
+                    if (cellSize >= 20)
+                    {
+                        var style = new GUIStyle(EditorStyles.miniLabel);
+                        style.alignment = TextAnchor.MiddleCenter;
+                        style.fontSize = 8;
+                        GUI.color = Color.white;
+                        GUI.Label(cellRect, $"{gridPos.x},{gridPos.y}", style);
+                        GUI.color = Color.white;
+                    }
+                    
+                    // Handle clicks
+                    if (mouseInGrid && cellRect.Contains(mousePos))
+                    {
+                        if (currentEvent.type == EventType.MouseDown)
+                        {
+                            if (currentEvent.button == 0) // Left click - toggle occupied
+                            {
+                                if (isOccupied)
+                                {
+                                    occupiedSet.Remove(gridPos);
+                                }
+                                else
+                                {
+                                    occupiedSet.Add(gridPos);
+                                }
+                                hasChanges = true;
+                                currentEvent.Use();
+                            }
+                            else if (currentEvent.button == 1) // Right click - toggle expansion
+                            {
+                                if (isExpansion)
+                                {
+                                    expansionSet.Remove(gridPos);
+                                }
+                                else
+                                {
+                                    expansionSet.Add(gridPos);
+                                }
+                                hasChanges = true;
+                                currentEvent.Use();
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Apply changes
+            if (hasChanges)
+            {
+                shapeData.occupiedOffsets = occupiedSet.ToArray();
+                shapeData.expansionOffsets = expansionSet.ToArray();
+                EditorUtility.SetDirty(selectedIngredient);
+            }
+            
+            // Control buttons
+            EditorGUILayout.Space(5);
+            EditorGUILayout.BeginHorizontal();
+            
+            if (GUILayout.Button("Rotate CW", GUILayout.Width(80)))
+            {
+                RotateShape(shapeData, 90);
+            }
+            
+            if (GUILayout.Button("Rotate CCW", GUILayout.Width(80)))
+            {
+                RotateShape(shapeData, -90);
+            }
+            
+            if (GUILayout.Button("Clear", GUILayout.Width(60)))
+            {
+                shapeData.occupiedOffsets = new Vector2Int[0];
+                shapeData.expansionOffsets = new Vector2Int[0];
+                EditorUtility.SetDirty(selectedIngredient);
+            }
+            
+            if (GUILayout.Button("Reset to 1x1", GUILayout.Width(80)))
+            {
+                shapeData.occupiedOffsets = new Vector2Int[] { Vector2Int.zero };
+                shapeData.expansionOffsets = new Vector2Int[0];
+                EditorUtility.SetDirty(selectedIngredient);
+            }
+            
+            EditorGUILayout.EndHorizontal();
+            
+            // Visual legend
+            EditorGUILayout.Space(5);
+            EditorGUILayout.LabelField("Legend:", EditorStyles.boldLabel);
+            EditorGUILayout.BeginHorizontal();
+            
+            DrawColorSwatch(new Color(0.2f, 0.8f, 0.2f), "Occupied");
+            DrawColorSwatch(new Color(1.0f, 0.85f, 0.29f), "Expansion");
+            DrawColorSwatch(new Color(0.6f, 0.6f, 0.8f), "Center (0,0)");
+            DrawColorSwatch(new Color(0.5f, 0.5f, 0.5f), "Empty");
+            
+            EditorGUILayout.EndHorizontal();
+        }
+        
+        private void DrawColorSwatch(Color color, string label)
+        {
+            EditorGUILayout.BeginVertical(GUILayout.Width(80));
+            var rect = GUILayoutUtility.GetRect(15, 15);
+            EditorGUI.DrawRect(rect, color);
+            EditorGUI.DrawRect(new Rect(rect.x, rect.y, rect.width, 1), Color.black); // top border
+            EditorGUI.DrawRect(new Rect(rect.x, rect.yMax - 1, rect.width, 1), Color.black); // bottom border
+            EditorGUI.DrawRect(new Rect(rect.x, rect.y, 1, rect.height), Color.black); // left border
+            EditorGUI.DrawRect(new Rect(rect.xMax - 1, rect.y, 1, rect.height), Color.black); // right border
+            EditorGUILayout.LabelField(label, EditorStyles.miniLabel);
+            EditorGUILayout.EndVertical();
+        }
+        
+        private void DrawRotationPreview(IngredientShapeData shapeData)
+        {
+            if (!shapeData.rotatable) return;
+            
+            EditorGUILayout.LabelField("Rotation Preview", EditorStyles.boldLabel);
+            
+            EditorGUILayout.BeginHorizontal();
+            
+            for (int rotation = 0; rotation < 360; rotation += 90)
+            {
+                EditorGUILayout.BeginVertical("Box", GUILayout.Width(100));
+                EditorGUILayout.LabelField($"{rotation}°", EditorStyles.centeredGreyMiniLabel);
+                
+                DrawMiniPreview(shapeData, rotation);
+                
+                EditorGUILayout.EndVertical();
+            }
+            
+            EditorGUILayout.EndHorizontal();
+        }
+        
+        private void DrawMiniPreview(IngredientShapeData shapeData, int rotation)
+        {
+            const int previewSize = 5;
+            const float cellSize = 12f;
+            
+            var occupiedOffsets = shapeData.GetOccupiedOffsets(rotation);
+            var expansionOffsets = shapeData.GetExpansionOffsets(rotation);
+            
+            var occupiedSet = new HashSet<Vector2Int>(occupiedOffsets);
+            var expansionSet = new HashSet<Vector2Int>(expansionOffsets);
+            
+            Rect previewRect = GUILayoutUtility.GetRect(previewSize * cellSize, previewSize * cellSize);
+            
+            for (int y = 0; y < previewSize; y++)
+            {
+                for (int x = 0; x < previewSize; x++)
+                {
+                    Vector2Int gridPos = new Vector2Int(x - 2, y - 2);
+                    
+                    Rect cellRect = new Rect(
+                        previewRect.x + x * cellSize,
+                        previewRect.y + y * cellSize,
+                        cellSize - 1,
+                        cellSize - 1
+                    );
+                    
+                    Color cellColor;
+                    if (occupiedSet.Contains(gridPos))
+                    {
+                        cellColor = new Color(0.2f, 0.8f, 0.2f);
+                    }
+                    else if (expansionSet.Contains(gridPos))
+                    {
+                        cellColor = new Color(1.0f, 0.85f, 0.29f);
+                    }
+                    else
+                    {
+                        cellColor = new Color(0.7f, 0.7f, 0.7f);
+                    }
+                    
+                    EditorGUI.DrawRect(cellRect, cellColor);
+                    // Draw border manually
+                    EditorGUI.DrawRect(new Rect(cellRect.x, cellRect.y, cellRect.width, 0.5f), Color.black); // top
+                    EditorGUI.DrawRect(new Rect(cellRect.x, cellRect.yMax - 0.5f, cellRect.width, 0.5f), Color.black); // bottom
+                    EditorGUI.DrawRect(new Rect(cellRect.x, cellRect.y, 0.5f, cellRect.height), Color.black); // left
+                    EditorGUI.DrawRect(new Rect(cellRect.xMax - 0.5f, cellRect.y, 0.5f, cellRect.height), Color.black); // right
+                }
+            }
+        }
+        
+        private void RotateShape(IngredientShapeData shapeData, int degrees)
+        {
+            if (!shapeData.rotatable) return;
+            
+            shapeData.occupiedOffsets = RotateOffsets(shapeData.occupiedOffsets, degrees);
+            
+            if (shapeData.expansionRotatesWithIngredient)
+            {
+                shapeData.expansionOffsets = RotateOffsets(shapeData.expansionOffsets, degrees);
+            }
+            
+            EditorUtility.SetDirty(selectedIngredient);
+        }
+        
+        private Vector2Int[] RotateOffsets(Vector2Int[] offsets, int degrees)
+        {
+            if (offsets == null || offsets.Length == 0) return offsets;
+            
+            var rotated = new Vector2Int[offsets.Length];
+            int rotations = ((degrees % 360) / 90) % 4;
+            if (rotations < 0) rotations += 4;
+            
+            for (int i = 0; i < offsets.Length; i++)
+            {
+                Vector2Int offset = offsets[i];
+                
+                for (int r = 0; r < rotations; r++)
+                {
+                    // Rotate 90 degrees clockwise: (x, y) -> (y, -x)
+                    offset = new Vector2Int(offset.y, -offset.x);
+                }
+                
+                rotated[i] = offset;
+            }
+            
+            return rotated;
         }
         
         private void DrawIngredientVisualDesign(SerializedObject serializedObject)
@@ -894,9 +1237,17 @@ namespace FourFatesStudios.ProjectWarden.Editor
                 
                 EditorGUILayout.Space();
                 
-                var outputProp = serializedObject.FindProperty("outputPotion");
+                var outputProp = serializedObject.FindProperty("outputItem");
                 if (outputProp != null)
-                    EditorGUILayout.PropertyField(outputProp);
+                {
+                    var currentItem = outputProp.objectReferenceValue as Item;
+                    var newItem = DrawPotionOrIngredientField("Output Item", currentItem, 0);
+                    
+                    if (newItem != currentItem)
+                    {
+                        outputProp.objectReferenceValue = newItem;
+                    }
+                }
                 
                 if (serializedObject.targetObject != null)
                 {
@@ -937,8 +1288,8 @@ namespace FourFatesStudios.ProjectWarden.Editor
             
             GUILayout.Label("=", GUILayout.Width(20));
             
-            // Output potion
-            DrawPotionSlot(recipe.OutputPotion, "Result");
+            // Output item (potion or ingredient)
+            DrawItemSlot(recipe.OutputItem, "Result");
             
             EditorGUILayout.EndHorizontal();
             EditorGUILayout.EndVertical();
@@ -994,6 +1345,100 @@ namespace FourFatesStudios.ProjectWarden.Editor
             EditorGUILayout.EndVertical();
         }
 
+        private void DrawItemSlot(Item item, string label)
+        {
+            EditorGUILayout.BeginVertical("Box", GUILayout.Width(80));
+            GUILayout.Label(label, EditorStyles.centeredGreyMiniLabel);
+            
+            if (item != null)
+            {
+                if (item.ItemIcon != null)
+                {
+                    GUILayout.Label(item.ItemIcon.texture, GUILayout.Width(60), GUILayout.Height(60));
+                }
+                else
+                {
+                    GUILayout.Box("No Icon", GUILayout.Width(60), GUILayout.Height(60));
+                }
+                
+                // Show item type indicator
+                string itemType = item is Potion ? "Potion" : item is Ingredient ? "Ingredient" : "Item";
+                GUILayout.Label($"{item.ItemName} ({itemType})", EditorStyles.centeredGreyMiniLabel);
+            }
+            else
+            {
+                GUILayout.Box("No Result", GUILayout.Width(60), GUILayout.Height(60));
+            }
+            
+            EditorGUILayout.EndVertical();
+        }
+
+        private int selectedOutputType = 0; // 0 = Potion, 1 = Synthetic Ingredient
+        
+        private Item DrawPotionOrIngredientField(string label, Item currentValue, float labelWidth = 100)
+        {
+            EditorGUILayout.BeginHorizontal();
+            
+            if (labelWidth > 0)
+            {
+                GUILayout.Label(label, GUILayout.Width(labelWidth));
+            }
+            else
+            {
+                EditorGUILayout.PrefixLabel(label);
+            }
+            
+            // Update selected type based on current value only if not null
+            if (currentValue != null)
+            {
+                selectedOutputType = currentValue is Potion ? 0 : 1;
+            }
+            
+            // Type selection toolbar
+            int newType = GUILayout.Toolbar(selectedOutputType, new string[] { "Potion", "Synthetic" }, GUILayout.Width(150));
+            
+            // Update if changed
+            if (newType != selectedOutputType)
+            {
+                selectedOutputType = newType;
+                currentValue = null; // Clear when switching types
+            }
+            
+            Item newValue = currentValue;
+            
+            // Show appropriate object field
+            if (selectedOutputType == 0)
+            {
+                // Potion picker
+                newValue = EditorGUILayout.ObjectField(newValue as Potion, typeof(Potion), false) as Item;
+            }
+            else
+            {
+                // Ingredient picker with Synthetic validation
+                var currentIngredient = newValue as Ingredient;
+                var selectedIngredient = EditorGUILayout.ObjectField(currentIngredient, typeof(Ingredient), false) as Ingredient;
+                
+                // Validate that it's a Synthetic ingredient
+                if (selectedIngredient != null && selectedIngredient.IngredientArchetype != IngredientArchetype.Synthetic)
+                {
+                    EditorUtility.DisplayDialog(
+                        "Invalid Ingredient Type",
+                        $"Only Synthetic ingredients can be used as recipe outputs.\n\n" +
+                        $"Selected: {selectedIngredient.ItemName} ({selectedIngredient.IngredientArchetype})\n\n" +
+                        $"💡 Tip: Use the search bar in the picker and type 'Synthetic' or the ingredient name.",
+                        "OK"
+                    );
+                    selectedIngredient = currentIngredient; // Revert
+                }
+                
+                newValue = selectedIngredient;
+            }
+            
+            EditorGUILayout.EndHorizontal();
+            
+            return newValue;
+        }
+
         private void DrawPotionsTab()
         {
             EditorGUILayout.BeginHorizontal();
@@ -1042,6 +1487,7 @@ namespace FourFatesStudios.ProjectWarden.Editor
                 if (GUILayout.Toggle(isSelected, "", GUILayout.Width(20)) && !isSelected)
                 {
                     selectedPotion = potion;
+                    Repaint();
                 }
                 
                 EditorGUILayout.ObjectField(potion, typeof(Potion), false);
@@ -2245,10 +2691,7 @@ namespace FourFatesStudios.ProjectWarden.Editor
             newRecipeDifficulty = (RecipeDifficulty)EditorGUILayout.EnumPopup(newRecipeDifficulty);
             EditorGUILayout.EndHorizontal();
             
-            EditorGUILayout.BeginHorizontal();
-            GUILayout.Label("Output Potion:", GUILayout.Width(100));
-            newRecipeOutputPotion = (Potion)EditorGUILayout.ObjectField(newRecipeOutputPotion, typeof(Potion), false);
-            EditorGUILayout.EndHorizontal();
+            newRecipeOutputItem = DrawPotionOrIngredientField("Output Item:", newRecipeOutputItem);
             
             GUILayout.Space(10);
             
@@ -2597,15 +3040,15 @@ namespace FourFatesStudios.ProjectWarden.Editor
 
                 try
                 {
-                    var outputPotionProp = serializedObject.FindProperty("outputPotion");
-                    if (outputPotionProp != null)
-                        EditorGUILayout.PropertyField(outputPotionProp);
+                    var outputItemProp = serializedObject.FindProperty("outputItem");
+                    if (outputItemProp != null)
+                        EditorGUILayout.PropertyField(outputItemProp);
                     else
-                        EditorGUILayout.LabelField("Output Potion: Property not found");
+                        EditorGUILayout.LabelField("Output Item: Property not found");
                 }
                 catch (System.Exception e)
                 {
-                    EditorGUILayout.LabelField($"Output Potion: Error - {e.Message}");
+                    EditorGUILayout.LabelField($"Output Item: Error - {e.Message}");
                 }
 
                 try
@@ -4001,7 +4444,7 @@ namespace FourFatesStudios.ProjectWarden.Editor
             
             if (newTemplate != currentTemplate && GUILayout.Button("Apply", GUILayout.Width(50)))
             {
-                ingredient.ApplyShapeTemplate(newTemplate);
+                ingredient.ShapeData.ApplyTemplate(newTemplate);
                 LoadIngredientShape(ingredient);
                 hasUnsavedGridChanges = false;
             }
@@ -4515,9 +4958,17 @@ namespace FourFatesStudios.ProjectWarden.Editor
             serializedRecipe.FindProperty("difficulty").enumValueIndex = (int)newRecipeDifficulty;
             serializedRecipe.FindProperty("outputQuantity").intValue = 1;
             
-            if (newRecipeOutputPotion != null)
+            if (newRecipeOutputItem != null)
             {
-                serializedRecipe.FindProperty("outputPotion").objectReferenceValue = newRecipeOutputPotion;
+                // Validate that it's a Potion or Ingredient
+                if (newRecipeOutputItem is Potion || newRecipeOutputItem is Ingredient)
+                {
+                    serializedRecipe.FindProperty("outputItem").objectReferenceValue = newRecipeOutputItem;
+                }
+                else
+                {
+                    Debug.LogWarning($"Output item must be either a Potion or Ingredient. Current type: {newRecipeOutputItem.GetType().Name}");
+                }
             }
             
             serializedRecipe.ApplyModifiedProperties();
@@ -4551,7 +5002,7 @@ namespace FourFatesStudios.ProjectWarden.Editor
             
             newRecipeName = "";
             newRecipeDifficulty = RecipeDifficulty.Standard;
-            newRecipeOutputPotion = null;
+            newRecipeOutputItem = null;
         }
         
         private void DeleteSelectedIngredient()

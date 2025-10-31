@@ -122,10 +122,10 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.AlchemyRecipes
         private Ingredient inputIngredient3;
 
         [Header("Output")]
-        [SerializeField, Tooltip("Potion created when recipe succeeds.")]
-        private Potion outputPotion;
+        [SerializeField, Tooltip("Item created when recipe succeeds (Potion or Ingredient only).")]
+        private Item outputItem;
         
-        [SerializeField, Tooltip("Number of potions created on success.")]
+        [SerializeField, Tooltip("Number of items created on success.")]
         [Range(1, 5)]
         private int outputQuantity = 1;
 
@@ -190,7 +190,9 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.AlchemyRecipes
         public Ingredient InputIngredient1 => inputIngredient1;
         public Ingredient InputIngredient2 => inputIngredient2;
         public Ingredient InputIngredient3 => inputIngredient3;
-        public Potion OutputPotion => outputPotion;
+        public Item OutputItem => outputItem;
+        public Potion OutputPotion => outputItem as Potion;
+        public Ingredient OutputIngredient => outputItem as Ingredient;
         public int OutputQuantity => outputQuantity;
         
         public bool IsKeyRecipe => isKeyRecipe;
@@ -444,8 +446,28 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.AlchemyRecipes
             if (inputIngredient2 == null)
                 Debug.LogWarning($"[{name}] Secondary ingredient (Input 2) is required.");
 
-            if (outputPotion == null)
-                Debug.LogWarning($"[{name}] Output Potion is not assigned.");
+            if (outputItem == null)
+            {
+                Debug.LogWarning($"[{name}] Output Item is not assigned.");
+            }
+            else if (outputItem is Potion)
+            {
+                // Potion output is valid
+            }
+            else if (outputItem is Ingredient ingredient)
+            {
+                // Only Synthetic ingredients are allowed as outputs
+                if (ingredient.IngredientArchetype != IngredientArchetype.Synthetic)
+                {
+                    Debug.LogError($"[{name}] Output Ingredient must be of type Synthetic. Current type: {ingredient.IngredientArchetype}");
+                    outputItem = null;
+                }
+            }
+            else
+            {
+                Debug.LogError($"[{name}] Output Item must be either a Potion or Synthetic Ingredient. Current type: {outputItem.GetType().Name}");
+                outputItem = null;
+            }
 
             // Validate output quantity
             if (outputQuantity <= 0)
@@ -504,7 +526,7 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.AlchemyRecipes
                 ingredients.Sort((a, b) => String.Compare(a.name, b.name, StringComparison.Ordinal));
                 
                 string preview = $"[{name}] Recipe: {string.Join(", ", ingredients.Select(i => i.name))}";
-                preview += $" -> {(outputPotion != null ? outputPotion.name : "Unknown")}";
+                preview += $" -> {(outputItem != null ? outputItem.name : "Unknown")}";
                 
                 if (isKeyRecipe) preview += " (KEY RECIPE)";
                 if (difficulty != RecipeDifficulty.Standard) preview += $" [{difficulty}]";

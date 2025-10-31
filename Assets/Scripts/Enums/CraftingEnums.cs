@@ -91,4 +91,14 @@ namespace FourFatesStudios.ProjectWarden.Enums
         Refining,
         Gift
     }
+
+    public enum IngredientSortOption
+    {
+        New,
+        Recent,
+        NameAsc,
+        NameDesc,
+        QuantityAsc,
+        QuantityDesc
+    }
 }

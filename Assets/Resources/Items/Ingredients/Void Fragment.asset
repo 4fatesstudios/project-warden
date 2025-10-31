@@ -1,0 +1,66 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac12d8c1b64a441a9fd60f1ef7e48a67, type: 3}
+  m_Name: Void Fragment
+  m_EditorClassIdentifier: 
+  id: 22a7c22c-0bf7-4409-ac22-4d30e04f6ecd
+  itemName: Void Fragment
+  itemDescription: A unique divine ingredient.
+  itemRarity: 6
+  itemIcon: {fileID: 0}
+  noun: 
+  adjective: 
+  ingredientArchetype: 5
+  ingredientAspect: 5
+  isCorrupted: 0
+  potency: 1
+  gridWidth: 1
+  gridHeight: 1
+  unlocksAdditionalSpace: 0
+  additionalSpaceCount: 0
+  isUnrefined: 1
+  originalIngredient: {fileID: 0}
+  shapeData:
+    id: 
+    icon: {fileID: 0}
+    pivot: {x: 0, y: 0}
+    occupiedOffsets:
+    - {x: 0, y: 0}
+    expansionOffsets: []
+    expansionRotatesWithIngredient: 1
+    rotatable: 1
+    expansionColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+    gridWidth: 1
+    gridHeight: 1
+    activeCells:
+    - {x: 0, y: 0}
+    shapeColor: {r: 0, g: 1, b: 0, a: 1}
+    shapeSprite: {fileID: 0}
+    lastModified: 2025-10-03 21:59:57
+    dataVersion: 1
+    template: 0
+  infusionBundle:
+    infusions: []
+  effectBundle:
+    Effects: []
+  canGrind: 0
+  grindingResult: {fileID: 0}
+  canDistill: 0
+  distillingResult: {fileID: 0}
+  canRoast: 0
+  roastingResult: {fileID: 0}
+  baseRefiningSuccessRate: 0.7
+  stabilityRating: 0.8
+  minimumRefiningSkill: 1
+  references:
+    version: 2
+    RefIds: []

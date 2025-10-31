@@ -33,7 +33,9 @@ namespace FourFatesStudios.ProjectWarden.GridDemo.UI
         
         [Header("Potion List Settings")]
         [SerializeField] private Color potionListBackgroundColor = new Color(0.2f, 0.3f, 0.4f, 1f); // Much more visible blue-gray
+        #pragma warning disable 0414
         [SerializeField] private float potionEntryHeight = 50f;  // Increased from 30f
+        #pragma warning restore 0414
         [SerializeField] private Color craftedPotionColor = new Color(0.3f, 0.7f, 0.3f, 1f); // Brighter green
         [SerializeField] private Color defaultPotionColor = new Color(0.4f, 0.4f, 0.6f, 1f); // Brighter blue-gray
         

@@ -12,6 +12,46 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu
     /// </summary>
     public static class ProficiencyGrading
     {
+        public static ProficiencyGrade CalculateProficiency(
+            GridCraftingManager gridManager,
+            Dictionary<Vector2Int, Ingredient> placedIngredients,
+            List<AspectObstacle> obstacles,
+            ProficiencyWeights weights,
+            bool isFreeCraftingMode = false)
+        {
+            var grade = new ProficiencyGrade();
+
+            if (placedIngredients.Count == 0)
+            {
+                grade.gradeLevel = GradeLevel.F;
+                grade.feedback = "No ingredients placed";
+                return grade;
+            }
+
+            grade.coverageRatio = CalculateCoverageRatio(gridManager, placedIngredients, obstacles);
+            grade.adjacencySynergy = CalculateAdjacencySynergy(placedIngredients);
+            grade.expansionUtilization = CalculateExpansionUtilization(gridManager, placedIngredients);
+            
+            grade.shapeDifficulty = 0f;
+            grade.orientationEfficiency = 0f;
+            
+            if (isFreeCraftingMode)
+            {
+                grade.obstaclesCompleted = 0f;
+            }
+            else
+            {
+                grade.obstaclesCompleted = CalculateObstacleCompletion(obstacles);
+            }
+
+            grade.overallScore = CalculateWeightedScore(grade, weights, isFreeCraftingMode);
+            grade.proficiencyPercentage = grade.overallScore * 100f;
+            grade.gradeLevel = DetermineGradeLevel(grade.overallScore);
+            grade.feedback = GenerateFeedback(grade, isFreeCraftingMode);
+
+            return grade;
+        }
+        
         /// <summary>
         /// Calculate proficiency grade for current crafting attempt
         /// </summary>
@@ -70,6 +110,30 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu
         /// Only Corporeal and Void obstacles subtract from available grid space
         /// Other obstacles (Frigid, Scorch, Caustic, Arc, Divine) are counted as available space
         /// </summary>
+        private static float CalculateCoverageRatio(GridCraftingManager gridManager, Dictionary<Vector2Int, Ingredient> placedIngredients, List<AspectObstacle> obstacles)
+        {
+            if (placedIngredients.Count == 0) return 0f;
+
+            var occupiedCells = new HashSet<Vector2Int>();
+            foreach (var kvp in placedIngredients)
+            {
+                var cells = gridManager.GetIngredientCells(kvp.Value, kvp.Key);
+                foreach (var cell in cells)
+                {
+                    occupiedCells.Add(cell);
+                }
+            }
+
+            int totalCells = gridManager.gridWidth * gridManager.gridHeight;
+            int blockedCells = obstacles.Count(o => o.SubtractsFromAvailableSpace());
+            int availableCells = totalCells - blockedCells;
+
+            if (availableCells <= 0) return 1f;
+
+            float coverage = (float)occupiedCells.Count / availableCells;
+            return Mathf.Clamp01(coverage);
+        }
+        
         private static float CalculateCoverageRatio(GridGameManager gridManager, Dictionary<Vector2Int, Ingredient> placedIngredients)
         {
             if (placedIngredients.Count == 0) return 0f;
@@ -139,6 +203,45 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu
         /// <summary>
         /// Calculate expansion utilization (how well expanded grid space is used)
         /// </summary>
+        private static float CalculateExpansionUtilization(GridCraftingManager gridManager, Dictionary<Vector2Int, Ingredient> placedIngredients)
+        {
+            bool hasExpansionIngredients = placedIngredients.Values.Any(i => i.UnlocksAdditionalSpace);
+            if (!hasExpansionIngredients) return 1f;
+
+            var enhancedGrid = gridManager.GetComponent<EnhancedGridSystem>();
+            if (enhancedGrid != null)
+            {
+                return enhancedGrid.GetGridEfficiencyScore();
+            }
+
+            var baseGridSize = new Vector2Int(3, 3);
+            var currentGridSize = new Vector2Int(gridManager.gridWidth, gridManager.gridHeight);
+            
+            if (currentGridSize.x <= baseGridSize.x && currentGridSize.y <= baseGridSize.y)
+                return 1f;
+
+            int baseArea = baseGridSize.x * baseGridSize.y;
+            int expandedArea = currentGridSize.x * currentGridSize.y - baseArea;
+            
+            var occupiedCells = new HashSet<Vector2Int>();
+            foreach (var kvp in placedIngredients)
+            {
+                var cells = gridManager.GetIngredientCells(kvp.Value, kvp.Key);
+                foreach (var cell in cells)
+                {
+                    if (cell.x >= baseGridSize.x || cell.y >= baseGridSize.y)
+                    {
+                        occupiedCells.Add(cell);
+                    }
+                }
+            }
+
+            if (expandedArea <= 0) return 1f;
+            
+            float utilization = (float)occupiedCells.Count / expandedArea;
+            return Mathf.Clamp01(utilization);
+        }
+        
         private static float CalculateExpansionUtilization(GridGameManager gridManager, Dictionary<Vector2Int, Ingredient> placedIngredients)
         {
             // Check if any ingredients unlock additional space
@@ -424,31 +527,14 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu
     [System.Serializable]
     public class ProficiencyWeights
     {
-        [Header("Grading Weights")]
-        [Range(0f, 1f)] public float coverageWeight = 0.25f;
-        [Range(0f, 1f)] public float adjacencyWeight = 0.20f;
-        [Range(0f, 1f)] public float expansionWeight = 0.15f;
-        [Range(0f, 1f)] public float shapeWeight = 0.15f;
-        [Range(0f, 1f)] public float orientationWeight = 0.10f;
-        [Range(0f, 1f)] public float obstacleWeight = 0.15f;
-
-        /// <summary>
-        /// Normalize weights to sum to 1.0
-        /// </summary>
+        [Header("Grading Weights (sum = 1.0)")]
+        [Range(0f, 1f)] public float coverageWeight = 0.33f;
+        [Range(0f, 1f)] public float adjacencyWeight = 0.27f;
+        [Range(0f, 1f)] public float expansionWeight = 0.20f;
+        [Range(0f, 1f)] public float obstacleWeight = 0.20f;
+        
         public void NormalizeWeights()
         {
-            float total = coverageWeight + adjacencyWeight + expansionWeight + 
-                         shapeWeight + orientationWeight + obstacleWeight;
-            
-            if (total > 0f)
-            {
-                coverageWeight /= total;
-                adjacencyWeight /= total;
-                expansionWeight /= total;
-                shapeWeight /= total;
-                orientationWeight /= total;
-                obstacleWeight /= total;
-            }
         }
     }
 

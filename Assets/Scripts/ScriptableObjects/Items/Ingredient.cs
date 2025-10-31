@@ -129,6 +129,15 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
             {
                 shapeData = new IngredientShapeData(gridWidth, gridHeight);
             }
+            
+            // Ensure shape data is properly initialized
+            if (shapeData.GetOccupiedOffsets().Length == 0)
+            {
+                // Initialize with default single cell if no shape data exists
+                shapeData.SetCellActive(0, 0, true);
+                shapeData.UpdateOffsetsFromShape();
+            }
+            
             return shapeData.ToBoolArray();
         }
         
@@ -152,24 +161,6 @@ namespace FourFatesStudios.ProjectWarden.ScriptableObjects.Items
 #endif
         }
         
-        /// <summary>
-        /// Apply a shape template to this ingredient
-        /// </summary>
-        public void ApplyShapeTemplate(ShapeTemplate template)
-        {
-            if (shapeData == null)
-            {
-                shapeData = new IngredientShapeData(gridWidth, gridHeight, template);
-            }
-            else
-            {
-                shapeData.ApplyTemplate(template);
-            }
-            
-#if UNITY_EDITOR
-            UnityEditor.EditorUtility.SetDirty(this);
-#endif
-        }
         
         /// <summary>
         /// Check if the ingredient occupies a specific grid cell

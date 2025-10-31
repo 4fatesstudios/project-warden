@@ -18,8 +18,12 @@ namespace FourFatesStudios.ProjectWarden
         
         [Header("Display Settings")]
         [SerializeField] private bool startCollapsed = false;
+        
+        #pragma warning disable 0414
         [SerializeField] private int maxVisibleRows = 6;
         [SerializeField] private int slotsPerRow = 5;
+        #pragma warning restore 0414
+        
         [SerializeField] private bool enableAutoRefresh = true;
         [SerializeField] private float autoRefreshInterval = 1f;
         

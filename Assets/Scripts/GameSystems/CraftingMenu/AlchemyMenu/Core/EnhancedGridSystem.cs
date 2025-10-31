@@ -19,12 +19,16 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu
         [SerializeField] private Vector2Int maxGridSize = new Vector2Int(7, 7);
 
         [Header("Layered Placement")]
+        #pragma warning disable 0414
         [SerializeField] private int maxLayersPerCell = 3;
+        #pragma warning restore 0414
         [SerializeField] private bool allowObstacleOverlap = false;
 
         [Header("Efficiency Tracking")]
         [SerializeField] private bool trackEfficiency = true;
+        #pragma warning disable 0414
         [SerializeField] private float targetEfficiency = 0.75f;
+        #pragma warning restore 0414
 
         // Grid state
         private Vector2Int currentGridSize;

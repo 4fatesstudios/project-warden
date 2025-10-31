@@ -20,12 +20,14 @@ namespace FourFatesStudios.ProjectWarden.GameSystems.CraftingMenu.AlchemyMenu
         [SerializeField] private AlchemyTemplate currentTemplate;
 
         [Header("Template Discovery")]
+        #pragma warning disable 0414
         [SerializeField] private bool templatesFoundInWorld = true;
         [SerializeField] private float templateDiscoveryChance = 0.15f;
 
         [Header("Reward Configuration")]
         [SerializeField] private float baseRewardMultiplier = 1.5f;
         [SerializeField] private int baseSkillPointReward = 2;
+        #pragma warning restore 0414
 
         // Current template state
         private Dictionary<Vector2Int, TemplateCell> templateGrid = new Dictionary<Vector2Int, TemplateCell>();
