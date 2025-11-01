@@ -5,6 +5,7 @@ using System.Linq;
 using FourFatesStudios.ProjectWarden.Enums;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Databases;
 using FourFatesStudios.ProjectWarden.ScriptableObjects.Exploration;
+using FourFatesStudios.ProjectWarden.Utilities;
 using UnityEngine;
 using UnityEngine.PlayerLoop;
 using Random = UnityEngine.Random;
@@ -12,32 +13,30 @@ using Random = UnityEngine.Random;
 namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
 {
     public class FloorGenerator : MonoBehaviour {
-        [SerializeField] private Area area;
-        [SerializeField] private int minimumFreeRooms = 8;
-        [SerializeField] private int maximumFreeRooms = 12;
-        [SerializeField] private int maxAttemptsPerRoom = 4;
-        [SerializeField] private List<GameObject> storyPrefabs;
-        [SerializeField] private SpaceData startingRoom;
-        [SerializeField] private GlobalAreasDatabase globalAreasDatabase;
-        [SerializeField] private SeedRNG seedRNG;
+        [SerializeField] private FloorProperties floorProperties;
+        [SerializeField] private GameObject rootGameObject;
 
         private Queue<SpawnGroupQueueItem> _spawnQueue = new();
         private List<PlacedSpace> _placedSpaces = new();
+        
         private List<SpaceConnectionItem> _spaceConnections = new();
-        private Dictionary<SpaceType, IReadOnlyList<SpaceData>> _spaces = new();
+        private Dictionary<SpaceType, List<FloorProperties.SpacePlacementProperties>> _spaces = new();
         private int numberOfFreeRooms;
 
         public void GenerateFloor() {
-            if (!startingRoom) {
-                Debug.Log("Missing starting room");
+            CustomLogger.Init(LogSystem.FloorGenerator, clear: true);
+            
+            if (!floorProperties.StartingRoom) {
+                CustomLogger.LogError(LogSystem.FloorGenerator, "Missing starting room");
                 return;
             }
             
             InitializeGeneration();
             
             // Obtain all hallways and all rooms from the given Area Database
-            _spaces.Add(SpaceType.Room, globalAreasDatabase.GetDatabaseByArea(area).Rooms);
-            _spaces.Add(SpaceType.Hallway, globalAreasDatabase.GetDatabaseByArea(area).Hallways);
+            _spaces.Add(SpaceType.Room, ToEnabledList(floorProperties.FreeRooms));
+            _spaces.Add(SpaceType.Hallway,  ToEnabledList(floorProperties.Hallways));
+            // _spaces.Add(SpaceType.StoryRoom, ToEnabledList(floorProperties.StoryRooms));
             
             // Place the starting room
             // Enqueue starting room door spawn groups and add starting room to placed spaces
@@ -53,6 +52,15 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
             // Third pass, connection pass to connect rooms that can be connected together
         }
         
+        private List<FloorProperties.SpacePlacementProperties> 
+            ToEnabledList<T>(IEnumerable<T> source) where T : FloorProperties.SpacePlacementProperties
+        {
+            return source
+                .Where(s => s.enabled)
+                .Cast<FloorProperties.SpacePlacementProperties>()
+                .ToList();
+        }
+        
         private void ProcessSpawnQueue() {
             while (_placedSpaces.Count(s => s.SourceData.SpaceType == SpaceType.Room) < numberOfFreeRooms 
                    && _spawnQueue.Count > 0) {
@@ -60,7 +68,7 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
                 TryPlaceFromSpawnGroup(queueItem);
             }
             
-            Debug.Log($"\n### Processed Queue ###\n" +
+            CustomLogger.LogInfo(LogSystem.FloorGenerator, $"\n### Processed Queue ###\n" +
                       $"Placed Rooms: {_placedSpaces.Count(p => p.SourceData.SpaceType == SpaceType.Room)} / {numberOfFreeRooms}\n" +
                       $"Remaining Queue Items: {_spawnQueue.Count}\n" +
                       // $"Attempts: {attempts} / {maxAttempts}\n" +
@@ -71,12 +79,12 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
             var placedHallways = new Queue<PlacedSpace>(_placedSpaces
                 .Where(s => s.SourceData.SpaceType == SpaceType.Hallway).ToList());
 
-            Debug.Log($"[Prune] Starting pruning. Initial hallway count: {placedHallways.Count}");
+            CustomLogger.LogInfo(LogSystem.FloorGenerator, $"[Prune] Starting pruning. Initial hallway count: {placedHallways.Count}");
 
             while (placedHallways.Count > 0) {
                 var hallway = placedHallways.Dequeue();
 
-                Debug.Log($"[Prune] Evaluating hallway: {hallway.SourceData.name} | Connections: {hallway.NumberOfConnections}");
+                CustomLogger.LogInfo(LogSystem.FloorGenerator, $"[Prune] Evaluating hallway: {hallway.SourceData.name} | Connections: {hallway.NumberOfConnections}");
 
                 if (hallway.NumberOfConnections > 1) continue;
                 var connectedHallways = hallway.GetAllConnections()
@@ -86,24 +94,24 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
 
                 foreach (var connectedHallway in connectedHallways) {
                     if (placedHallways.Contains(connectedHallway)) continue;
-                    Debug.Log($"[Prune] Queueing connected hallway: {connectedHallway.SourceData.name}");
+                    CustomLogger.LogInfo(LogSystem.FloorGenerator, $"[Prune] Queueing connected hallway: {connectedHallway.SourceData.name}");
                     placedHallways.Enqueue(connectedHallway);
                 }
 
-                Debug.Log($"[Prune] Pruning dead-end hallway: {hallway.SourceData.name}");
+                CustomLogger.LogInfo(LogSystem.FloorGenerator, $"[Prune] Pruning dead-end hallway: {hallway.SourceData.name}");
                 DeletePlacedSpaceAndConnections(hallway);
             }
 
-            Debug.Log($"[Prune] Finished pruning. Remaining placed spaces: {_placedSpaces.Count}");
+            CustomLogger.LogInfo(LogSystem.FloorGenerator, $"[Prune] Finished pruning. Remaining placed spaces: {_placedSpaces.Count}");
         }
 
         private void DeletePlacedSpaceAndConnections(PlacedSpace placedSpace) {
             if (!_placedSpaces.Contains(placedSpace)) {
-                Debug.LogWarning($"[Delete] Placed space not found: {placedSpace.SourceData.name}");
+                CustomLogger.LogWarning(LogSystem.FloorGenerator, $"[Delete] Placed space not found: {placedSpace.SourceData.name}");
                 return;
             }
 
-            Debug.Log($"[Delete] Removing placed space: {placedSpace.SourceData.name}");
+            CustomLogger.LogInfo(LogSystem.FloorGenerator, $"[Delete] Removing placed space: {placedSpace.SourceData.name}");
 
             _placedSpaces.Remove(placedSpace);
             _spaceConnections.RemoveAll(item => item.SpaceA == placedSpace || item.SpaceB == placedSpace);
@@ -120,14 +128,14 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
         private void TryPlaceFromSpawnGroup(SpawnGroupQueueItem queueItem) {
             var source = queueItem.Source;
             if (!source.DoorGroups.TryGetValue(queueItem.GroupID, out var doorGroup)) {
-                Debug.LogWarning($"Group {queueItem.GroupID} not found in {source.Instance.name}");
+                CustomLogger.LogWarning(LogSystem.FloorGenerator, $"Group {queueItem.GroupID} not found in {source.Instance.name}");
                 return;
             }
             ShuffleList(doorGroup);
             queueItem.AttemptCount++;
             bool placedAny = false;
             
-            Debug.Log($"[Attempt {queueItem.AttemptCount}/{maxAttemptsPerRoom}] Trying group {queueItem.GroupID} from {source.SourceData.name}");
+            CustomLogger.LogInfo(LogSystem.FloorGenerator, $"[Attempt {queueItem.AttemptCount}/{floorProperties.MaxAttemptsPerRoom}] Trying group {queueItem.GroupID} from {source.SourceData.name}");
             
             foreach (var sourceDoorGO in doorGroup) {
                 placedAny = TryPlaceSpaceByDepth(queueItem, sourceDoorGO, source, queueItem.HallwayDepth);
@@ -135,13 +143,13 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
             }
             
             if (placedAny) {
-                Debug.Log($"✅ Success: Placed space from group {queueItem.GroupID} (Attempt {queueItem.AttemptCount})");
+                CustomLogger.LogInfo(LogSystem.FloorGenerator, $"✅ Success: Placed space from group {queueItem.GroupID} (Attempt {queueItem.AttemptCount})");
                 LogSpawnQueue("After Successful Placement");
-            } else if (queueItem.AttemptCount >= maxAttemptsPerRoom) {
-                Debug.LogWarning($"❌ Max attempts reached for group {queueItem.GroupID} from {source.SourceData.name}");
+            } else if (queueItem.AttemptCount >= floorProperties.MaxAttemptsPerRoom) {
+                CustomLogger.LogWarning(LogSystem.FloorGenerator, $"❌ Max attempts reached for group {queueItem.GroupID} from {source.SourceData.name}");
                 LogSpawnQueue("After Failed Placement & Max Attempts");
             } else {
-                Debug.Log($"🔁 Re-enqueueing group {queueItem.GroupID} (Attempt {queueItem.AttemptCount})");
+                CustomLogger.LogInfo(LogSystem.FloorGenerator, $"🔁 Re-enqueueing group {queueItem.GroupID} (Attempt {queueItem.AttemptCount})");
                 _spawnQueue.Enqueue(queueItem);
                 LogSpawnQueue("After Failed Placement & Re-enqueue");
             }
@@ -152,7 +160,7 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
                 case 0:
                     return TryPlace(queueItem, doorGO, source, SpaceType.Hallway, hallwayDepth + 1);
                 case 1:
-                    return seedRNG.Rng.Next(4) == 1 
+                    return floorProperties.SeedRNG.Rng.Next(4) == 1 
                         ? TryPlace(queueItem, doorGO, source, SpaceType.Hallway, hallwayDepth + 1) 
                         : TryPlace(queueItem, doorGO, source, SpaceType.Room, 0);
                 case 2:
@@ -166,18 +174,18 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
             int hallwayDepth) {
             var list = _spaces[spaceTypeToTry];
             var filtered = list
-                .Where(space => !queueItem.FailedRoomSizes.Contains(space.SpaceSize))
+                .Where(space => !queueItem.FailedRoomSizes.Contains(space.spaceData.SpaceSize))
                 .ToList();
             // If nothing valid left to try, set attempts to max (probably cleaner way to do this later)
             if (filtered.Count == 0) {
-                queueItem.AttemptCount = maxAttemptsPerRoom;
+                queueItem.AttemptCount = floorProperties.MaxAttemptsPerRoom;
                 return false;
             }
-            var spaceData = filtered[seedRNG.Rng.Next(filtered.Count)];
+            var spaceData = filtered[floorProperties.SeedRNG.Rng.Next(filtered.Count)];
 
-            Debug.Log($"→ Attempting to place {spaceTypeToTry}: {spaceData.name} | Size: {spaceData.SpaceSize} | Remaining options: {filtered.Count}");
+            CustomLogger.LogInfo(LogSystem.FloorGenerator, $"→ Attempting to place {spaceTypeToTry}: {spaceData.spaceData.name} | Size: {spaceData.spaceData.SpaceSize} | Remaining options: {filtered.Count}");
             
-            if (!TryPlaceSpaceAtDoor(queueItem, doorGO, source, spaceData, hallwayDepth, out var placed)) return false;
+            if (!TryPlaceSpaceAtDoor(queueItem, doorGO, source, spaceData.spaceData, hallwayDepth, out var placed)) return false;
             _placedSpaces.Add(placed);
 
             var userGroupId = placed.DoorLookup.First(
@@ -190,13 +198,13 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
         }
         
         private PlacedSpace PlaceStartingRoom() {
-            var placed = InstantiateSpaceAtOrigin(startingRoom, transform.position);
+            var placed = InstantiateSpaceAtOrigin(floorProperties.StartingRoom, transform.position);
             if (placed == null) return null;
             EnqueueSpaceDoorSpawnGroups(placed);
             _placedSpaces.Add(placed);
             
-            Debug.Log($"\n--- STARTING ROOM ---\n" +
-                      $"Prefab: {startingRoom.name}\n" +
+            CustomLogger.LogInfo(LogSystem.FloorGenerator, $"\n--- STARTING ROOM ---\n" +
+                      $"Prefab: {floorProperties.StartingRoom.name}\n" +
                       $"Position: {placed.Instance.transform.position}\n" +
                       $"----------------------\n");
             
@@ -205,10 +213,10 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
 
         private void InitializeGeneration() {
             // Set up rng and reset necessary structures
-            seedRNG.SetRandomSeed();
+            floorProperties.SeedRNG.SetRandomSeed();
             _placedSpaces = new List<PlacedSpace>();
             _spawnQueue = new Queue<SpawnGroupQueueItem>();
-            numberOfFreeRooms = seedRNG.Rng.Next(minimumFreeRooms, maximumFreeRooms + 1);
+            numberOfFreeRooms = floorProperties.SeedRNG.Rng.Next(floorProperties.MinimumFreeRooms, floorProperties.MaximumFreeRooms + 1);
             _spaceConnections = new List<SpaceConnectionItem>();
         }
 
@@ -240,7 +248,7 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
 
             // Get the source door's direction from the source space
             if (!sourceSpace.DoorLookup.TryGetValue(sourceDoorGO, out var sourceDoorData)) {
-                Debug.LogError("Source door GameObject not found in DoorLookup.");
+                CustomLogger.LogError(LogSystem.FloorGenerator, "Source door GameObject not found in DoorLookup.");
 #if UNITY_EDITOR
                 DestroyImmediate(placed.Instance);
 #else
@@ -252,7 +260,7 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
 
             var targetDoorData = placed.GetMatchingDoor(CardinalDirectionMask.GetOpposite(sourceDoorData.SpawnDirection));
             if (targetDoorData == null) {
-                Debug.LogWarning($"Failed: Matching door not found in {newData.name}");
+                CustomLogger.LogWarning(LogSystem.FloorGenerator, $"Failed: Matching door not found in {newData.name}");
 #if UNITY_EDITOR
                 DestroyImmediate(placed.Instance);
 #else
@@ -265,7 +273,7 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
             // Find the actual GameObject in the new PlacedSpace corresponding to the target DoorSpawnData
             var targetDoorGO = placed.DoorLookup.FirstOrDefault(kvp => kvp.Value == targetDoorData).Key;
             if (targetDoorGO == null) {
-                Debug.LogError("Matching target door GameObject not found.");
+                CustomLogger.LogError(LogSystem.FloorGenerator, "Matching target door GameObject not found.");
 #if UNITY_EDITOR
                 DestroyImmediate(placed.Instance);
 #else
@@ -280,7 +288,7 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
             placed.Instance.transform.position += offset;
             
             if (IsOverlapping(placed.GetBounds())) {
-                Debug.LogWarning($"Failed: Overlap detected for {newData.name}");
+                CustomLogger.LogWarning(LogSystem.FloorGenerator, $"Failed: Overlap detected for {newData.name}");
 #if UNITY_EDITOR
                 DestroyImmediate(placed.Instance);
 #else
@@ -296,7 +304,7 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
             PlacedSpaceConnectionUtility.ConnectSpaces(sourceSpace, sourceDoorGO, placed, targetDoorGO);
             _spaceConnections.Add(new SpaceConnectionItem(sourceSpace, sourceDoorGO, placed, targetDoorGO));
             
-            Debug.Log(
+            CustomLogger.LogInfo(LogSystem.FloorGenerator, 
                 $"\n+++ SPACE PLACED +++\n" +
                 $"Prefab: {newData.name}\n" +
                 $"Placed at: {placed.Instance.transform.position}\n" +
@@ -330,7 +338,7 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
         private bool IsOverlapping(Bounds newBounds) {
             foreach (var placed in _placedSpaces) {
                 if (placed.GetBounds().Intersects(newBounds)) {
-                    Debug.LogWarning($"Overlap detected for {placed.Instance.name}");
+                    CustomLogger.LogWarning(LogSystem.FloorGenerator, $"Overlap detected for {placed.Instance.name}");
                     return true;
                 }
             }
@@ -338,27 +346,27 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
         }
         
         private void LogSpawnQueue(string context) {
-            Debug.Log($"\n--- Spawn Queue ({context}) ---\n" +
+            CustomLogger.LogInfo(LogSystem.FloorGenerator, $"\n--- Spawn Queue ({context}) ---\n" +
                       $"Queue Count: {_spawnQueue.Count}");
 
             int i = 0;
             foreach (var item in _spawnQueue) {
-                Debug.Log(
+                CustomLogger.LogInfo(LogSystem.FloorGenerator, 
                     $"[{i++}] Source: {item.Source.SourceData.name}, Group ID: {item.GroupID}, Depth: {item.HallwayDepth}"
                 );
             }
-            Debug.Log("--- End of Queue ---\n");
+            CustomLogger.LogInfo(LogSystem.FloorGenerator, "--- End of Queue ---\n");
         }
         
         private void LogPlacedSpaceDoors(PlacedSpace placed) {
-            Debug.Log($"Door count: {placed.DoorLookup.Count}");
+            CustomLogger.LogInfo(LogSystem.FloorGenerator, $"Door count: {placed.DoorLookup.Count}");
     
             foreach (var kvp in placed.DoorLookup) {
-                Debug.Log($"Door GameObject: {kvp.Key.name} -> {kvp.Value.SpawnDirection} [Group {kvp.Value.DoorSpawnGroup}]");
+                CustomLogger.LogInfo(LogSystem.FloorGenerator, $"Door GameObject: {kvp.Key.name} -> {kvp.Value.SpawnDirection} [Group {kvp.Value.DoorSpawnGroup}]");
             }
 
             foreach (var group in placed.DoorGroups) {
-                Debug.Log($"Group {group.Key} has {group.Value.Count} doors");
+                CustomLogger.LogInfo(LogSystem.FloorGenerator, $"Group {group.Key} has {group.Value.Count} doors");
             }
         }
 
@@ -372,7 +380,7 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
         
         private void ShuffleList<T>(List<T> list) {
             for (int i = list.Count - 1; i > 0; i--) {
-                int j = seedRNG.Rng.Next(i + 1);
+                int j = floorProperties.SeedRNG.Rng.Next(i + 1);
                 (list[i], list[j]) = (list[j], list[i]);
             }
         }

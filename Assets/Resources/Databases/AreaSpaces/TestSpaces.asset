@@ -30,6 +30,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 57749257abe6b1f4eaa9947820590e09, type: 2}
   - {fileID: 11400000, guid: 58ce0cbba6dfeb9458b0cd0528a6d83d, type: 2}
   - {fileID: 11400000, guid: 3dcbb1777bf3ddd4987b27538f2cdb79, type: 2}
+  - {fileID: 11400000, guid: ef09ed9d7e9ffc44ab4d5152124a9058, type: 2}
   hallways:
   - {fileID: 11400000, guid: e7f5bbc144da62f4f8e87e275142f82a, type: 2}
   - {fileID: 11400000, guid: 829771878f4e24d44ac0e0f44aad7805, type: 2}

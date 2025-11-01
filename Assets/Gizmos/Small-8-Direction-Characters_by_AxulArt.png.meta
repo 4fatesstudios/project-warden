@@ -1,0 +1,235 @@
+fileFormatVersion: 2
+guid: 0554b48e6b1797a459cabc538172c2f4
+TextureImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 5
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Small-8-Direction-Characters_by_AxulArt_0
+      rect:
+        serializedVersion: 2
+        x: 4
+        y: 272
+        width: 8
+        height: 8
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 68a80f5f18a2332449a8035551937598
+      internalID: 323617726
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 3b5905d73f0e33143afe3bd68e980420
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Small-8-Direction-Characters_by_AxulArt_0: 323617726
+      Small-8-Direction-Characters_by_AxulArt_1: -1481512711
+      Small-8-Direction-Characters_by_AxulArt_10: -1355334019
+      Small-8-Direction-Characters_by_AxulArt_11: -216027645
+      Small-8-Direction-Characters_by_AxulArt_12: 814221718
+      Small-8-Direction-Characters_by_AxulArt_13: 1077120565
+      Small-8-Direction-Characters_by_AxulArt_14: -1388506826
+      Small-8-Direction-Characters_by_AxulArt_15: -1446161694
+      Small-8-Direction-Characters_by_AxulArt_16: -2078760235
+      Small-8-Direction-Characters_by_AxulArt_17: -1485379092
+      Small-8-Direction-Characters_by_AxulArt_18: -711905750
+      Small-8-Direction-Characters_by_AxulArt_19: -2054437621
+      Small-8-Direction-Characters_by_AxulArt_2: 1282780893
+      Small-8-Direction-Characters_by_AxulArt_20: 1396731265
+      Small-8-Direction-Characters_by_AxulArt_21: 653499125
+      Small-8-Direction-Characters_by_AxulArt_22: -1449975611
+      Small-8-Direction-Characters_by_AxulArt_23: 1247018795
+      Small-8-Direction-Characters_by_AxulArt_24: 274812787
+      Small-8-Direction-Characters_by_AxulArt_25: -1770840891
+      Small-8-Direction-Characters_by_AxulArt_26: -730332611
+      Small-8-Direction-Characters_by_AxulArt_27: 1795353164
+      Small-8-Direction-Characters_by_AxulArt_28: 1871871619
+      Small-8-Direction-Characters_by_AxulArt_29: 367155649
+      Small-8-Direction-Characters_by_AxulArt_3: 643935750
+      Small-8-Direction-Characters_by_AxulArt_30: -601259069
+      Small-8-Direction-Characters_by_AxulArt_31: 1572973652
+      Small-8-Direction-Characters_by_AxulArt_32: 2145605651
+      Small-8-Direction-Characters_by_AxulArt_33: -51235259
+      Small-8-Direction-Characters_by_AxulArt_34: 630863610
+      Small-8-Direction-Characters_by_AxulArt_35: -1836529490
+      Small-8-Direction-Characters_by_AxulArt_36: -280359123
+      Small-8-Direction-Characters_by_AxulArt_37: 1139182215
+      Small-8-Direction-Characters_by_AxulArt_38: 257581484
+      Small-8-Direction-Characters_by_AxulArt_39: 180671563
+      Small-8-Direction-Characters_by_AxulArt_4: -1095680324
+      Small-8-Direction-Characters_by_AxulArt_40: -544481911
+      Small-8-Direction-Characters_by_AxulArt_41: 831427711
+      Small-8-Direction-Characters_by_AxulArt_42: -1859716124
+      Small-8-Direction-Characters_by_AxulArt_43: 559766755
+      Small-8-Direction-Characters_by_AxulArt_44: -372829035
+      Small-8-Direction-Characters_by_AxulArt_45: 1502554766
+      Small-8-Direction-Characters_by_AxulArt_46: -1766061462
+      Small-8-Direction-Characters_by_AxulArt_47: -92356851
+      Small-8-Direction-Characters_by_AxulArt_48: -27099116
+      Small-8-Direction-Characters_by_AxulArt_49: -791445486
+      Small-8-Direction-Characters_by_AxulArt_5: -1011583469
+      Small-8-Direction-Characters_by_AxulArt_50: 1733553975
+      Small-8-Direction-Characters_by_AxulArt_51: 1363036548
+      Small-8-Direction-Characters_by_AxulArt_52: 1060705888
+      Small-8-Direction-Characters_by_AxulArt_53: 2045159032
+      Small-8-Direction-Characters_by_AxulArt_54: 275005846
+      Small-8-Direction-Characters_by_AxulArt_55: 1310549988
+      Small-8-Direction-Characters_by_AxulArt_56: -159816317
+      Small-8-Direction-Characters_by_AxulArt_57: -1681809132
+      Small-8-Direction-Characters_by_AxulArt_58: 1516935107
+      Small-8-Direction-Characters_by_AxulArt_59: 569634612
+      Small-8-Direction-Characters_by_AxulArt_6: 1629925443
+      Small-8-Direction-Characters_by_AxulArt_60: 207204116
+      Small-8-Direction-Characters_by_AxulArt_61: 538110944
+      Small-8-Direction-Characters_by_AxulArt_62: 168572862
+      Small-8-Direction-Characters_by_AxulArt_63: -171194772
+      Small-8-Direction-Characters_by_AxulArt_64: 1327738963
+      Small-8-Direction-Characters_by_AxulArt_65: -1892853959
+      Small-8-Direction-Characters_by_AxulArt_66: 987710822
+      Small-8-Direction-Characters_by_AxulArt_67: -2121672164
+      Small-8-Direction-Characters_by_AxulArt_68: -412725048
+      Small-8-Direction-Characters_by_AxulArt_69: -2072114122
+      Small-8-Direction-Characters_by_AxulArt_7: -1137670993
+      Small-8-Direction-Characters_by_AxulArt_70: -1243322704
+      Small-8-Direction-Characters_by_AxulArt_71: 280459850
+      Small-8-Direction-Characters_by_AxulArt_72: -1237275520
+      Small-8-Direction-Characters_by_AxulArt_73: 524223265
+      Small-8-Direction-Characters_by_AxulArt_74: -1720128097
+      Small-8-Direction-Characters_by_AxulArt_75: 1541810027
+      Small-8-Direction-Characters_by_AxulArt_76: 732604229
+      Small-8-Direction-Characters_by_AxulArt_77: -1115000337
+      Small-8-Direction-Characters_by_AxulArt_78: -2007211503
+      Small-8-Direction-Characters_by_AxulArt_79: 183893967
+      Small-8-Direction-Characters_by_AxulArt_8: 1272583548
+      Small-8-Direction-Characters_by_AxulArt_80: 1206509036
+      Small-8-Direction-Characters_by_AxulArt_81: 346695696
+      Small-8-Direction-Characters_by_AxulArt_82: 695504258
+      Small-8-Direction-Characters_by_AxulArt_83: -1631930334
+      Small-8-Direction-Characters_by_AxulArt_84: -73871534
+      Small-8-Direction-Characters_by_AxulArt_85: 12983508
+      Small-8-Direction-Characters_by_AxulArt_86: 1851914421
+      Small-8-Direction-Characters_by_AxulArt_87: -1032190706
+      Small-8-Direction-Characters_by_AxulArt_88: 1952008929
+      Small-8-Direction-Characters_by_AxulArt_89: 446979369
+      Small-8-Direction-Characters_by_AxulArt_9: 124880753
+      Small-8-Direction-Characters_by_AxulArt_90: 325386535
+      Small-8-Direction-Characters_by_AxulArt_91: -1232745544
+      Small-8-Direction-Characters_by_AxulArt_92: 1029617476
+      Small-8-Direction-Characters_by_AxulArt_93: 388533703
+      Small-8-Direction-Characters_by_AxulArt_94: 862948763
+      Small-8-Direction-Characters_by_AxulArt_95: -1021558772
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

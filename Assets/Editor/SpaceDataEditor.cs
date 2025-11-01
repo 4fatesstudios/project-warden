@@ -52,6 +52,7 @@ public class SpaceDataEditor : UnityEditor.Editor
 
     public override void OnInspectorGUI()
     {
+        GUI.enabled = false;
         // Compact SpacePrefab field
         SerializedProperty spacePrefabProp = serializedObject.FindProperty("spacePrefab");
         EditorGUILayout.PropertyField(spacePrefabProp);
@@ -63,6 +64,7 @@ public class SpaceDataEditor : UnityEditor.Editor
         // Compact SpaceSize field
         SerializedProperty spaceSizeProp = serializedObject.FindProperty("spaceSize");
         EditorGUILayout.PropertyField(spaceSizeProp);
+        GUI.enabled = true;
 
         // Compact DoorSpawnPoints list with custom drawer
         SerializedProperty spawnListProp = serializedObject.FindProperty("doorSpawnPoints");
@@ -71,10 +73,12 @@ public class SpaceDataEditor : UnityEditor.Editor
         serializedObject.ApplyModifiedProperties();
 
         SpaceData data = (SpaceData)target;
-
+        
+        GUI.enabled = false;
         if (GUILayout.Button("Auto-Populate Door Spawns")) {
             SpaceDataUtility.AutoPopulateDoorSpawns(data);
         }
+        GUI.enabled = true;
 
         if (GUILayout.Button("Update Groups"))
         {

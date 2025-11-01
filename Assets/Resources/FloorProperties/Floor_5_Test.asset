@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a5c5abc736a180a4f81425e89c374798, type: 3}
+  m_Name: Floor_5_Test
+  m_EditorClassIdentifier: 
+  id: 
+  floorNumber: 5
+  area: 0
+  minimumFreeRooms: 8
+  maximumFreeRooms: 12
+  maxAttemptsPerRoom: 4
+  storyRooms: []
+  freeRooms: []
+  hallways: []
+  startingRoom: {fileID: 0}
+  seedRNG:
+    randomSeed: 0
+  globalAreasDatabase: {fileID: 11400000, guid: 8ae72178073f07546b3c4e99441a3445, type: 2}

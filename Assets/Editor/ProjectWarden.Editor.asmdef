@@ -2,7 +2,8 @@
     "name": "ProjectWarden.Editor",
     "rootNamespace": "",
     "references": [
-        "ProjectWarden"
+        "ProjectWarden",
+        "Unity.Cinemachine"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

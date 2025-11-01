@@ -14,61 +14,71 @@ namespace FourFatesStudios.ProjectWarden.Interactions
         private Interactable _currentFocused;
         private static readonly Collider[] _overlapResults = new Collider[10];
 
-        private void Awake()
-        {
+        private void Awake() {
             _interactionCollider = GetComponent<SphereCollider>();
             _interactionCollider.isTrigger = true;
         }
 
-        private void OnEnable()
-        {
+        private void OnEnable() {
             PlayerController.OnExplorationInteractAction += TryInteract;
         }
 
-        private void OnDisable()
-        {
+        private void OnDisable() {
             PlayerController.OnExplorationInteractAction -= TryInteract;
+
+            if (_currentFocused == null) return;
+            _currentFocused.OnDestroyed -= HandleInteractableDestroyed;
+            _currentFocused.OnUnfocus();
+            _currentFocused = null;
         }
 
-        private void Update()
-        {
+        private void Update() {
             UpdateFocus();
         }
 
-        private void UpdateFocus()
-        {
-            float radius = _interactionCollider.radius * Mathf.Max(transform.lossyScale.x, transform.lossyScale.y, transform.lossyScale.z);
-            int count = Physics.OverlapSphereNonAlloc(transform.position, radius, _overlapResults, interactLayer);
-            // default set closest Interactable to null
-            Interactable closest = null;
-            float closestDist = float.MaxValue;
+        private void UpdateFocus() {
+            var radius = _interactionCollider.radius * Mathf.Max(transform.lossyScale.x, transform.lossyScale.y, transform.lossyScale.z);
+            var count = Physics.OverlapSphereNonAlloc(transform.position, radius, _overlapResults, interactLayer);
 
-            for (int i = 0; i < count; i++)
-            {
+            Interactable closest = null;
+            var closestDist = float.MaxValue;
+
+            for (var i = 0; i < count; i++) {
                 var interactable = _overlapResults[i].GetComponentInParent<Interactable>();
                 if (interactable == null || !interactable.CanInteract(gameObject))
                     continue;
 
-                float dist = Vector3.Distance(transform.position, interactable.transform.position);
-                if (dist < closestDist)
-                {
-                    closest = interactable;
-                    closestDist = dist;
-                }
+                var dist = Vector3.Distance(transform.position, interactable.transform.position);
+                
+                if (!(dist < closestDist)) continue;
+                
+                closest = interactable;
+                closestDist = dist;
             }
 
-            if (_currentFocused != closest)
-            {
-                _currentFocused?.OnUnfocus();
-                _currentFocused = closest;
-                _currentFocused?.OnFocus();
+            if (_currentFocused == closest) return;
+            
+            if (_currentFocused != null) {
+                _currentFocused.OnDestroyed -= HandleInteractableDestroyed;
+                _currentFocused.OnUnfocus();
+            }
+
+            _currentFocused = closest;
+
+            if (_currentFocused == null) return;
+            
+            _currentFocused.OnDestroyed += HandleInteractableDestroyed;
+            _currentFocused.OnFocus();
+        }
+
+        private void HandleInteractableDestroyed(Interactable destroyed) {
+            if (_currentFocused == destroyed) {
+                _currentFocused = null;
             }
         }
 
-        private void TryInteract()
-        {
-            if (_currentFocused != null && _currentFocused.CanInteract(gameObject))
-            {
+        private void TryInteract() {
+            if (_currentFocused != null && _currentFocused.CanInteract(gameObject)) {
                 _currentFocused.Interact(gameObject);
             }
         }

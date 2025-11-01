@@ -2,18 +2,16 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
-
 namespace FourFatesStudios.ProjectWarden.Utilities
 {
-    // Add whatever specific log system you need here
     public enum LogSystem {
         CSVImporter,
+        FloorGenerator,
     }
 
     public static class CustomLogger {
-        // Toggle to enable/disable logging globally
         public static bool IsLoggingEnabled = true;
-        
+
         private static readonly string baseLogDir = Path.Combine(Application.persistentDataPath, "Logs");
         private static Dictionary<(LogSystem, string), string> logPaths = new();
 
@@ -27,18 +25,30 @@ namespace FourFatesStudios.ProjectWarden.Utilities
             string path = GetLogPath(system, fileName);
             if (clear && File.Exists(path))
                 File.Delete(path);
-            Log(system, "=== Log Started ===", fileName);
+
+            LogInfo(system, "=== Log Started ===", fileName);
         }
 
         /// <summary>
         /// Log an info message.
         /// </summary>
-        public static void Log(LogSystem system, string message, string fileName = "system_log.txt")
+        public static void LogInfo(LogSystem system, string message, string fileName = "system_log.txt")
         {
             if (!IsLoggingEnabled) return;
 
             string path = GetLogPath(system, fileName);
             File.AppendAllText(path, $"{System.DateTime.Now:HH:mm:ss} [INFO] {message}\n");
+        }
+
+        /// <summary>
+        /// Log a warning message.
+        /// </summary>
+        public static void LogWarning(LogSystem system, string message, string fileName = "system_log.txt")
+        {
+            if (!IsLoggingEnabled) return;
+
+            string path = GetLogPath(system, fileName);
+            File.AppendAllText(path, $"{System.DateTime.Now:HH:mm:ss} [WARNING] {message}\n");
         }
 
         /// <summary>
@@ -48,7 +58,8 @@ namespace FourFatesStudios.ProjectWarden.Utilities
         {
             if (!IsLoggingEnabled) return;
 
-            Log(system, "=== Log Started ===", fileName);
+            string path = GetLogPath(system, fileName);
+            File.AppendAllText(path, $"{System.DateTime.Now:HH:mm:ss} [ERROR] {message}\n");
         }
 
         /// <summary>
