@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   spacePrefab: {fileID: 1726751025465976600, guid: 24f107779ee07974ca955cd0dc959176, type: 3}
   spaceType: 0
-  roomSize: 2
+  spaceSize: 0
   doorSpawnPoints:
   - doorSpawnPoint: {fileID: 2946898079614587024, guid: 24f107779ee07974ca955cd0dc959176, type: 3}
     doorType: 0
@@ -116,3 +116,5 @@ MonoBehaviour:
     spawnWeight: 1
     spawnDirection: 1
     doorSpawnGroup: 0
+  maxInstances: 0
+  minDistanceFromStart: 0
