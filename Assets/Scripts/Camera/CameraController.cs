@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using FourFatesStudios.ProjectWarden.Events;
-using Sentry;
 using UnityEngine;
 using Unity.Cinemachine;
 
@@ -15,9 +14,10 @@ namespace FourFatesStudios.ProjectWarden.Camera
         SkillSelect
     }
 
+    // Perspective enum kept for legacy support, but we won't use perspective anymore
     public enum CameraPerspective {
-        Isometric,
-        TwoPointFiveD
+        Exploration, // formerly Isometric
+        Combat       // formerly TwoPointFiveD
     }
     
     [System.Serializable]
@@ -34,8 +34,8 @@ namespace FourFatesStudios.ProjectWarden.Camera
     
     public class CameraController : MonoBehaviour {
         [Header("Cinemachine Virtual Cameras")]
-        [SerializeField] private CinemachineCamera isoCam; // orthographic iso for general gameplay
-        [SerializeField] private CinemachineCamera twoPointFiveDCam; // 2.5d for combat
+        [SerializeField] private CinemachineCamera explorationCam; // formerly isoCam
+        [SerializeField] private CinemachineCamera combatCam;      // formerly twoPointFiveDCam
         [SerializeField] private UnityEngine.Camera mainCam;
 
         [Header("Transition Settings")] 
@@ -46,27 +46,24 @@ namespace FourFatesStudios.ProjectWarden.Camera
         [SerializeField] private float orthoSize = 5f;
         [SerializeField] private float perspectiveFOV = 60f;
 
-        [Header("Combat Camera Views (Perspective Only")] 
+        [Header("Combat Camera Views (Legacy perspective system retained)")] 
         [SerializeField] private List<ViewEntry> viewEntries = new();
         private Dictionary<CombatCamView, CameraViewData> viewData;
 
         private float blendTimer;
-
-        private CinemachineBrain brain;
-        
         private CameraPerspective currentPerspective;
         private CameraPerspective targetPerspective;
 
         private void Start() {
             if (!mainCam) mainCam = UnityEngine.Camera.main;
-            brain = mainCam.GetComponent<CinemachineBrain>();
             
-            // set up dic
             viewData = viewEntries.ToDictionary(v => v.view, v => v.data);
             
-            // start in ortho view
+            // We always use orthographic now
             SetProjection(false, instant: true);
-            SetActiveCam(isoCam);
+            SetActiveCam(explorationCam);
+
+            currentPerspective = targetPerspective = CameraPerspective.Exploration;
         }
 
         private void OnEnable() {
@@ -81,37 +78,27 @@ namespace FourFatesStudios.ProjectWarden.Camera
         
         private void Update()
         {
-            if (Input.GetKeyDown(KeyCode.Tab)) SetPerspective(CameraPerspective.Isometric);
-            if (Input.GetKeyDown(KeyCode.Q)) SetPerspective(CameraPerspective.TwoPointFiveD);
+            // Debug test keys kept for dev
+            if (Input.GetKeyDown(KeyCode.Tab)) SetPerspective(CameraPerspective.Exploration);
+            if (Input.GetKeyDown(KeyCode.Q)) SetPerspective(CameraPerspective.Combat);
 
             if (Input.GetKeyDown(KeyCode.Alpha1)) StartViewTransition(CombatCamView.Default);
             if (Input.GetKeyDown(KeyCode.Alpha2)) StartViewTransition(CombatCamView.CharacterSelect);
             if (Input.GetKeyDown(KeyCode.Alpha3)) StartViewTransition(CombatCamView.ActionSelect);
             if (Input.GetKeyDown(KeyCode.Alpha4)) StartViewTransition(CombatCamView.SkillSelect);
 
-            // Transition between perspectives
+            // Transition block kept but effectively dormant
             if (currentPerspective != targetPerspective)
             {
                 blendTimer += Time.deltaTime;
                 float t = blendCurve.Evaluate(Mathf.Clamp01(blendTimer / blendDuration));
 
-                if (targetPerspective == CameraPerspective.TwoPointFiveD)
+                mainCam.fieldOfView = Mathf.Lerp(perspectiveFOV, orthoSize, t);
+
+                if (t >= 1f)
                 {
-                    mainCam.fieldOfView = Mathf.Lerp(orthoSize, perspectiveFOV, t);
-                    if (t >= 1f)
-                    {
-                        mainCam.orthographic = false;
-                        currentPerspective = targetPerspective;
-                    }
-                }
-                else
-                {
-                    mainCam.fieldOfView = Mathf.Lerp(perspectiveFOV, orthoSize, t);
-                    if (t >= 1f)
-                    {
-                        mainCam.orthographic = true;
-                        currentPerspective = targetPerspective;
-                    }
+                    mainCam.orthographic = true; // Always orthographic now
+                    currentPerspective = targetPerspective;
                 }
             }
         }
@@ -120,12 +107,14 @@ namespace FourFatesStudios.ProjectWarden.Camera
             if (targetPerspective == perspective) return;
             targetPerspective = perspective;
             blendTimer = 0f;
-            SetActiveCam(perspective == CameraPerspective.Isometric ? isoCam : twoPointFiveDCam);
+
+            // Both cams are isometric — only swap priority
+            SetActiveCam(perspective == CameraPerspective.Exploration ? explorationCam : combatCam);
         }
         
         private void StartViewTransition(CombatCamView view) {
             StopAllCoroutines();
-            StartCoroutine(LerpCamera(twoPointFiveDCam, viewData.GetValueOrDefault(view), 0.5f));
+            StartCoroutine(LerpCamera(combatCam, viewData.GetValueOrDefault(view), 0.5f));
         }
 
         private IEnumerator LerpCamera(CinemachineCamera cam, CameraViewData data, float duration)
@@ -142,30 +131,21 @@ namespace FourFatesStudios.ProjectWarden.Camera
             while (t < 1f)
             {
                 t += Time.deltaTime / Mathf.Max(0.0001f, duration);
-                float lerpT = Mathf.SmoothStep(0f, 1f, t);
-
-                composer.TargetOffset = Vector3.Lerp(startOffset, endOffset, lerpT);
+                composer.TargetOffset = Vector3.Lerp(startOffset, endOffset, Mathf.SmoothStep(0f, 1f, t));
                 yield return null;
             }
-
             composer.TargetOffset = endOffset;
         }
 
         private void SetActiveCam(CinemachineCamera cam) {
-            isoCam.Priority = (cam == isoCam) ? 10 : 0;
-            twoPointFiveDCam.Priority = (cam == twoPointFiveDCam) ? 10 : 0;
+            explorationCam.Priority = (cam == explorationCam) ? 10 : 0;
+            combatCam.Priority = (cam == combatCam) ? 10 : 0;
         }
 
         private void SetProjection(bool perspective, bool instant = false) {
-            if (perspective) {
-                mainCam.orthographic = false;
-                mainCam.fieldOfView = perspectiveFOV;
-            }
-            else {
-                mainCam.orthographic = true;
-                mainCam.fieldOfView = orthoSize;
-            }
-
+            // Keep the option, but default to ortho
+            mainCam.orthographic = !perspective;
+            mainCam.fieldOfView = perspective ? perspectiveFOV : orthoSize;
             if (instant) blendTimer = blendDuration;
         }
     }

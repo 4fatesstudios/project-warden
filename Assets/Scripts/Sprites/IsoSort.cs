@@ -3,6 +3,7 @@ using UnityEngine;
 namespace FourFatesStudios.ProjectWarden.Sprites
 {
     [RequireComponent(typeof(SpriteRenderer))]
+    [ExecuteAlways]
     public class IsoSort : MonoBehaviour
     {
         SpriteRenderer sr;
