@@ -75,19 +75,47 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
             }
         }
 
-        public Bounds GetBounds() {
-            var collider = Instance.GetComponent<BoxCollider>();
-            if (!collider) {
-                Debug.LogError($"No BoxCollider found on {Instance.name}");
+        // public Bounds GetBounds() {
+        //     var collider = Instance.GetComponent<BoxCollider>();
+        //     if (!collider) {
+        //         Debug.LogError($"No BoxCollider found on {Instance.name}");
+        //         return new Bounds(Instance.transform.position, Vector3.zero);
+        //     }
+        //
+        //     // Calculate the world position of the collider center accounting for local offset
+        //     Vector3 worldCenter = Instance.transform.TransformPoint(collider.center);
+        //     Bounds bounds = new Bounds(worldCenter, collider.size);
+        //
+        //     return bounds;
+        // }
+        
+        public Bounds GetBounds()
+        {
+            // Search the root and all children for a MeshFilter
+            var mf = Instance.GetComponentInChildren<MeshFilter>();
+            if (!mf)
+            {
+                Debug.LogError($"No MeshFilter found on {Instance.name} or its children.");
                 return new Bounds(Instance.transform.position, Vector3.zero);
             }
 
-            // Calculate the world position of the collider center accounting for local offset
-            Vector3 worldCenter = Instance.transform.TransformPoint(collider.center);
-            Bounds bounds = new Bounds(worldCenter, collider.size);
+            Mesh mesh = mf.sharedMesh;
+            if (!mesh)
+            {
+                Debug.LogError($"MeshFilter on {mf.gameObject.name} has no mesh.");
+                return new Bounds(Instance.transform.position, Vector3.zero);
+            }
 
-            return bounds;
+            // Local bounds
+            Bounds localBounds = mesh.bounds;
+
+            // Convert to world space
+            Vector3 worldSize = Vector3.Scale(localBounds.size, mf.transform.lossyScale);
+            Vector3 worldCenter = mf.transform.TransformPoint(localBounds.center);
+
+            return new Bounds(worldCenter, worldSize);
         }
+
 
     }
 
