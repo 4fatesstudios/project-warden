@@ -15,7 +15,10 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
     public class FloorGenerator : MonoBehaviour {
         [SerializeField] private FloorProperties floorProperties;
         [SerializeField] private GameObject rootGameObject;
-
+        
+        public Vector2[] _lastFailA;
+        public Vector2[] _lastFailB;
+        
         private Queue<SpawnGroupQueueItem> _spawnQueue = new();
         private List<PlacedSpace> _placedSpaces = new();
         
@@ -287,7 +290,7 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
             var offset = sourceDoorGO.transform.position - targetDoorGO.transform.position;
             placed.Instance.transform.position += offset;
             
-            if (IsOverlapping(placed.GetBounds())) {
+            if (IsOverlapping(placed.GetRhombusVertices())) {
                 CustomLogger.LogWarning(LogSystem.FloorGenerator, $"Failed: Overlap detected for {newData.name}");
 #if UNITY_EDITOR
                 DestroyImmediate(placed.Instance);
@@ -335,13 +338,37 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
             return largerSizes;
         }
         
-        private bool IsOverlapping(Bounds newBounds) {
-            foreach (var placed in _placedSpaces) {
-                if (placed.GetBounds().Intersects(newBounds)) {
-                    CustomLogger.LogWarning(LogSystem.FloorGenerator, $"Overlap detected for {placed.Instance.name}");
+        // private bool IsOverlapping(Bounds newBounds) {
+        //     foreach (var placed in _placedSpaces) {
+        //         if (placed.GetBounds().Intersects(newBounds)) {
+        //             CustomLogger.LogWarning(LogSystem.FloorGenerator, $"Overlap detected for {placed.Instance.name}");
+        //             return true;
+        //         }
+        //     }
+        //     return false;
+        // }
+        
+        private bool IsOverlapping(Vector2[] rhombusVertices)
+        {
+            foreach (var placed in _placedSpaces)
+            {
+                Vector2[] placedVerts = placed.GetRhombusVertices();
+
+                if (RhombusOverlapChecker.DoOverlap(rhombusVertices, placedVerts))
+                {
+                    CustomLogger.LogWarning(LogSystem.FloorGenerator, 
+                        $"Overlap detected for {placed.Instance.name}");
+
+                    // Store for drawing
+                    _lastFailA = rhombusVertices;
+                    _lastFailB = placedVerts;
+
                     return true;
                 }
             }
+
+            _lastFailA = null;
+            _lastFailB = null;
             return false;
         }
         
@@ -386,6 +413,9 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
         }
 
         private void OnDrawGizmos() {
+            DrawRhombus(_lastFailA, Color.red);
+            DrawRhombus(_lastFailB, Color.yellow);
+            
             if (_spaceConnections.Count == 0) return;
             foreach (var connection in _spaceConnections) {
                 if (connection != null) {
@@ -393,6 +423,21 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
                     Gizmos.color = Color.magenta;
                     Gizmos.DrawWireCube(location, new Vector3(4, 4, 4));
                 }
+            }
+        }
+        
+        private void DrawRhombus(Vector2[] verts, Color color)
+        {
+            if (verts == null) return;
+
+            Gizmos.color = color;
+
+            for (int i = 0; i < verts.Length; i++)
+            {
+                Vector3 a = new Vector3(verts[i].x, 0.1f, verts[i].y);
+                Vector3 b = new Vector3(verts[(i + 1) % verts.Length].x, 0.1f, verts[(i + 1) % verts.Length].y);
+
+                Gizmos.DrawLine(a, b);
             }
         }
 

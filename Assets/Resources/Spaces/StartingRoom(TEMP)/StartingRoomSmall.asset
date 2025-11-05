@@ -19,22 +19,22 @@ MonoBehaviour:
   - doorSpawnPoint: {fileID: 3810456338258692827, guid: 5e701b2bf502a014cbc3b4e5bb1bb58b, type: 3}
     doorType: 0
     spawnWeight: 1
-    spawnDirection: 0
+    spawnDirection: 2
     doorSpawnGroup: 1
   - doorSpawnPoint: {fileID: 4345657238982069564, guid: 5e701b2bf502a014cbc3b4e5bb1bb58b, type: 3}
     doorType: 0
     spawnWeight: 1
-    spawnDirection: 0
+    spawnDirection: 4
     doorSpawnGroup: 2
   - doorSpawnPoint: {fileID: 5271111469972155895, guid: 5e701b2bf502a014cbc3b4e5bb1bb58b, type: 3}
     doorType: 0
     spawnWeight: 1
-    spawnDirection: 0
+    spawnDirection: 3
     doorSpawnGroup: 3
   - doorSpawnPoint: {fileID: 2379871919205499902, guid: 5e701b2bf502a014cbc3b4e5bb1bb58b, type: 3}
     doorType: 0
     spawnWeight: 1
-    spawnDirection: 0
+    spawnDirection: 1
     doorSpawnGroup: 4
   maxInstances: 0
   minDistanceFromStart: 0

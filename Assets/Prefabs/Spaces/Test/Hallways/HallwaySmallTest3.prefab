@@ -32,6 +32,10 @@ PrefabInstance:
       propertyPath: m_Color.b
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 7486578133452491536, guid: 07f7f0468755a9442af4abce11c600cb, type: 3}
+      propertyPath: m_ConstrainProportionsScale
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8113794995430571539, guid: 07f7f0468755a9442af4abce11c600cb, type: 3}
       propertyPath: m_Name
       value: HallwaySmallTest3
