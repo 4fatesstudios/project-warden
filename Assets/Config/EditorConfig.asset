@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 92d255fc239e14c409d012d2e6832562, type: 3}
+  m_Name: EditorConfig
+  m_EditorClassIdentifier: 
+  floorGeneratorPrefab: {fileID: 947328609840266066, guid: 9c3f9b2f03205e14890b30927ca8ca7f, type: 3}
+  globalAreasDatabase: {fileID: 11400000, guid: 8ae72178073f07546b3c4e99441a3445, type: 2}
+  playerPrefab: {fileID: 4749932644239177571, guid: 0c549d1048c186344bcf180ffb32d874, type: 3}
+  mainCameraPrefab: {fileID: 1280660494529261082, guid: 52f11f7330636e844921581a46f8e1ea, type: 3}
+  vCamExplorationPrefab: {fileID: 1760112377803748407, guid: 789d3e8306731c146b49b5b271e3d527, type: 3}
+  vCamCombatPrefab: {fileID: 5450437901809485988, guid: 6afbf85106c7eb74a90fee173832a8c0, type: 3}

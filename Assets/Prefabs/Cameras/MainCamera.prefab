@@ -100,10 +100,10 @@ Camera:
     width: 1
     height: 1
   near clip plane: 0.3
-  far clip plane: 1000
+  far clip plane: 100
   field of view: 60
-  orthographic: 0
-  orthographic size: 5
+  orthographic: 1
+  orthographic size: 6
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -183,8 +183,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb9cb76a09a918f478501d455ee99eca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isoCam: {fileID: 0}
-  twoPointFiveDCam: {fileID: 0}
+  explorationCam: {fileID: 0}
+  combatCam: {fileID: 0}
   mainCam: {fileID: 557833094602142253}
   blendDuration: 1
   blendCurve:
@@ -224,7 +224,7 @@ MonoBehaviour:
       rotationOffset: {x: 0, y: 0, z: 0}
   - view: 2
     data:
-      positionOffset: {x: 0, y: 0, z: 0}
+      positionOffset: {x: -1.5, y: 0, z: -1.5}
       rotationOffset: {x: 0, y: 0, z: 0}
   - view: 3
     data:
