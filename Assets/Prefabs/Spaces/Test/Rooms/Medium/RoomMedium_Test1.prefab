@@ -12,6 +12,10 @@ PrefabInstance:
       propertyPath: m_Color.r
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 134474092462629370, guid: 00e7813566ebb36418460f3ab58eaaf6, type: 3}
+      propertyPath: m_Color.r
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 294751647659335819, guid: 00e7813566ebb36418460f3ab58eaaf6, type: 3}
       propertyPath: m_Name
       value: RoomMedium_Test1
@@ -24,7 +28,15 @@ PrefabInstance:
       propertyPath: m_Color.r
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 1633789132859965009, guid: 00e7813566ebb36418460f3ab58eaaf6, type: 3}
+      propertyPath: m_Color.r
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3631806644111601646, guid: 00e7813566ebb36418460f3ab58eaaf6, type: 3}
+      propertyPath: m_Color.r
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3657596298761049594, guid: 00e7813566ebb36418460f3ab58eaaf6, type: 3}
       propertyPath: m_Color.r
       value: 1
       objectReference: {fileID: 0}
@@ -83,6 +95,10 @@ PrefabInstance:
     - target: {fileID: 8870153499534874581, guid: 00e7813566ebb36418460f3ab58eaaf6, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9115843294940105157, guid: 00e7813566ebb36418460f3ab58eaaf6, type: 3}
+      propertyPath: m_Color.r
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using FourFatesStudios.ProjectWarden.Enums;
@@ -75,20 +76,78 @@ namespace FourFatesStudios.ProjectWarden.ProceduralGeneration
             }
         }
 
-        public Bounds GetBounds() {
-            var collider = Instance.GetComponent<BoxCollider>();
-            if (!collider) {
-                Debug.LogError($"No BoxCollider found on {Instance.name}");
-                return new Bounds(Instance.transform.position, Vector3.zero);
+        // public Bounds GetBounds() {
+        //     var collider = Instance.GetComponent<BoxCollider>();
+        //     if (!collider) {
+        //         Debug.LogError($"No BoxCollider found on {Instance.name}");
+        //         return new Bounds(Instance.transform.position, Vector3.zero);
+        //     }
+        //
+        //     // Calculate the world position of the collider center accounting for local offset
+        //     Vector3 worldCenter = Instance.transform.TransformPoint(collider.center);
+        //     Bounds bounds = new Bounds(worldCenter, collider.size);
+        //
+        //     return bounds;
+        // }
+        
+        // public Bounds GetBounds()
+        // {
+        //     // Search the root and all children for a MeshFilter
+        //     var mf = Instance.GetComponentInChildren<MeshFilter>();
+        //     if (!mf)
+        //     {
+        //         Debug.LogError($"No MeshFilter found on {Instance.name} or its children.");
+        //         return new Bounds(Instance.transform.position, Vector3.zero);
+        //     }
+        //
+        //     Mesh mesh = mf.sharedMesh;
+        //     if (!mesh)
+        //     {
+        //         Debug.LogError($"MeshFilter on {mf.gameObject.name} has no mesh.");
+        //         return new Bounds(Instance.transform.position, Vector3.zero);
+        //     }
+        //
+        //     // Local bounds
+        //     Bounds localBounds = mesh.bounds;
+        //
+        //     // Convert to world space
+        //     Vector3 worldSize = Vector3.Scale(localBounds.size, mf.transform.lossyScale);
+        //     Vector3 worldCenter = mf.transform.TransformPoint(localBounds.center);
+        //
+        //     return new Bounds(worldCenter, worldSize);
+        // }
+        
+        
+        /// <summary>
+        /// Returns the 4 world-space corners of the rhombus mesh (top-down XZ plane)
+        /// </summary>
+        public Vector2[] GetRhombusVertices()
+        {
+            var mf = Instance.GetComponentInChildren<MeshFilter>();
+            if (!mf || mf.sharedMesh == null) return null;
+
+            Mesh mesh = mf.sharedMesh;
+            Bounds b = mesh.bounds;
+
+            // local-space corners
+            Vector3[] local = new Vector3[]
+            {
+                new Vector3(b.min.x, 0, b.center.z),
+                new Vector3(b.center.x, 0, b.max.z),
+                new Vector3(b.max.x, 0, b.center.z),
+                new Vector3(b.center.x, 0, b.min.z)
+            };
+
+            Vector2[] world2D = new Vector2[4];
+            for (int i = 0; i < 4; i++)
+            {
+                Vector3 w = mf.transform.TransformPoint(local[i]);
+                world2D[i] = new Vector2(w.x, w.z);
             }
 
-            // Calculate the world position of the collider center accounting for local offset
-            Vector3 worldCenter = Instance.transform.TransformPoint(collider.center);
-            Bounds bounds = new Bounds(worldCenter, collider.size);
-
-            return bounds;
+            return world2D;
         }
-
+        
     }
 
     public struct DoorConnection {

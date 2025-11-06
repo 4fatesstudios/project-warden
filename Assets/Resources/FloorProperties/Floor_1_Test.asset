@@ -100,6 +100,11 @@ MonoBehaviour:
     enabled: 1
     maxInstances: 0
     minimumDepthFromStartingRoom: 0
+  - spaceType: 0
+    spaceData: {fileID: 11400000, guid: 608a49c42ab19bb46953ce95f35f958d, type: 2}
+    enabled: 1
+    maxInstances: 0
+    minimumDepthFromStartingRoom: 0
   hallways:
   - spaceType: 1
     spaceData: {fileID: 11400000, guid: e7f5bbc144da62f4f8e87e275142f82a, type: 2}
@@ -148,5 +153,5 @@ MonoBehaviour:
     minimumDepthFromStartingRoom: 0
   startingRoom: {fileID: 11400000, guid: da186a916b0e83e498352a17a0982e01, type: 2}
   seedRNG:
-    randomSeed: 4523234
+    randomSeed: 1
   globalAreasDatabase: {fileID: 11400000, guid: 8ae72178073f07546b3c4e99441a3445, type: 2}

@@ -14,3 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   floorGeneratorPrefab: {fileID: 947328609840266066, guid: 9c3f9b2f03205e14890b30927ca8ca7f, type: 3}
   globalAreasDatabase: {fileID: 11400000, guid: 8ae72178073f07546b3c4e99441a3445, type: 2}
+  playerPrefab: {fileID: 4749932644239177571, guid: 0c549d1048c186344bcf180ffb32d874, type: 3}
+  mainCameraPrefab: {fileID: 1280660494529261082, guid: 52f11f7330636e844921581a46f8e1ea, type: 3}
+  vCamExplorationPrefab: {fileID: 1760112377803748407, guid: 789d3e8306731c146b49b5b271e3d527, type: 3}
+  vCamCombatPrefab: {fileID: 5450437901809485988, guid: 6afbf85106c7eb74a90fee173832a8c0, type: 3}

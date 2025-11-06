@@ -12,6 +12,10 @@ PrefabInstance:
       propertyPath: m_Color.b
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 3013099841472934020, guid: 07f7f0468755a9442af4abce11c600cb, type: 3}
+      propertyPath: m_Color.b
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3233390036838779447, guid: 07f7f0468755a9442af4abce11c600cb, type: 3}
       propertyPath: m_Color.g
       value: 1
@@ -32,6 +36,10 @@ PrefabInstance:
       propertyPath: m_Color.r
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 3953727626639838152, guid: 07f7f0468755a9442af4abce11c600cb, type: 3}
+      propertyPath: m_Color.r
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5142565356194891629, guid: 07f7f0468755a9442af4abce11c600cb, type: 3}
       propertyPath: m_Color.b
       value: 1
@@ -44,6 +52,10 @@ PrefabInstance:
       propertyPath: m_Color.r
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 5673330536105451509, guid: 07f7f0468755a9442af4abce11c600cb, type: 3}
+      propertyPath: m_Color.g
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5985848935834607761, guid: 07f7f0468755a9442af4abce11c600cb, type: 3}
       propertyPath: m_Color.b
       value: 0.015686275
@@ -53,6 +65,18 @@ PrefabInstance:
       value: 0.92156863
       objectReference: {fileID: 0}
     - target: {fileID: 5985848935834607761, guid: 07f7f0468755a9442af4abce11c600cb, type: 3}
+      propertyPath: m_Color.r
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7183515305374008679, guid: 07f7f0468755a9442af4abce11c600cb, type: 3}
+      propertyPath: m_Color.b
+      value: 0.015686275
+      objectReference: {fileID: 0}
+    - target: {fileID: 7183515305374008679, guid: 07f7f0468755a9442af4abce11c600cb, type: 3}
+      propertyPath: m_Color.g
+      value: 0.92156863
+      objectReference: {fileID: 0}
+    - target: {fileID: 7183515305374008679, guid: 07f7f0468755a9442af4abce11c600cb, type: 3}
       propertyPath: m_Color.r
       value: 1
       objectReference: {fileID: 0}

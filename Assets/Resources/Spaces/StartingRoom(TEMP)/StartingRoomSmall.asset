@@ -14,25 +14,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   spacePrefab: {fileID: 8883216095692962453, guid: 5e701b2bf502a014cbc3b4e5bb1bb58b, type: 3}
   spaceType: 0
-  roomSize: 0
+  spaceSize: 0
   doorSpawnPoints:
-  - doorSpawnPoint: {fileID: 6445488630143781573, guid: 5e701b2bf502a014cbc3b4e5bb1bb58b, type: 3}
+  - doorSpawnPoint: {fileID: 3810456338258692827, guid: 5e701b2bf502a014cbc3b4e5bb1bb58b, type: 3}
     doorType: 0
     spawnWeight: 1
     spawnDirection: 2
     doorSpawnGroup: 1
-  - doorSpawnPoint: {fileID: 3954470981713692726, guid: 5e701b2bf502a014cbc3b4e5bb1bb58b, type: 3}
+  - doorSpawnPoint: {fileID: 4345657238982069564, guid: 5e701b2bf502a014cbc3b4e5bb1bb58b, type: 3}
     doorType: 0
     spawnWeight: 1
     spawnDirection: 4
     doorSpawnGroup: 2
-  - doorSpawnPoint: {fileID: 3679461229183201483, guid: 5e701b2bf502a014cbc3b4e5bb1bb58b, type: 3}
+  - doorSpawnPoint: {fileID: 5271111469972155895, guid: 5e701b2bf502a014cbc3b4e5bb1bb58b, type: 3}
     doorType: 0
     spawnWeight: 1
     spawnDirection: 3
     doorSpawnGroup: 3
-  - doorSpawnPoint: {fileID: 7230828995010387081, guid: 5e701b2bf502a014cbc3b4e5bb1bb58b, type: 3}
+  - doorSpawnPoint: {fileID: 2379871919205499902, guid: 5e701b2bf502a014cbc3b4e5bb1bb58b, type: 3}
     doorType: 0
     spawnWeight: 1
     spawnDirection: 1
     doorSpawnGroup: 4
+  maxInstances: 0
+  minDistanceFromStart: 0

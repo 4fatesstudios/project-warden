@@ -96,3 +96,5 @@ MonoBehaviour:
     spawnWeight: 1
     spawnDirection: 1
     doorSpawnGroup: 0
+  maxInstances: 0
+  minDistanceFromStart: 0

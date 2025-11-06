@@ -8,6 +8,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 134474092462629370, guid: 00e7813566ebb36418460f3ab58eaaf6, type: 3}
+      propertyPath: m_Color.r
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 294751647659335819, guid: 00e7813566ebb36418460f3ab58eaaf6, type: 3}
       propertyPath: m_Name
       value: RoomMedium_Test4
@@ -24,6 +28,10 @@ PrefabInstance:
       propertyPath: m_Color.b
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 1633789132859965009, guid: 00e7813566ebb36418460f3ab58eaaf6, type: 3}
+      propertyPath: m_Color.r
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1799533427710472582, guid: 00e7813566ebb36418460f3ab58eaaf6, type: 3}
       propertyPath: m_Color.b
       value: 1
@@ -36,7 +44,15 @@ PrefabInstance:
       propertyPath: m_Color.b
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 5645799708530190417, guid: 00e7813566ebb36418460f3ab58eaaf6, type: 3}
+      propertyPath: m_Color.b
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6160015918519309226, guid: 00e7813566ebb36418460f3ab58eaaf6, type: 3}
+      propertyPath: m_Color.b
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6236802325677968992, guid: 00e7813566ebb36418460f3ab58eaaf6, type: 3}
       propertyPath: m_Color.b
       value: 1
       objectReference: {fileID: 0}
@@ -54,6 +70,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6915967342970926394, guid: 00e7813566ebb36418460f3ab58eaaf6, type: 3}
       propertyPath: m_Color.r
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7068224956783027999, guid: 00e7813566ebb36418460f3ab58eaaf6, type: 3}
+      propertyPath: m_Color.b
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8848630878338741107, guid: 00e7813566ebb36418460f3ab58eaaf6, type: 3}
@@ -99,6 +119,10 @@ PrefabInstance:
     - target: {fileID: 8870153499534874581, guid: 00e7813566ebb36418460f3ab58eaaf6, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9115843294940105157, guid: 00e7813566ebb36418460f3ab58eaaf6, type: 3}
+      propertyPath: m_Color.r
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
