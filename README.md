@@ -2,9 +2,11 @@
 
 **Turn-Based RPG · Unity · C# · Procedural Generation · Developer Tools · Local AI**
 
-Project Warden is a turn-based RPG set in a dystopian world contained within a massive tower inspired by the Tower of Babel.
+Project Warden is a turn-based RPG set within a massive, dystopian tower inspired by the Tower of Babel and the same original universe first explored in *Echoes of Hubris*.
 
-Players ascend the tower while encountering characters who can join and leave their party throughout the journey. These recurring characters are also the focus of an experimental AI-driven dialogue system designed to support dynamic conversations, persistent character context, and fully local inference without requiring cloud services or paid API tokens.
+Imprisoned at the base of an ever-ascending labyrinth, the protagonist is forced into the service of its Warden, who exploits them to produce potions for his own purposes. As the player ventures deeper into the labyrinth, they encounter a recurring cast of characters while gradually uncovering more about their circumstances, the Warden, and the place in which they are trapped.
+
+These recurring characters are also the focus of an experimental AI-driven dialogue system designed to support dynamic conversations, persistent character context, and fully local inference without requiring cloud services or paid API tokens.
 
 Project Warden began development in May 2025 as an 8-person team project under 4Fates Studios. Following its initial team development period, active production was scaled back while core systems continued to be developed and integrated. Development currently focuses on bringing those systems and the team's existing work together into a cohesive vertical slice.
 
